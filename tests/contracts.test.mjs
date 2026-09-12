@@ -111,6 +111,13 @@ test('normalization retains the saved 12.x bounds', async () => {
   ]) assert.equal(normalizer.includes(expression), true, `missing normalization contract: ${expression}`);
 });
 
+test('prepared cache samples eligible items instead of always returning the first items', async () => {
+  const preparedCache = await read('Jellyfin.Plugin.Featured/Api/FeaturedPreparedCache.cs');
+  assert.match(preparedCache, /Where\(item => !excludedIds\.Contains\(item\.Id\)\)[\s\S]*?SelectRandomItems\(eligibleItems, requestedCount\)/);
+  assert.match(preparedCache, /Random\.Shared\.Next\(index, candidates\.Count\)/);
+  assert.doesNotMatch(preparedCache, /entry\.Items[\s\S]{0,160}?\.Take\(requestedCount\)/);
+});
+
 test('DOM observation cannot trigger destructive remount scans', async () => {
   const runtime = await read('src/runtime.ts');
   assert.match(runtime, /trackedMountNeedsRecovery\(\) \|\| \(!hasTrackedMount && mutations\.some\(mutationAffectsHome\)\)/);

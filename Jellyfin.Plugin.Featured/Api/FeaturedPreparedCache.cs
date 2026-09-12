@@ -55,17 +55,31 @@ public sealed class FeaturedPreparedCache
             return false;
         }
 
-        items = entry.Items
+        List<BaseItem> eligibleItems = entry.Items
             .Where(item => !excludedIds.Contains(item.Id))
-            .Take(requestedCount)
             .ToList();
-        if (items.Count < requestedCount)
+        if (eligibleItems.Count < requestedCount)
         {
             QueueUserRefresh(user.Id);
             return false;
         }
 
+        items = SelectRandomItems(eligibleItems, requestedCount);
         return true;
+    }
+
+    private static List<BaseItem> SelectRandomItems(List<BaseItem> candidates, int count)
+    {
+        // The prepared pool has already been filtered and balanced by the rule engine.
+        // Shuffle only as much of the pool as needed so reloads do not always return
+        // the same first items while preserving a selection without duplicates.
+        for (int index = 0; index < count; index++)
+        {
+            int selectedIndex = Random.Shared.Next(index, candidates.Count);
+            (candidates[index], candidates[selectedIndex]) = (candidates[selectedIndex], candidates[index]);
+        }
+
+        return candidates.GetRange(0, count);
     }
 
     internal void RemoveDisplayedItem(Guid userId, Guid itemId)
