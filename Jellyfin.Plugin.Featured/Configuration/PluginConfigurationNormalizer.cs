@@ -67,6 +67,8 @@ internal static class PluginConfigurationNormalizer
         config.PersonalizationDefaults.PreferredGenres = NormalizeValues(config.PersonalizationDefaults.PreferredGenres);
         config.PersonalizationPolicy ??= new FeaturedPersonalizationPolicy();
         config.RepeatCooldownDays = Math.Clamp(config.RepeatCooldownDays, 0, 3650);
+        config.MaximumItemsPerGenre = Math.Clamp(config.MaximumItemsPerGenre, 0, 100);
+        config.MaximumItemsPerFranchise = Math.Clamp(config.MaximumItemsPerFranchise, 0, 100);
         config.RandomMediaCount = Math.Clamp(config.RandomMediaCount, 1, 100);
         config.AutoplayInterval = Math.Clamp(config.AutoplayInterval, 1, 3600);
         config.BannerHeight = Math.Clamp(config.BannerHeight, 240, 900);
@@ -88,6 +90,12 @@ internal static class PluginConfigurationNormalizer
         rule.Id = string.IsNullOrWhiteSpace(rule.Id) ? Guid.NewGuid().ToString("N") : rule.Id.Trim();
         rule.Type = rule.Type.ToUpperInvariant();
         rule.Weight = Math.Clamp(rule.Weight, 1, 100);
+        rule.MinimumItems = Math.Clamp(rule.MinimumItems, 0, 100);
+        rule.MaximumItems = Math.Clamp(rule.MaximumItems, 0, 100);
+        if (rule.MaximumItems > 0 && rule.MinimumItems > rule.MaximumItems)
+        {
+            rule.MinimumItems = rule.MaximumItems;
+        }
         rule.EditorUserId = string.IsNullOrWhiteSpace(rule.EditorUserId) ? null : rule.EditorUserId.Trim();
         rule.LibraryIds = NormalizeValues(rule.LibraryIds);
         rule.CollectionIds = NormalizeValues(rule.CollectionIds);

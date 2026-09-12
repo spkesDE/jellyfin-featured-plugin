@@ -35,19 +35,31 @@ public sealed class FeaturedDisplayHistoryStore : IDisposable
     }
 
     internal HashSet<Guid> GetRecentItemIds(Guid userId, int cooldownDays)
+        => GetRecentItems(userId, cooldownDays).Keys.ToHashSet();
+
+    internal IReadOnlyDictionary<Guid, DateTimeOffset> GetRecentItems(Guid userId, int cooldownDays)
     {
-        if (cooldownDays <= 0) return [];
+        if (cooldownDays <= 0) return new Dictionary<Guid, DateTimeOffset>();
         lock (_syncRoot)
         {
             EnsureLoaded();
             string key = userId.ToString("N");
-            if (!_entries!.TryGetValue(key, out List<FeaturedDisplayHistoryEntry>? history) || history is null) return [];
+            if (!_entries!.TryGetValue(key, out List<FeaturedDisplayHistoryEntry>? history) || history is null)
+            {
+                return new Dictionary<Guid, DateTimeOffset>();
+            }
+
             DateTimeOffset cutoff = DateTimeOffset.UtcNow.AddDays(-cooldownDays);
             return history
                 .Where(entry => entry.DisplayedAt >= cutoff)
-                .Select(entry => Guid.TryParse(entry.ItemId, out Guid id) ? id : Guid.Empty)
-                .Where(id => id != Guid.Empty)
-                .ToHashSet();
+                .Select(entry => new
+                {
+                    Id = Guid.TryParse(entry.ItemId, out Guid id) ? id : Guid.Empty,
+                    entry.DisplayedAt
+                })
+                .Where(entry => entry.Id != Guid.Empty)
+                .GroupBy(entry => entry.Id)
+                .ToDictionary(group => group.Key, group => group.Max(entry => entry.DisplayedAt));
         }
     }
 

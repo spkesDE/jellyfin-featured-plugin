@@ -48,7 +48,7 @@ public sealed class FeaturedPreparedCache
         out List<BaseItem> items)
     {
         items = [];
-        if (!config.EnablePreparedCache) return false;
+        if (!config.EnablePreparedCache || RequiresLiveMixing(config)) return false;
         if (!_entries.TryGetValue(user.Id, out PreparedEntry? entry)
             || !string.Equals(entry.ConfigurationFingerprint, GetConfigurationFingerprint(config, personalization), StringComparison.Ordinal))
         {
@@ -99,7 +99,8 @@ public sealed class FeaturedPreparedCache
 
     internal void QueueUserRefresh(Guid userId)
     {
-        if (userId == Guid.Empty || !_queuedUsers.TryAdd(userId, 0)) return;
+        PluginConfiguration currentConfig = GetCurrentConfiguration();
+        if (userId == Guid.Empty || RequiresLiveMixing(currentConfig) || !_queuedUsers.TryAdd(userId, 0)) return;
         _ = Task.Run(async () =>
         {
             try
@@ -195,10 +196,16 @@ public sealed class FeaturedPreparedCache
 
     private void RefreshUser(Jellyfin.Database.Implementations.Entities.User user, PluginConfiguration config)
     {
+        if (RequiresLiveMixing(config))
+        {
+            _entries.TryRemove(user.Id, out _);
+            return;
+        }
+
         FeaturedPersonalizationContext personalization = _personalization.Resolve(config, user.Id);
-        HashSet<Guid> historyIds = _historyStore.GetRecentItemIds(user.Id, personalization.RepeatCooldownDays);
+        IReadOnlyDictionary<Guid, DateTimeOffset> recentHistory = _historyStore.GetRecentItems(user.Id, personalization.RepeatCooldownDays);
         FeaturedRuleEngine engine = new(config, _userManager, _libraryManager, _userDataManager, _candidateCache);
-        FeaturedSelection selection = engine.SelectItems(user, [], historyIds, GetPoolSize(config), personalization);
+        FeaturedSelection selection = engine.SelectItems(user, [], recentHistory, GetPoolSize(config), personalization);
         _entries[user.Id] = new PreparedEntry(
             selection.Items.ToArray(),
             GetConfigurationFingerprint(config, personalization),
@@ -207,6 +214,13 @@ public sealed class FeaturedPreparedCache
 
     private static int GetPoolSize(PluginConfiguration config)
         => Math.Clamp(Math.Max(MinimumPoolSize, config.RandomMediaCount * 12), MinimumPoolSize, MaximumPoolSize);
+
+    private static bool RequiresLiveMixing(PluginConfiguration config)
+        => config.RelaxRepeatCooldownWhenNeeded
+            || config.MaximumItemsPerGenre > 0
+            || config.MaximumItemsPerFranchise > 0
+            || config.ExcludeItemsFromSameSeries
+            || config.SourceRules.Any(rule => rule.MinimumItems > 0 || rule.MaximumItems > 0 || rule.IsFallback);
 
     private static PluginConfiguration GetCurrentConfiguration()
         => PluginConfigurationNormalizer.Normalize(Plugin.Instance?.Configuration);

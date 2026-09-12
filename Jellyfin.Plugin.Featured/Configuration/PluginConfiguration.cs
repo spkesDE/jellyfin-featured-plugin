@@ -31,6 +31,14 @@ public sealed class PluginConfiguration : BasePluginConfiguration
 
     public int RepeatCooldownDays { get; set; }
 
+    public bool RelaxRepeatCooldownWhenNeeded { get; set; }
+
+    public int MaximumItemsPerGenre { get; set; }
+
+    public int MaximumItemsPerFranchise { get; set; }
+
+    public bool ExcludeItemsFromSameSeries { get; set; }
+
     public int RandomMediaCount { get; set; } = 5;
 
     public bool EnableInfiniteLoading { get; set; }
@@ -113,6 +121,12 @@ public sealed class FeaturedSourceRule
     public bool Enabled { get; set; } = true;
 
     public int Weight { get; set; } = 100;
+
+    public int MinimumItems { get; set; }
+
+    public int MaximumItems { get; set; }
+
+    public bool IsFallback { get; set; }
 
     public string? EditorUserId { get; set; }
 

@@ -327,8 +327,8 @@ public sealed class FeaturedController : ControllerBase
 
             int requestedCount = _config.EnableInfiniteLoading ? InfiniteBatchSize : _config.RandomMediaCount;
             FeaturedPersonalizationContext personalization = _personalization.Resolve(_config, activeUser.Id);
-            HashSet<Guid> historyExcludedIds = _historyStore.GetRecentItemIds(activeUser.Id, personalization.RepeatCooldownDays);
-            FeaturedSelection selection = CreateEngine().SelectItems(activeUser, [], historyExcludedIds, requestedCount, personalization);
+            IReadOnlyDictionary<Guid, DateTimeOffset> recentHistory = _historyStore.GetRecentItems(activeUser.Id, personalization.RepeatCooldownDays);
+            FeaturedSelection selection = CreateEngine().SelectItems(activeUser, [], recentHistory, requestedCount, personalization);
             DateTimeOffset now = DateTimeOffset.UtcNow;
             HashSet<string> referencedManualListIds = _config.SourceRules
                 .Where(rule => rule.Enabled && rule.Type == FeaturedSourceTypes.ManualLists)
@@ -361,9 +361,13 @@ public sealed class FeaturedController : ControllerBase
                     ["filteredOut"] = stat.FilteredOut,
                     ["afterFilters"] = stat.AfterFilters,
                     ["ineligible"] = stat.Ineligible,
+                    ["cooldownExcluded"] = stat.CooldownExcluded,
                     ["eligible"] = stat.Eligible,
                     ["allocated"] = stat.Allocated,
                     ["duplicates"] = stat.Duplicates,
+                    ["diversitySkipped"] = stat.DiversitySkipped,
+                    ["cooldownRelaxed"] = stat.CooldownRelaxed,
+                    ["fallback"] = stat.IsFallback,
                     ["returned"] = stat.Returned
                 }).ToArray(),
                 ["basePath"] = string.IsNullOrEmpty(Request.PathBase.Value) ? "/" : Request.PathBase.Value,
@@ -389,12 +393,12 @@ public sealed class FeaturedController : ControllerBase
 
             int requestedCount = _config.EnableInfiniteLoading ? InfiniteBatchSize : _config.RandomMediaCount;
             FeaturedPersonalizationContext personalization = _personalization.Resolve(_config, activeUser.Id);
-            HashSet<Guid> historyExcludedIds = _historyStore.GetRecentItemIds(activeUser.Id, personalization.RepeatCooldownDays);
-            HashSet<Guid> allExcludedIds = [.. excludedIds, .. historyExcludedIds];
+            IReadOnlyDictionary<Guid, DateTimeOffset> recentHistory = _historyStore.GetRecentItems(activeUser.Id, personalization.RepeatCooldownDays);
+            HashSet<Guid> allExcludedIds = [.. excludedIds, .. recentHistory.Keys];
             List<BaseItem> selectedItems;
             if (!_preparedCache.TryGetItems(activeUser, _config, personalization, allExcludedIds, requestedCount, out selectedItems))
             {
-                selectedItems = CreateEngine().SelectItems(activeUser, excludedIds, historyExcludedIds, requestedCount, personalization).Items;
+                selectedItems = CreateEngine().SelectItems(activeUser, excludedIds, recentHistory, requestedCount, personalization).Items;
                 if (_config.EnablePreparedCache) _preparedCache.QueueUserRefresh(activeUser.Id);
             }
 

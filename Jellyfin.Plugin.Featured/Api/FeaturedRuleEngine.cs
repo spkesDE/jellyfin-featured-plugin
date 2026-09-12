@@ -5,6 +5,7 @@ using Jellyfin.Data.Enums;
 using Jellyfin.Database.Implementations.Enums;
 using Jellyfin.Extensions;
 using MediaBrowser.Controller.Entities;
+using MediaBrowser.Controller.Entities.Movies;
 using MediaBrowser.Controller.Entities.TV;
 using MediaBrowser.Controller.Library;
 
@@ -39,14 +40,14 @@ internal sealed class FeaturedRuleEngine
     internal FeaturedSelection SelectItems(
         Jellyfin.Database.Implementations.Entities.User activeUser,
         HashSet<Guid> requestExcludedIds,
-        HashSet<Guid> historyExcludedIds,
+        IReadOnlyDictionary<Guid, DateTimeOffset> recentHistory,
         int requestedCount,
         FeaturedPersonalizationContext? personalization = null)
     {
         List<FeaturedRuleDiagnostic> diagnostics = [];
         List<BaseItem> result = [];
-        HashSet<Guid> selectedIds = [];
-        HashSet<Guid> excludedIds = [.. requestExcludedIds, .. historyExcludedIds];
+        HashSet<string> selectedKeys = new(StringComparer.OrdinalIgnoreCase);
+        FeaturedDiversityTracker diversity = new(_config);
         FeaturedUserProfile? profile = personalization?.Profile ?? _config.UserProfiles.FirstOrDefault(candidate =>
             candidate.Enabled
             && Guid.TryParse(candidate.UserId, out Guid userId)
@@ -86,13 +87,25 @@ internal sealed class FeaturedRuleEngine
                 .Where(item => globallyFilteredItemIds is null || globallyFilteredItemIds.Contains(item.Id))
                 .Where(item => MatchesAllFilters(item, rule.Filters, selectionUserData))
                 .ToList();
-            List<BaseItem> eligible = afterFilters
-                .Where(item => IsEligibleItem(item, activeUser, allowedItemIds, excludedIds))
+            List<BaseItem> eligibleBeforeCooldown = afterFilters
+                .Where(item => IsEligibleItem(item, activeUser, allowedItemIds, requestExcludedIds))
                 .DistinctBy(item => item.Id)
                 .ToList();
+            List<BaseItem> eligible = eligibleBeforeCooldown
+                .Where(item => !recentHistory.ContainsKey(item.Id))
+                .ToList();
+            List<BaseItem> cooldownEligible = _config.RelaxRepeatCooldownWhenNeeded
+                ? eligibleBeforeCooldown
+                    .Where(item => recentHistory.ContainsKey(item.Id))
+                    .OrderBy(item => recentHistory[item.Id])
+                    .ToList()
+                : [];
             if (rule.Type != FeaturedSourceTypes.ManualLists)
             {
                 eligible = OrderForProfile(eligible, profile, selectionUserData);
+                cooldownEligible = OrderForProfile(cooldownEligible, profile, selectionUserData)
+                    .OrderBy(item => recentHistory[item.Id])
+                    .ToList();
             }
 
             FeaturedRuleDiagnostic stats = new()
@@ -102,36 +115,35 @@ internal sealed class FeaturedRuleEngine
                 CandidateItems = candidates.Count,
                 FilteredOut = candidates.Count - afterFilters.Count,
                 AfterFilters = afterFilters.Count,
-                Ineligible = afterFilters.Count - eligible.Count,
-                Eligible = eligible.Count
+                Ineligible = afterFilters.Count - eligibleBeforeCooldown.Count,
+                CooldownExcluded = eligibleBeforeCooldown.Count - eligible.Count,
+                Eligible = eligible.Count,
+                IsFallback = rule.IsFallback
             };
-            pools.Add(new FeaturedRulePool(index, rule.Weight, new Queue<BaseItem>(eligible), stats));
+            pools.Add(new FeaturedRulePool(index, rule, eligible, cooldownEligible, stats));
         }
 
-        AllocateQuotas(pools, Math.Max(0, requestedCount - result.Count));
-        while (result.Count < requestedCount && pools.Any(pool => pool.Items.Count > 0 && pool.Stats.Returned < pool.Quota))
+        List<FeaturedRulePool> primaryPools = pools.Where(pool => !pool.Rule.IsFallback).ToList();
+        List<FeaturedRulePool> fallbackPools = pools.Where(pool => pool.Rule.IsFallback).ToList();
+        FillFromPools(primaryPools, requestedCount, result, selectedKeys, diversity, enforceDiversity: true);
+        FillFromPools(fallbackPools, requestedCount, result, selectedKeys, diversity, enforceDiversity: true);
+
+        // Diversity is best-effort: never return an unnecessarily short feed.
+        RestoreDeferred(primaryPools);
+        FillFromPools(primaryPools, requestedCount, result, selectedKeys, diversity, enforceDiversity: false);
+        RestoreDeferred(fallbackPools);
+        FillFromPools(fallbackPools, requestedCount, result, selectedKeys, diversity, enforceDiversity: false);
+
+        if (_config.RelaxRepeatCooldownWhenNeeded && result.Count < requestedCount)
         {
-            FeaturedRulePool? pool = pools
-                .Where(candidate => candidate.Items.Count > 0 && candidate.Stats.Returned < candidate.Quota)
-                .OrderBy(candidate => (double)(candidate.Stats.Returned + 1) / Math.Max(1, candidate.Quota))
-                .ThenBy(candidate => candidate.Index)
-                .FirstOrDefault();
-            if (pool == null) break;
-
-            AddNextFromPool(pool, result, selectedIds);
-        }
-
-        // Empty or duplicate-heavy pools donate their unused quota to all remaining pools.
-        while (result.Count < requestedCount)
-        {
-            FeaturedRulePool? pool = pools
-                .Where(candidate => candidate.Items.Count > 0)
-                .OrderBy(candidate => (double)(candidate.Stats.Returned + 1) / candidate.Weight)
-                .ThenBy(candidate => candidate.Index)
-                .FirstOrDefault();
-            if (pool == null) break;
-
-            AddNextFromPool(pool, result, selectedIds);
+            ActivateCooldownItems(primaryPools);
+            FillFromPools(primaryPools, requestedCount, result, selectedKeys, diversity, enforceDiversity: true, cooldownRelaxed: true);
+            ActivateCooldownItems(fallbackPools);
+            FillFromPools(fallbackPools, requestedCount, result, selectedKeys, diversity, enforceDiversity: true, cooldownRelaxed: true);
+            RestoreDeferred(primaryPools);
+            FillFromPools(primaryPools, requestedCount, result, selectedKeys, diversity, enforceDiversity: false, cooldownRelaxed: true);
+            RestoreDeferred(fallbackPools);
+            FillFromPools(fallbackPools, requestedCount, result, selectedKeys, diversity, enforceDiversity: false, cooldownRelaxed: true);
         }
 
         diagnostics.AddRange(pools.Select(pool => pool.Stats));
@@ -172,37 +184,139 @@ internal sealed class FeaturedRuleEngine
     private static void AllocateQuotas(List<FeaturedRulePool> pools, int requestedCount)
     {
         if (requestedCount <= 0 || pools.Count == 0) return;
-        int totalWeight = pools.Sum(pool => pool.Weight);
+
         foreach (FeaturedRulePool pool in pools)
         {
-            double exact = (double)requestedCount * pool.Weight / totalWeight;
-            pool.Quota = (int)Math.Floor(exact);
-            pool.Remainder = exact - pool.Quota;
+            int available = pool.Items.Count + pool.Stats.Returned;
+            int maximum = pool.Rule.MaximumItems > 0 ? Math.Min(pool.Rule.MaximumItems, available) : available;
+            pool.Quota = Math.Min(maximum, Math.Max(pool.Stats.Returned, pool.Rule.MinimumItems));
         }
 
-        int remaining = requestedCount - pools.Sum(pool => pool.Quota);
-        foreach (FeaturedRulePool pool in pools.OrderByDescending(pool => pool.Remainder).ThenBy(pool => pool.Index).Take(remaining))
+        int assigned = pools.Sum(pool => Math.Max(0, pool.Quota - pool.Stats.Returned));
+        if (assigned > requestedCount)
         {
-            pool.Quota += 1;
+            foreach (FeaturedRulePool pool in pools.OrderByDescending(pool => pool.Index))
+            {
+                int reduction = Math.Min(pool.Quota - pool.Stats.Returned, assigned - requestedCount);
+                pool.Quota -= reduction;
+                assigned -= reduction;
+                if (assigned == requestedCount) break;
+            }
         }
 
-        foreach (FeaturedRulePool pool in pools) pool.Stats.Allocated = pool.Quota;
+        int remaining = requestedCount - assigned;
+        while (remaining > 0)
+        {
+            FeaturedRulePool? next = pools
+                .Where(pool => pool.Quota < pool.Items.Count + pool.Stats.Returned
+                    && (pool.Rule.MaximumItems == 0 || pool.Quota < pool.Rule.MaximumItems))
+                .OrderBy(pool => (double)(pool.Quota + 1) / pool.Rule.Weight)
+                .ThenBy(pool => pool.Index)
+                .FirstOrDefault();
+            if (next is null) break;
+            next.Quota += 1;
+            remaining -= 1;
+        }
+
+        foreach (FeaturedRulePool pool in pools)
+        {
+            pool.Stats.Allocated = Math.Max(pool.Stats.Allocated, pool.Quota);
+        }
     }
 
-    private static void AddNextFromPool(
+    private static void FillFromPools(
+        List<FeaturedRulePool> pools,
+        int requestedCount,
+        List<BaseItem> result,
+        HashSet<string> selectedKeys,
+        FeaturedDiversityTracker diversity,
+        bool enforceDiversity,
+        bool cooldownRelaxed = false)
+    {
+        while (result.Count < requestedCount)
+        {
+            int resultCountBeforePass = result.Count;
+            AllocateQuotas(pools, requestedCount - result.Count);
+            while (result.Count < requestedCount)
+            {
+                FeaturedRulePool? pool = pools
+                    .Where(candidate => candidate.Items.Count > 0
+                        && candidate.Stats.Returned < candidate.Quota
+                        && (candidate.Rule.MaximumItems == 0 || candidate.Stats.Returned < candidate.Rule.MaximumItems))
+                    .OrderBy(candidate => (double)(candidate.Stats.Returned + 1) / Math.Max(1, candidate.Quota))
+                    .ThenBy(candidate => candidate.Index)
+                    .FirstOrDefault();
+                if (pool is null) break;
+                TryAddNext(pool, result, selectedKeys, diversity, enforceDiversity, cooldownRelaxed);
+            }
+
+            // Reallocate quota donated by exhausted or duplicate-heavy pools.
+            if (result.Count == resultCountBeforePass) break;
+        }
+    }
+
+    private static bool TryAddNext(
         FeaturedRulePool pool,
         List<BaseItem> result,
-        HashSet<Guid> selectedIds)
+        HashSet<string> selectedKeys,
+        FeaturedDiversityTracker diversity,
+        bool enforceDiversity,
+        bool cooldownRelaxed)
     {
-        BaseItem item = pool.Items.Dequeue();
-        if (!selectedIds.Add(item.Id))
+        while (pool.Items.TryDequeue(out BaseItem? item))
         {
-            pool.Stats.Duplicates += 1;
-            return;
+            string identity = GetItemIdentity(item);
+            if (selectedKeys.Contains(identity))
+            {
+                pool.Stats.Duplicates += 1;
+                continue;
+            }
+
+            if (enforceDiversity && !diversity.CanAdd(item))
+            {
+                pool.DeferredItems.Enqueue(item);
+                pool.Stats.DiversitySkipped += 1;
+                continue;
+            }
+
+            selectedKeys.Add(identity);
+            diversity.Record(item);
+            result.Add(item);
+            pool.Stats.Returned += 1;
+            if (cooldownRelaxed) pool.Stats.CooldownRelaxed += 1;
+            return true;
         }
 
-        result.Add(item);
-        pool.Stats.Returned += 1;
+        return false;
+    }
+
+    private static void RestoreDeferred(IEnumerable<FeaturedRulePool> pools)
+    {
+        foreach (FeaturedRulePool pool in pools)
+        {
+            while (pool.DeferredItems.TryDequeue(out BaseItem? item)) pool.Items.Enqueue(item);
+        }
+    }
+
+    private static void ActivateCooldownItems(IEnumerable<FeaturedRulePool> pools)
+    {
+        foreach (FeaturedRulePool pool in pools)
+        {
+            while (pool.CooldownItems.TryDequeue(out BaseItem? item)) pool.Items.Enqueue(item);
+        }
+    }
+
+    private static string GetItemIdentity(BaseItem item)
+    {
+        foreach (string provider in new[] { "Tmdb", "Imdb", "Tvdb", "MusicBrainzAlbum" })
+        {
+            if (item.ProviderIds.TryGetValue(provider, out string? value) && !string.IsNullOrWhiteSpace(value))
+            {
+                return $"{item.GetBaseItemKind()}:{provider}:{value}";
+            }
+        }
+
+        return $"{item.GetBaseItemKind()}:{item.Name?.Trim()}:{item.ProductionYear}";
     }
 
     private List<BaseItem> OrderForProfile(
@@ -592,10 +706,14 @@ public sealed class FeaturedRuleDiagnostic
     public int FilteredOut { get; set; }
     public int AfterFilters { get; set; }
     public int Ineligible { get; set; }
+    public int CooldownExcluded { get; set; }
     public int Eligible { get; set; }
     public int Allocated { get; set; }
     public int Duplicates { get; set; }
+    public int DiversitySkipped { get; set; }
+    public int CooldownRelaxed { get; set; }
     public int Returned { get; set; }
+    public bool IsFallback { get; set; }
 }
 
 internal sealed record FeaturedSelection(
@@ -605,18 +723,92 @@ internal sealed record FeaturedSelection(
 
 internal sealed class FeaturedRulePool
 {
-    internal FeaturedRulePool(int index, int weight, Queue<BaseItem> items, FeaturedRuleDiagnostic stats)
+    internal FeaturedRulePool(
+        int index,
+        FeaturedSourceRule rule,
+        IEnumerable<BaseItem> items,
+        IEnumerable<BaseItem> cooldownItems,
+        FeaturedRuleDiagnostic stats)
     {
         Index = index;
-        Weight = weight;
-        Items = items;
+        Rule = rule;
+        Items = new Queue<BaseItem>(items);
+        CooldownItems = new Queue<BaseItem>(cooldownItems);
         Stats = stats;
     }
 
     internal int Index { get; }
-    internal int Weight { get; }
+    internal FeaturedSourceRule Rule { get; }
     internal Queue<BaseItem> Items { get; }
+    internal Queue<BaseItem> DeferredItems { get; } = new();
+    internal Queue<BaseItem> CooldownItems { get; }
     internal FeaturedRuleDiagnostic Stats { get; }
     internal int Quota { get; set; }
-    internal double Remainder { get; set; }
+}
+
+internal sealed class FeaturedDiversityTracker
+{
+    private readonly int _maximumItemsPerGenre;
+    private readonly int _maximumItemsPerFranchise;
+    private readonly bool _excludeItemsFromSameSeries;
+    private readonly Dictionary<string, int> _genreCounts = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, int> _franchiseCounts = new(StringComparer.OrdinalIgnoreCase);
+    private readonly HashSet<string> _series = new(StringComparer.OrdinalIgnoreCase);
+
+    internal FeaturedDiversityTracker(PluginConfiguration config)
+    {
+        _maximumItemsPerGenre = config.MaximumItemsPerGenre;
+        _maximumItemsPerFranchise = config.MaximumItemsPerFranchise;
+        _excludeItemsFromSameSeries = config.ExcludeItemsFromSameSeries;
+    }
+
+    internal bool CanAdd(BaseItem item)
+    {
+        string? genre = GetPrimaryGenre(item);
+        if (_maximumItemsPerGenre > 0 && genre is not null && GetCount(_genreCounts, genre) >= _maximumItemsPerGenre)
+        {
+            return false;
+        }
+
+        string? franchise = GetFranchise(item);
+        if (_maximumItemsPerFranchise > 0
+            && franchise is not null
+            && GetCount(_franchiseCounts, franchise) >= _maximumItemsPerFranchise)
+        {
+            return false;
+        }
+
+        string? series = GetSeries(item);
+        return !_excludeItemsFromSameSeries || series is null || !_series.Contains(series);
+    }
+
+    internal void Record(BaseItem item)
+    {
+        Increment(_genreCounts, GetPrimaryGenre(item));
+        Increment(_franchiseCounts, GetFranchise(item));
+        string? series = GetSeries(item);
+        if (series is not null) _series.Add(series);
+    }
+
+    private static string? GetPrimaryGenre(BaseItem item)
+        => item.Genres.FirstOrDefault(genre => !string.IsNullOrWhiteSpace(genre))?.Trim();
+
+    private static string? GetFranchise(BaseItem item)
+        => item is Movie movie && !string.IsNullOrWhiteSpace(movie.TmdbCollectionName)
+            ? movie.TmdbCollectionName.Trim()
+            : null;
+
+    private static string? GetSeries(BaseItem item)
+        => item is IHasSeries series && !string.IsNullOrWhiteSpace(series.SeriesName)
+            ? series.SeriesName.Trim()
+            : null;
+
+    private static int GetCount(Dictionary<string, int> counts, string key)
+        => counts.TryGetValue(key, out int count) ? count : 0;
+
+    private static void Increment(Dictionary<string, int> counts, string? key)
+    {
+        if (key is null) return;
+        counts[key] = GetCount(counts, key) + 1;
+    }
 }
