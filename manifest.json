@@ -1,0 +1,12 @@
+[
+    {
+        "guid": "08880a95-8467-4538-bab9-da69c7f4793f",
+        "name": "Jellyfin Featured",
+        "overview": "Add a configurable featured-content carousel to the Jellyfin Web home page.",
+        "description": "A modern featured-content carousel for Jellyfin Web with curated, random, collection, and recent-release modes.",
+        "owner": "spkesDE",
+        "category": "General",
+        "imageUrl": "https://raw.githubusercontent.com/spkesDE/jellyfin-featured-plugin/main/logo.png",
+        "versions": []
+    }
+]

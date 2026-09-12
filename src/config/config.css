@@ -1,0 +1,1088 @@
+                #FeaturedConfigPage .jmp-configForm,
+                #FeaturedConfigPage .sectionTitleContainer,
+                #FeaturedConfigPage .verticalSection,
+                #FeaturedConfigPage .jmp-grid {
+                    width: 100%;
+                    max-width: none !important;
+                }
+
+                #FeaturedConfigPage .ec-configChecklist {
+                    display: grid;
+                    gap: 0.15rem;
+                    max-height: 18rem;
+                    overflow: auto;
+                    padding-right: 0.4rem;
+                }
+
+                #FeaturedConfigPage .ec-diagnosticsError {
+                    color: #ffb4ab;
+                    overflow-wrap: anywhere;
+                }
+
+                #FeaturedConfigPage .ec-diagnostics-section {
+                    grid-column: 1 / -1;
+                }
+
+                #FeaturedConfigPage .ec-diagnosticsResults {
+                    display: grid;
+                    gap: 0;
+                    margin: .35rem 0 1rem;
+                    overflow: hidden;
+                    border: 1px solid rgba(255, 255, 255, .09);
+                    border-radius: .55rem;
+                }
+
+                #FeaturedConfigPage .ec-diagnosticsResults>div {
+                    display: grid;
+                    grid-template-columns: minmax(10rem, 1fr) minmax(0, 1.5fr);
+                    gap: 1rem;
+                    padding: .58rem .72rem;
+                }
+
+                #FeaturedConfigPage .ec-diagnosticsResults>div:nth-child(odd) {
+                    background: rgba(255, 255, 255, .035);
+                }
+
+                #FeaturedConfigPage .ec-diagnosticsResults dt {
+                    opacity: .72;
+                }
+
+                #FeaturedConfigPage .ec-diagnosticsResults dd {
+                    margin: 0;
+                    overflow-wrap: anywhere;
+                }
+
+                #FeaturedConfigPage .ec-ruleDiagnosticsScroll {
+                    overflow-x: auto;
+                }
+
+                #FeaturedConfigPage .ec-ruleDiagnostics table {
+                    border-collapse: collapse;
+                    min-width: 42rem;
+                    width: 100%;
+                }
+
+                #FeaturedConfigPage .ec-ruleDiagnostics th,
+                #FeaturedConfigPage .ec-ruleDiagnostics td {
+                    border-bottom: 1px solid rgba(255, 255, 255, .08);
+                    padding: .55rem .65rem;
+                    text-align: left;
+                }
+
+                #FeaturedConfigPage .ec-ruleDiagnostics th {
+                    font-size: .75rem;
+                    opacity: .7;
+                }
+
+                @media (max-width: 650px) {
+                    #FeaturedConfigPage .ec-diagnosticsResults>div {
+                        grid-template-columns: 1fr;
+                        gap: .2rem;
+                    }
+                }
+
+                #FeaturedConfigPage .ec-configPreviewItem {
+                    margin: 0 auto;
+                    max-width: 64rem;
+                    width: 100%;
+                }
+
+                #FeaturedConfigPage .ec-jellyfinMock {
+                    background: #101218;
+                    border: 1px solid rgba(255, 255, 255, .08);
+                    border-radius: 10px;
+                    box-shadow: 0 1rem 2.8rem rgba(0, 0, 0, .32);
+                    color: #fff;
+                    overflow: hidden;
+                    width: 100%;
+                }
+
+                #FeaturedConfigPage .ec-jellyfinMockHeader {
+                    align-items: center;
+                    background: rgba(19, 21, 28, .96);
+                    display: flex;
+                    gap: .8rem;
+                    height: 2.6rem;
+                    padding: 0 .85rem;
+                }
+
+                #FeaturedConfigPage .ec-mockIcon {
+                    font-size: 1.05rem;
+                    opacity: .72;
+                }
+
+                #FeaturedConfigPage .ec-jellyfinMockHeader strong {
+                    background: linear-gradient(105deg, #a96ee9, #00a4dc);
+                    -webkit-background-clip: text;
+                    background-clip: text;
+                    color: transparent;
+                    font-size: .92rem;
+                }
+
+                #FeaturedConfigPage .ec-jellyfinMockNav {
+                    display: flex;
+                    font-size: .68rem;
+                    gap: 1rem;
+                    margin-left: 1rem;
+                    opacity: .78;
+                }
+
+                #FeaturedConfigPage .ec-jellyfinMockHeaderActions {
+                    align-items: center;
+                    display: flex;
+                    gap: .8rem;
+                    margin-left: auto;
+                }
+
+                #FeaturedConfigPage .ec-jellyfinMockPage {
+                    background: #101218;
+                    overflow: hidden;
+                }
+
+                #FeaturedConfigPage .ec-configPreview {
+                    background: #181b22 radial-gradient(circle at 72% 28%, #465267 0, #222936 35%, #11151d 72%);
+                    border-radius: var(--ec-preview-radius, 0);
+                    container-type: inline-size;
+                    min-height: 170px;
+                    overflow: hidden;
+                    position: relative;
+                    width: 100%;
+                }
+
+                #FeaturedConfigPage .ec-configPreview:not(.is-hero) {
+                    border: 1px solid rgba(255, 255, 255, .08);
+                    border-radius: var(--ec-preview-radius, 0);
+                    box-shadow: 0 .45rem 1.35rem rgba(0, 0, 0, .34);
+                    margin: .85rem 3.3% 0;
+                    width: 93.4%;
+                }
+
+                #FeaturedConfigPage .ec-configPreview.is-hero {
+                    background: transparent;
+                    margin: 0;
+                }
+
+                #FeaturedConfigPage .ec-preview-section {
+                    grid-column: 1 / -1;
+                }
+
+                #FeaturedConfigPage .ec-jellyfinMockHeading {
+                    font-size: clamp(.75rem, 1.5vw, 1rem);
+                    font-weight: 500;
+                    padding: .7rem 3.3% .4rem;
+                }
+
+                #FeaturedConfigPage .ec-configPreviewBackdrop {
+                    background-position: center;
+                    background-repeat: no-repeat;
+                    background-size: cover;
+                    inset: 0;
+                    position: absolute;
+                    transform: scale(1.01);
+                    z-index: 0;
+                }
+
+                #FeaturedConfigPage .ec-configPreview.is-hero .ec-configPreviewBackdrop,
+                #FeaturedConfigPage .ec-configPreview.is-hero .ec-configPreviewShade {
+                    -webkit-mask-image: linear-gradient(to bottom, #000 40%, rgba(0, 0, 0, .9) 55%, rgba(0, 0, 0, .4) 72%, transparent 100%);
+                    mask-image: linear-gradient(to bottom, #000 40%, rgba(0, 0, 0, .9) 55%, rgba(0, 0, 0, .4) 72%, transparent 100%);
+                }
+
+                #FeaturedConfigPage .ec-configPreviewShade {
+                    background: linear-gradient(90deg, rgb(4 6 10 / var(--ec-preview-gradient, .85)), rgb(4 6 10 / calc(var(--ec-preview-gradient, .85) * .48)) 56%, transparent);
+                    inset: 0;
+                    position: absolute;
+                }
+
+                #FeaturedConfigPage .ec-configPreviewContent {
+                    bottom: 13%;
+                    left: 8%;
+                    max-width: 54%;
+                    position: absolute;
+                    z-index: 2;
+                }
+
+                #FeaturedConfigPage .ec-configPreview.text-center .ec-configPreviewContent {
+                    align-items: center;
+                    display: flex;
+                    flex-direction: column;
+                    left: 23%;
+                    text-align: center;
+                }
+
+                #FeaturedConfigPage .ec-configPreview.text-right .ec-configPreviewContent {
+                    align-items: flex-end;
+                    display: flex;
+                    flex-direction: column;
+                    left: auto;
+                    right: 8%;
+                    text-align: right;
+                }
+
+                #FeaturedConfigPage .ec-configPreviewLogo {
+                    display: -webkit-box;
+                    font-size: clamp(1.25rem, 5cqw, 3.4rem);
+                    font-weight: 900;
+                    line-height: .96;
+                    overflow: hidden;
+                    overflow-wrap: anywhere;
+                    text-wrap: balance;
+                    -webkit-box-orient: vertical;
+                    -webkit-line-clamp: 2;
+                }
+
+                #FeaturedConfigPage .ec-configPreviewImageLogo {
+                    display: block;
+                    max-height: min(7.5rem, 35%);
+                    max-width: min(32rem, 100%);
+                    object-fit: contain;
+                    object-position: left center;
+                }
+
+                #FeaturedConfigPage .ec-configPreviewMeta {
+                    font-size: .78rem;
+                    font-weight: 700;
+                    margin-top: .7rem;
+                }
+
+                #FeaturedConfigPage .ec-configPreviewText {
+                    display: -webkit-box;
+                    font-size: .75rem;
+                    margin-top: .45rem;
+                    overflow: hidden;
+                    -webkit-box-orient: vertical;
+                    -webkit-line-clamp: 2;
+                }
+
+                #FeaturedConfigPage .ec-configPreviewButton {
+                    background: #fff;
+                    border: 0;
+                    border-radius: .2rem;
+                    color: #111;
+                    font-weight: 700;
+                    margin-top: .65rem;
+                    padding: .45rem .8rem;
+                }
+
+                #FeaturedConfigPage .ec-configPreviewButton+.ec-configPreviewButton {
+                    margin-left: .4rem;
+                }
+
+                #FeaturedConfigPage .ec-configPreviewActions {
+                    white-space: nowrap;
+                }
+
+                #FeaturedConfigPage .ec-configPreviewButton.is-secondary {
+                    background: rgba(255, 255, 255, .2);
+                    color: #fff;
+                }
+
+                #FeaturedConfigPage .ec-configPreviewDots {
+                    display: flex;
+                    gap: .3rem;
+                }
+
+                #FeaturedConfigPage .ec-configPreviewDots span {
+                    background: rgba(255, 255, 255, .42);
+                    border-radius: 50%;
+                    height: .35rem;
+                    width: .35rem;
+                }
+
+                #FeaturedConfigPage .ec-configPreviewDots span.is-active {
+                    background: #fff;
+                }
+
+                #FeaturedConfigPage .ec-configPreviewNavigation {
+                    align-items: center;
+                    bottom: .55rem;
+                    display: flex;
+                    flex-direction: column;
+                    gap: .2rem;
+                    left: 50%;
+                    margin-top: 8px;
+                    position: absolute;
+                    transform: translateX(-50%);
+                    z-index: 4;
+                }
+
+                #FeaturedConfigPage .ec-configPreview.is-hero .ec-configPreviewNavigation {
+                    bottom: auto;
+                    left: auto;
+                    right: max(1rem, 3.3%);
+                    top: .55rem;
+                    transform: none;
+                }
+
+                #FeaturedConfigPage .ec-configPreviewControls {
+                    align-items: center;
+                    display: flex;
+                    gap: .25rem;
+                    mix-blend-mode: difference;
+                }
+
+                #FeaturedConfigPage .ec-configPreviewControls .ec-mockControl {
+                    font-size: 1.2rem;
+                    line-height: 1;
+                    opacity: .58;
+                    padding: .25rem;
+                }
+
+                #FeaturedConfigPage .ec-configPreviewStatus {
+                    font-size: .62rem;
+                    letter-spacing: .04em;
+                    opacity: .58;
+                    padding: 0 .3rem;
+                    white-space: nowrap;
+                }
+
+                #FeaturedConfigPage .ec-jellyfinMockMedia {
+                    padding: 0 3.3% .65rem;
+                }
+
+                #FeaturedConfigPage .ec-jellyfinMockCards {
+                    display: grid;
+                    gap: .65rem;
+                    grid-template-columns: repeat(5, minmax(0, 1fr));
+                }
+
+                #FeaturedConfigPage .ec-jellyfinMockCard {
+                    display: grid;
+                    font-size: .62rem;
+                    gap: .3rem;
+                    min-width: 0;
+                }
+
+                #FeaturedConfigPage .ec-jellyfinMockCardArt {
+                    align-items: center;
+                    aspect-ratio: 1.72;
+                    background: linear-gradient(135deg, #34495e, #17202a);
+                    border-radius: .18rem;
+                    display: flex;
+                    justify-content: center;
+                    overflow: hidden;
+                }
+
+                #FeaturedConfigPage .ec-mockPlay {
+                    font-size: 1rem;
+                    opacity: .42;
+                }
+
+                #FeaturedConfigPage .ec-jellyfinMockCardArt.art-2 {
+                    background: linear-gradient(135deg, #59315f, #23172f);
+                }
+
+                #FeaturedConfigPage .ec-jellyfinMockCardArt.art-3 {
+                    background: linear-gradient(135deg, #175a64, #102931);
+                }
+
+                #FeaturedConfigPage .ec-jellyfinMockCardArt.art-4 {
+                    background: linear-gradient(135deg, #725124, #251c13);
+                }
+
+                #FeaturedConfigPage .ec-jellyfinMockCardArt.art-5 {
+                    background: linear-gradient(135deg, #385d3d, #142419);
+                }
+
+                @media (max-width: 650px) {
+                    #FeaturedConfigPage .ec-jellyfinMockNav {
+                        display: none;
+                    }
+
+                    #FeaturedConfigPage .ec-jellyfinMockCards {
+                        grid-template-columns: repeat(3, minmax(0, 1fr));
+                    }
+
+                    #FeaturedConfigPage .ec-jellyfinMockCard:nth-child(n + 4) {
+                        display: none;
+                    }
+
+                    #FeaturedConfigPage .ec-configPreviewContent {
+                        left: 6%;
+                        max-width: 72%;
+                    }
+                }
+
+                #FeaturedConfigPage .jmp-grid {
+                    display: grid;
+                    grid-template-columns: minmax(0, 1fr);
+                    align-items: start;
+                    gap: 1rem;
+                }
+
+                #FeaturedConfigPage .jmp-section {
+                    padding: 1rem;
+                    border-radius: 0.75rem;
+                    background: rgba(255, 255, 255, 0.03);
+                    border: 1px solid rgba(255, 255, 255, 0.06);
+                    margin-bottom: 1rem;
+                }
+
+                #FeaturedConfigPage .jmp-section-plain {
+                    padding: 0;
+                    background: transparent;
+                    border: none;
+                    margin-bottom: 0;
+                }
+
+                #FeaturedConfigPage .jmp-section h3 {
+                    margin: 0 0 0.25rem;
+                }
+
+                #FeaturedConfigPage .jmp-toolbar {
+                    display: flex;
+                    align-items: center;
+                    gap: 1rem;
+                    margin-bottom: 1rem;
+                    flex-wrap: wrap;
+                }
+
+                #FeaturedConfigPage .jmp-subgrid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+                    gap: 1.5rem;
+                }
+
+                #FeaturedConfigPage .jmp-generalGrid {
+                    display: grid;
+                    grid-template-columns: minmax(340px, 0.95fr) minmax(520px, 1.35fr);
+                    gap: 1.5rem;
+                    align-items: start;
+                }
+
+                #FeaturedConfigPage .jmp-generalSelectionGrid {
+                    display: grid;
+                    grid-template-columns: repeat(2, minmax(0, 1fr));
+                    gap: 1.5rem;
+                }
+
+                #FeaturedConfigPage .jmp-selectionIntro,
+                #FeaturedConfigPage .jmp-selectionFallback {
+                    grid-column: 1 / -1;
+                }
+
+                #FeaturedConfigPage .jmp-blockDivider {
+                    margin: 1.1rem 0 1rem;
+                    padding-top: 1rem;
+                    border-top: 1px solid rgba(255, 255, 255, 0.06);
+                }
+
+                #FeaturedConfigPage .jmp-subsection {
+                    min-width: 0;
+                    padding: 1rem;
+                    border-radius: 0.9rem;
+                    background: rgba(255, 255, 255, 0.03);
+                    border: 1px solid rgba(255, 255, 255, 0.06);
+                }
+
+                #FeaturedConfigPage .jmp-subsectionTitle {
+                    margin: 0 0 0.2rem;
+                    font-size: 1rem;
+                    font-weight: 600;
+                    color: rgba(255, 255, 255, 0.96);
+                }
+
+                #FeaturedConfigPage .jmp-titleRow {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 0.75rem;
+                    margin-bottom: 0.2rem;
+                }
+
+                #FeaturedConfigPage .jmp-titleRow .jmp-subsectionTitle {
+                    margin-bottom: 0;
+                }
+
+                #FeaturedConfigPage .jmp-badge {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    flex: 0 0 auto;
+                    padding: 0.28rem 0.55rem;
+                    border-radius: 999px;
+                    border: 1px solid rgba(0, 164, 220, 0.34);
+                    background: rgba(0, 164, 220, 0.14);
+                    color: rgba(226, 247, 255, 0.98);
+                    font-size: 0.72rem;
+                    font-weight: 700;
+                    line-height: 1;
+                    letter-spacing: 0.02em;
+                    text-transform: uppercase;
+                    white-space: nowrap;
+                }
+
+                #FeaturedConfigPage .jmp-badge-muted {
+                    border-color: rgba(255, 255, 255, 0.12);
+                    background: rgba(255, 255, 255, 0.06);
+                    color: rgba(255, 255, 255, 0.78);
+                }
+
+                #FeaturedConfigPage .jmp-badge-wip {
+                    border-color: rgba(244, 184, 75, 0.38);
+                    background: rgba(244, 184, 75, 0.14);
+                    color: #ffd992;
+                }
+
+                #FeaturedConfigPage .jmp-subsectionHelp {
+                    margin: 0 0 1rem;
+                    opacity: 0.75;
+                    font-size: 0.9em;
+                    line-height: 1.35;
+                }
+
+                #FeaturedConfigPage .jmp-help {
+                    margin: 0 0 1rem;
+                    opacity: 0.8;
+                    font-size: 0.95em;
+                }
+
+                #FeaturedConfigPage .jmp-hidden {
+                    display: none !important;
+                }
+
+                #FeaturedConfigPage .jmp-tabSectionHidden {
+                    display: none !important;
+                }
+
+                #FeaturedConfigPage .jmp-note {
+                    margin: 0.4rem 0 0;
+                    opacity: 0.75;
+                    font-size: 0.9em;
+                }
+
+                #FeaturedConfigPage .jmp-note-tight {
+                    margin-top: -0.2rem;
+                }
+
+                #FeaturedConfigPage .jmp-flow {
+                    display: grid;
+                    gap: 1rem;
+                }
+
+                #FeaturedConfigPage .jmp-flowStep {
+                    padding-top: 0.95rem;
+                    border-top: 1px solid rgba(255, 255, 255, 0.06);
+                }
+
+                #FeaturedConfigPage .jmp-flowStep:first-of-type {
+                    padding-top: 0;
+                    border-top: none;
+                }
+
+                #FeaturedConfigPage .jmp-flowTitle {
+                    margin: 0 0 0.2rem;
+                    font-size: 0.98rem;
+                    font-weight: 700;
+                    color: rgba(255, 255, 255, 0.97);
+                }
+
+                #FeaturedConfigPage .jmp-flowHelp {
+                    margin: 0 0 0.85rem;
+                    opacity: 0.74;
+                    font-size: 0.9em;
+                    line-height: 1.35;
+                }
+
+                #FeaturedConfigPage .jmp-compactGrid {
+                    display: grid;
+                    grid-template-columns: repeat(2, minmax(0, 1fr));
+                    gap: 0.85rem 1rem;
+                }
+
+                #FeaturedConfigPage .jmp-intro {
+                    max-width: none;
+                    margin-bottom: 1.25rem;
+                }
+
+                #FeaturedConfigPage .jmp-tabBar {
+                    display: flex;
+                    flex-wrap: wrap;
+                    flex: 1 1 auto;
+                    min-width: 0;
+                    gap: 0.65rem;
+                    margin-bottom: 0;
+                }
+
+                #FeaturedConfigPage .jmp-tabButton {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 0.4rem;
+                    border: 1px solid rgba(255, 255, 255, 0.08);
+                    border-radius: 999px;
+                    background: rgba(255, 255, 255, 0.04);
+                    color: rgba(255, 255, 255, 0.84);
+                    padding: 0.55rem 0.9rem;
+                    font-size: 0.92em;
+                    line-height: 1;
+                    cursor: pointer;
+                    transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
+                }
+
+                #FeaturedConfigPage .jmp-tabButton:hover {
+                    background: rgba(255, 255, 255, 0.08);
+                    color: rgba(255, 255, 255, 0.95);
+                    transform: translateY(-1px);
+                }
+
+                #FeaturedConfigPage .jmp-tabButton.is-active {
+                    background: rgba(255, 255, 255, 0.12);
+                    border-color: rgba(255, 255, 255, 0.14);
+                    color: rgba(255, 255, 255, 0.98);
+                }
+
+                #FeaturedConfigPage .jmp-tabButton .jmp-badge {
+                    margin: 0;
+                    box-sizing: border-box;
+                    width: auto;
+                    height: 1.1rem;
+                    padding: 0 0.4rem;
+                    font-size: 0.62rem;
+                    line-height: normal;
+                    text-indent: 0.02em;
+                }
+
+                #FeaturedConfigPage .jmp-saveButton {
+                    appearance: none;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    box-sizing: border-box;
+                    margin-left: auto;
+                    min-width: 0;
+                    height: auto;
+                    margin-top: 0;
+                    margin-bottom: 0;
+                    padding: 0.55rem 0.9rem;
+                    border: 1px solid rgba(255, 255, 255, 0.08);
+                    border-radius: 999px;
+                    background: rgba(255, 255, 255, 0.04);
+                    color: rgba(255, 255, 255, 0.84);
+                    box-shadow: none !important;
+                    box-shadow: none;
+                    font: inherit;
+                    font-size: 0.92em;
+                    font-weight: 700;
+                    line-height: 1;
+                    white-space: nowrap;
+                    text-transform: none;
+                    text-decoration: none;
+                    transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
+                }
+
+                #FeaturedConfigPage .jmp-saveButton span {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    line-height: 1;
+                }
+
+                #FeaturedConfigPage .jmp-saveButton:hover,
+                #FeaturedConfigPage .jmp-saveButton:focus {
+                    background: rgba(255, 255, 255, 0.08);
+                    color: rgba(255, 255, 255, 0.95);
+                    transform: translateY(-1px);
+                }
+
+                #FeaturedConfigPage .jmp-saveButton.is-dirty {
+                    background: #00a4dc;
+                    border-color: rgba(0, 164, 220, 0.42);
+                    color: #ffffff;
+                }
+
+                #FeaturedConfigPage .jmp-saveButton.is-dirty:hover,
+                #FeaturedConfigPage .jmp-saveButton.is-dirty:focus {
+                    background: #18b3ea;
+                }
+
+                #FeaturedConfigPage .jmp-saveButton.is-saved {
+                    background: #1f9d5a;
+                    border-color: rgba(31, 157, 90, 0.42);
+                    color: #ffffff;
+                }
+
+                #FeaturedConfigPage .jmp-saveButton.is-saved:hover,
+                #FeaturedConfigPage .jmp-saveButton.is-saved:focus {
+                    background: #29ad67;
+                }
+
+                #FeaturedConfigPage .jmp-pillRow {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 0.5rem;
+                    margin-top: -0.35rem;
+                    margin-bottom: 1rem;
+                }
+
+                #FeaturedConfigPage .jmp-pill {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 0.35rem;
+                    padding: 0.35rem 0.7rem;
+                    border-radius: 999px;
+                    background: rgba(255, 255, 255, 0.06);
+                    border: 1px solid rgba(255, 255, 255, 0.08);
+                    font-size: 0.88em;
+                    line-height: 1;
+                }
+
+                #FeaturedConfigPage .jmp-pillKey {
+                    opacity: 0.72;
+                }
+
+                #FeaturedConfigPage .jmp-pillValue {
+                    font-weight: 600;
+                }
+
+                #FeaturedConfigPage .jmp-modeCard {
+                    display: flex;
+                    align-items: flex-start;
+                    gap: 0.75rem;
+                    margin-top: -0.35rem;
+                    margin-bottom: 1rem;
+                    padding: 0.85rem 0.95rem;
+                    border-radius: 0.9rem;
+                    background: rgba(255, 255, 255, 0.04);
+                    border: 1px solid rgba(255, 255, 255, 0.07);
+                }
+
+                #FeaturedConfigPage .jmp-modeGlyph {
+                    flex: 0 0 auto;
+                    width: 1.9rem;
+                    height: 1.9rem;
+                    border-radius: 999px;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: rgba(255, 255, 255, 0.07);
+                    color: rgba(255, 255, 255, 0.92);
+                    font-size: 1rem;
+                    line-height: 1;
+                }
+
+                #FeaturedConfigPage .jmp-modeCardBody {
+                    min-width: 0;
+                }
+
+                #FeaturedConfigPage .jmp-modeTitle {
+                    margin: 0 0 0.2rem;
+                    font-size: 0.95em;
+                    font-weight: 600;
+                    color: rgba(255, 255, 255, 0.96);
+                }
+
+                #FeaturedConfigPage .jmp-modeText {
+                    margin: 0;
+                    opacity: 0.78;
+                    font-size: 0.9em;
+                    line-height: 1.35;
+                }
+
+                #FeaturedConfigPage .jmp-appearancePreviewGrid {
+                    display: grid;
+                    grid-template-columns: minmax(0, 540px);
+                    justify-items: center;
+                    justify-content: start;
+                    gap: 1.25rem;
+                    width: 100%;
+                    max-width: 540px;
+                    margin: 0 0 0.75rem;
+                }
+
+                #FeaturedConfigPage .jmp-appearancePreviewItem {
+                    display: grid;
+                    gap: 0.5rem;
+                    width: 100%;
+                    container-type: inline-size;
+                }
+
+                #FeaturedConfigPage .jmp-appearancePreviewItem:first-child {
+                    width: 100%;
+                }
+
+                #FeaturedConfigPage .jmp-appearancePreviewLabel {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 0.5rem;
+                    color: rgba(255, 255, 255, 0.82);
+                    font-size: 0.82rem;
+                }
+
+                #FeaturedConfigPage .jmp-appearanceCard {
+                    position: relative;
+                    width: 100%;
+                    overflow: hidden;
+                    border-radius: 0.75rem;
+                    background: #111820;
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    box-shadow: 0 0.65rem 1.5rem rgba(0, 0, 0, 0.28);
+                    isolation: isolate;
+                }
+
+                #FeaturedConfigPage .jmp-appearanceCard-portrait {
+                    --jmp-appearancePortraitHeight: min(300px, 56.25cqw);
+                    width: min(100%, calc(var(--jmp-appearancePortraitHeight) * 0.666667));
+                    height: var(--jmp-appearancePortraitHeight);
+                    transition: width 280ms cubic-bezier(0.2, 0.75, 0.2, 1);
+                }
+
+                #FeaturedConfigPage .jmp-appearanceCard-portrait-wide-3-2 {
+                    width: min(100%, calc(var(--jmp-appearancePortraitHeight) * 1.5));
+                }
+
+                #FeaturedConfigPage .jmp-appearanceCard-portrait-wide-16-9 {
+                    width: min(100%, calc(var(--jmp-appearancePortraitHeight) * 1.777778));
+                }
+
+                #FeaturedConfigPage .jmp-appearanceCard-backdrop {
+                    width: min(100%, 340px);
+                    aspect-ratio: 16 / 9;
+                }
+
+                #FeaturedConfigPage .jmp-appearancePoster,
+                #FeaturedConfigPage .jmp-appearanceBackdrop,
+                #FeaturedConfigPage .jmp-appearanceMedia {
+                    position: absolute;
+                    inset: 0;
+                }
+
+                #FeaturedConfigPage .jmp-appearancePoster {
+                    z-index: 0;
+                    background:
+                        radial-gradient(circle at 72% 25%, rgba(62, 188, 220, 0.58), transparent 24%),
+                        linear-gradient(145deg, #18283b 5%, #315a75 48%, #111820 100%);
+                    background-position: center;
+                    background-repeat: no-repeat;
+                    background-size: cover;
+                }
+
+                #FeaturedConfigPage .jmp-appearanceBackdrop {
+                    z-index: 1;
+                    pointer-events: none;
+                }
+
+                #FeaturedConfigPage .jmp-appearanceMedia {
+                    z-index: 2;
+                    background-position: center;
+                    background-repeat: no-repeat;
+                    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 90'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop stop-color='%2300a4dc'/%3E%3Cstop offset='1' stop-color='%232b315e'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='160' height='90' fill='url(%23g)'/%3E%3Ccircle cx='118' cy='27' r='15' fill='%23f4b84b'/%3E%3Cpath d='M0 78L38 42L67 68L91 38L160 90H0Z' fill='%23101820' fill-opacity='.72'/%3E%3C/svg%3E");
+                    transition-property: opacity, filter;
+                    transition-timing-function: ease;
+                }
+
+                #FeaturedConfigPage .jmp-appearanceMedia.is-alt {
+                    filter: hue-rotate(72deg) saturate(1.18);
+                }
+
+                #FeaturedConfigPage .jmp-appearanceCard.has-library-artwork .jmp-appearanceMedia.is-alt {
+                    filter: none;
+                }
+
+                #FeaturedConfigPage .jmp-appearanceMedia.fit-contain {
+                    background-size: contain;
+                }
+
+                #FeaturedConfigPage .jmp-appearanceMedia.fit-cover {
+                    background-size: cover;
+                }
+
+                #FeaturedConfigPage .jmp-appearanceMedia.fit-stretch {
+                    background-size: 100% 100%;
+                }
+
+                #FeaturedConfigPage .jmp-metadata-overlay {
+                    position: absolute;
+                    z-index: 80;
+                    display: none;
+                    flex-direction: column;
+                    gap: 4px;
+                    max-width: calc(100% - 16px);
+                    padding: 8px 10px;
+                    pointer-events: none;
+                    border-radius: 10px;
+                    background: linear-gradient(180deg, rgba(8, 10, 14, 0.86), rgba(8, 10, 14, 0.72));
+                    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.32);
+                    color: #fff;
+                }
+
+                #FeaturedConfigPage .jmp-metadata-overlay.pos-top-left {
+                    top: 8px;
+                    left: 8px;
+                }
+
+                #FeaturedConfigPage .jmp-metadata-overlay.pos-top-right {
+                    top: 8px;
+                    right: 8px;
+                }
+
+                #FeaturedConfigPage .jmp-metadata-overlay.pos-bottom-left {
+                    bottom: 8px;
+                    left: 8px;
+                }
+
+                #FeaturedConfigPage .jmp-metadata-overlay.pos-bottom-right {
+                    right: 8px;
+                    bottom: 8px;
+                }
+
+                #FeaturedConfigPage .jmp-metadata-title {
+                    font-size: 0.88rem;
+                    font-weight: 700;
+                    line-height: 1.2;
+                    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+                }
+
+                #FeaturedConfigPage .jmp-metadata-meta {
+                    font-size: 0.76rem;
+                    line-height: 1.25;
+                    opacity: 0.88;
+                    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+                }
+
+                #FeaturedConfigPage .jmp-progress {
+                    position: absolute;
+                    right: 8px;
+                    bottom: 8px;
+                    left: 8px;
+                    z-index: 90;
+                    display: none;
+                    height: 3px;
+                    overflow: hidden;
+                    pointer-events: none;
+                    border-radius: 999px;
+                    background: rgba(255, 255, 255, 0.18);
+                }
+
+                #FeaturedConfigPage .jmp-progress-bar {
+                    width: 58%;
+                    height: 100%;
+                    background: rgba(255, 255, 255, 0.88);
+                    transform-origin: left center;
+                }
+
+                @media (max-width: 1100px) {
+
+                    #FeaturedConfigPage .jmp-generalGrid,
+                    #FeaturedConfigPage .jmp-generalSelectionGrid {
+                        grid-template-columns: 1fr;
+                    }
+
+                    #FeaturedConfigPage .jmp-selectionIntro,
+                    #FeaturedConfigPage .jmp-selectionFallback {
+                        grid-column: auto;
+                    }
+
+                    #FeaturedConfigPage .jmp-toolbar {
+                        align-items: stretch;
+                    }
+
+                    #FeaturedConfigPage .jmp-tabBar {
+                        flex-basis: 100%;
+                    }
+
+                    #FeaturedConfigPage .jmp-saveButton {
+                        width: 100%;
+                        margin-left: 0;
+                    }
+
+                    #FeaturedConfigPage .jmp-compactGrid {
+                        grid-template-columns: 1fr;
+                    }
+                }
+
+                #FeaturedConfigPage .ec-addSourceButton,
+                #FeaturedConfigPage .ec-addFilterButton {
+                    align-items: center;
+                    background: #00a4dc;
+                    border: 0;
+                    border-radius: .35rem;
+                    color: #fff;
+                    cursor: pointer;
+                    display: inline-flex;
+                    gap: .4rem;
+                    justify-content: center;
+                    margin: 0;
+                    min-height: 2.7rem;
+                    padding: .65rem 1rem;
+                }
+
+                #FeaturedConfigPage .ec-addSourceButton:hover,
+                #FeaturedConfigPage .ec-addFilterButton:hover {
+                    background: #0cb3ea;
+                }
+
+                #FeaturedConfigPage .ec-ruleIconButton {
+                    align-items: center;
+                    border-radius: 50%;
+                    display: inline-flex;
+                    height: 2.35rem;
+                    justify-content: center;
+                    min-width: 2.35rem;
+                    padding: .4rem;
+                    background: transparent;
+                    border: 0;
+                    cursor: pointer;
+                    color: inherit;
+                }
+
+                #FeaturedConfigPage .ec-ruleIconButton:disabled {
+                    opacity: .24;
+                }
+
+                #FeaturedConfigPage .ec-removeRule,
+                #FeaturedConfigPage .ec-removeFilter {
+                    color: #ffb4ab;
+                }
+
+                #FeaturedConfigPage .ec-primaryAction,
+                #FeaturedConfigPage .ec-secondaryAction,
+                #FeaturedConfigPage .ec-searchButton {
+                    align-items: center;
+                    border: 0;
+                    border-radius: .35rem;
+                    cursor: pointer;
+                    display: inline-flex;
+                    gap: .4rem;
+                    justify-content: center;
+                    margin: 0;
+                    min-height: 2.7rem;
+                    padding: .65rem 1rem;
+                }
+
+                #FeaturedConfigPage .ec-primaryAction,
+                #FeaturedConfigPage .ec-searchButton {
+                    background: #00a4dc;
+                    color: #fff;
+                }
+
+                #FeaturedConfigPage .ec-secondaryAction {
+                    background: rgba(255, 255, 255, .1);
+                    color: inherit;
+                }
+
+                #FeaturedConfigPage .ec-emptySources {
+                    align-items: center;
+                    border: 1px dashed rgba(255, 255, 255, .16);
+                    border-radius: .9rem;
+                    display: flex;
+                    flex-direction: column;
+                    margin-top: 1rem;
+                    padding: 2.2rem 1rem;
+                    text-align: center;
+                }
+
+                #FeaturedConfigPage .ec-emptySources .material-icons {
+                    font-size: 2rem;
+                    opacity: .5;
+                }
+
+                #FeaturedConfigPage .ec-emptySources h3 {
+                    margin: .7rem 0 .25rem;
+                }
+
+                #FeaturedConfigPage .ec-emptySources p {
+                    margin: 0;
+                    opacity: .7;
+                }

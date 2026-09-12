@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Jellyfin Featured</title>
+</head>
+<body>
+    <div id="FeaturedConfigPage" data-role="page" class="page type-interior pluginConfigurationPage">
+        <div data-role="content">
+            <div id="FeaturedConfigApp"></div>
+        </div>
+
+        <script type="text/javascript">
+            (function () {
+                const apiClient = window.ApiClient || window.apiClient;
+                const scriptUrl = apiClient && typeof apiClient.getUrl === 'function'
+                    ? apiClient.getUrl('featured/config-script')
+                    : new URL('featured/config-script', window.location.origin + '/').toString();
+
+                if (!scriptUrl) {
+                    throw new Error('Could not resolve the Jellyfin Featured configuration bundle URL.');
+                }
+
+                const script = document.createElement('script');
+                const separator = scriptUrl.includes('?') ? '&' : '?';
+                script.src = scriptUrl + separator + 'instance=' + Date.now().toString(36);
+                script.async = false;
+                document.head.appendChild(script);
+            }());
+        </script>
+    </div>
+</body>
+</html>

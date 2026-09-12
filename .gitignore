@@ -1,0 +1,11 @@
+dist/
+release/
+**/bin/
+**/obj/
+.vs/
+.vscode/
+node_modules/
+*.user
+*.suo
+*.log
+docs/product-roadmap.md

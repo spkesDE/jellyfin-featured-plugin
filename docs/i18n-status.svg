@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="140" viewBox="0 0 720 140" role="img" aria-labelledby="title desc">
+  <title id="title">Jellyfin Featured translation status</title>
+  <desc id="desc">Translation completion by language.</desc>
+  <style>
+    .background { fill: #0d1117; }
+    .title { fill: #f0f6fc; font: 600 18px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    .language { fill: #c9d1d9; font: 13px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    .percent { fill: #c9d1d9; font: 600 12px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    .track { fill: #30363d; }
+  </style>
+  <rect width="720" height="140" rx="10" class="background"/>
+  <text x="28" y="30" class="title">Translation status</text>
+    <g>
+      <text x="30" y="66" class="language">English</text>
+      <rect x="210" y="57" width="390" height="10" rx="5" class="track"/>
+      <rect x="210" y="57" width="390.0" height="10" rx="5" fill="#2dd4bf"/>
+      <text x="662" y="66" text-anchor="end" class="percent">100%</text>
+    </g>
+    <g>
+      <text x="30" y="104" class="language">German</text>
+      <rect x="210" y="95" width="390" height="10" rx="5" class="track"/>
+      <rect x="210" y="95" width="390.0" height="10" rx="5" fill="#2dd4bf"/>
+      <text x="662" y="104" text-anchor="end" class="percent">100%</text>
+    </g>
+</svg>

@@ -1,0 +1,73 @@
+[changelog]
+header = "# Changelog\n\n"
+body = """
+{% if version -%}
+## {{ version }} - {{ timestamp | date(format="%Y-%m-%d") }}
+{% else -%}
+## Unreleased
+{% endif %}
+{% for group, commits in commits | filter(attribute="merge_commit", value=false) | group_by(attribute="group") %}
+
+### {{ group | striptags | trim }}
+
+{% for commit in commits -%}
+- {{ commit.message | split(pat="\n") | first | trim }}
+{% endfor -%}
+{% endfor %}
+"""
+trim = true
+footer = ""
+postprocessors = [
+  { pattern = '\n{3,}', replace = "\n\n" },
+]
+
+[git]
+conventional_commits = false
+filter_unconventional = false
+split_commits = false
+tag_pattern = "v[0-9].*"
+skip_tags = ""
+ignore_tags = ""
+topo_order = true
+topo_order_commits = true
+sort_commits = "oldest"
+
+[[git.commit_parsers]]
+message = "^Prepare release .*"
+skip = true
+
+[[git.commit_parsers]]
+message = "^Update changelog and manifest for v.*"
+skip = true
+
+[[git.commit_parsers]]
+message = "^Merge .*"
+skip = true
+
+[[git.commit_parsers]]
+message = "^ci"
+skip = true
+
+[[git.commit_parsers]]
+message = "^feat"
+group = "<!-- 0 -->Features"
+
+[[git.commit_parsers]]
+message = "^fix"
+group = "<!-- 1 -->Fixes"
+
+[[git.commit_parsers]]
+message = "^build"
+group = "<!-- 2 -->Build"
+
+[[git.commit_parsers]]
+message = "^docs"
+group = "<!-- 3 -->Documentation"
+
+[[git.commit_parsers]]
+message = "^refactor"
+group = "<!-- 4 -->Refactoring"
+
+[[git.commit_parsers]]
+message = ".*"
+group = "<!-- 5 -->Other"

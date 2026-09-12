@@ -1,0 +1,31 @@
+import type { HeroBackdropPosition, HeroHeightMode, HeroTextPosition, TransitionEffect } from './config';
+
+export interface FeaturedDisplaySettings {
+  showAutoplayButton: boolean;
+  enableBackgroundTrailers: boolean;
+  showPlayButton: boolean;
+  showNavigationArrows: boolean;
+  showSlidePosition: boolean;
+  mediaPadding: number;
+  titleDisplayMode: 'logo' | 'title';
+  showRating: boolean;
+  showDescription: boolean;
+  hideOnTvLayout: boolean;
+  useHeroLayout: boolean;
+  heroHeightMode: HeroHeightMode;
+  tabletBannerHeight: number;
+  mobileBannerHeight: number;
+  heroBorderRadius: number;
+  heroGradientStrength: number;
+  heroTextPosition: HeroTextPosition;
+  transitionEffect: TransitionEffect;
+  heroBackdropPosition: HeroBackdropPosition;
+  bannerHeight: number;
+  showYear: boolean;
+  showRuntime: boolean;
+  showSecondaryButton: boolean;
+  secondaryButtonText?: string | null;
+  showPaginationDots: boolean;
+  heading?: string | null;
+  playButtonText?: string | null;
+}

@@ -1,0 +1,125 @@
+export type SourceType = 'LIBRARIES' | 'COLLECTIONS' | 'FAVOURITES' | 'TAGS' | 'PLAYLISTS' | 'RECENTLY_ADDED' | 'LATEST_RELEASES' | 'RANDOM' | 'UNPLAYED' | 'MANUAL_LISTS';
+export type FilterField = 'LIBRARY' | 'GENRE' | 'TAG' | 'MEDIA_TYPE' | 'PLAYED' | 'COMMUNITY_RATING' | 'CRITIC_RATING' | 'PRODUCTION_YEAR' | 'RUNTIME_MINUTES';
+export type FilterOperator = 'EQUALS' | 'NOT_EQUALS' | 'GTE' | 'LTE' | 'CONTAINS_ANY' | 'CONTAINS_ALL';
+export type FrontendInjectionMethod = 'automatic' | 'file-transformation' | 'javascript-injector';
+export type TransitionEffect = 'slide' | 'fade';
+export type HeroBackdropPosition = 'top' | 'center' | 'bottom';
+export type HeroHeightMode = 'auto' | 'compact' | 'standard' | 'cinematic' | 'custom';
+export type HeroTextPosition = 'left' | 'center' | 'right';
+
+import type { FeaturedDisplaySettings } from './display';
+
+export interface FeaturedFilterRule {
+  Id: string;
+  Field: FilterField;
+  Operator: FilterOperator;
+  Values: string[];
+}
+
+export interface FeaturedSourceRule {
+  Id: string;
+  Type: SourceType;
+  Enabled: boolean;
+  Weight: number;
+  EditorUserId: string | null;
+  LibraryIds: string[];
+  CollectionIds: string[];
+  PlaylistIds: string[];
+  ManualListIds: string[];
+  Tags: string[];
+  RecentDays: number;
+  Filters: FeaturedFilterRule[];
+}
+
+export interface FeaturedPluginConfig {
+  FrontendInjectionMethod: FrontendInjectionMethod;
+  EnableFrontendBootstrap: boolean;
+  SourceRules: FeaturedSourceRule[];
+  GlobalFilters: FeaturedFilterRule[];
+  ManualLists: FeaturedManualList[];
+  UserProfiles: FeaturedUserProfile[];
+  RepeatCooldownDays: number;
+  RandomMediaCount: number;
+  EnableInfiniteLoading: boolean;
+  MaximumParentRating: number;
+  MaximumParentRatingSubscore: number;
+  EnableAutoplay: boolean;
+  ShowAutoplayButton: boolean;
+  EnableBackgroundTrailers: boolean;
+  AutoplayInterval: number;
+  ShowPlayButton: boolean;
+  ShowNavigationArrows: boolean;
+  ShowSlidePosition: boolean;
+  MediaPadding: number;
+  TitleDisplayMode: 'logo' | 'title';
+  ShowRating: boolean;
+  ShowDescription: boolean;
+  HideOnTvLayout: boolean;
+  UseHeroLayout: boolean;
+  HeroHeightMode: HeroHeightMode;
+  TabletBannerHeight: number;
+  MobileBannerHeight: number;
+  HeroBorderRadius: number;
+  HeroGradientStrength: number;
+  HeroTextPosition: HeroTextPosition;
+  TransitionEffect: TransitionEffect;
+  HeroBackdropPosition: HeroBackdropPosition;
+  ReduceImageSize: boolean;
+  EnablePreparedCache: boolean;
+  BannerHeight: number;
+  ShowYear: boolean;
+  ShowRuntime: boolean;
+  ShowSecondaryButton: boolean;
+  SecondaryButtonText: string;
+  ShowPaginationDots: boolean;
+  Heading: string;
+  PlayButtonText: string;
+  Debug: boolean;
+}
+
+export interface FeaturedManualItem {
+  Id: string;
+  ItemId: string;
+  Name: string;
+  MediaType: string;
+  ProductionYear: number | null;
+  ImageType: 'Backdrop' | 'Primary';
+  Position: number;
+  StartsAt: string | null;
+  EndsAt: string | null;
+}
+
+export interface FeaturedManualList {
+  Id: string;
+  Name: string;
+  Enabled: boolean;
+  StartsAt: string | null;
+  EndsAt: string | null;
+  Items: FeaturedManualItem[];
+}
+
+export interface FeaturedUserProfile {
+  Id: string;
+  UserId: string;
+  Enabled: boolean;
+  UnplayedBoost: number;
+  FavouriteBoost: number;
+  PreferredGenreBoost: number;
+  InProgressSeriesBoost: number;
+  PreferredGenres: string[];
+}
+
+export interface RuntimeConfig extends FeaturedDisplaySettings {
+  frontendInjectionMethod: FrontendInjectionMethod;
+  randomMediaCount: number;
+  enableInfiniteLoading: boolean;
+  maximumParentRating: number;
+  maximumParentRatingSubscore: number;
+  enableAutoplay: boolean;
+  autoplayInterval: number;
+  reduceImageSize: boolean;
+  secondaryButtonText: string | null;
+  heading: string | null;
+  playButtonText: string | null;
+  debug: boolean;
+}

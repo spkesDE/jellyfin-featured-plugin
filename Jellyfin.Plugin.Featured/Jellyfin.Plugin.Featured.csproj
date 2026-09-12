@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>Jellyfin.Plugin.Featured</AssemblyName>
+    <RootNamespace>Jellyfin.Plugin.Featured</RootNamespace>
+    <AssemblyVersion>12.1.0.0</AssemblyVersion>
+    <FileVersion>12.1.0.0</FileVersion>
+    <Version>12.1.0.0</Version>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Jellyfin.Controller" Version="12.0.0" />
+    <PackageReference Include="Jellyfin.Model" Version="12.0.0" />
+    <PackageReference Include="Jellyfin.Common" Version="12.0.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Configuration\configPage.html" />
+    <EmbeddedResource Include="..\dist\featured.bundle.js" Link="dist\featured.bundle.js" LogicalName="Jellyfin.Plugin.Featured.dist.featured.bundle.js" />
+    <EmbeddedResource Include="..\dist\config.bundle.js" Link="dist\config.bundle.js" LogicalName="Jellyfin.Plugin.Featured.dist.config.bundle.js" />
+  </ItemGroup>
+</Project>
