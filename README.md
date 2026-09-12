@@ -10,6 +10,7 @@ Jellyfin Featured adds a large, rotating banner to your Jellyfin home page. Use 
 - Mix several sources and decide how often each one should appear.
 - Narrow the selection by genre, year, age rating, play status, runtime and more.
 - Give each Jellyfin user more of what they like, including favourites, unwatched titles, preferred genres and series they have already started.
+- Let users personalize their own source mix while the administrator keeps control of which settings may be changed.
 - Choose between a classic banner and a larger hero layout, then adjust the height, artwork, text, buttons and transitions.
 - Rotate titles automatically, load more while browsing, or play muted local trailers in the background.
 
@@ -100,6 +101,20 @@ You can combine as many sources as you like. Give a source more weight if you wa
 The default hero layout is designed to work without much tweaking. If you want a different look, you can change the banner height, artwork position, text alignment, gradients, corners, spacing, and transition style. Separate height settings are available for desktop, tablet, and mobile screens.
 
 You can also choose which details and controls are shown, including the title or logo, description, rating, year, runtime, buttons, arrows, and page dots. Autoplay, background trailers, and the number of featured titles are optional.
+
+## Personalization
+
+Administrators configure the server defaults and the settings users may override under `User Profiles`. Available controls include source activation, source weights, preferred genres, scoring boosts, and an optional personal repeat cooldown. Existing per-user admin profiles remain available as user-specific server defaults.
+
+When personalization is enabled, users can open the gear button on the Featured carousel and save settings for their own Jellyfin account. Settings they leave unchanged continue to inherit server defaults; `Reset to server defaults` removes all personal overrides. Genre options are derived only from content visible to the active user, and the normal Jellyfin access checks still apply to every returned item.
+
+Integrations may use the authenticated preference API directly:
+
+```http
+GET /featured/preferences
+PUT /featured/preferences
+GET /featured/preferences/options
+```
 
 ## Troubleshooting
 
