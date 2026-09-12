@@ -106,7 +106,8 @@ public sealed class FeaturedItemsResponseDto : FeaturedDisplaySettingsDto
         PluginConfiguration config,
         IReadOnlyList<FeaturedItemDto> items,
         int batchSize,
-        int requestedCount)
+        int requestedCount,
+        FeaturedPersonalizationContext personalization)
         : base(config)
     {
         Items = items;
@@ -116,7 +117,8 @@ public sealed class FeaturedItemsResponseDto : FeaturedDisplaySettingsDto
         Autoplay = config.EnableAutoplay;
         AutoplayInterval = config.AutoplayInterval * 1000;
         ReduceImageSizes = config.ReduceImageSize;
-        TrackDisplayedItems = config.RepeatCooldownDays > 0;
+        TrackDisplayedItems = personalization.RepeatCooldownDays > 0;
+        PersonalizationEnabled = config.PersonalizationPolicy.Enabled;
     }
 
     public IReadOnlyList<FeaturedItemDto> Items { get; }
@@ -127,6 +129,69 @@ public sealed class FeaturedItemsResponseDto : FeaturedDisplaySettingsDto
     public int AutoplayInterval { get; }
     public bool ReduceImageSizes { get; }
     public bool TrackDisplayedItems { get; }
+    public bool PersonalizationEnabled { get; }
+}
+
+public sealed class FeaturedPreferencesResponse
+{
+    internal FeaturedPreferencesResponse(FeaturedUserPreferences? saved, FeaturedPersonalizationContext effective)
+    {
+        HasOverrides = saved is not null;
+        Preferences = saved ?? new FeaturedUserPreferences();
+        Effective = new FeaturedEffectivePreferences
+        {
+            SourceEnabled = effective.SourceRules.ToDictionary(rule => rule.Id, rule => rule.Enabled),
+            SourceWeights = effective.SourceRules.ToDictionary(rule => rule.Id, rule => rule.Weight),
+            PreferredGenres = effective.Profile.PreferredGenres,
+            UnplayedBoost = effective.Profile.UnplayedBoost,
+            FavouriteBoost = effective.Profile.FavouriteBoost,
+            InProgressSeriesBoost = effective.Profile.InProgressSeriesBoost,
+            RepeatCooldownDays = effective.RepeatCooldownDays
+        };
+    }
+
+    public bool HasOverrides { get; }
+    public FeaturedUserPreferences Preferences { get; }
+    public FeaturedEffectivePreferences Effective { get; }
+}
+
+public sealed class FeaturedEffectivePreferences
+{
+    public Dictionary<string, bool> SourceEnabled { get; set; } = [];
+    public Dictionary<string, int> SourceWeights { get; set; } = [];
+    public string[] PreferredGenres { get; set; } = [];
+    public int UnplayedBoost { get; set; }
+    public int FavouriteBoost { get; set; }
+    public int InProgressSeriesBoost { get; set; }
+    public int RepeatCooldownDays { get; set; }
+}
+
+public sealed class FeaturedPreferencesUpdate
+{
+    public bool Reset { get; set; }
+    public FeaturedUserPreferences? Preferences { get; set; }
+}
+
+public sealed class FeaturedPreferenceOptionsResponse
+{
+    internal FeaturedPreferenceOptionsResponse(FeaturedPersonalizationPolicy policy, FeaturedPreferenceSourceOption[] sources, string[] genres)
+    {
+        Policy = policy;
+        Sources = sources;
+        Genres = genres;
+    }
+
+    public FeaturedPersonalizationPolicy Policy { get; }
+    public FeaturedPreferenceSourceOption[] Sources { get; }
+    public string[] Genres { get; }
+}
+
+public sealed class FeaturedPreferenceSourceOption
+{
+    public string Id { get; set; } = string.Empty;
+    public string Type { get; set; } = string.Empty;
+    public bool Enabled { get; set; }
+    public int Weight { get; set; }
 }
 
 public sealed class FeaturedItemDto

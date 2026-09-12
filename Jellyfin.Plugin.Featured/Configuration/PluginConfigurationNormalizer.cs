@@ -59,6 +59,13 @@ internal static class PluginConfigurationNormalizer
         config.GlobalFilters = NormalizeFilters(config.GlobalFilters);
         config.ManualLists = NormalizeManualLists(config.ManualLists);
         config.UserProfiles = NormalizeUserProfiles(config.UserProfiles);
+        config.PersonalizationDefaults ??= new FeaturedPersonalizationDefaults();
+        config.PersonalizationDefaults.UnplayedBoost = Math.Clamp(config.PersonalizationDefaults.UnplayedBoost, 0, 100);
+        config.PersonalizationDefaults.FavouriteBoost = Math.Clamp(config.PersonalizationDefaults.FavouriteBoost, 0, 100);
+        config.PersonalizationDefaults.PreferredGenreBoost = Math.Clamp(config.PersonalizationDefaults.PreferredGenreBoost, 0, 100);
+        config.PersonalizationDefaults.InProgressSeriesBoost = Math.Clamp(config.PersonalizationDefaults.InProgressSeriesBoost, 0, 100);
+        config.PersonalizationDefaults.PreferredGenres = NormalizeValues(config.PersonalizationDefaults.PreferredGenres);
+        config.PersonalizationPolicy ??= new FeaturedPersonalizationPolicy();
         config.RepeatCooldownDays = Math.Clamp(config.RepeatCooldownDays, 0, 3650);
         config.RandomMediaCount = Math.Clamp(config.RandomMediaCount, 1, 100);
         config.AutoplayInterval = Math.Clamp(config.AutoplayInterval, 1, 3600);

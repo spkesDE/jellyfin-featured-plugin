@@ -13,15 +13,13 @@ public sealed class FeaturedPreparedCache
     private readonly ConcurrentDictionary<Guid, PreparedEntry> _entries = new();
     private readonly ConcurrentDictionary<Guid, byte> _queuedUsers = new();
     private readonly SemaphoreSlim _refreshGate = new(1, 1);
-    private readonly object _fingerprintLock = new();
     private readonly IUserManager _userManager;
     private readonly ILibraryManager _libraryManager;
     private readonly IUserDataManager _userDataManager;
     private readonly FeaturedDisplayHistoryStore _historyStore;
     private readonly FeaturedCandidateCache _candidateCache;
+    private readonly FeaturedPersonalizationService _personalization;
     private readonly ILogger<FeaturedPreparedCache> _logger;
-    private PluginConfiguration? _fingerprintedConfiguration;
-    private string? _configurationFingerprint;
 
     public FeaturedPreparedCache(
         IUserManager userManager,
@@ -29,6 +27,7 @@ public sealed class FeaturedPreparedCache
         IUserDataManager userDataManager,
         FeaturedDisplayHistoryStore historyStore,
         FeaturedCandidateCache candidateCache,
+        FeaturedPersonalizationService personalization,
         ILogger<FeaturedPreparedCache> logger)
     {
         _userManager = userManager;
@@ -36,12 +35,14 @@ public sealed class FeaturedPreparedCache
         _userDataManager = userDataManager;
         _historyStore = historyStore;
         _candidateCache = candidateCache;
+        _personalization = personalization;
         _logger = logger;
     }
 
     internal bool TryGetItems(
         Jellyfin.Database.Implementations.Entities.User user,
         PluginConfiguration config,
+        FeaturedPersonalizationContext personalization,
         HashSet<Guid> excludedIds,
         int requestedCount,
         out List<BaseItem> items)
@@ -49,7 +50,7 @@ public sealed class FeaturedPreparedCache
         items = [];
         if (!config.EnablePreparedCache) return false;
         if (!_entries.TryGetValue(user.Id, out PreparedEntry? entry)
-            || !string.Equals(entry.ConfigurationFingerprint, GetConfigurationFingerprint(config), StringComparison.Ordinal))
+            || !string.Equals(entry.ConfigurationFingerprint, GetConfigurationFingerprint(config, personalization), StringComparison.Ordinal))
         {
             QueueUserRefresh(user.Id);
             return false;
@@ -159,11 +160,6 @@ public sealed class FeaturedPreparedCache
     internal void Clear()
     {
         _entries.Clear();
-        lock (_fingerprintLock)
-        {
-            _fingerprintedConfiguration = null;
-            _configurationFingerprint = null;
-        }
     }
 
     internal string GetStatus()
@@ -199,12 +195,13 @@ public sealed class FeaturedPreparedCache
 
     private void RefreshUser(Jellyfin.Database.Implementations.Entities.User user, PluginConfiguration config)
     {
-        HashSet<Guid> historyIds = _historyStore.GetRecentItemIds(user.Id, config.RepeatCooldownDays);
+        FeaturedPersonalizationContext personalization = _personalization.Resolve(config, user.Id);
+        HashSet<Guid> historyIds = _historyStore.GetRecentItemIds(user.Id, personalization.RepeatCooldownDays);
         FeaturedRuleEngine engine = new(config, _userManager, _libraryManager, _userDataManager, _candidateCache);
-        FeaturedSelection selection = engine.SelectItems(user, [], historyIds, GetPoolSize(config));
+        FeaturedSelection selection = engine.SelectItems(user, [], historyIds, GetPoolSize(config), personalization);
         _entries[user.Id] = new PreparedEntry(
             selection.Items.ToArray(),
-            GetConfigurationFingerprint(config),
+            GetConfigurationFingerprint(config, personalization),
             DateTimeOffset.UtcNow);
     }
 
@@ -214,20 +211,8 @@ public sealed class FeaturedPreparedCache
     private static PluginConfiguration GetCurrentConfiguration()
         => PluginConfigurationNormalizer.Normalize(Plugin.Instance?.Configuration);
 
-    private string GetConfigurationFingerprint(PluginConfiguration config)
-    {
-        lock (_fingerprintLock)
-        {
-            if (ReferenceEquals(config, _fingerprintedConfiguration) && _configurationFingerprint is not null)
-            {
-                return _configurationFingerprint;
-            }
-
-            _fingerprintedConfiguration = config;
-            _configurationFingerprint = JsonSerializer.Serialize(config);
-            return _configurationFingerprint;
-        }
-    }
+    private string GetConfigurationFingerprint(PluginConfiguration config, FeaturedPersonalizationContext personalization)
+        => JsonSerializer.Serialize(config) + personalization.Fingerprint;
 
     private sealed record PreparedEntry(
         IReadOnlyList<BaseItem> Items,

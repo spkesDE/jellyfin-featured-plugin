@@ -40,6 +40,7 @@ public sealed class FeaturedController : ControllerBase
     private readonly FeaturedDisplayHistoryStore _historyStore;
     private readonly FeaturedCandidateCache _candidateCache;
     private readonly FeaturedPreparedCache _preparedCache;
+    private readonly FeaturedPersonalizationService _personalization;
     private readonly ILogger<FeaturedController> _logger;
 
     public FeaturedController(
@@ -49,6 +50,7 @@ public sealed class FeaturedController : ControllerBase
         FeaturedDisplayHistoryStore historyStore,
         FeaturedCandidateCache candidateCache,
         FeaturedPreparedCache preparedCache,
+        FeaturedPersonalizationService personalization,
         ILogger<FeaturedController> logger)
     {
         _userManager = userManager;
@@ -57,6 +59,7 @@ public sealed class FeaturedController : ControllerBase
         _historyStore = historyStore;
         _candidateCache = candidateCache;
         _preparedCache = preparedCache;
+        _personalization = personalization;
         _logger = logger;
         _config = PluginConfigurationNormalizer.Normalize(Plugin.Instance?.Configuration);
     }
@@ -178,6 +181,60 @@ public sealed class FeaturedController : ControllerBase
         }
     }
 
+    [HttpGet("preferences")]
+    [Authorize]
+    [Produces(MediaTypeNames.Application.Json)]
+    public ActionResult<FeaturedPreferencesResponse> GetPreferences()
+    {
+        Jellyfin.Database.Implementations.Entities.User? activeUser = GetActiveUser();
+        if (activeUser == null) return NotFound();
+        return Ok(CreatePreferencesResponse(activeUser));
+    }
+
+    [HttpPut("preferences")]
+    [Authorize]
+    [Produces(MediaTypeNames.Application.Json)]
+    public ActionResult<FeaturedPreferencesResponse> PutPreferences([FromBody] FeaturedPreferencesUpdate? request)
+    {
+        Jellyfin.Database.Implementations.Entities.User? activeUser = GetActiveUser();
+        if (activeUser == null) return NotFound();
+        if (!_config.PersonalizationPolicy.Enabled) return Forbid();
+        if (request?.Reset == true)
+        {
+            _personalization.Remove(activeUser.Id);
+        }
+        else if (request?.Preferences is not null)
+        {
+            HashSet<string> genres = GetVisibleGenres(activeUser).ToHashSet(StringComparer.OrdinalIgnoreCase);
+            _personalization.NormalizeAndSave(_config, activeUser.Id, request.Preferences, genres);
+        }
+        else
+        {
+            return BadRequest();
+        }
+
+        _preparedCache.QueueUserRefresh(activeUser.Id);
+        return Ok(CreatePreferencesResponse(activeUser));
+    }
+
+    [HttpGet("preferences/options")]
+    [Authorize]
+    [Produces(MediaTypeNames.Application.Json)]
+    public ActionResult<FeaturedPreferenceOptionsResponse> GetPreferenceOptions()
+    {
+        Jellyfin.Database.Implementations.Entities.User? activeUser = GetActiveUser();
+        if (activeUser == null) return NotFound();
+        FeaturedPersonalizationContext effective = _personalization.Resolve(_config, activeUser.Id);
+        FeaturedPreferenceSourceOption[] sources = effective.SourceRules.Select(rule => new FeaturedPreferenceSourceOption
+        {
+            Id = rule.Id,
+            Type = rule.Type,
+            Enabled = rule.Enabled,
+            Weight = rule.Weight
+        }).ToArray();
+        return Ok(new FeaturedPreferenceOptionsResponse(_config.PersonalizationPolicy, sources, GetVisibleGenres(activeUser)));
+    }
+
     [HttpGet("config/search")]
     [Authorize]
     [Produces(MediaTypeNames.Application.Json)]
@@ -227,7 +284,8 @@ public sealed class FeaturedController : ControllerBase
         Jellyfin.Database.Implementations.Entities.User? activeUser = GetActiveUser();
         if (activeUser == null) return NotFound();
         if (request is null || request.ItemId == Guid.Empty) return BadRequest();
-        if (_config.RepeatCooldownDays <= 0) return Ok(new { ok = true });
+        FeaturedPersonalizationContext personalization = _personalization.Resolve(_config, activeUser.Id);
+        if (personalization.RepeatCooldownDays <= 0) return Ok(new { ok = true });
         BaseItem? item = _libraryManager.GetItemById(request.ItemId);
         if (item is null || !item.IsVisible(activeUser)) return NotFound();
         _historyStore.Record(activeUser.Id, item.Id);
@@ -268,8 +326,9 @@ public sealed class FeaturedController : ControllerBase
             }
 
             int requestedCount = _config.EnableInfiniteLoading ? InfiniteBatchSize : _config.RandomMediaCount;
-            HashSet<Guid> historyExcludedIds = _historyStore.GetRecentItemIds(activeUser.Id, _config.RepeatCooldownDays);
-            FeaturedSelection selection = CreateEngine().SelectItems(activeUser, [], historyExcludedIds, requestedCount);
+            FeaturedPersonalizationContext personalization = _personalization.Resolve(_config, activeUser.Id);
+            HashSet<Guid> historyExcludedIds = _historyStore.GetRecentItemIds(activeUser.Id, personalization.RepeatCooldownDays);
+            FeaturedSelection selection = CreateEngine().SelectItems(activeUser, [], historyExcludedIds, requestedCount, personalization);
             DateTimeOffset now = DateTimeOffset.UtcNow;
             HashSet<string> referencedManualListIds = _config.SourceRules
                 .Where(rule => rule.Enabled && rule.Type == FeaturedSourceTypes.ManualLists)
@@ -292,7 +351,7 @@ public sealed class FeaturedController : ControllerBase
                     && (!list.StartsAt.HasValue || list.StartsAt <= now)
                     && (!list.EndsAt.HasValue || list.EndsAt > now)),
                 ["userProfileApplied"] = selection.UserProfileApplied,
-                ["repeatCooldownDays"] = _config.RepeatCooldownDays,
+                ["repeatCooldownDays"] = personalization.RepeatCooldownDays,
                 ["historyEntries"] = _historyStore.GetEntryCount(activeUser.Id),
                 ["rules"] = selection.RuleStats.Select(stat => new Dictionary<string, object>
                 {
@@ -329,18 +388,19 @@ public sealed class FeaturedController : ControllerBase
             }
 
             int requestedCount = _config.EnableInfiniteLoading ? InfiniteBatchSize : _config.RandomMediaCount;
-            HashSet<Guid> historyExcludedIds = _historyStore.GetRecentItemIds(activeUser.Id, _config.RepeatCooldownDays);
+            FeaturedPersonalizationContext personalization = _personalization.Resolve(_config, activeUser.Id);
+            HashSet<Guid> historyExcludedIds = _historyStore.GetRecentItemIds(activeUser.Id, personalization.RepeatCooldownDays);
             HashSet<Guid> allExcludedIds = [.. excludedIds, .. historyExcludedIds];
             List<BaseItem> selectedItems;
-            if (!_preparedCache.TryGetItems(activeUser, _config, allExcludedIds, requestedCount, out selectedItems))
+            if (!_preparedCache.TryGetItems(activeUser, _config, personalization, allExcludedIds, requestedCount, out selectedItems))
             {
-                selectedItems = CreateEngine().SelectItems(activeUser, excludedIds, historyExcludedIds, requestedCount).Items;
+                selectedItems = CreateEngine().SelectItems(activeUser, excludedIds, historyExcludedIds, requestedCount, personalization).Items;
                 if (_config.EnablePreparedCache) _preparedCache.QueueUserRefresh(activeUser.Id);
             }
 
             List<FeaturedItemDto> items = selectedItems.Select(item => CreateItemResponse(item, activeUser)).ToList();
             return new JsonResult(
-                new FeaturedItemsResponseDto(_config, items, InfiniteBatchSize, requestedCount),
+                new FeaturedItemsResponseDto(_config, items, InfiniteBatchSize, requestedCount, personalization),
                 RuntimeConfigJsonOptions);
         }
         catch (Exception ex)
@@ -351,6 +411,24 @@ public sealed class FeaturedController : ControllerBase
     }
 
     private FeaturedRuleEngine CreateEngine() => new(_config, _userManager, _libraryManager, _userDataManager, _candidateCache);
+
+    private FeaturedPreferencesResponse CreatePreferencesResponse(Jellyfin.Database.Implementations.Entities.User user)
+    {
+        FeaturedPersonalizationContext effective = _personalization.Resolve(_config, user.Id);
+        return new FeaturedPreferencesResponse(_personalization.Get(user.Id), effective);
+    }
+
+    private string[] GetVisibleGenres(Jellyfin.Database.Implementations.Entities.User user)
+    {
+        InternalItemsQuery query = new(user) { IncludeItemTypes = FeaturedMediaTypes.All };
+        return _libraryManager.GetItemList(query)
+            .Where(item => item.IsVisible(user))
+            .SelectMany(item => item.Genres)
+            .Where(genre => !string.IsNullOrWhiteSpace(genre))
+            .Distinct(StringComparer.CurrentCultureIgnoreCase)
+            .OrderBy(genre => genre, StringComparer.CurrentCultureIgnoreCase)
+            .ToArray();
+    }
 
     private FeaturedItemDto CreateItemResponse(
         BaseItem item,

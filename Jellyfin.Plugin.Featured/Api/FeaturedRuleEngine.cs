@@ -40,18 +40,19 @@ internal sealed class FeaturedRuleEngine
         Jellyfin.Database.Implementations.Entities.User activeUser,
         HashSet<Guid> requestExcludedIds,
         HashSet<Guid> historyExcludedIds,
-        int requestedCount)
+        int requestedCount,
+        FeaturedPersonalizationContext? personalization = null)
     {
         List<FeaturedRuleDiagnostic> diagnostics = [];
         List<BaseItem> result = [];
         HashSet<Guid> selectedIds = [];
         HashSet<Guid> excludedIds = [.. requestExcludedIds, .. historyExcludedIds];
-        FeaturedUserProfile? profile = _config.UserProfiles.FirstOrDefault(candidate =>
+        FeaturedUserProfile? profile = personalization?.Profile ?? _config.UserProfiles.FirstOrDefault(candidate =>
             candidate.Enabled
             && Guid.TryParse(candidate.UserId, out Guid userId)
             && userId == activeUser.Id);
 
-        List<(FeaturedSourceRule Rule, List<BaseItem> Items)> candidatesByRule = _config.SourceRules
+        List<(FeaturedSourceRule Rule, List<BaseItem> Items)> candidatesByRule = (personalization?.SourceRules ?? _config.SourceRules)
             .Where(rule => rule.Enabled)
             .Select(rule => (rule, GetSourceCandidates(rule, activeUser, requestedCount)))
             .ToList();

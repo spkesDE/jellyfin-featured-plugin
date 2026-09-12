@@ -25,6 +25,10 @@ public sealed class PluginConfiguration : BasePluginConfiguration
 
     public FeaturedUserProfile[] UserProfiles { get; set; } = [];
 
+    public FeaturedPersonalizationDefaults PersonalizationDefaults { get; set; } = new();
+
+    public FeaturedPersonalizationPolicy PersonalizationPolicy { get; set; } = new();
+
     public int RepeatCooldownDays { get; set; }
 
     public int RandomMediaCount { get; set; } = 5;
@@ -191,6 +195,38 @@ public sealed class FeaturedUserProfile
     public int InProgressSeriesBoost { get; set; } = 30;
 
     public string[] PreferredGenres { get; set; } = [];
+}
+
+public sealed class FeaturedPersonalizationDefaults
+{
+    public int UnplayedBoost { get; set; } = 25;
+
+    public int FavouriteBoost { get; set; } = 20;
+
+    public int PreferredGenreBoost { get; set; } = 15;
+
+    public int InProgressSeriesBoost { get; set; } = 30;
+
+    public string[] PreferredGenres { get; set; } = [];
+}
+
+public sealed class FeaturedPersonalizationPolicy
+{
+    public bool Enabled { get; set; } = true;
+
+    public bool AllowSourceSelection { get; set; } = true;
+
+    public bool AllowSourceWeights { get; set; } = true;
+
+    public bool AllowPreferredGenres { get; set; } = true;
+
+    public bool AllowUnplayedBoost { get; set; } = true;
+
+    public bool AllowFavouriteBoost { get; set; } = true;
+
+    public bool AllowInProgressSeriesBoost { get; set; } = true;
+
+    public bool AllowRepeatCooldown { get; set; }
 }
 
 public static class FeaturedSourceTypes

@@ -12,6 +12,8 @@ public sealed class PluginServiceRegistrator : IPluginServiceRegistrator
     public void RegisterServices(IServiceCollection serviceCollection, IServerApplicationHost applicationHost)
     {
         serviceCollection.AddSingleton<FeaturedDisplayHistoryStore>();
+        serviceCollection.AddSingleton<FeaturedPreferenceStore>();
+        serviceCollection.AddSingleton<FeaturedPersonalizationService>();
         serviceCollection.AddSingleton<FeaturedCandidateCache>();
         serviceCollection.AddSingleton<FeaturedPreparedCache>();
         serviceCollection.AddSingleton<IScheduledTask, RefreshFeaturedCacheTask>();
