@@ -28,6 +28,29 @@ function addProfile(): void {
 
 <template>
   <section id="featuredPanel-users" class="jmp-section jmp-section-plain" role="tabpanel" aria-labelledby="featuredTab-users">
+    <ConfigCard :title="t('users.personalizationTitle')" :help="t('users.personalizationHelp')">
+      <ConfigCheckbox v-model="store.config.PersonalizationPolicy.Enabled" :label="t('users.personalizationEnabled')" />
+      <div class="ec-policyGrid" :class="{ 'ec-disabledGroup': !store.config.PersonalizationPolicy.Enabled }">
+        <ConfigCheckbox v-model="store.config.PersonalizationPolicy.AllowSourceSelection" :label="t('users.allowSources')" :disabled="!store.config.PersonalizationPolicy.Enabled" />
+        <ConfigCheckbox v-model="store.config.PersonalizationPolicy.AllowSourceWeights" :label="t('users.allowWeights')" :disabled="!store.config.PersonalizationPolicy.Enabled" />
+        <ConfigCheckbox v-model="store.config.PersonalizationPolicy.AllowPreferredGenres" :label="t('users.allowGenres')" :disabled="!store.config.PersonalizationPolicy.Enabled" />
+        <ConfigCheckbox v-model="store.config.PersonalizationPolicy.AllowUnplayedBoost" :label="t('users.allowUnplayed')" :disabled="!store.config.PersonalizationPolicy.Enabled" />
+        <ConfigCheckbox v-model="store.config.PersonalizationPolicy.AllowFavouriteBoost" :label="t('users.allowFavourites')" :disabled="!store.config.PersonalizationPolicy.Enabled" />
+        <ConfigCheckbox v-model="store.config.PersonalizationPolicy.AllowInProgressSeriesBoost" :label="t('users.allowInProgress')" :disabled="!store.config.PersonalizationPolicy.Enabled" />
+        <ConfigCheckbox v-model="store.config.PersonalizationPolicy.AllowRepeatCooldown" :label="t('users.allowCooldown')" :disabled="!store.config.PersonalizationPolicy.Enabled" />
+      </div>
+    </ConfigCard>
+
+    <ConfigCard :title="t('users.defaultsTitle')" :help="t('users.defaultsHelp')">
+      <ConfigMultiPicker v-model="store.config.PersonalizationDefaults.PreferredGenres" :label="t('users.preferredGenres')" :options="genreOptions()" />
+      <div class="ec-scoreGrid">
+        <ConfigNumber v-model="store.config.PersonalizationDefaults.UnplayedBoost" :label="t('users.unplayedBoost')" :min="0" :max="100" :step="1" />
+        <ConfigNumber v-model="store.config.PersonalizationDefaults.FavouriteBoost" :label="t('users.favouriteBoost')" :min="0" :max="100" :step="1" />
+        <ConfigNumber v-model="store.config.PersonalizationDefaults.PreferredGenreBoost" :label="t('users.genreBoost')" :min="0" :max="100" :step="1" />
+        <ConfigNumber v-model="store.config.PersonalizationDefaults.InProgressSeriesBoost" :label="t('users.inProgressBoost')" :min="0" :max="100" :step="1" />
+      </div>
+    </ConfigCard>
+
     <ConfigCard :title="t('users.title')" :help="t('users.help')">
       <div class="ec-userExplanation">
         <strong>{{ t('users.howItWorks') }}</strong>
@@ -85,10 +108,14 @@ function addProfile(): void {
 .ec-userProfile > .jmp-subsectionHelp { margin-bottom: .75rem; }
 .ec-scoreGrid { display: grid; gap: .85rem 1rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .ec-scoreGrid :deep(.inputContainer) { margin-bottom: 0; }
+.ec-policyGrid { display: grid; gap: .25rem 1rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.ec-policyGrid :deep(.checkboxContainer) { margin-bottom: .35rem; }
+.ec-disabledGroup { opacity: .55; }
 
 @media (max-width: 600px) {
   .ec-addSourceRow { grid-template-columns: 1fr; }
   .ec-scoreGrid { grid-template-columns: 1fr; }
+  .ec-policyGrid { grid-template-columns: 1fr; }
   .ec-userProfileHeader { align-items: stretch; flex-direction: column; }
   .ec-userProfileActions { justify-content: space-between; }
 }

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import ConfigHelpTooltip from './ConfigHelpTooltip.vue';
 
-defineProps<{ label: string; helpText?: string; modelValue?: unknown }>();
+defineProps<{ label: string; helpText?: string; modelValue?: unknown; disabled?: boolean }>();
 const emit = defineEmits<{ 'update:modelValue': [value: boolean] }>();
 </script>
 
@@ -12,6 +12,7 @@ const emit = defineEmits<{ 'update:modelValue': [value: boolean] }>();
         <input
           class="emby-checkbox"
           type="checkbox"
+          :disabled="disabled"
           :checked="modelValue === true"
           @change="emit('update:modelValue', ($event.target as HTMLInputElement).checked)"
         >

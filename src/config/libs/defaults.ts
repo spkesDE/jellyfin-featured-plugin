@@ -35,6 +35,15 @@ export const CONFIG_DEFAULTS: FeaturedPluginConfig = {
   GlobalFilters: [],
   ManualLists: [],
   UserProfiles: [],
+  PersonalizationDefaults: {
+    UnplayedBoost: 25, FavouriteBoost: 20, PreferredGenreBoost: 15,
+    InProgressSeriesBoost: 30, PreferredGenres: []
+  },
+  PersonalizationPolicy: {
+    Enabled: true, AllowSourceSelection: true, AllowSourceWeights: true,
+    AllowPreferredGenres: true, AllowUnplayedBoost: true, AllowFavouriteBoost: true,
+    AllowInProgressSeriesBoost: true, AllowRepeatCooldown: false
+  },
   RepeatCooldownDays: 0,
   RandomMediaCount: 5,
   EnableInfiniteLoading: false,
@@ -173,6 +182,16 @@ export function normalizeConfig(value: unknown): FeaturedPluginConfig {
         PreferredGenres: Array.isArray(profile.PreferredGenres) ? profile.PreferredGenres : []
       }))
     : [];
+  config.PersonalizationDefaults = {
+    ...createDefaultConfig().PersonalizationDefaults,
+    ...(source.PersonalizationDefaults ?? {}),
+    PreferredGenres: Array.isArray(source.PersonalizationDefaults?.PreferredGenres)
+      ? source.PersonalizationDefaults.PreferredGenres : []
+  };
+  config.PersonalizationPolicy = {
+    ...createDefaultConfig().PersonalizationPolicy,
+    ...(source.PersonalizationPolicy ?? {})
+  };
   config.Heading ??= '';
   config.PlayButtonText ??= '';
   config.SecondaryButtonText ??= '';

@@ -38,6 +38,8 @@ export interface FeaturedPluginConfig {
   GlobalFilters: FeaturedFilterRule[];
   ManualLists: FeaturedManualList[];
   UserProfiles: FeaturedUserProfile[];
+  PersonalizationDefaults: FeaturedPersonalizationDefaults;
+  PersonalizationPolicy: FeaturedPersonalizationPolicy;
   RepeatCooldownDays: number;
   RandomMediaCount: number;
   EnableInfiniteLoading: boolean;
@@ -107,6 +109,25 @@ export interface FeaturedUserProfile {
   PreferredGenreBoost: number;
   InProgressSeriesBoost: number;
   PreferredGenres: string[];
+}
+
+export interface FeaturedPersonalizationDefaults {
+  UnplayedBoost: number;
+  FavouriteBoost: number;
+  PreferredGenreBoost: number;
+  InProgressSeriesBoost: number;
+  PreferredGenres: string[];
+}
+
+export interface FeaturedPersonalizationPolicy {
+  Enabled: boolean;
+  AllowSourceSelection: boolean;
+  AllowSourceWeights: boolean;
+  AllowPreferredGenres: boolean;
+  AllowUnplayedBoost: boolean;
+  AllowFavouriteBoost: boolean;
+  AllowInProgressSeriesBoost: boolean;
+  AllowRepeatCooldown: boolean;
 }
 
 export interface RuntimeConfig extends FeaturedDisplaySettings {
