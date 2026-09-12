@@ -341,7 +341,7 @@ public sealed class FeaturedController : ControllerBase
                 ["jellyfinVersion"] = typeof(ILibraryManager).Assembly.GetName().Version?.ToString() ?? "unknown",
                 ["pluginVersion"] = Plugin.Instance?.Version.ToString() ?? "unknown",
                 ["currentUser"] = activeUser.Username,
-                ["sources"] = _config.SourceRules.Where(rule => rule.Enabled).Select(rule => rule.Type).ToArray(),
+                ["sources"] = personalization.SourceRules.Where(rule => rule.Enabled).Select(rule => rule.Type).ToArray(),
                 ["matchingItems"] = selection.RuleStats.Sum(stat => stat.AfterFilters),
                 ["eligibleItems"] = selection.RuleStats.Sum(stat => stat.Eligible),
                 ["heroItemsReturned"] = selection.Items.Count,

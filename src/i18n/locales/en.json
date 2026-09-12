@@ -342,5 +342,6 @@
   "preferences.inProgress": "Prefer in-progress series",
   "preferences.cooldown": "Repeat cooldown (days)",
   "preferences.reset": "Reset to server defaults",
-  "preferences.save": "Save preferences"
+  "preferences.save": "Save preferences",
+  "preferences.saveFailed": "Could not save: {error}"
 }

@@ -106,17 +106,30 @@ export async function openPreferencesDialog(): Promise<void> {
 
     const actions = document.createElement('div');
     actions.className = 'ec-preferences-actions';
-    actions.innerHTML = `<button type="button" class="ec-preferences-reset">${t('preferences.reset')}</button><button type="submit" class="ec-preferences-save">${t('preferences.save')}</button>`;
+    actions.innerHTML = `<span class="ec-preferences-status" aria-live="polite"></span><button type="button" class="ec-preferences-reset">${t('preferences.reset')}</button><button type="submit" class="ec-preferences-save">${t('preferences.save')}</button>`;
     dialog.appendChild(actions);
     backdrop.replaceChildren(dialog);
     const close = (): void => backdrop.remove();
     dialog.querySelector('.ec-preferences-close')?.addEventListener('click', close);
     backdrop.addEventListener('click', (event) => { if (event.target === backdrop) close(); });
     dialog.addEventListener('keydown', (event) => { if (event.key === 'Escape') close(); });
+    const status = dialog.querySelector<HTMLElement>('.ec-preferences-status')!;
+    const setBusy = (busy: boolean): void => {
+      dialog.querySelectorAll<HTMLButtonElement>('button').forEach((button) => { button.disabled = busy; });
+    };
+    const showSaveError = (error: unknown): void => {
+      status.textContent = t('preferences.saveFailed', { error: error instanceof Error ? error.message : String(error) });
+    };
     dialog.querySelector('.ec-preferences-reset')?.addEventListener('click', async () => {
-      await requestJson('featured/preferences', { method: 'PUT', body: { reset: true } });
-      close();
-      window.setTimeout(() => window.JellyfinFeatured?.refresh(), 0);
+      setBusy(true);
+      try {
+        await requestJson('featured/preferences', { method: 'PUT', body: { reset: true } });
+        close();
+        window.setTimeout(() => window.JellyfinFeatured?.refresh(), 0);
+      } catch (error) {
+        showSaveError(error);
+        setBusy(false);
+      }
     });
     dialog.addEventListener('submit', async (event) => {
       event.preventDefault();
@@ -147,9 +160,15 @@ export async function openPreferencesDialog(): Promise<void> {
         const value = Number(field.querySelector<HTMLInputElement>('input')!.value);
         if (value !== current.defaults[key]) preferences[key] = value;
       });
-      await requestJson('featured/preferences', { method: 'PUT', body: { preferences } });
-      close();
-      window.setTimeout(() => window.JellyfinFeatured?.refresh(), 0);
+      setBusy(true);
+      try {
+        await requestJson('featured/preferences', { method: 'PUT', body: { preferences } });
+        close();
+        window.setTimeout(() => window.JellyfinFeatured?.refresh(), 0);
+      } catch (error) {
+        showSaveError(error);
+        setBusy(false);
+      }
     });
     dialog.querySelector<HTMLInputElement>('input, button')?.focus();
   } catch (error) {

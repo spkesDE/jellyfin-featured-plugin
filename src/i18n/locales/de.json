@@ -342,5 +342,6 @@
   "preferences.inProgress": "Angefangene Serien bevorzugen",
   "preferences.cooldown": "Wiederholungssperre (Tage)",
   "preferences.reset": "Auf Server-Defaults zurücksetzen",
-  "preferences.save": "Einstellungen speichern"
+  "preferences.save": "Einstellungen speichern",
+  "preferences.saveFailed": "Speichern fehlgeschlagen: {error}"
 }

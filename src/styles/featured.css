@@ -57,6 +57,7 @@
 .ec-preference-boosts { display: grid; gap: .7rem 1rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .ec-preference-boosts legend { grid-column: 1 / -1; }
 .ec-preferences-actions { display: flex; gap: .75rem; justify-content: flex-end; margin-top: 1.2rem; }
+.ec-preferences-status { align-self: center; color: #ffb4ab; flex: 1; }
 .ec-preferences-actions button { border: 0; border-radius: .3rem; cursor: pointer; font: inherit; font-weight: 700; padding: .7rem 1rem; }
 .ec-preferences-save { background: #00a4dc; color: #fff; }
 
