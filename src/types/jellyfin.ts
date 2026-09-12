@@ -1,5 +1,5 @@
 export interface JellyfinAjaxRequest {
-  type: 'GET' | 'POST';
+  type: 'GET' | 'POST' | 'PUT';
   url: string;
   dataType?: 'json';
   contentType?: 'application/json';
@@ -41,7 +41,7 @@ export interface JellyfinApiClient {
   getCurrentUserId?: () => string | null | undefined;
   getUrl?: (path: string, query?: Record<string, string | number | boolean | null | undefined>) => string | null;
   ajax?: (request: JellyfinAjaxRequest) => Promise<unknown> | unknown;
-  fetch?: (request: { url: string; type: 'GET' | 'POST' }) => Promise<Response>;
+  fetch?: (request: { url: string; type: 'GET' | 'POST' | 'PUT' }) => Promise<Response>;
   getPluginConfiguration?: (pluginId: string) => Promise<unknown>;
   updatePluginConfiguration?: (pluginId: string, config: unknown) => Promise<unknown>;
   getUsers?: () => Promise<JellyfinUser[]>;

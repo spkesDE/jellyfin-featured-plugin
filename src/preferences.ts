@@ -1,0 +1,151 @@
+import { requestJson } from './core/apiClient';
+import { t, type TranslationKey } from './i18n';
+import type {
+  FeaturedPreferenceOptions,
+  FeaturedPreferencesResponse,
+  FeaturedUserPreferences
+} from './types/featured';
+
+const sourceKeys: Record<string, TranslationKey> = {
+  LIBRARIES: 'source.type.libraries', COLLECTIONS: 'source.type.collections', FAVOURITES: 'source.type.favourites',
+  TAGS: 'source.type.tags', PLAYLISTS: 'source.type.playlists', RECENTLY_ADDED: 'source.type.recently_added',
+  LATEST_RELEASES: 'source.type.latest_releases', RANDOM: 'source.type.random', UNPLAYED: 'source.type.unplayed',
+  MANUAL_LISTS: 'source.type.manual_lists'
+};
+
+function checkbox(label: string, checked: boolean, disabled: boolean): HTMLLabelElement {
+  const wrapper = document.createElement('label');
+  wrapper.className = 'ec-preference-check';
+  const input = document.createElement('input');
+  input.type = 'checkbox';
+  input.checked = checked;
+  input.disabled = disabled;
+  wrapper.append(input, document.createTextNode(label));
+  return wrapper;
+}
+
+function numberField(label: string, value: number, max: number): HTMLLabelElement {
+  const wrapper = document.createElement('label');
+  wrapper.className = 'ec-preference-number';
+  const text = document.createElement('span');
+  text.textContent = label;
+  const input = document.createElement('input');
+  input.type = 'number';
+  input.min = '0';
+  input.max = String(max);
+  input.step = '1';
+  input.value = String(value);
+  wrapper.append(text, input);
+  return wrapper;
+}
+
+export async function openPreferencesDialog(): Promise<void> {
+  if (document.querySelector('.ec-preferences-backdrop')) return;
+  const backdrop = document.createElement('div');
+  backdrop.className = 'ec-preferences-backdrop';
+  backdrop.innerHTML = `<div class="ec-preferences-loading" role="status">${t('preferences.loading')}</div>`;
+  document.body.appendChild(backdrop);
+
+  try {
+    const [current, options] = await Promise.all([
+      requestJson<FeaturedPreferencesResponse>('featured/preferences'),
+      requestJson<FeaturedPreferenceOptions>('featured/preferences/options')
+    ]);
+    if (!options.policy.enabled) throw new Error(t('preferences.disabled'));
+    const effective = current.effective;
+    const dialog = document.createElement('form');
+    dialog.className = 'ec-preferences-dialog';
+    dialog.setAttribute('role', 'dialog');
+    dialog.setAttribute('aria-modal', 'true');
+    dialog.setAttribute('aria-labelledby', 'ec-preferences-title');
+    dialog.innerHTML = `<header><h2 id="ec-preferences-title">${t('preferences.title')}</h2><button type="button" class="ec-preferences-close" aria-label="${t('preferences.close')}">×</button></header><p>${t('preferences.help')}</p>`;
+
+    const sources = document.createElement('fieldset');
+    sources.innerHTML = `<legend>${t('preferences.sources')}</legend>`;
+    for (const source of options.sources) {
+      const row = document.createElement('div');
+      row.className = 'ec-preference-source';
+      const enabled = checkbox(t(sourceKeys[source.type] ?? 'source.type.random'), effective.sourceEnabled[source.id] ?? source.enabled, !options.policy.allowSourceSelection);
+      enabled.dataset.sourceId = source.id;
+      const weight = numberField(t('preferences.weight'), effective.sourceWeights[source.id] ?? source.weight, 100);
+      weight.dataset.sourceId = source.id;
+      weight.querySelector('input')!.disabled = !options.policy.allowSourceWeights;
+      row.append(enabled, weight);
+      sources.appendChild(row);
+    }
+    dialog.appendChild(sources);
+
+    if (options.policy.allowPreferredGenres && options.genres.length) {
+      const genres = document.createElement('fieldset');
+      genres.className = 'ec-preference-genres';
+      genres.innerHTML = `<legend>${t('preferences.genres')}</legend>`;
+      for (const genre of options.genres) {
+        const field = checkbox(genre, effective.preferredGenres.includes(genre), false);
+        field.dataset.genre = genre;
+        genres.appendChild(field);
+      }
+      dialog.appendChild(genres);
+    }
+
+    const boosts = document.createElement('fieldset');
+    boosts.className = 'ec-preference-boosts';
+    boosts.innerHTML = `<legend>${t('preferences.content')}</legend>`;
+    const boostFields: Array<[keyof FeaturedUserPreferences, string, number, boolean]> = [
+      ['unplayedBoost', t('preferences.unplayed'), effective.unplayedBoost, options.policy.allowUnplayedBoost],
+      ['favouriteBoost', t('preferences.favourites'), effective.favouriteBoost, options.policy.allowFavouriteBoost],
+      ['inProgressSeriesBoost', t('preferences.inProgress'), effective.inProgressSeriesBoost, options.policy.allowInProgressSeriesBoost],
+      ['repeatCooldownDays', t('preferences.cooldown'), effective.repeatCooldownDays, options.policy.allowRepeatCooldown]
+    ];
+    for (const [key, label, value, allowed] of boostFields) {
+      if (!allowed) continue;
+      const field = numberField(label, value, key === 'repeatCooldownDays' ? 3650 : 100);
+      field.dataset.preferenceKey = key;
+      boosts.appendChild(field);
+    }
+    if (boosts.children.length > 1) dialog.appendChild(boosts);
+
+    const actions = document.createElement('div');
+    actions.className = 'ec-preferences-actions';
+    actions.innerHTML = `<button type="button" class="ec-preferences-reset">${t('preferences.reset')}</button><button type="submit" class="ec-preferences-save">${t('preferences.save')}</button>`;
+    dialog.appendChild(actions);
+    backdrop.replaceChildren(dialog);
+    const close = (): void => backdrop.remove();
+    dialog.querySelector('.ec-preferences-close')?.addEventListener('click', close);
+    backdrop.addEventListener('click', (event) => { if (event.target === backdrop) close(); });
+    dialog.addEventListener('keydown', (event) => { if (event.key === 'Escape') close(); });
+    dialog.querySelector('.ec-preferences-reset')?.addEventListener('click', async () => {
+      await requestJson('featured/preferences', { method: 'PUT', body: { reset: true } });
+      close();
+      window.setTimeout(() => window.JellyfinFeatured?.refresh(), 0);
+    });
+    dialog.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const preferences: FeaturedUserPreferences = {
+        sourceEnabled: {}, sourceWeights: {}, preferredGenres: null,
+        unplayedBoost: null, favouriteBoost: null, inProgressSeriesBoost: null, repeatCooldownDays: null
+      };
+      dialog.querySelectorAll<HTMLElement>('[data-source-id]').forEach((field) => {
+        const id = field.dataset.sourceId!;
+        const input = field.querySelector<HTMLInputElement>('input')!;
+        if (input.type === 'checkbox') preferences.sourceEnabled[id] = input.checked;
+        else preferences.sourceWeights[id] = Number(input.value);
+      });
+      if (options.policy.allowPreferredGenres) {
+        preferences.preferredGenres = Array.from(dialog.querySelectorAll<HTMLElement>('[data-genre]'))
+          .filter((field) => field.querySelector<HTMLInputElement>('input')?.checked)
+          .map((field) => field.dataset.genre!);
+      }
+      dialog.querySelectorAll<HTMLElement>('[data-preference-key]').forEach((field) => {
+        const key = field.dataset.preferenceKey as 'unplayedBoost' | 'favouriteBoost' | 'inProgressSeriesBoost' | 'repeatCooldownDays';
+        preferences[key] = Number(field.querySelector<HTMLInputElement>('input')!.value);
+      });
+      await requestJson('featured/preferences', { method: 'PUT', body: { preferences } });
+      close();
+      window.setTimeout(() => window.JellyfinFeatured?.refresh(), 0);
+    });
+    dialog.querySelector<HTMLInputElement>('input, button')?.focus();
+  } catch (error) {
+    backdrop.innerHTML = `<div class="ec-preferences-loading" role="alert">${error instanceof Error ? error.message : String(error)}</div>`;
+    window.setTimeout(() => backdrop.remove(), 3500);
+  }
+}

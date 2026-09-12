@@ -4,6 +4,7 @@ import { CONSOLE_PREFIX, PLUGIN_VERSION } from '../constants';
 import { createSlide, loadSlideArtwork } from './render';
 import { trailerUrl } from './trailer';
 import { applyHeroLayoutVariables } from './layout';
+import { openPreferencesDialog } from '../preferences';
 
 export type FeaturedItemLoader = (excludedItemIds: readonly string[]) => Promise<FeaturedResponse>;
 export type FeaturedItemDisplayReporter = (itemId: string) => Promise<unknown>;
@@ -50,6 +51,17 @@ export class FeaturedCarousel {
     applyHeroLayoutVariables(this.root, response);
     this.root.setAttribute('aria-roledescription', 'carousel');
     this.root.setAttribute('aria-label', response.heading || t('carousel.label'));
+
+    if (response.personalizationEnabled) {
+      const personalize = document.createElement('button');
+      personalize.type = 'button';
+      personalize.className = 'ec-personalize emby-scrollbuttons-button paper-icon-button-light';
+      personalize.title = t('preferences.open');
+      personalize.setAttribute('aria-label', t('preferences.open'));
+      personalize.innerHTML = '<span class="material-icons" aria-hidden="true">settings</span>';
+      personalize.addEventListener('click', () => void openPreferencesDialog());
+      this.root.appendChild(personalize);
+    }
 
     if (response.heading && !response.useHeroLayout) {
       const heading = document.createElement('h2');

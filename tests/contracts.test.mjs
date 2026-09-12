@@ -57,7 +57,27 @@ test('item and runtime contracts retain their established names and interval uni
   assert.match(dtos, /JsonPropertyName\("official_rating"\)/);
   assert.match(dtos, /JsonPropertyName\("critic_rating"\)/);
   assert.match(dtos, /JsonPropertyName\("community_rating"\)/);
-  assert.match(controller, /new FeaturedItemsResponseDto\(_config, items, InfiniteBatchSize, requestedCount\),\s*RuntimeConfigJsonOptions/);
+  assert.match(controller, /new FeaturedItemsResponseDto\(_config, items, InfiniteBatchSize, requestedCount, personalization\),\s*RuntimeConfigJsonOptions/);
+});
+
+test('personalization is authenticated, policy-bound, and user scoped', async () => {
+  const [controller, service, store, response, frontend] = await Promise.all([
+    read('Jellyfin.Plugin.Featured/Api/FeaturedController.cs'),
+    read('Jellyfin.Plugin.Featured/Api/FeaturedPersonalizationService.cs'),
+    read('Jellyfin.Plugin.Featured/Api/FeaturedPreferenceStore.cs'),
+    read('Jellyfin.Plugin.Featured/Api/FeaturedResponseDtos.cs'),
+    read('src/preferences.ts')
+  ]);
+  assert.match(controller, /\[HttpGet\("preferences"\)\][\s\S]*?\[Authorize\]/);
+  assert.match(controller, /\[HttpPut\("preferences"\)\][\s\S]*?\[Authorize\]/);
+  assert.match(controller, /\[HttpGet\("preferences\/options"\)\][\s\S]*?\[Authorize\]/);
+  assert.match(controller, /GetVisibleGenres\(activeUser\)/);
+  assert.match(service, /policy\.AllowSourceSelection[\s\S]*?sourceIds\.Contains/);
+  assert.match(service, /policy\.AllowPreferredGenres[\s\S]*?allowedGenres\.Contains/);
+  assert.match(store, /userId\.ToString\("N"\)/);
+  assert.match(response, /public bool PersonalizationEnabled \{ get; \}/);
+  assert.match(frontend, /body: \{ reset: true \}/);
+  assert.match(frontend, /body: \{ preferences \}/);
 });
 
 test('all details interactions use the shared navigation helper', async () => {

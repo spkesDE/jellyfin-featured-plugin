@@ -326,5 +326,21 @@
   "carousel.startAutoplay": "Automatische Wiedergabe starten",
   "carousel.critics": "{score} % Kritiker",
   "carousel.play": "Abspielen",
-  "carousel.moreInfo": "Weitere Infos"
+  "carousel.moreInfo": "Weitere Infos",
+  "preferences.open": "Featured personalisieren",
+  "preferences.title": "Featured personalisieren",
+  "preferences.help": "Lege fest, was in deinem Featured-Karussell erscheint. Änderungen gelten nur für dein Benutzerkonto.",
+  "preferences.loading": "Personalisierung wird geladen …",
+  "preferences.disabled": "Die Personalisierung wurde vom Serveradministrator deaktiviert.",
+  "preferences.close": "Personalisierung schließen",
+  "preferences.sources": "Quellen",
+  "preferences.weight": "Gewichtung",
+  "preferences.genres": "Bevorzugte Genres",
+  "preferences.content": "Inhaltspräferenzen",
+  "preferences.unplayed": "Ungesehene Inhalte bevorzugen",
+  "preferences.favourites": "Favoriten bevorzugen",
+  "preferences.inProgress": "Angefangene Serien bevorzugen",
+  "preferences.cooldown": "Wiederholungssperre (Tage)",
+  "preferences.reset": "Auf Server-Defaults zurücksetzen",
+  "preferences.save": "Einstellungen speichern"
 }

@@ -326,5 +326,21 @@
   "carousel.startAutoplay": "Start autoplay",
   "carousel.critics": "{score}% critics",
   "carousel.play": "Play",
-  "carousel.moreInfo": "More info"
+  "carousel.moreInfo": "More info",
+  "preferences.open": "Personalize Featured",
+  "preferences.title": "Personalize Featured",
+  "preferences.help": "Choose what appears in your Featured carousel. Changes apply only to your user account.",
+  "preferences.loading": "Loading personalization …",
+  "preferences.disabled": "Personalization is disabled by the server administrator.",
+  "preferences.close": "Close personalization",
+  "preferences.sources": "Sources",
+  "preferences.weight": "Weight",
+  "preferences.genres": "Preferred genres",
+  "preferences.content": "Content preferences",
+  "preferences.unplayed": "Prefer unplayed",
+  "preferences.favourites": "Prefer favourites",
+  "preferences.inProgress": "Prefer in-progress series",
+  "preferences.cooldown": "Repeat cooldown (days)",
+  "preferences.reset": "Reset to server defaults",
+  "preferences.save": "Save preferences"
 }

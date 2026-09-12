@@ -148,7 +148,8 @@ export function createFeaturedResponseDefaults(): Omit<FeaturedResponse, 'items'
     autoplay: config.EnableAutoplay,
     autoplayInterval: config.AutoplayInterval * 1000,
     reduceImageSizes: config.ReduceImageSize,
-    trackDisplayedItems: config.RepeatCooldownDays > 0
+    trackDisplayedItems: config.RepeatCooldownDays > 0,
+    personalizationEnabled: config.PersonalizationPolicy.Enabled
   };
 }
 

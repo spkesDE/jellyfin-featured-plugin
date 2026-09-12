@@ -25,6 +25,50 @@ export interface FeaturedResponse extends FeaturedDisplaySettings {
   autoplayInterval: number;
   reduceImageSizes: boolean;
   trackDisplayedItems: boolean;
+  personalizationEnabled: boolean;
+}
+
+export interface FeaturedUserPreferences {
+  sourceEnabled: Record<string, boolean>;
+  sourceWeights: Record<string, number>;
+  preferredGenres: string[] | null;
+  unplayedBoost: number | null;
+  favouriteBoost: number | null;
+  inProgressSeriesBoost: number | null;
+  repeatCooldownDays: number | null;
+}
+
+export interface FeaturedEffectivePreferences {
+  sourceEnabled: Record<string, boolean>;
+  sourceWeights: Record<string, number>;
+  preferredGenres: string[];
+  unplayedBoost: number;
+  favouriteBoost: number;
+  inProgressSeriesBoost: number;
+  repeatCooldownDays: number;
+}
+
+export interface FeaturedPreferencesResponse {
+  hasOverrides: boolean;
+  preferences: FeaturedUserPreferences;
+  effective: FeaturedEffectivePreferences;
+}
+
+export interface FeaturedPreferencePolicy {
+  enabled: boolean;
+  allowSourceSelection: boolean;
+  allowSourceWeights: boolean;
+  allowPreferredGenres: boolean;
+  allowUnplayedBoost: boolean;
+  allowFavouriteBoost: boolean;
+  allowInProgressSeriesBoost: boolean;
+  allowRepeatCooldown: boolean;
+}
+
+export interface FeaturedPreferenceOptions {
+  policy: FeaturedPreferencePolicy;
+  sources: Array<{ id: string; type: string; enabled: boolean; weight: number }>;
+  genres: string[];
 }
 
 export interface FeaturedDiagnostics {
