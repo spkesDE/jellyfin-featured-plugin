@@ -2,59 +2,40 @@
 
 ![Jellyfin Featured banner](./banner.png)
 
-`Jellyfin Featured` adds a configurable featured-content carousel to the Jellyfin Web home page.
+Jellyfin Featured adds a large, rotating banner to your Jellyfin home page. Use it to highlight favourites, new additions, collections, playlists, or anything else you want people on your server to discover.
 
-Build a Netflix-style hero from your Jellyfin libraries, collections, playlists, favourites, tags, recent additions, latest releases, manual lists, random picks, or unplayed media — with per-source weighting, filters, autoplay, layouts, and optional background trailers.
+## What you can do
 
-## Credits
+- Fill the banner from libraries, collections, playlists, favourites, tags, recent additions, new releases, unplayed titles or your own hand-picked list.
+- Mix several sources and decide how often each one should appear.
+- Narrow the selection by genre, year, age rating, play status, runtime and more.
+- Give each Jellyfin user more of what they like, including favourites, unwatched titles, preferred genres and series they have already started.
+- Choose between a classic banner and a larger hero layout, then adjust the height, artwork, text, buttons and transitions.
+- Rotate titles automatically, load more while browsing, or play muted local trailers in the background.
 
-Jellyfin Featured is a remake of the original [Jellyfin Editor's Choice plugin](https://github.com/lachlandcp/jellyfin-editors-choice-plugin) by [lachlandcp](https://github.com/lachlandcp). Credit and thanks go to the original project for the idea and foundation.
-
-## Features
-
-- Full-width featured carousel for Jellyfin Web
-- Multiple content sources with independent enable/disable state and weighting
-- Libraries, collections, favourites, tags, playlists, recently added, latest releases, random, unplayed, and manual lists
-- Movies, series, music albums, music videos, videos, audiobooks, books, photos, and photo albums
-- Global and source-specific filters for library, genre, tag, media type, played state, ratings, year, runtime, and parental rating
-- Optional user profiles with boosts for unplayed items, favourites, preferred genres, and in-progress series
-- Standard and hero layouts
-- Slide and fade transitions
-- Configurable banner height, spacing, title/logo display, ratings, descriptions, navigation, and autoplay controls
-- Optional muted local background trailers
-- Optional continuous loading of additional featured items
-- Keyboard, touch, and navigation controls
-- English and German frontend localization with automatic language detection and English fallback
-- No runtime CDN dependency
-
-The frontend affects Jellyfin Web clients only. Native TV clients that do not render Jellyfin Web cannot display the carousel.
+Jellyfin Featured works in Jellyfin Web and clients that display the Jellyfin Web interface. Some native TV apps use their own home screen and cannot show the banner.
 
 ## Requirements
 
-- Jellyfin Server 12 / .NET 10
-- One frontend injection plugin:
+- Jellyfin Server 12
+- One of these companion plugins:
   - [File Transformation](https://github.com/IAmParadox27/jellyfin-plugin-file-transformation), or
   - [JavaScript Injector](https://github.com/n00bcodr/Jellyfin-JavaScript-Injector)
 
-Node.js and npm are only required when building the plugin from source.
-
 ## Installation
 
-Install Jellyfin Featured and one frontend injection plugin:
-
-1. `Jellyfin Featured`
-2. `File Transformation` or `JavaScript Injector`
+You need Jellyfin Featured and one companion plugin. File Transformation is recommended, but JavaScript Injector works as well.
 
 ### Jellyfin Featured
 
-1. Open `Dashboard -> Catalog -> Settings` in Jellyfin.
-2. Add this plugin repository:
+1. In Jellyfin, open `Dashboard -> Catalog -> Settings`.
+2. Add the following plugin repository:
 
    ```text
    https://raw.githubusercontent.com/spkesDE/jellyfin-featured-plugin/main/manifest.json
    ```
 
-3. Save, open the plugin catalog, and install `Jellyfin Featured`.
+3. Save the repository, return to the plugin catalog, and install `Jellyfin Featured`.
 4. Restart Jellyfin.
 
 ### File Transformation
@@ -79,9 +60,9 @@ Install Jellyfin Featured and one frontend injection plugin:
 2. Install `JavaScript Injector`.
 3. Restart Jellyfin.
 
-Jellyfin Featured registers its frontend loader automatically. You do not need to paste a script into JavaScript Injector.
+That is all the setup JavaScript Injector needs. You do not have to copy or paste any scripts.
 
-You only need one of the two injection plugins. If both are installed, `Automatic` prefers File Transformation and prevents duplicate frontend initialization. You can also explicitly select File Transformation or JavaScript Injector in the plugin settings.
+Only one companion plugin is required. If both are installed, leave the injection method set to `Automatic`; Jellyfin Featured will use File Transformation. You can also choose either plugin yourself in the settings.
 
 Restart Jellyfin after changing the frontend injection method.
 
@@ -89,47 +70,36 @@ Restart Jellyfin after changing the frontend injection method.
 
 1. Open the Jellyfin admin dashboard.
 2. Open the `Jellyfin Featured` plugin settings.
-3. Configure one or more featured content sources.
-4. Adjust source weights and optional filters.
-5. Choose the layout, transition, autoplay, and display options you want.
+3. Choose where the featured titles should come from.
+4. Add any filters you want and adjust how often each source should appear.
+5. Choose a layout and customise the banner to your taste.
 6. Save the configuration.
 7. Refresh Jellyfin Web.
 
-A random source is enabled by default, so the carousel can work without building a complex rule set first.
+A random selection is enabled by default, so you should see the banner without having to create any rules first.
 
 ## Content Sources
 
 | Source | Best for |
 |---|---|
-| Libraries | Featuring content from selected Jellyfin libraries |
+| Libraries | Titles from selected Jellyfin libraries |
 | Collections | Curated groups and franchises |
 | Favourites | Items marked as favourites |
-| Tags | Editorial or metadata-driven selections |
+| Tags | Anything grouped with a Jellyfin tag |
 | Playlists | Existing Jellyfin playlists |
 | Recently Added | Newly added library content |
 | Latest Releases | Recently released media |
-| Random | Rotating discovery from eligible items |
+| Random | A changing mix of eligible titles |
 | Unplayed | Content the user has not watched or played |
-| Manual Lists | Fully curated and ordered featured selections |
+| Manual Lists | Your own hand-picked and ordered selection |
 
-Each source can be enabled independently and assigned a relative weight. Global filters apply across the carousel, while source-specific filters let individual sources use different rules.
+You can combine as many sources as you like. Give a source more weight if you want its titles to appear more often. Filters can apply to the whole banner or only to one source.
 
 ## Display Options
 
-Jellyfin Featured can be tuned from a simple rotating banner to a more prominent hero layout. Available options include:
+The default hero layout is designed to work without much tweaking. If you want a different look, you can change the banner height, artwork position, text alignment, gradients, corners, spacing, and transition style. Separate height settings are available for desktop, tablet, and mobile screens.
 
-- Standard or hero layout, with hero enabled by default
-- Auto, compact, standard, cinematic, or custom desktop height plus dedicated tablet and mobile heights
-- Configurable border radius, gradient strength, backdrop position, and left/center/right content alignment
-- Slide or fade transitions
-- Automatic rotation interval
-- Primary/secondary buttons, navigation arrows, slide position, pagination dots, and maximum slide count
-- Independent rating, description, release-year, and runtime visibility
-- Logo or text title display
-- Banner height and spacing
-- Backdrop positioning and optional reduced image size
-- Optional local background trailers
-- Optional hiding on TV-style layouts
+You can also choose which details and controls are shown, including the title or logo, description, rating, year, runtime, buttons, arrows, and page dots. Autoplay, background trailers, and the number of featured titles are optional.
 
 ## Troubleshooting
 
@@ -138,29 +108,26 @@ If the featured carousel does not appear:
 1. Make sure `Jellyfin Featured` and either `File Transformation` or `JavaScript Injector` are installed and enabled.
 2. Restart Jellyfin after installing or updating plugins.
 3. Hard-refresh Jellyfin Web in your browser.
-4. Make sure at least one featured source is enabled and can return eligible media.
-5. Check that global or source-specific filters are not excluding every item.
+4. Make sure at least one content source is enabled and contains something the banner can show.
+5. Temporarily remove your filters to check whether they are hiding every title.
 6. If both injection plugins are installed, leave the injection method on `Automatic` or select one explicitly.
-7. Enable debug logging in the plugin settings if you need additional diagnostics.
+7. If the problem remains, enable debug logging in the plugin settings and check the Jellyfin log.
 
-If the carousel appears in a browser but not in a native TV app, the client may not render Jellyfin Web and therefore cannot load the frontend plugin.
+If the banner appears in a browser but not in a TV app, that app probably uses its own home screen and cannot display Jellyfin Featured.
 
-## Localization
-
-Jellyfin Featured automatically follows the Jellyfin Web language when a matching translation is available. Unsupported languages fall back to English.
-
-[![Translation status](./docs/i18n-status.svg)](./src/i18n/locales)
-
-## Documentation
-
-- [Build guide](./BUILD.md)
-- [Contributing](./CONTRIBUTING.md)
-- [AI assistance disclosure](./AI_USAGE.md)
-- [Changelog](./CHANGELOG.md)
+For details about recent releases, see the [changelog](./CHANGELOG.md).
 
 ## License
 
 This project is licensed under the [MIT License](./LICENSE).
+
+## Credits
+
+Jellyfin Featured is a remake of the original [Jellyfin Editor's Choice plugin](https://github.com/lachlandcp/jellyfin-editors-choice-plugin) by [lachlandcp](https://github.com/lachlandcp). Thanks to the original project for the idea and foundation.
+
+## Contributing
+
+Want to help improve Jellyfin Featured? See the [contributing guide](./CONTRIBUTING.md). If you want to build the plugin yourself, follow the [build guide](./BUILD.md).
 
 ## Star History
 
