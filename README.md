@@ -129,6 +129,10 @@ Jellyfin Featured is a remake of the original [Jellyfin Editor's Choice plugin](
 
 Want to help improve Jellyfin Featured? See the [contributing guide](./CONTRIBUTING.md). If you want to build the plugin yourself, follow the [build guide](./BUILD.md).
 
+## More Jellyfin plugins
+
+Check out my other plugin: [Jellyfin Media Preview](https://github.com/spkesDE/jellyfin-media-preview-plugin).
+
 ## Star History
 
 <a href="https://www.star-history.com/?repos=spkesde%2Fjellyfin-featured-plugin&type=date&legend=top-left">
