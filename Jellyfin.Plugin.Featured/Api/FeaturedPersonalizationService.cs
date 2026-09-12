@@ -21,9 +21,17 @@ public sealed class FeaturedPersonalizationService
     }
 
     internal FeaturedPersonalizationContext Resolve(PluginConfiguration config, Guid userId)
+        => Resolve(config, userId, config.PersonalizationPolicy.Enabled ? _store.Get(userId) : null);
+
+    internal FeaturedPersonalizationContext ResolveDefaults(PluginConfiguration config, Guid userId)
+        => Resolve(config, userId, null);
+
+    private static FeaturedPersonalizationContext Resolve(
+        PluginConfiguration config,
+        Guid userId,
+        FeaturedUserPreferences? saved)
     {
         FeaturedPersonalizationPolicy policy = config.PersonalizationPolicy;
-        FeaturedUserPreferences? saved = policy.Enabled ? _store.Get(userId) : null;
         FeaturedUserProfile? adminProfile = config.UserProfiles.FirstOrDefault(candidate =>
             candidate.Enabled && Guid.TryParse(candidate.UserId, out Guid id) && id == userId);
         FeaturedPersonalizationDefaults defaults = config.PersonalizationDefaults;
@@ -100,7 +108,17 @@ public sealed class FeaturedPersonalizationService
         if (policy.AllowFavouriteBoost && submitted.FavouriteBoost.HasValue) normalized.FavouriteBoost = Math.Clamp(submitted.FavouriteBoost.Value, 0, 100);
         if (policy.AllowInProgressSeriesBoost && submitted.InProgressSeriesBoost.HasValue) normalized.InProgressSeriesBoost = Math.Clamp(submitted.InProgressSeriesBoost.Value, 0, 100);
         if (policy.AllowRepeatCooldown && submitted.RepeatCooldownDays.HasValue) normalized.RepeatCooldownDays = Math.Clamp(submitted.RepeatCooldownDays.Value, 0, 3650);
-        _store.Set(userId, normalized);
+        if (IsEmpty(normalized)) _store.Remove(userId);
+        else _store.Set(userId, normalized);
         return normalized;
     }
+
+    private static bool IsEmpty(FeaturedUserPreferences preferences)
+        => preferences.SourceEnabled.Count == 0
+            && preferences.SourceWeights.Count == 0
+            && preferences.PreferredGenres is null
+            && !preferences.UnplayedBoost.HasValue
+            && !preferences.FavouriteBoost.HasValue
+            && !preferences.InProgressSeriesBoost.HasValue
+            && !preferences.RepeatCooldownDays.HasValue;
 }

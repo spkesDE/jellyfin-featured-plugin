@@ -415,7 +415,8 @@ public sealed class FeaturedController : ControllerBase
     private FeaturedPreferencesResponse CreatePreferencesResponse(Jellyfin.Database.Implementations.Entities.User user)
     {
         FeaturedPersonalizationContext effective = _personalization.Resolve(_config, user.Id);
-        return new FeaturedPreferencesResponse(_personalization.Get(user.Id), effective);
+        FeaturedPersonalizationContext defaults = _personalization.ResolveDefaults(_config, user.Id);
+        return new FeaturedPreferencesResponse(_personalization.Get(user.Id), effective, defaults);
     }
 
     private string[] GetVisibleGenres(Jellyfin.Database.Implementations.Entities.User user)

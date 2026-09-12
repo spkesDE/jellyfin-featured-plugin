@@ -127,17 +127,25 @@ export async function openPreferencesDialog(): Promise<void> {
       dialog.querySelectorAll<HTMLElement>('[data-source-id]').forEach((field) => {
         const id = field.dataset.sourceId!;
         const input = field.querySelector<HTMLInputElement>('input')!;
-        if (input.type === 'checkbox') preferences.sourceEnabled[id] = input.checked;
-        else preferences.sourceWeights[id] = Number(input.value);
+        if (input.type === 'checkbox') {
+          if (input.checked !== current.defaults.sourceEnabled[id]) preferences.sourceEnabled[id] = input.checked;
+        } else {
+          const value = Number(input.value);
+          if (value !== current.defaults.sourceWeights[id]) preferences.sourceWeights[id] = value;
+        }
       });
       if (options.policy.allowPreferredGenres) {
-        preferences.preferredGenres = Array.from(dialog.querySelectorAll<HTMLElement>('[data-genre]'))
+        const selectedGenres = Array.from(dialog.querySelectorAll<HTMLElement>('[data-genre]'))
           .filter((field) => field.querySelector<HTMLInputElement>('input')?.checked)
           .map((field) => field.dataset.genre!);
+        const normalized = (values: string[]): string => [...values].sort((a, b) => a.localeCompare(b)).join('\n');
+        preferences.preferredGenres = normalized(selectedGenres) === normalized(current.defaults.preferredGenres)
+          ? null : selectedGenres;
       }
       dialog.querySelectorAll<HTMLElement>('[data-preference-key]').forEach((field) => {
         const key = field.dataset.preferenceKey as 'unplayedBoost' | 'favouriteBoost' | 'inProgressSeriesBoost' | 'repeatCooldownDays';
-        preferences[key] = Number(field.querySelector<HTMLInputElement>('input')!.value);
+        const value = Number(field.querySelector<HTMLInputElement>('input')!.value);
+        if (value !== current.defaults[key]) preferences[key] = value;
       });
       await requestJson('featured/preferences', { method: 'PUT', body: { preferences } });
       close();

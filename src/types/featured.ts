@@ -52,6 +52,7 @@ export interface FeaturedPreferencesResponse {
   hasOverrides: boolean;
   preferences: FeaturedUserPreferences;
   effective: FeaturedEffectivePreferences;
+  defaults: FeaturedEffectivePreferences;
 }
 
 export interface FeaturedPreferencePolicy {

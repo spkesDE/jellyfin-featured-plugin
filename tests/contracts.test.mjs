@@ -74,10 +74,13 @@ test('personalization is authenticated, policy-bound, and user scoped', async ()
   assert.match(controller, /GetVisibleGenres\(activeUser\)/);
   assert.match(service, /policy\.AllowSourceSelection[\s\S]*?sourceIds\.Contains/);
   assert.match(service, /policy\.AllowPreferredGenres[\s\S]*?allowedGenres\.Contains/);
+  assert.match(service, /ResolveDefaults\(PluginConfiguration config, Guid userId\)[\s\S]*?Resolve\(config, userId, null\)/);
+  assert.match(service, /if \(IsEmpty\(normalized\)\) _store\.Remove\(userId\)/);
   assert.match(store, /userId\.ToString\("N"\)/);
   assert.match(response, /public bool PersonalizationEnabled \{ get; \}/);
   assert.match(frontend, /body: \{ reset: true \}/);
   assert.match(frontend, /body: \{ preferences \}/);
+  assert.match(frontend, /current\.defaults\.sourceEnabled/);
 });
 
 test('all details interactions use the shared navigation helper', async () => {

@@ -134,7 +134,10 @@ public sealed class FeaturedItemsResponseDto : FeaturedDisplaySettingsDto
 
 public sealed class FeaturedPreferencesResponse
 {
-    internal FeaturedPreferencesResponse(FeaturedUserPreferences? saved, FeaturedPersonalizationContext effective)
+    internal FeaturedPreferencesResponse(
+        FeaturedUserPreferences? saved,
+        FeaturedPersonalizationContext effective,
+        FeaturedPersonalizationContext defaults)
     {
         HasOverrides = saved is not null;
         Preferences = saved ?? new FeaturedUserPreferences();
@@ -148,11 +151,22 @@ public sealed class FeaturedPreferencesResponse
             InProgressSeriesBoost = effective.Profile.InProgressSeriesBoost,
             RepeatCooldownDays = effective.RepeatCooldownDays
         };
+        Defaults = new FeaturedEffectivePreferences
+        {
+            SourceEnabled = defaults.SourceRules.ToDictionary(rule => rule.Id, rule => rule.Enabled),
+            SourceWeights = defaults.SourceRules.ToDictionary(rule => rule.Id, rule => rule.Weight),
+            PreferredGenres = defaults.Profile.PreferredGenres,
+            UnplayedBoost = defaults.Profile.UnplayedBoost,
+            FavouriteBoost = defaults.Profile.FavouriteBoost,
+            InProgressSeriesBoost = defaults.Profile.InProgressSeriesBoost,
+            RepeatCooldownDays = defaults.RepeatCooldownDays
+        };
     }
 
     public bool HasOverrides { get; }
     public FeaturedUserPreferences Preferences { get; }
     public FeaturedEffectivePreferences Effective { get; }
+    public FeaturedEffectivePreferences Defaults { get; }
 }
 
 public sealed class FeaturedEffectivePreferences
