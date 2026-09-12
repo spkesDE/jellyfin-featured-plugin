@@ -3,6 +3,8 @@ import { ref } from 'vue';
 import type { SourceType } from '../../types/config';
 import { t } from '../../i18n';
 import ConfigCard from '../components/ConfigCard.vue';
+import ConfigCheckbox from '../components/ConfigCheckbox.vue';
+import ConfigNumber from '../components/ConfigNumber.vue';
 import ConfigSelect, { type SelectOption } from '../components/ConfigSelect.vue';
 import SourceRuleCard from '../components/SourceRuleCard.vue';
 import { useConfigStore } from '../libs/store';
@@ -35,6 +37,17 @@ const sourceOptions: SelectOption[] = [
       </div>
     </ConfigCard>
 
+    <ConfigCard :title="t('source.diversityTitle')" :help="t('source.diversityHelp')">
+      <div class="ec-diversityGrid">
+        <ConfigNumber v-model="store.config.MaximumItemsPerGenre" :label="t('source.maximumPerGenre')"
+          :help-text="t('source.maximumPerGenreHelp')" :min="0" :max="100" :step="1" />
+        <ConfigNumber v-model="store.config.MaximumItemsPerFranchise" :label="t('source.maximumPerFranchise')"
+          :help-text="t('source.maximumPerFranchiseHelp')" :min="0" :max="100" :step="1" />
+      </div>
+      <ConfigCheckbox v-model="store.config.ExcludeItemsFromSameSeries" :label="t('source.excludeSameSeries')"
+        :help-text="t('source.excludeSameSeriesHelp')" />
+    </ConfigCard>
+
     <div v-if="store.config.SourceRules.length" class="ec-sourceRules">
       <SourceRuleCard
         v-for="(rule, index) in store.config.SourceRules"
@@ -56,8 +69,10 @@ const sourceOptions: SelectOption[] = [
 .ec-addSourceRow { align-items: end; display: grid; gap: 1rem; grid-template-columns: minmax(15rem, 1fr) auto; }
 .ec-addSourceRow > :deep(.selectContainer) { margin-bottom: 0; }
 .ec-sourceRules { display: grid; gap: 1rem; margin-top: 1rem; }
+.ec-diversityGrid { display: grid; gap: 1rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 
 @media (max-width: 600px) {
   .ec-addSourceRow { grid-template-columns: 1fr; }
+  .ec-diversityGrid { grid-template-columns: 1fr; }
 }
 </style>

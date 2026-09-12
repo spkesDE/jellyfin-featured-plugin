@@ -7,7 +7,8 @@ const createId = (): string => globalThis.crypto?.randomUUID?.() ?? `${Date.now(
 
 export function createSourceRule(type: SourceType = 'RANDOM'): FeaturedSourceRule {
   return {
-    Id: createId(), Type: type, Enabled: true, Weight: 100, EditorUserId: null,
+    Id: createId(), Type: type, Enabled: true, Weight: 100,
+    MinimumItems: 0, MaximumItems: 0, IsFallback: false, EditorUserId: null,
     LibraryIds: [], CollectionIds: [], PlaylistIds: [], ManualListIds: [], Tags: [],
     RecentDays: type === 'LATEST_RELEASES' ? 365 : 30, Filters: []
   };
@@ -45,6 +46,10 @@ export const CONFIG_DEFAULTS: FeaturedPluginConfig = {
     AllowInProgressSeriesBoost: true, AllowRepeatCooldown: false
   },
   RepeatCooldownDays: 0,
+  RelaxRepeatCooldownWhenNeeded: false,
+  MaximumItemsPerGenre: 0,
+  MaximumItemsPerFranchise: 0,
+  ExcludeItemsFromSameSeries: false,
   RandomMediaCount: 5,
   EnableInfiniteLoading: false,
   MaximumParentRating: -2,

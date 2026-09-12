@@ -98,9 +98,13 @@ export interface FeaturedRuleDiagnostics {
   filteredOut: number;
   afterFilters: number;
   ineligible: number;
+  cooldownExcluded: number;
   eligible: number;
   allocated: number;
   duplicates: number;
+  diversitySkipped: number;
+  cooldownRelaxed: number;
+  fallback: boolean;
   returned: number;
 }
 

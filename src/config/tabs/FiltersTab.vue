@@ -55,6 +55,7 @@ async function clearHistory(): Promise<void> {
 
         <ConfigCard :title="t('filter.rotationHistory')" :help="t('filter.rotationHistoryHelp')">
           <ConfigNumber v-model="store.config.RepeatCooldownDays" :label="t('filter.cooldownDays')" :help-text="t('filter.cooldownHelp')" :min="0" :max="3650" :step="1" />
+          <ConfigCheckbox v-model="store.config.RelaxRepeatCooldownWhenNeeded" :label="t('filter.relaxCooldown')" :help-text="t('filter.relaxCooldownHelp')" />
           <ConfigMultiPicker
             v-model="historyUserIds"
             :label="t('filter.historyUsers')"

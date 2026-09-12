@@ -61,6 +61,9 @@ const tagOptions = (): SelectOption[] => valueOptions(store.tags.value);
     <div class="ec-sourceRuleBasics">
       <ConfigCheckbox v-model="rule.Enabled" :label="t('source.enabled')" />
       <ConfigNumber v-model="rule.Weight" :label="t('source.weight')" :help-text="t('source.weightHelp')" :min="1" :max="100" :step="1" />
+      <ConfigNumber v-model="rule.MinimumItems" :label="t('source.minimumItems')" :help-text="t('source.minimumItemsHelp')" :min="0" :max="100" :step="1" />
+      <ConfigNumber v-model="rule.MaximumItems" :label="t('source.maximumItems')" :help-text="t('source.maximumItemsHelp')" :min="0" :max="100" :step="1" />
+      <ConfigCheckbox v-model="rule.IsFallback" :label="t('source.fallback')" :help-text="t('source.fallbackHelp')" />
     </div>
 
     <div v-if="rule.Enabled" class="ec-sourceSettings">
@@ -89,7 +92,7 @@ const tagOptions = (): SelectOption[] => valueOptions(store.tags.value);
 .ec-sourceRuleHeader h3 { font-size: 1.08rem; margin: .12rem 0 .25rem; }
 .ec-sourceRuleEyebrow { font-size: .7rem; letter-spacing: .08em; margin: 0; opacity: .58; text-transform: uppercase; }
 .ec-sourceRuleActions { display: flex; gap: .2rem; }
-.ec-sourceRuleBasics { align-items: center; display: grid; gap: 1.25rem; grid-template-columns: minmax(12rem, 1fr) minmax(9rem, .45fr); margin-top: 0; }
+.ec-sourceRuleBasics { align-items: center; display: grid; gap: .75rem 1.25rem; grid-template-columns: repeat(2, minmax(10rem, 1fr)); margin-top: 0; }
 .ec-sourceRule > .jmp-subsectionHelp { margin-bottom: .4rem; }
 .ec-sourceRuleBasics > :deep(.checkboxContainer),
 .ec-sourceRuleBasics > :deep(.inputContainer) { margin-bottom: 0; }
@@ -98,7 +101,7 @@ const tagOptions = (): SelectOption[] => valueOptions(store.tags.value);
 .ec-sourceFilters > summary { cursor: pointer; font-weight: 600; padding: .25rem 0; }
 .ec-sourceFilters > .jmp-note { margin: .3rem 0 .65rem; }
 
-@media (max-width: 600px) {
+@media (max-width: 700px) {
   .ec-sourceRuleBasics { grid-template-columns: 1fr; }
   .ec-sourceRuleHeader { align-items: stretch; flex-direction: column; }
   .ec-sourceRuleActions { justify-content: flex-end; }

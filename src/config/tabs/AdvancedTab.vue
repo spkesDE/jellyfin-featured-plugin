@@ -110,19 +110,25 @@ const injectionOptions: SelectOption[] = [
                   <th>{{ t('advanced.ruleCandidates') }}</th>
                   <th>{{ t('advanced.ruleFiltered') }}</th>
                   <th>{{ t('advanced.ruleIneligible') }}</th>
+                  <th>{{ t('advanced.ruleCooldown') }}</th>
                   <th>{{ t('advanced.ruleAllocated') }}</th>
                   <th>{{ t('advanced.ruleDuplicates') }}</th>
+                  <th>{{ t('advanced.ruleDiversity') }}</th>
+                  <th>{{ t('advanced.ruleRelaxed') }}</th>
                   <th>{{ t('advanced.ruleReturned') }}</th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-for="rule in store.diagnostics.value.rules" :key="rule.id">
-                  <td>{{ rule.type }}</td>
+                  <td>{{ rule.type }}{{ rule.fallback ? ` · ${t('source.fallback')}` : '' }}</td>
                   <td>{{ rule.candidateItems }}</td>
                   <td>{{ rule.filteredOut }}</td>
                   <td>{{ rule.ineligible }}</td>
+                  <td>{{ rule.cooldownExcluded }}</td>
                   <td>{{ rule.allocated }}</td>
                   <td>{{ rule.duplicates }}</td>
+                  <td>{{ rule.diversitySkipped }}</td>
+                  <td>{{ rule.cooldownRelaxed }}</td>
                   <td>{{ rule.returned }}</td>
                 </tr>
               </tbody>

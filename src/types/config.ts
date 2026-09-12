@@ -21,6 +21,9 @@ export interface FeaturedSourceRule {
   Type: SourceType;
   Enabled: boolean;
   Weight: number;
+  MinimumItems: number;
+  MaximumItems: number;
+  IsFallback: boolean;
   EditorUserId: string | null;
   LibraryIds: string[];
   CollectionIds: string[];
@@ -41,6 +44,10 @@ export interface FeaturedPluginConfig {
   PersonalizationDefaults: FeaturedPersonalizationDefaults;
   PersonalizationPolicy: FeaturedPersonalizationPolicy;
   RepeatCooldownDays: number;
+  RelaxRepeatCooldownWhenNeeded: boolean;
+  MaximumItemsPerGenre: number;
+  MaximumItemsPerFranchise: number;
+  ExcludeItemsFromSameSeries: boolean;
   RandomMediaCount: number;
   EnableInfiniteLoading: boolean;
   MaximumParentRating: number;
