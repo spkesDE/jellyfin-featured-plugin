@@ -118,6 +118,12 @@ test('prepared cache samples eligible items instead of always returning the firs
   assert.doesNotMatch(preparedCache, /entry\.Items[\s\S]{0,160}?\.Take\(requestedCount\)/);
 });
 
+test('featured selection excludes samples and other video extras', async () => {
+  const ruleEngine = await read('Jellyfin.Plugin.Featured/Api/FeaturedRuleEngine.cs');
+  assert.match(ruleEngine, /IsSupportedItemType\(BaseItem item\)[\s\S]*?item\.ExtraType is null[\s\S]*?FeaturedMediaTypes\.Contains/);
+  assert.match(ruleEngine, /SampleFileNameRegex[\s\S]*?Path\.GetFileNameWithoutExtension\(item\.Path\)[\s\S]*?SampleFileNameRegex\.IsMatch\(fileName\)/);
+});
+
 test('DOM observation cannot trigger destructive remount scans', async () => {
   const runtime = await read('src/runtime.ts');
   assert.match(runtime, /trackedMountNeedsRecovery\(\) \|\| \(!hasTrackedMount && mutations\.some\(mutationAffectsHome\)\)/);

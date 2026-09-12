@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using Jellyfin.Data.Enums;
 using Jellyfin.Database.Implementations.Enums;
 using Jellyfin.Extensions;
@@ -12,6 +13,9 @@ namespace Jellyfin.Plugin.Featured.Api;
 internal sealed class FeaturedRuleEngine
 {
     private const int MaximumCandidatesPerRule = 2000;
+    private static readonly Regex SampleFileNameRegex = new(
+        @"(?:^|[._-])sample(?:[._-]*\d+)?$",
+        RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.Compiled);
     private readonly PluginConfiguration _config;
     private readonly IUserManager _userManager;
     private readonly ILibraryManager _libraryManager;
@@ -553,7 +557,16 @@ internal sealed class FeaturedRuleEngine
     private static bool IsSupportedItemType(BaseItem item)
         => item is not Episode
             && item is not Season
+            && item.ExtraType is null
+            && !IsSampleFile(item)
             && FeaturedMediaTypes.Contains(item.GetBaseItemKind());
+
+    private static bool IsSampleFile(BaseItem item)
+    {
+        if (string.IsNullOrWhiteSpace(item.Path)) return false;
+        string fileName = Path.GetFileNameWithoutExtension(item.Path);
+        return SampleFileNameRegex.IsMatch(fileName);
+    }
 
     private MediaBrowser.Model.Entities.ParentalRatingScore? GetParentalRatingScore(
         Jellyfin.Database.Implementations.Entities.User activeUser,
