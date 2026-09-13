@@ -33,6 +33,7 @@ export class FeaturedCarousel {
   private touchStartX: number | null = null;
   private status: HTMLElement | null = null;
   private autoplayButton: HTMLButtonElement | null = null;
+  private trailerCountdownTimer: number | null = null;
   private dots: HTMLButtonElement[] = [];
   private destroyed = false;
   private lastReportedItemId: string | null = null;
@@ -347,9 +348,12 @@ export class FeaturedCarousel {
     const concealDurationMilliseconds = concealYouTube
       ? Math.max(YOUTUBE_CONTROL_CONCEALMENT_MS, this.response.trailerDelayMilliseconds)
       : 0;
+    if (concealYouTube) this.startTrailerCountdown();
+    else if (launchDelayMilliseconds > 0) this.startTrailerCountdown(launchDelayMilliseconds);
     this.trailerDelayTimer = window.setTimeout(() => {
       this.trailerDelayTimer = null;
       if (this.destroyed || document.hidden || this.index !== expectedIndex) return;
+      if (!concealYouTube) this.stopTrailerCountdown();
       let player: TrailerPlayer | null = null;
       player = createTrailerPlayer(item.trailer!, {
         muted: concealYouTube ? true : this.trailerMuted,
@@ -357,8 +361,10 @@ export class FeaturedCarousel {
         endOffsetSeconds: this.response.trailerEndOffsetSeconds,
         loop: !this.response.waitForTrailerToFinish,
         concealDurationMilliseconds,
+        onConcealStart: (durationMilliseconds) => this.startTrailerCountdown(durationMilliseconds),
         onReveal: () => {
           if (!player || this.trailerPlayer !== player) return;
+          this.stopTrailerCountdown();
           this.trailerConcealed = false;
           slide.classList.remove('ec-youtube-trailer-concealed');
           slide.classList.add('ec-trailer-active');
@@ -371,6 +377,7 @@ export class FeaturedCarousel {
         }
       });
       if (!player) {
+        this.stopTrailerCountdown();
         this.trailerItemId = null;
         return;
       }
@@ -392,6 +399,7 @@ export class FeaturedCarousel {
   private stopTrailer(_slide?: HTMLElement): void {
     if (this.trailerDelayTimer !== null) window.clearTimeout(this.trailerDelayTimer);
     this.trailerDelayTimer = null;
+    this.stopTrailerCountdown();
     this.trailerPlayer?.destroy();
     this.trailerPlayer = null;
     this.trailerSlide?.classList.remove('ec-trailer-active');
@@ -400,6 +408,36 @@ export class FeaturedCarousel {
     this.trailerItemId = null;
     this.trailerPaused = false;
     this.trailerConcealed = false;
+  }
+
+  private startTrailerCountdown(durationMilliseconds?: number): void {
+    this.clearTrailerCountdownTimer();
+    if (!this.autoplayButton) return;
+    this.autoplayButton.classList.add('ec-countdown-active');
+    this.autoplayButton.classList.toggle('ec-countdown-loading', durationMilliseconds === undefined);
+    if (durationMilliseconds === undefined) {
+      this.autoplayButton.style.setProperty('--ec-countdown-angle', '90deg');
+      return;
+    }
+    const duration = Math.max(1, durationMilliseconds);
+    const endsAt = performance.now() + duration;
+    const update = (): void => {
+      const remaining = Math.max(0, endsAt - performance.now());
+      this.autoplayButton!.style.setProperty('--ec-countdown-angle', `${(remaining / duration) * 360}deg`);
+    };
+    update();
+    this.trailerCountdownTimer = window.setInterval(update, 100);
+  }
+
+  private clearTrailerCountdownTimer(): void {
+    if (this.trailerCountdownTimer !== null) window.clearInterval(this.trailerCountdownTimer);
+    this.trailerCountdownTimer = null;
+  }
+
+  private stopTrailerCountdown(): void {
+    this.clearTrailerCountdownTimer();
+    this.autoplayButton?.classList.remove('ec-countdown-active', 'ec-countdown-loading');
+    this.autoplayButton?.style.removeProperty('--ec-countdown-angle');
   }
 
   private pauseTimer = (): void => {

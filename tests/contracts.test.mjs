@@ -185,6 +185,11 @@ test('proper trailer support keeps resolution and playback source independent', 
   assert.match(carousel, /Math\.max\(YOUTUBE_CONTROL_CONCEALMENT_MS, this\.response\.trailerDelayMilliseconds\)/);
   assert.match(carousel, /muted: concealYouTube \? true : this\.trailerMuted/);
   assert.match(player, /concealDurationMilliseconds[\s\S]*?setTimeout[\s\S]*?onReveal/);
+  assert.match(player, /onConcealStart\?\.\(options\.concealDurationMilliseconds/);
+  assert.match(carousel, /startTrailerCountdown\(durationMilliseconds\)[\s\S]*?setInterval\(update, 100\)/);
+  assert.match(styles, /\.ec-autoplay::after[\s\S]*?conic-gradient[\s\S]*?radial-gradient/);
+  assert.doesNotMatch(carousel, /trailerCountdownLabel|Math\.ceil\(remaining \/ 1000\)/);
+  assert.doesNotMatch(styles, /ec-trailer-countdown/);
   assert.match(styles, /\.ec-youtube-trailer-concealed[\s\S]*?opacity:\s*0/);
   assert.match(carousel, /querySelectorAll\(':scope > \.ec-trailer'\)/);
   assert.match(carousel, /classList\.add\('ec-trailer-active'\)[\s\S]*?classList\.remove\('ec-trailer-active'\)/);

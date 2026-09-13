@@ -8,6 +8,7 @@ export interface TrailerPlaybackOptions {
   loop: boolean;
   onEnded: () => void;
   concealDurationMilliseconds?: number;
+  onConcealStart?: (durationMilliseconds: number) => void;
   onReveal?: () => void;
 }
 
@@ -177,6 +178,7 @@ export class YouTubePlayer implements TrailerPlayer {
           if (options.startOffsetSeconds > 0) target.seekTo(options.startOffsetSeconds, true);
           target.playVideo();
           if ((options.concealDurationMilliseconds ?? 0) > 0) {
+            options.onConcealStart?.(options.concealDurationMilliseconds!);
             this.revealTimer = window.setTimeout(() => {
               this.revealTimer = null;
               if (!this.destroyed) options.onReveal?.();
