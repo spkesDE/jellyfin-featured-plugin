@@ -2,6 +2,7 @@ import type { FeaturedItem, FeaturedResponse } from '../types/featured';
 import { t } from '../i18n';
 import { heroImageUrl, logoUrl } from './images';
 import { openItemDetails } from './navigation';
+import { ExternalPlayer } from './trailer';
 
 export function loadSlideArtwork(slide: HTMLElement): void {
   const backdrop = slide.querySelector<HTMLElement>('.ec-backdrop');
@@ -95,7 +96,7 @@ export function createSlide(item: FeaturedItem, response: FeaturedResponse): HTM
   appendText(content, 'ec-tagline', item.tagline);
   appendText(content, 'ec-overview', item.overview);
 
-  if (response.showPlayButton || response.showSecondaryButton) {
+  if (response.showPlayButton || response.showSecondaryButton || (item.trailer?.provider === 'external' && item.trailer.url)) {
     const actions = document.createElement('div');
     actions.className = 'ec-actions';
     if (response.showPlayButton) {
@@ -113,6 +114,14 @@ export function createSlide(item: FeaturedItem, response: FeaturedResponse): HTM
       details.textContent = response.secondaryButtonText || t('carousel.moreInfo');
       details.addEventListener('click', () => openItemDetails(item.id));
       actions.appendChild(details);
+    }
+    if (item.trailer?.provider === 'external' && item.trailer.url) {
+      const trailer = document.createElement('button');
+      trailer.type = 'button';
+      trailer.className = 'ec-button ec-button-secondary';
+      trailer.textContent = t('carousel.trailer');
+      trailer.addEventListener('click', () => new ExternalPlayer(item.trailer!.url!).open());
+      actions.appendChild(trailer);
     }
     content.appendChild(actions);
   }

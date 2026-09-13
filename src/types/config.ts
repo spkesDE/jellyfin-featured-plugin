@@ -6,6 +6,8 @@ export type TransitionEffect = 'slide' | 'fade';
 export type HeroBackdropPosition = 'top' | 'center' | 'bottom';
 export type HeroHeightMode = 'auto' | 'compact' | 'standard' | 'cinematic' | 'custom';
 export type HeroTextPosition = 'left' | 'center' | 'right';
+export type TrailerSourcePriority = 'prefer_local' | 'prefer_remote' | 'local_only' | 'remote_only' | 'automatic';
+export type MultipleTrailerMode = 'first' | 'random';
 
 import type { FeaturedDisplaySettings } from './display';
 
@@ -55,6 +57,16 @@ export interface FeaturedPluginConfig {
   EnableAutoplay: boolean;
   ShowAutoplayButton: boolean;
   EnableBackgroundTrailers: boolean;
+  TrailerSourcePriority: TrailerSourcePriority;
+  FallBackToRemoteTrailers: boolean;
+  StartTrailersMuted: boolean;
+  WaitForTrailerToFinish: boolean;
+  TrailerDelayMilliseconds: number;
+  TrailerStartOffsetSeconds: number;
+  TrailerEndOffsetSeconds: number;
+  MultipleTrailerMode: MultipleTrailerMode;
+  AllowTrailersOnMobile: boolean;
+  TrailerOverrides: FeaturedTrailerOverride[];
   AutoplayInterval: number;
   ShowPlayButton: boolean;
   ShowNavigationArrows: boolean;
@@ -84,6 +96,13 @@ export interface FeaturedPluginConfig {
   Heading: string;
   PlayButtonText: string;
   Debug: boolean;
+}
+
+export interface FeaturedTrailerOverride {
+  ItemId: string;
+  Name: string;
+  Url: string | null;
+  LocalTrailerItemId: string | null;
 }
 
 export interface FeaturedManualItem {

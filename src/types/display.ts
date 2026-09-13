@@ -3,6 +3,12 @@ import type { HeroBackdropPosition, HeroHeightMode, HeroTextPosition, Transition
 export interface FeaturedDisplaySettings {
   showAutoplayButton: boolean;
   enableBackgroundTrailers: boolean;
+  startTrailersMuted: boolean;
+  waitForTrailerToFinish: boolean;
+  trailerDelayMilliseconds: number;
+  trailerStartOffsetSeconds: number;
+  trailerEndOffsetSeconds: number;
+  allowTrailersOnMobile: boolean;
   showPlayButton: boolean;
   showNavigationArrows: boolean;
   showSlidePosition: boolean;

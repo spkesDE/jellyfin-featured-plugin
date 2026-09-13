@@ -57,6 +57,16 @@ export const CONFIG_DEFAULTS: FeaturedPluginConfig = {
   EnableAutoplay: true,
   ShowAutoplayButton: true,
   EnableBackgroundTrailers: false,
+  TrailerSourcePriority: 'prefer_local',
+  FallBackToRemoteTrailers: true,
+  StartTrailersMuted: true,
+  WaitForTrailerToFinish: false,
+  TrailerDelayMilliseconds: 1500,
+  TrailerStartOffsetSeconds: 0,
+  TrailerEndOffsetSeconds: 0,
+  MultipleTrailerMode: 'first',
+  AllowTrailersOnMobile: false,
+  TrailerOverrides: [],
   AutoplayInterval: 10,
   ShowPlayButton: true,
   ShowNavigationArrows: true,
@@ -96,6 +106,12 @@ export function createDisplaySettings(config: FeaturedPluginConfig): FeaturedDis
   return {
     showAutoplayButton: config.ShowAutoplayButton,
     enableBackgroundTrailers: config.EnableBackgroundTrailers,
+    startTrailersMuted: config.StartTrailersMuted,
+    waitForTrailerToFinish: config.WaitForTrailerToFinish,
+    trailerDelayMilliseconds: config.TrailerDelayMilliseconds,
+    trailerStartOffsetSeconds: config.TrailerStartOffsetSeconds,
+    trailerEndOffsetSeconds: config.TrailerEndOffsetSeconds,
+    allowTrailersOnMobile: config.AllowTrailersOnMobile,
     showPlayButton: config.ShowPlayButton,
     showNavigationArrows: config.ShowNavigationArrows,
     showSlidePosition: config.ShowSlidePosition,
@@ -198,6 +214,12 @@ export function normalizeConfig(value: unknown): FeaturedPluginConfig {
     ...createDefaultConfig().PersonalizationPolicy,
     ...(source.PersonalizationPolicy ?? {})
   };
+  config.TrailerOverrides = Array.isArray(source.TrailerOverrides)
+    ? source.TrailerOverrides.map((entry) => ({
+        ItemId: entry.ItemId || '', Name: entry.Name || '', Url: entry.Url || null,
+        LocalTrailerItemId: entry.LocalTrailerItemId || null
+      }))
+    : [];
   config.Heading ??= '';
   config.PlayButtonText ??= '';
   config.SecondaryButtonText ??= '';

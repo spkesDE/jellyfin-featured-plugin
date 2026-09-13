@@ -6,12 +6,21 @@ export interface FeaturedItem {
   hasLogo: boolean;
   imageType: 'Backdrop' | 'Primary';
   mediaType: string;
-  localTrailerId?: string;
+  trailer?: FeaturedTrailer | null;
   overview?: string | null;
   critic_rating?: number;
   community_rating?: number;
   productionYear?: number;
   runtimeMinutes?: number;
+}
+
+export interface FeaturedTrailer {
+  type: 'local' | 'remote';
+  provider: 'jellyfin' | 'youtube' | 'direct' | 'external' | string;
+  name?: string | null;
+  url?: string | null;
+  videoId?: string | null;
+  itemId?: string | null;
 }
 
 import type { FeaturedDisplaySettings } from './display';

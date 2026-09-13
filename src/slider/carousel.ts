@@ -2,7 +2,7 @@ import type { FeaturedItem, FeaturedResponse } from '../types/featured';
 import { t } from '../i18n';
 import { CONSOLE_PREFIX, PLUGIN_VERSION } from '../constants';
 import { createSlide, loadSlideArtwork } from './render';
-import { trailerUrl } from './trailer';
+import { createTrailerPlayer, isMobileTrailerClient, type TrailerPlayer } from './trailer';
 import { applyHeroLayoutVariables } from './layout';
 import { openPreferencesDialog } from '../preferences';
 
@@ -36,6 +36,8 @@ export class FeaturedCarousel {
   private dots: HTMLButtonElement[] = [];
   private destroyed = false;
   private lastReportedItemId: string | null = null;
+  private trailerPlayer: TrailerPlayer | null = null;
+  private trailerDelayTimer: number | null = null;
 
   constructor(response: FeaturedResponse, loadItems?: FeaturedItemLoader, reportDisplayed?: FeaturedItemDisplayReporter) {
     this.response = response;
@@ -336,30 +338,38 @@ export class FeaturedCarousel {
   }
 
   private startTrailer(slide: HTMLElement, item: FeaturedItem): void {
-    if (!this.response.enableBackgroundTrailers || !item.localTrailerId || document.hidden) return;
-    let video = slide.querySelector<HTMLVideoElement>('.ec-trailer');
-    if (!video) {
-      const url = trailerUrl(item.localTrailerId);
-      if (!url) return;
-      video = document.createElement('video');
-      video.className = 'ec-trailer';
-      video.src = url;
-      video.muted = true;
-      video.loop = true;
-      video.autoplay = true;
-      video.playsInline = true;
-      slide.querySelector('.ec-backdrop')?.after(video);
-    }
-    void video.play().catch(() => undefined);
+    if (!this.response.enableBackgroundTrailers || !item.trailer || document.hidden) return;
+    if (!this.response.allowTrailersOnMobile && isMobileTrailerClient()) return;
+    const expectedIndex = this.index;
+    this.trailerDelayTimer = window.setTimeout(() => {
+      this.trailerDelayTimer = null;
+      if (this.destroyed || document.hidden || this.index !== expectedIndex) return;
+      const player = createTrailerPlayer(item.trailer!, {
+        muted: this.response.startTrailersMuted,
+        startOffsetSeconds: this.response.trailerStartOffsetSeconds,
+        endOffsetSeconds: this.response.trailerEndOffsetSeconds,
+        loop: !this.response.waitForTrailerToFinish,
+        onEnded: () => {
+          if (this.response.waitForTrailerToFinish && this.autoplayEnabled && this.index === expectedIndex) {
+            this.show(this.index + 1, false);
+          }
+        }
+      });
+      if (!player) return;
+      this.trailerPlayer = player;
+      slide.querySelector('.ec-backdrop')?.after(player.element);
+      if (this.response.waitForTrailerToFinish) this.pauseTimer();
+      void player.play().catch(() => {
+        if (this.trailerPlayer === player) this.restartTimer();
+      });
+    }, this.response.trailerDelayMilliseconds);
   }
 
-  private stopTrailer(slide?: HTMLElement): void {
-    const video = slide?.querySelector<HTMLVideoElement>('.ec-trailer');
-    if (!video) return;
-    video.pause();
-    video.removeAttribute('src');
-    video.load();
-    video.remove();
+  private stopTrailer(_slide?: HTMLElement): void {
+    if (this.trailerDelayTimer !== null) window.clearTimeout(this.trailerDelayTimer);
+    this.trailerDelayTimer = null;
+    this.trailerPlayer?.destroy();
+    this.trailerPlayer = null;
   }
 
   private pauseTimer = (): void => {
