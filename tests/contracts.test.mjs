@@ -35,7 +35,10 @@ test('critical C# and TypeScript defaults stay in parity', async () => {
     EnableFrontendBootstrap: 'true',
     EnablePreparedCache: 'true',
     BannerHeight: '360',
-    ShowPaginationDots: 'true'
+    ShowPaginationDots: 'true',
+    TrailerDelayMilliseconds: '1500',
+    StartTrailersMuted: 'true',
+    FallBackToRemoteTrailers: 'true'
   };
   for (const [name, value] of Object.entries(expected)) {
     const csharpValue = value.startsWith("'") ? `"${value.slice(1, -1)}"` : value;
@@ -81,6 +84,38 @@ test('personalization is authenticated, policy-bound, and user scoped', async ()
   assert.match(frontend, /body: \{ reset: true \}/);
   assert.match(frontend, /body: \{ preferences \}/);
   assert.match(frontend, /current\.defaults\.sourceEnabled/);
+});
+
+test('proper trailer support keeps resolution and playback source independent', async () => {
+  const [configuration, normalizer, resolver, response, player, carousel, trailerTab] = await Promise.all([
+    read('Jellyfin.Plugin.Featured/Configuration/PluginConfiguration.cs'),
+    read('Jellyfin.Plugin.Featured/Configuration/PluginConfigurationNormalizer.cs'),
+    read('Jellyfin.Plugin.Featured/Api/TrailerResolver.cs'),
+    read('Jellyfin.Plugin.Featured/Api/FeaturedResponseDtos.cs'),
+    read('src/slider/trailer.ts'),
+    read('src/slider/carousel.ts'),
+    read('src/config/tabs/TrailersTab.vue')
+  ]);
+  for (const setting of [
+    'TrailerSourcePriority', 'FallBackToRemoteTrailers', 'StartTrailersMuted',
+    'WaitForTrailerToFinish', 'TrailerDelayMilliseconds', 'TrailerStartOffsetSeconds',
+    'TrailerEndOffsetSeconds', 'MultipleTrailerMode', 'AllowTrailersOnMobile', 'TrailerOverrides'
+  ]) {
+    assert.equal(configuration.includes(setting), true, `backend misses ${setting}`);
+    assert.equal(trailerTab.includes(`store.config.${setting}`), true, `trailer editor misses ${setting}`);
+  }
+  assert.match(normalizer, /NormalizeTrailerUrl[\s\S]*?Uri\.UriSchemeHttp[\s\S]*?Uri\.UriSchemeHttps/);
+  assert.match(resolver, /ResolveManual\(manual, activeUser\)[\s\S]*?if \(manualTrailer is not null\) return manualTrailer/);
+  assert.match(resolver, /LocalOnly => local\(\)[\s\S]*?RemoteOnly => remote\(\)[\s\S]*?PreferRemote => remote\(\) \?\? local\(\)/);
+  assert.match(resolver, /provider = videoId is not null[\s\S]*?"youtube"[\s\S]*?"direct"[\s\S]*?"external"/);
+  assert.match(response, /public FeaturedTrailerDto\? Trailer \{ get; init; \}/);
+  assert.doesNotMatch(response, /LocalTrailerId/);
+  for (const adapter of ['JellyfinLocalPlayer', 'YouTubePlayer', 'DirectVideoPlayer', 'ExternalPlayer']) {
+    assert.match(player, new RegExp(`class ${adapter}`));
+  }
+  assert.doesNotMatch(player, /youtube[\s\S]{0,120}\.mp4/i);
+  assert.match(carousel, /waitForTrailerToFinish[\s\S]*?pauseTimer\(\)/);
+  assert.match(carousel, /trailerDelayMilliseconds/);
 });
 
 test('source mixer constraints survive personalized source cloning', async () => {
