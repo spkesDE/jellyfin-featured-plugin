@@ -187,13 +187,11 @@ test('proper trailer support keeps resolution and playback source independent', 
   assert.match(player, /concealDurationMilliseconds[\s\S]*?setTimeout[\s\S]*?onReveal/);
   assert.match(styles, /\.ec-youtube-trailer-concealed[\s\S]*?opacity:\s*0/);
   assert.match(carousel, /querySelectorAll\(':scope > \.ec-trailer'\)/);
-  assert.match(carousel, /classList\.add\('ec-trailer-playing'\)[\s\S]*?classList\.remove\('ec-trailer-playing'\)/);
   assert.match(carousel, /classList\.add\('ec-trailer-active'\)[\s\S]*?classList\.remove\('ec-trailer-active'\)/);
   assert.match(styles, /\.ec-trailer\s*\{[\s\S]*?height:\s*max\(100%, 56\.25vw\)[\s\S]*?min-width:\s*100vw[\s\S]*?translate\(-50%, -50%\)/);
   assert.match(styles, /\.ec-trailer\s*\{[\s\S]*?pointer-events:\s*none/);
-  assert.match(styles, /\.ec-slide\.ec-trailer-active\s*\{[\s\S]*?background:\s*#000/);
+  assert.match(styles, /\.ec-slide\.ec-trailer-active\s*\{[\s\S]*?linear-gradient\(to bottom,[\s\S]*?#000 76%[\s\S]*?transparent 100%/);
   assert.match(styles, /\.ec-slide\.ec-trailer-active \.ec-backdrop\s*\{[\s\S]*?opacity:\s*0/);
-  assert.match(styles, /\.ec-root\.ec-hero\.ec-trailer-playing::after\s*\{[\s\S]*?top:\s*100%[\s\S]*?z-index:\s*1/);
   assert.match(player, /target\.getIframe\(\)[\s\S]*?tabIndex = -1[\s\S]*?aria-hidden/);
 });
 

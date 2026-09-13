@@ -361,7 +361,6 @@ export class FeaturedCarousel {
           if (!player || this.trailerPlayer !== player) return;
           this.trailerConcealed = false;
           slide.classList.remove('ec-youtube-trailer-concealed');
-          this.root.classList.add('ec-trailer-playing');
           slide.classList.add('ec-trailer-active');
           void player.setMuted(this.trailerMuted);
         },
@@ -379,7 +378,6 @@ export class FeaturedCarousel {
       this.trailerPaused = false;
       this.trailerConcealed = concealYouTube;
       this.trailerSlide = slide;
-      this.root.classList.toggle('ec-trailer-playing', !concealYouTube);
       slide.classList.toggle('ec-trailer-active', !concealYouTube);
       slide.classList.toggle('ec-youtube-trailer-concealed', concealYouTube);
       slide.querySelectorAll(':scope > .ec-trailer').forEach((element) => element.remove());
@@ -396,7 +394,6 @@ export class FeaturedCarousel {
     this.trailerDelayTimer = null;
     this.trailerPlayer?.destroy();
     this.trailerPlayer = null;
-    this.root.classList.remove('ec-trailer-playing');
     this.trailerSlide?.classList.remove('ec-trailer-active');
     this.trailerSlide?.classList.remove('ec-youtube-trailer-concealed');
     this.trailerSlide = null;
