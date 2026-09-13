@@ -42,6 +42,7 @@ export class FeaturedCarousel {
   private trailerDelayTimer: number | null = null;
   private trailerItemId: string | null = null;
   private trailerMuted: boolean;
+  private trailerVolume = 100;
   private trailerPaused = false;
   private trailerConcealed = false;
 
@@ -357,6 +358,7 @@ export class FeaturedCarousel {
       let player: TrailerPlayer | null = null;
       player = createTrailerPlayer(item.trailer!, {
         muted: concealYouTube ? true : this.trailerMuted,
+        volume: this.trailerVolume,
         startOffsetSeconds: this.response.trailerStartOffsetSeconds,
         endOffsetSeconds: this.response.trailerEndOffsetSeconds,
         loop: !this.response.waitForTrailerToFinish,
@@ -479,12 +481,30 @@ export class FeaturedCarousel {
     if (target?.closest('input, textarea, select, button, [contenteditable="true"], [role="dialog"]')) return;
     if (event.key.toLowerCase() === 'm') {
       event.preventDefault();
+      event.stopPropagation();
       this.trailerMuted = !this.trailerMuted;
+      if (!this.trailerMuted && this.trailerVolume === 0) {
+        this.trailerVolume = 10;
+        void this.trailerPlayer.setVolume(this.trailerVolume);
+      }
+      if (!this.trailerConcealed) void this.trailerPlayer.setMuted(this.trailerMuted);
+      return;
+    }
+    const volumeUp = event.key === '+' || event.code === 'NumpadAdd';
+    const volumeDown = event.key === '-' || event.code === 'NumpadSubtract';
+    if (volumeUp || volumeDown) {
+      event.preventDefault();
+      event.stopPropagation();
+      const direction = volumeUp ? 1 : -1;
+      this.trailerVolume = Math.max(0, Math.min(100, this.trailerVolume + (direction * 10)));
+      this.trailerMuted = this.trailerVolume === 0;
+      void this.trailerPlayer.setVolume(this.trailerVolume);
       if (!this.trailerConcealed) void this.trailerPlayer.setMuted(this.trailerMuted);
       return;
     }
     if (event.code !== 'Space' && event.key !== ' ') return;
     event.preventDefault();
+    event.stopPropagation();
     this.trailerPaused = !this.trailerPaused;
     if (this.trailerPaused) {
       void this.trailerPlayer.pause();

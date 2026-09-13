@@ -3,6 +3,7 @@ import type { FeaturedTrailer } from '../types/featured';
 
 export interface TrailerPlaybackOptions {
   muted: boolean;
+  volume: number;
   startOffsetSeconds: number;
   endOffsetSeconds: number;
   loop: boolean;
@@ -17,6 +18,7 @@ export interface TrailerPlayer {
   play(): Promise<void>;
   pause(): Promise<void>;
   setMuted(muted: boolean): Promise<void>;
+  setVolume(volume: number): Promise<void>;
   destroy(): void;
 }
 
@@ -48,6 +50,7 @@ abstract class HtmlVideoPlayer implements TrailerPlayer {
     this.element.className = 'ec-trailer';
     this.element.src = url;
     this.element.muted = options.muted;
+    this.element.volume = Math.max(0, Math.min(1, options.volume / 100));
     this.element.loop = options.loop && options.endOffsetSeconds === 0;
     this.element.autoplay = true;
     this.element.playsInline = true;
@@ -74,6 +77,10 @@ abstract class HtmlVideoPlayer implements TrailerPlayer {
 
   async setMuted(muted: boolean): Promise<void> {
     this.element.muted = muted;
+  }
+
+  async setVolume(volume: number): Promise<void> {
+    this.element.volume = Math.max(0, Math.min(1, volume / 100));
   }
 
   destroy(): void {
@@ -148,6 +155,11 @@ export class YouTubePlayer implements TrailerPlayer {
     else this.player?.unMute();
   }
 
+  async setVolume(volume: number): Promise<void> {
+    await this.ready;
+    this.player?.setVolume(Math.max(0, Math.min(100, volume)));
+  }
+
   destroy(): void {
     this.destroyed = true;
     if (this.endTimer !== null) window.clearInterval(this.endTimer);
@@ -175,6 +187,7 @@ export class YouTubePlayer implements TrailerPlayer {
           iframe.tabIndex = -1;
           iframe.setAttribute('aria-hidden', 'true');
           if (options.muted) target.mute(); else target.unMute();
+          target.setVolume(options.volume);
           if (options.startOffsetSeconds > 0) target.seekTo(options.startOffsetSeconds, true);
           target.playVideo();
           if ((options.concealDurationMilliseconds ?? 0) > 0) {
@@ -218,6 +231,7 @@ interface YouTubePlayerInstance {
   pauseVideo(): void;
   playVideo(): void;
   seekTo(seconds: number, allowSeekAhead: boolean): void;
+  setVolume(volume: number): void;
   unMute(): void;
 }
 

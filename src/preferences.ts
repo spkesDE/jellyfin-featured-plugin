@@ -88,7 +88,7 @@ export async function openPreferencesDialog(): Promise<void> {
     dialog.innerHTML = `<header><h2 id="ec-preferences-title">${t('preferences.title')}</h2><button type="button" class="ec-preferences-close" aria-label="${t('preferences.close')}">×</button></header><p>${t('preferences.help')}</p>`;
     const hotkeys = document.createElement('aside');
     hotkeys.className = 'ec-preferences-hotkeys';
-    hotkeys.innerHTML = `<strong>${t('preferences.hotkeys')}</strong><span><kbd>M</kbd> ${t('preferences.hotkeyMute')}</span><span><kbd>${t('preferences.hotkeySpace')}</kbd> ${t('preferences.hotkeyPause')}</span>`;
+    hotkeys.innerHTML = `<strong>${t('preferences.hotkeys')}</strong><span><kbd>M</kbd> ${t('preferences.hotkeyMute')}</span><span><kbd>+ / −</kbd> ${t('preferences.hotkeyVolume')}</span><span><kbd>${t('preferences.hotkeySpace')}</kbd> ${t('preferences.hotkeyPause')}</span>`;
     dialog.appendChild(hotkeys);
 
     const sources = document.createElement('fieldset');
