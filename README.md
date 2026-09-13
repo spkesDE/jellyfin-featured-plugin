@@ -96,6 +96,12 @@ A random selection is enabled by default, so you should see the banner without h
 
 You can combine as many sources as you like. Give a source more weight if you want its titles to appear more often. Filters can apply to the whole banner or only to one source.
 
+Each source may also reserve a minimum number of slots, cap its maximum contribution, or act as a fallback. Primary sources are mixed first; fallback sources are considered only when the primary sources cannot fill the requested feed. Empty and duplicate-heavy sources donate their unused quota to the remaining sources.
+
+Optional diversity controls limit titles with the same primary genre or TMDb movie franchise and can avoid multiple entries carrying the same Jellyfin series metadata. These limits are best-effort: if they would leave the carousel short, deferred titles become eligible again. Duplicates are detected by stable provider IDs where available, with media type, title, and year as a fallback identity.
+
+The repeat cooldown can remain strict or reuse the oldest recently displayed items after all fresh primary and fallback candidates have been exhausted. Advanced mixer rules are evaluated for every request so source limits and feed-wide diversity remain exact; the prepared cache continues to serve configurations that only use weighted mixing.
+
 ## Display Options
 
 The default hero layout is designed to work without much tweaking. If you want a different look, you can change the banner height, artwork position, text alignment, gradients, corners, spacing, and transition style. Separate height settings are available for desktop, tablet, and mobile screens.
