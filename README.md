@@ -110,6 +110,8 @@ Jellyfin Featured can play local trailers and supported online trailers in the b
 
 If a title needs a specific trailer, add a manual override in the `Trailers` tab. Unsupported online trailers can still be opened with a trailer button.
 
+Trailer candidates fall back in the configured order when playback fails. YouTube playback can still be unavailable when a video owner disables embedding, a video is private or removed, or browser/network privacy controls block the player. See [Trailer behavior and troubleshooting](./docs/trailer-behavior.md) for details.
+
 ## Personalization
 
 Administrators choose which options users may change under `User Profiles`. These can include content sources, source shares, preferred genres, favourites, unwatched titles, in-progress series, and the repeat cooldown.
@@ -118,11 +120,19 @@ When personalization is enabled, users can open `Featured settings` from Jellyfi
 
 ## Presets and Scheduling
 
-Presets let you prepare a complete Featured experience for occasions such as Christmas, Halloween, weekends, kids mornings, or Friday nights.
+Presets let you prepare a complete Featured experience for a specific occasion such as this year's Christmas period, a particular weekend, or a planned movie night.
 
-First configure the sources, filters, layout, personalization, and trailers you want. Then open `Presets & Schedule`, capture the current settings, choose a name and time period, and enable the preset. Outside that period, Jellyfin Featured automatically returns to your normal settings.
+First configure the sources, filters, layout, personalization, and trailers you want. Then open `Presets & Schedule`, capture the current settings, choose a name and one-time start/end period, and enable the preset. Outside that absolute period, Jellyfin Featured automatically returns to your normal settings. Weekly or annual recurrence is not currently supported.
 
 If two presets overlap, use the priority setting to choose which one should be shown. `Update from current settings` refreshes an existing preset without changing its name or schedule.
+
+## Languages
+
+The plugin interface currently includes English and German. It follows the Jellyfin/browser language automatically and falls back to English when the selected language or an individual translation is unavailable.
+
+## Caching and repeat protection
+
+Candidate Cache, Prepared Cache, and Repeat Cooldown solve different problems. In short, candidates avoid repeated library discovery, prepared entries make normal requests fast, and repeat cooldown records displayed titles so they can be excluded for longer. See [Cache behavior](./docs/cache-behavior.md) for the full distinction and cache diagnostics.
 
 ## Troubleshooting
 
