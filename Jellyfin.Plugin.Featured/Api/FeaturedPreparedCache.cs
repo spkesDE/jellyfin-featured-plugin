@@ -57,31 +57,31 @@ public sealed class FeaturedPreparedCache
         dtoCreationMilliseconds = 0;
         if (!config.EnablePreparedCache)
         {
-            status = "disabled";
+            status = "bypass (disabled)";
             return false;
         }
 
         if (RequiresLiveMixing(config))
         {
-            status = "live-mixing-required";
+            status = "bypass (live mixing required)";
             return false;
         }
 
         if (!_entries.TryGetValue(user.Id, out PreparedEntry? entry))
         {
-            status = "not-warmed";
+            status = _queuedUsers.ContainsKey(user.Id) ? "refreshing" : "miss (no entry)";
             return false;
         }
 
         if (!string.Equals(entry.ConfigurationFingerprint, GetConfigurationFingerprint(config, personalization), StringComparison.Ordinal))
         {
-            status = "fingerprint-mismatch";
+            status = "miss (fingerprint mismatch)";
             return false;
         }
 
-        if (!entry.TryTake(excludedIds, requestedCount, out items, out dtoCreationMilliseconds))
+        if (!entry.TryTake(excludedIds, requestedCount, out items, out dtoCreationMilliseconds, out int eligibleCount))
         {
-            status = "insufficient-eligible-items";
+            status = FormattableString.Invariant($"miss (eligible {eligibleCount} < requested {requestedCount})");
             QueueUserRefresh(user.Id);
             return false;
         }
@@ -91,7 +91,7 @@ public sealed class FeaturedPreparedCache
     }
 
     internal static bool CanPopulateFromRequest(string status)
-        => status is "not-warmed" or "fingerprint-mismatch";
+        => status is "miss (no entry)" or "miss (fingerprint mismatch)";
 
     internal static int GetRequestedPoolSize(PluginConfiguration config) => GetPoolSize(config);
 
@@ -163,6 +163,10 @@ public sealed class FeaturedPreparedCache
                 progress.Report((index + 1d) / users.Length * 100d);
                 await Task.Yield();
             }
+
+            FeaturedController.WarmItemsResponseSerialization(
+                config,
+                _personalization.Resolve(config, users[0].Id));
 
             HashSet<Guid> currentUserIds = users.Select(user => user.Id).ToHashSet();
             foreach (Guid cachedUserId in _entries.Keys.Where(id => !currentUserIds.Contains(id)))
@@ -326,13 +330,15 @@ public sealed class FeaturedPreparedCache
             HashSet<Guid> excludedIds,
             int count,
             out List<FeaturedItemDto> items,
-            out double dtoCreationMilliseconds)
+            out double dtoCreationMilliseconds,
+            out int eligibleCount)
         {
             lock (_sync)
             {
                 items = [];
                 dtoCreationMilliseconds = 0;
-                if (_items.Count(item => !excludedIds.Contains(item.Id)) < count) return false;
+                eligibleCount = _items.Count(item => !excludedIds.Contains(item.Id));
+                if (eligibleCount < count) return false;
 
                 if (_remaining.Count(item => !excludedIds.Contains(item.Id)) < count)
                 {

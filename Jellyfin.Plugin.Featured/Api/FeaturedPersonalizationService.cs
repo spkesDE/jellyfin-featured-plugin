@@ -9,10 +9,21 @@ public sealed record FeaturedPersonalizationContext(
     int RepeatCooldownHours,
     bool HasOverrides)
 {
+    // Profile.Id is deliberately excluded: effective profiles are synthesized for
+    // each resolution and receive a new model ID even when their behavior is identical.
+    // The cache is already keyed by user, so Profile.UserId is non-semantic here too.
     internal string Fingerprint => JsonSerializer.Serialize(new
     {
         SourceRules,
-        Profile,
+        Profile = new
+        {
+            Profile.Enabled,
+            Profile.UnplayedBoost,
+            Profile.FavouriteBoost,
+            Profile.PreferredGenreBoost,
+            Profile.InProgressSeriesBoost,
+            Profile.PreferredGenres
+        },
         ExcludedGenres,
         RepeatCooldownHours
     });

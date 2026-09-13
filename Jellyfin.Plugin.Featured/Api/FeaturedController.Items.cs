@@ -83,6 +83,7 @@ public sealed partial class FeaturedController
                 out items,
                 out string preparedCacheStatus,
                 out double cachedDtoMilliseconds);
+            string initialPreparedCacheStatus = preparedCacheStatus;
             double preparedCacheMilliseconds = Math.Max(0, GetElapsedMilliseconds(ref checkpoint) - cachedDtoMilliseconds);
 
             double ruleEngineMilliseconds = 0;
@@ -112,7 +113,9 @@ public sealed partial class FeaturedController
                     out double coldFillDtoMilliseconds);
                 preparedCacheMilliseconds += Math.Max(0, GetElapsedMilliseconds(ref checkpoint) - coldFillDtoMilliseconds);
                 dtoMilliseconds += coldFillDtoMilliseconds;
-                preparedCacheStatus = preparedCacheHit ? "cold-filled" : $"cold-fill-{coldFillStatus}";
+                preparedCacheStatus = preparedCacheHit
+                    ? $"cold-filled ({initialPreparedCacheStatus})"
+                    : $"cold-fill failed ({initialPreparedCacheStatus}; {coldFillStatus})";
             }
 
             if (!preparedCacheHit)
@@ -186,6 +189,23 @@ public sealed partial class FeaturedController
     }
 
     private FeaturedRuleEngine CreateEngine() => new(_config, _userManager, _libraryManager, _userDataManager, _candidateCache);
+
+    internal static void WarmItemsResponseSerialization(
+        PluginConfiguration config,
+        FeaturedPersonalizationContext personalization)
+    {
+        FeaturedItemDto placeholder = new()
+        {
+            Id = string.Empty,
+            Name = string.Empty,
+            MediaType = string.Empty,
+            ImageType = string.Empty,
+            HasLogo = false
+        };
+        _ = JsonSerializer.Serialize(
+            new FeaturedItemsResponseDto(config, [placeholder], InfiniteBatchSize, 1, personalization, null, null, null),
+            RuntimeConfigJsonOptions);
+    }
 
     private static double GetElapsedMilliseconds(ref long checkpoint)
     {

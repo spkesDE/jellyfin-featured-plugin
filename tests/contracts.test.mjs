@@ -345,7 +345,7 @@ test('normalization retains the saved 12.x bounds', async () => {
 
 test('prepared cache rotates through a shuffle bag before repeating items', async () => {
   const preparedCache = await read('Jellyfin.Plugin.Featured/Api/FeaturedPreparedCache.cs');
-  assert.match(preparedCache, /TryTake\(excludedIds, requestedCount, out items, out dtoCreationMilliseconds\)/);
+  assert.match(preparedCache, /TryTake\(excludedIds, requestedCount, out items, out dtoCreationMilliseconds, out int eligibleCount\)/);
   assert.match(preparedCache, /_remaining\.Count\(item => !excludedIds\.Contains\(item\.Id\)\) < count[\s\S]*?CreateShuffledBag\(_items\)/);
   assert.match(preparedCache, /PreparedItem candidate = _remaining\.Dequeue\(\)[\s\S]*?_remaining\.Enqueue\(candidate\)[\s\S]*?items\.Add\(candidate\.Dto\.Value\)/);
   assert.match(preparedCache, /Random\.Shared\.Next\(index \+ 1\)/);
@@ -372,15 +372,16 @@ test('warm prepared responses reuse prebuilt DTOs and expose bypass diagnostics'
   ]);
   assert.match(preparedCache, /new Lazy<FeaturedItemDto>[\s\S]*?_itemDtoFactory\.Create\(item, user, config\)/);
   assert.match(preparedCache, /out string status/);
-  for (const status of ['disabled', 'live-mixing-required', 'not-warmed', 'fingerprint-mismatch', 'insufficient-eligible-items', 'hit']) {
+  for (const status of ['bypass (disabled)', 'bypass (live mixing required)', 'miss (no entry)', 'miss (fingerprint mismatch)', 'refreshing', 'hit']) {
     assert.equal(preparedCache.includes(`\"${status}\"`), true, `missing prepared-cache status ${status}`);
   }
   assert.match(itemsController, /X-Featured-Prepared-Cache/);
   assert.match(itemsController, /Server-Timing/);
   assert.match(itemsController, /Featured request timing/);
   assert.match(itemsController, /JsonSerializer\.Serialize\(payload, RuntimeConfigJsonOptions\)/);
+  assert.match(preparedCache, /FeaturedController\.WarmItemsResponseSerialization/);
   assert.match(itemsController, /CanPopulateFromRequest\(preparedCacheStatus\)[\s\S]*?GetRequestedPoolSize\(_config\)[\s\S]*?StoreRequestPool/);
-  assert.match(itemsController, /preparedCacheHit \? "cold-filled"/);
+  assert.match(itemsController, /\$"cold-filled \(\{initialPreparedCacheStatus\}\)"/);
   assert.match(preparedCache, /eagerlyBuildDtos: false, replaceExisting: false/);
   assert.match(preparedCache, /eagerlyBuildDtos: true, replaceExisting: true/);
   assert.match(dtoFactory, /ResolveCandidates\(item, activeUser, config\)/);
