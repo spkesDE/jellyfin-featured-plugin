@@ -39,6 +39,8 @@ export class FeaturedCarousel {
   private trailerSlide: HTMLElement | null = null;
   private trailerDelayTimer: number | null = null;
   private trailerItemId: string | null = null;
+  private trailerMuted: boolean;
+  private trailerPaused = false;
 
   constructor(response: FeaturedResponse, loadItems?: FeaturedItemLoader, reportDisplayed?: FeaturedItemDisplayReporter) {
     this.response = response;
@@ -48,6 +50,7 @@ export class FeaturedCarousel {
     this.seenItemIds = new Set(this.items.map((item) => item.id));
     this.hasMore = response.infiniteLoading && response.hasMore;
     this.autoplayEnabled = response.autoplay;
+    this.trailerMuted = response.startTrailersMuted;
     this.root = document.createElement('section');
     this.root.className = `ec-root ec-ready ec-effect-${response.transitionEffect} ec-height-${response.heroHeightMode} ec-text-${response.heroTextPosition}${response.useHeroLayout ? ' ec-hero' : ''}`;
     this.root.dataset.featuredVersion = PLUGIN_VERSION;
@@ -125,6 +128,7 @@ export class FeaturedCarousel {
     this.root.addEventListener('keydown', this.onKeyDown);
     this.root.addEventListener('touchstart', this.onTouchStart, { passive: true });
     this.root.addEventListener('touchend', this.onTouchEnd, { passive: true });
+    document.addEventListener('keydown', this.onTrailerHotkey);
     document.addEventListener('visibilitychange', this.onVisibilityChange);
     this.show(0, false);
     this.updateAutoplayButton();
@@ -135,6 +139,7 @@ export class FeaturedCarousel {
     if (this.destroyed) return;
     this.destroyed = true;
     this.pauseTimer();
+    document.removeEventListener('keydown', this.onTrailerHotkey);
     document.removeEventListener('visibilitychange', this.onVisibilityChange);
     this.stopTrailer(this.slides[this.index - this.windowStart]);
     this.root.remove();
@@ -338,7 +343,7 @@ export class FeaturedCarousel {
       this.trailerDelayTimer = null;
       if (this.destroyed || document.hidden || this.index !== expectedIndex) return;
       const player = createTrailerPlayer(item.trailer!, {
-        muted: this.response.startTrailersMuted,
+        muted: this.trailerMuted,
         startOffsetSeconds: this.response.trailerStartOffsetSeconds,
         endOffsetSeconds: this.response.trailerEndOffsetSeconds,
         loop: !this.response.waitForTrailerToFinish,
@@ -353,6 +358,7 @@ export class FeaturedCarousel {
         return;
       }
       this.trailerPlayer = player;
+      this.trailerPaused = false;
       this.trailerSlide = slide;
       this.root.classList.add('ec-trailer-playing');
       slide.classList.add('ec-trailer-active');
@@ -374,6 +380,7 @@ export class FeaturedCarousel {
     this.trailerSlide?.classList.remove('ec-trailer-active');
     this.trailerSlide = null;
     this.trailerItemId = null;
+    this.trailerPaused = false;
   }
 
   private pauseTimer = (): void => {
@@ -383,7 +390,7 @@ export class FeaturedCarousel {
 
   private restartTimer = (): void => {
     this.pauseTimer();
-    if (!this.autoplayEnabled || this.slides.length < 2 || document.hidden || this.destroyed) return;
+    if (!this.autoplayEnabled || this.slides.length < 2 || document.hidden || this.destroyed || this.trailerPaused) return;
     this.timer = window.setInterval(() => this.show(this.index + 1, false), Math.max(1000, this.response.autoplayInterval));
   };
 
@@ -407,6 +414,28 @@ export class FeaturedCarousel {
     if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
     event.preventDefault();
     this.show(this.index + (event.key === 'ArrowLeft' ? -1 : 1));
+  };
+
+  private onTrailerHotkey = (event: KeyboardEvent): void => {
+    if (!this.trailerPlayer || event.repeat || event.altKey || event.ctrlKey || event.metaKey) return;
+    const target = event.target as HTMLElement | null;
+    if (target?.closest('input, textarea, select, button, [contenteditable="true"], [role="dialog"]')) return;
+    if (event.key.toLowerCase() === 'm') {
+      event.preventDefault();
+      this.trailerMuted = !this.trailerMuted;
+      void this.trailerPlayer.setMuted(this.trailerMuted);
+      return;
+    }
+    if (event.code !== 'Space' && event.key !== ' ') return;
+    event.preventDefault();
+    this.trailerPaused = !this.trailerPaused;
+    if (this.trailerPaused) {
+      void this.trailerPlayer.pause();
+      this.pauseTimer();
+    } else {
+      void this.trailerPlayer.play();
+      if (!this.response.waitForTrailerToFinish) this.restartTimer();
+    }
   };
 
   private onTouchStart = (event: TouchEvent): void => {

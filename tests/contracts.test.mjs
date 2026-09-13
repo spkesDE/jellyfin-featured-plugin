@@ -170,6 +170,11 @@ test('proper trailer support keeps resolution and playback source independent', 
   assert.match(carousel, /waitForTrailerToFinish[\s\S]*?pauseTimer\(\)/);
   assert.match(carousel, /trailerDelayMilliseconds/);
   assert.match(carousel, /trailerItemId === item\.id[\s\S]*?this\.stopTrailer\(\)/);
+  assert.match(player, /pause\(\): Promise<void>[\s\S]*?setMuted\(muted: boolean\): Promise<void>/);
+  assert.match(carousel, /event\.key\.toLowerCase\(\) === 'm'[\s\S]*?setMuted\(this\.trailerMuted\)/);
+  assert.match(carousel, /event\.code !== 'Space'[\s\S]*?trailerPlayer\.pause\(\)[\s\S]*?trailerPlayer\.play\(\)/);
+  assert.match(carousel, /closest\('input, textarea, select, button,[\s\S]*?\[role="dialog"\]'/);
+  assert.match(carousel, /restartTimer[\s\S]*?this\.trailerPaused/);
   assert.match(carousel, /querySelectorAll\(':scope > \.ec-trailer'\)/);
   assert.match(carousel, /classList\.add\('ec-trailer-playing'\)[\s\S]*?classList\.remove\('ec-trailer-playing'\)/);
   assert.match(carousel, /classList\.add\('ec-trailer-active'\)[\s\S]*?classList\.remove\('ec-trailer-active'\)/);

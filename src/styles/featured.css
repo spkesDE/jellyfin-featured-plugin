@@ -30,6 +30,9 @@
 .ec-preferences-dialog h2 { margin: 0; }
 .ec-preferences-dialog fieldset { border: 1px solid rgb(255 255 255 / .15); border-radius: .45rem; margin: 1rem 0 0; padding: .85rem; }
 .ec-preferences-dialog legend { font-weight: 700; padding: 0 .35rem; }
+.ec-preferences-hotkeys { align-items: center; background: rgb(255 255 255 / .06); border-radius: .45rem; display: flex; flex-wrap: wrap; gap: .55rem 1rem; padding: .65rem .75rem; }
+.ec-preferences-hotkeys strong { margin-right: auto; }
+.ec-preferences-hotkeys kbd { background: rgb(0 0 0 / .34); border: 1px solid rgb(255 255 255 / .28); border-radius: .25rem; box-shadow: 0 1px 0 rgb(255 255 255 / .16); display: inline-block; font: inherit; font-size: .85em; font-weight: 700; min-width: 1.7rem; padding: .12rem .38rem; text-align: center; }
 .ec-preferences-close { background: none; border: 0; color: inherit; cursor: pointer; font-size: 2rem; }
 .ec-preference-source { align-items: center; display: grid; gap: .75rem; grid-template-columns: minmax(0, 1fr) minmax(11rem, auto); margin: .4rem 0; }
 .ec-preference-check { align-items: center; display: flex; gap: .55rem; min-height: 2rem; }

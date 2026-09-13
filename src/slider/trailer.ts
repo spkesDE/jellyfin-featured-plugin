@@ -12,6 +12,8 @@ export interface TrailerPlaybackOptions {
 export interface TrailerPlayer {
   readonly element: HTMLElement;
   play(): Promise<void>;
+  pause(): Promise<void>;
+  setMuted(muted: boolean): Promise<void>;
   destroy(): void;
 }
 
@@ -61,6 +63,14 @@ abstract class HtmlVideoPlayer implements TrailerPlayer {
 
   async play(): Promise<void> {
     await this.element.play();
+  }
+
+  async pause(): Promise<void> {
+    this.element.pause();
+  }
+
+  async setMuted(muted: boolean): Promise<void> {
+    this.element.muted = muted;
   }
 
   destroy(): void {
@@ -121,6 +131,17 @@ export class YouTubePlayer implements TrailerPlayer {
   async play(): Promise<void> {
     await this.ready;
     this.player?.playVideo();
+  }
+
+  async pause(): Promise<void> {
+    await this.ready;
+    this.player?.pauseVideo();
+  }
+
+  async setMuted(muted: boolean): Promise<void> {
+    await this.ready;
+    if (muted) this.player?.mute();
+    else this.player?.unMute();
   }
 
   destroy(): void {
