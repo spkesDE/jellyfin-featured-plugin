@@ -66,6 +66,7 @@ internal static class PluginConfigurationNormalizer
         config.PersonalizationDefaults.InProgressSeriesBoost = Math.Clamp(config.PersonalizationDefaults.InProgressSeriesBoost, 0, 100);
         config.PersonalizationDefaults.PreferredGenres = NormalizeValues(config.PersonalizationDefaults.PreferredGenres);
         config.PersonalizationPolicy ??= new FeaturedPersonalizationPolicy();
+        config.Presets = NormalizePresets(config.Presets);
         config.RepeatCooldownDays = Math.Clamp(config.RepeatCooldownDays, 0, 3650);
         config.MaximumItemsPerGenre = Math.Clamp(config.MaximumItemsPerGenre, 0, 100);
         config.MaximumItemsPerFranchise = Math.Clamp(config.MaximumItemsPerFranchise, 0, 100);
@@ -98,6 +99,76 @@ internal static class PluginConfigurationNormalizer
         config.HeroBackdropPosition = config.HeroBackdropPosition is "top" or "bottom" ? config.HeroBackdropPosition : "center";
         config.TitleDisplayMode = config.TitleDisplayMode is "title" ? "title" : "logo";
         return config;
+    }
+
+    private static FeaturedPreset[] NormalizePresets(FeaturedPreset[]? presets)
+    {
+        return (presets ?? [])
+            .Where(preset => preset is not null)
+            .Select(preset =>
+            {
+                preset.Id = NormalizeId(preset.Id);
+                preset.Name = string.IsNullOrWhiteSpace(preset.Name) ? "Featured preset" : preset.Name.Trim();
+                preset.Priority = Math.Clamp(preset.Priority, -1000, 1000);
+                (preset.StartsAt, preset.EndsAt) = NormalizeSchedule(preset.StartsAt, preset.EndsAt);
+                preset.SourceRules = (preset.SourceRules ?? [])
+                    .Where(rule => rule is not null && ValidSourceTypes.Contains(rule.Type))
+                    .Select(NormalizeSourceRule)
+                    .Take(50)
+                    .ToArray();
+                preset.GlobalFilters = NormalizeFilters(preset.GlobalFilters);
+                preset.PersonalizationPolicy ??= new FeaturedPersonalizationPolicy();
+                preset.Mixer ??= new FeaturedPresetMixerSettings();
+                preset.Mixer.RepeatCooldownDays = Math.Clamp(preset.Mixer.RepeatCooldownDays, 0, 3650);
+                preset.Mixer.MaximumItemsPerGenre = Math.Clamp(preset.Mixer.MaximumItemsPerGenre, 0, 100);
+                preset.Mixer.MaximumItemsPerFranchise = Math.Clamp(preset.Mixer.MaximumItemsPerFranchise, 0, 100);
+                preset.Mixer.RandomMediaCount = Math.Clamp(preset.Mixer.RandomMediaCount, 1, 100);
+                preset.Layout ??= new FeaturedPresetLayoutSettings();
+                NormalizePresetLayout(preset.Layout);
+                preset.Trailers ??= new FeaturedPresetTrailerSettings();
+                NormalizePresetTrailers(preset.Trailers);
+                return preset;
+            })
+            .DistinctBy(preset => preset.Id, StringComparer.OrdinalIgnoreCase)
+            .Take(50)
+            .ToArray();
+    }
+
+    private static void NormalizePresetLayout(FeaturedPresetLayoutSettings layout)
+    {
+        layout.AutoplayInterval = Math.Clamp(layout.AutoplayInterval, 1, 3600);
+        layout.BannerHeight = Math.Clamp(layout.BannerHeight, 240, 900);
+        layout.TabletBannerHeight = Math.Clamp(layout.TabletBannerHeight, 240, 700);
+        layout.MobileBannerHeight = Math.Clamp(layout.MobileBannerHeight, 220, 600);
+        layout.HeroBorderRadius = Math.Clamp(layout.HeroBorderRadius, 0, 48);
+        layout.HeroGradientStrength = Math.Clamp(layout.HeroGradientStrength, 0, 100);
+        layout.HeroHeightMode = layout.HeroHeightMode is "auto" or "compact" or "cinematic" or "custom" ? layout.HeroHeightMode : "standard";
+        layout.HeroTextPosition = layout.HeroTextPosition is "center" or "right" ? layout.HeroTextPosition : "left";
+        layout.MediaPadding = Math.Clamp(layout.MediaPadding, -240, 240);
+        layout.TransitionEffect = layout.TransitionEffect is "fade" ? "fade" : "slide";
+        layout.HeroBackdropPosition = layout.HeroBackdropPosition is "top" or "bottom" ? layout.HeroBackdropPosition : "center";
+        layout.TitleDisplayMode = layout.TitleDisplayMode is "title" ? "title" : "logo";
+        layout.SecondaryButtonText = NullIfWhiteSpace(layout.SecondaryButtonText);
+        layout.Heading = NullIfWhiteSpace(layout.Heading);
+        layout.PlayButtonText = NullIfWhiteSpace(layout.PlayButtonText);
+    }
+
+    private static void NormalizePresetTrailers(FeaturedPresetTrailerSettings trailers)
+    {
+        trailers.TrailerSourcePriority = trailers.TrailerSourcePriority switch
+        {
+            FeaturedTrailerSourcePriorities.PreferRemote => FeaturedTrailerSourcePriorities.PreferRemote,
+            FeaturedTrailerSourcePriorities.LocalOnly => FeaturedTrailerSourcePriorities.LocalOnly,
+            FeaturedTrailerSourcePriorities.RemoteOnly => FeaturedTrailerSourcePriorities.RemoteOnly,
+            FeaturedTrailerSourcePriorities.Automatic => FeaturedTrailerSourcePriorities.Automatic,
+            _ => FeaturedTrailerSourcePriorities.PreferLocal
+        };
+        trailers.TrailerDelayMilliseconds = Math.Clamp(trailers.TrailerDelayMilliseconds, 0, 30000);
+        trailers.TrailerStartOffsetSeconds = Math.Clamp(trailers.TrailerStartOffsetSeconds, 0, 3600);
+        trailers.TrailerEndOffsetSeconds = Math.Clamp(trailers.TrailerEndOffsetSeconds, 0, 3600);
+        trailers.MultipleTrailerMode = trailers.MultipleTrailerMode == FeaturedMultipleTrailerModes.Random
+            ? FeaturedMultipleTrailerModes.Random
+            : FeaturedMultipleTrailerModes.First;
     }
 
     private static FeaturedSourceRule NormalizeSourceRule(FeaturedSourceRule rule)
@@ -224,6 +295,9 @@ internal static class PluginConfigurationNormalizer
 
     private static string NormalizeId(string? value)
         => string.IsNullOrWhiteSpace(value) ? Guid.NewGuid().ToString("N") : value.Trim();
+
+    private static string? NullIfWhiteSpace(string? value)
+        => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 
     private static (DateTimeOffset? StartsAt, DateTimeOffset? EndsAt) NormalizeSchedule(
         DateTimeOffset? startsAt,

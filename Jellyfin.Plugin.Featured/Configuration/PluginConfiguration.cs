@@ -29,6 +29,8 @@ public sealed class PluginConfiguration : BasePluginConfiguration
 
     public FeaturedPersonalizationPolicy PersonalizationPolicy { get; set; } = new();
 
+    public FeaturedPreset[] Presets { get; set; } = [];
+
     public int RepeatCooldownDays { get; set; }
 
     public bool RelaxRepeatCooldownWhenNeeded { get; set; }
@@ -130,6 +132,89 @@ public sealed class PluginConfiguration : BasePluginConfiguration
     public string? PlayButtonText { get; set; }
 
     public bool Debug { get; set; }
+}
+
+public sealed class FeaturedPreset
+{
+    public string Id { get; set; } = Guid.NewGuid().ToString("N");
+
+    public string Name { get; set; } = "Featured preset";
+
+    public bool Enabled { get; set; } = true;
+
+    public int Priority { get; set; }
+
+    public DateTimeOffset? StartsAt { get; set; }
+
+    public DateTimeOffset? EndsAt { get; set; }
+
+    public FeaturedSourceRule[] SourceRules { get; set; } = [];
+
+    public FeaturedFilterRule[] GlobalFilters { get; set; } = [];
+
+    public FeaturedPersonalizationPolicy PersonalizationPolicy { get; set; } = new();
+
+    public FeaturedPresetMixerSettings Mixer { get; set; } = new();
+
+    public FeaturedPresetLayoutSettings Layout { get; set; } = new();
+
+    public FeaturedPresetTrailerSettings Trailers { get; set; } = new();
+}
+
+public sealed class FeaturedPresetMixerSettings
+{
+    public int RepeatCooldownDays { get; set; }
+    public bool RelaxRepeatCooldownWhenNeeded { get; set; }
+    public int MaximumItemsPerGenre { get; set; }
+    public int MaximumItemsPerFranchise { get; set; }
+    public bool ExcludeItemsFromSameSeries { get; set; }
+    public int RandomMediaCount { get; set; } = 5;
+}
+
+public sealed class FeaturedPresetLayoutSettings
+{
+    public bool EnableAutoplay { get; set; } = true;
+    public bool ShowAutoplayButton { get; set; } = true;
+    public int AutoplayInterval { get; set; } = 10;
+    public bool ShowPlayButton { get; set; } = true;
+    public bool ShowNavigationArrows { get; set; } = true;
+    public bool ShowSlidePosition { get; set; } = true;
+    public int MediaPadding { get; set; }
+    public string TitleDisplayMode { get; set; } = "logo";
+    public bool ShowRating { get; set; } = true;
+    public bool ShowDescription { get; set; } = true;
+    public bool HideOnTvLayout { get; set; }
+    public bool UseHeroLayout { get; set; } = true;
+    public string HeroHeightMode { get; set; } = "standard";
+    public int TabletBannerHeight { get; set; } = 400;
+    public int MobileBannerHeight { get; set; } = 340;
+    public int HeroBorderRadius { get; set; }
+    public int HeroGradientStrength { get; set; } = 85;
+    public string HeroTextPosition { get; set; } = "left";
+    public string TransitionEffect { get; set; } = "slide";
+    public string HeroBackdropPosition { get; set; } = "center";
+    public int BannerHeight { get; set; } = 360;
+    public bool ShowYear { get; set; } = true;
+    public bool ShowRuntime { get; set; } = true;
+    public bool ShowSecondaryButton { get; set; } = true;
+    public string? SecondaryButtonText { get; set; }
+    public bool ShowPaginationDots { get; set; } = true;
+    public string? Heading { get; set; }
+    public string? PlayButtonText { get; set; }
+}
+
+public sealed class FeaturedPresetTrailerSettings
+{
+    public bool EnableBackgroundTrailers { get; set; }
+    public string TrailerSourcePriority { get; set; } = FeaturedTrailerSourcePriorities.PreferLocal;
+    public bool FallBackToRemoteTrailers { get; set; } = true;
+    public bool StartTrailersMuted { get; set; } = true;
+    public bool WaitForTrailerToFinish { get; set; }
+    public int TrailerDelayMilliseconds { get; set; } = 1500;
+    public int TrailerStartOffsetSeconds { get; set; }
+    public int TrailerEndOffsetSeconds { get; set; }
+    public string MultipleTrailerMode { get; set; } = FeaturedMultipleTrailerModes.First;
+    public bool AllowTrailersOnMobile { get; set; }
 }
 
 public sealed class FeaturedSourceRule

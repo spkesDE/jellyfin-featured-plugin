@@ -60,7 +60,30 @@ test('item and runtime contracts retain their established names and interval uni
   assert.match(dtos, /JsonPropertyName\("official_rating"\)/);
   assert.match(dtos, /JsonPropertyName\("critic_rating"\)/);
   assert.match(dtos, /JsonPropertyName\("community_rating"\)/);
-  assert.match(controller, /new FeaturedItemsResponseDto\(_config, items, InfiniteBatchSize, requestedCount, personalization\),\s*RuntimeConfigJsonOptions/);
+  assert.match(controller, /new FeaturedItemsResponseDto\([\s\S]*?_config,[\s\S]*?items,[\s\S]*?personalization,[\s\S]*?_presetResolution\.ActivePresetId/);
+});
+
+test('featured presets resolve schedules and override all roadmap sections', async () => {
+  const [configuration, normalizer, resolver, controller, response, cache] = await Promise.all([
+    read('Jellyfin.Plugin.Featured/Configuration/PluginConfiguration.cs'),
+    read('Jellyfin.Plugin.Featured/Configuration/PluginConfigurationNormalizer.cs'),
+    read('Jellyfin.Plugin.Featured/Configuration/FeaturedPresetResolver.cs'),
+    read('Jellyfin.Plugin.Featured/Api/FeaturedController.cs'),
+    read('Jellyfin.Plugin.Featured/Api/FeaturedResponseDtos.cs'),
+    read('Jellyfin.Plugin.Featured/Api/FeaturedPreparedCache.cs')
+  ]);
+  for (const section of ['SourceRules', 'GlobalFilters', 'PersonalizationPolicy', 'Mixer', 'Layout', 'Trailers']) {
+    assert.match(configuration, new RegExp(`class FeaturedPreset[\\s\\S]*?${section}`), `preset misses ${section}`);
+  }
+  assert.match(normalizer, /NormalizePresets[\s\S]*?NormalizeSchedule[\s\S]*?DistinctBy\(preset => preset\.Id/);
+  assert.match(resolver, /preset\.StartsAt\.Value <= now[\s\S]*?preset\.EndsAt\.Value > now/);
+  assert.match(resolver, /OrderByDescending\(candidate => candidate\.Preset\.Priority\)[\s\S]*?ThenByDescending\(candidate => candidate\.Preset\.StartsAt/);
+  assert.match(resolver, /config\.SourceRules = preset\.SourceRules[\s\S]*?config\.PersonalizationPolicy = preset\.PersonalizationPolicy/);
+  assert.match(resolver, /config\.UseHeroLayout = preset\.Layout\.UseHeroLayout[\s\S]*?config\.TrailerSourcePriority = preset\.Trailers\.TrailerSourcePriority/);
+  assert.match(controller, /FeaturedPresetResolver\.Resolve\(baseConfig, DateTimeOffset\.UtcNow\)/);
+  assert.match(response, /public string\? ActivePresetName \{ get; \}/);
+  assert.match(response, /public DateTimeOffset\? NextPresetChange \{ get; \}/);
+  assert.match(cache, /FeaturedPresetResolver\.Resolve\(baseConfig, DateTimeOffset\.UtcNow\)\.Configuration/);
 });
 
 test('personalization is authenticated, policy-bound, and user scoped', async () => {

@@ -72,7 +72,15 @@ public sealed partial class FeaturedController
 
             List<FeaturedItemDto> items = selectedItems.Select(item => CreateItemResponse(item, activeUser)).ToList();
             return new JsonResult(
-                new FeaturedItemsResponseDto(_config, items, InfiniteBatchSize, requestedCount, personalization),
+                new FeaturedItemsResponseDto(
+                    _config,
+                    items,
+                    InfiniteBatchSize,
+                    requestedCount,
+                    personalization,
+                    _presetResolution.ActivePresetId,
+                    _presetResolution.ActivePresetName,
+                    _presetResolution.NextScheduleChange),
                 RuntimeConfigJsonOptions);
         }
         catch (Exception ex)

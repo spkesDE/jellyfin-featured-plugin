@@ -223,7 +223,10 @@ public sealed class FeaturedPreparedCache
             || config.SourceRules.Any(rule => rule.MinimumItems > 0 || rule.MaximumItems > 0 || rule.IsFallback);
 
     private static PluginConfiguration GetCurrentConfiguration()
-        => PluginConfigurationNormalizer.Normalize(Plugin.Instance?.Configuration);
+    {
+        PluginConfiguration baseConfig = PluginConfigurationNormalizer.Normalize(Plugin.Instance?.Configuration);
+        return FeaturedPresetResolver.Resolve(baseConfig, DateTimeOffset.UtcNow).Configuration;
+    }
 
     private string GetConfigurationFingerprint(PluginConfiguration config, FeaturedPersonalizationContext personalization)
         => JsonSerializer.Serialize(config) + personalization.Fingerprint;

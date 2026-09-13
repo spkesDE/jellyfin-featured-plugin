@@ -87,7 +87,11 @@ public abstract class FeaturedDisplaySettingsDto
 
 public sealed class FeaturedRuntimeConfigurationDto : FeaturedDisplaySettingsDto
 {
-    internal FeaturedRuntimeConfigurationDto(PluginConfiguration config)
+    internal FeaturedRuntimeConfigurationDto(
+        PluginConfiguration config,
+        string? activePresetId,
+        string? activePresetName,
+        DateTimeOffset? nextPresetChange)
         : base(config)
     {
         FrontendInjectionMethod = config.FrontendInjectionMethod;
@@ -99,6 +103,9 @@ public sealed class FeaturedRuntimeConfigurationDto : FeaturedDisplaySettingsDto
         AutoplayInterval = config.AutoplayInterval;
         ReduceImageSize = config.ReduceImageSize;
         Debug = config.Debug;
+        ActivePresetId = activePresetId;
+        ActivePresetName = activePresetName;
+        NextPresetChange = nextPresetChange;
     }
 
     public string FrontendInjectionMethod { get; }
@@ -110,6 +117,15 @@ public sealed class FeaturedRuntimeConfigurationDto : FeaturedDisplaySettingsDto
     public int AutoplayInterval { get; }
     public bool ReduceImageSize { get; }
     public bool Debug { get; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? ActivePresetId { get; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? ActivePresetName { get; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public DateTimeOffset? NextPresetChange { get; }
 }
 
 public sealed class FeaturedItemsResponseDto : FeaturedDisplaySettingsDto
@@ -119,7 +135,10 @@ public sealed class FeaturedItemsResponseDto : FeaturedDisplaySettingsDto
         IReadOnlyList<FeaturedItemDto> items,
         int batchSize,
         int requestedCount,
-        FeaturedPersonalizationContext personalization)
+        FeaturedPersonalizationContext personalization,
+        string? activePresetId,
+        string? activePresetName,
+        DateTimeOffset? nextPresetChange)
         : base(config)
     {
         Items = items;
@@ -131,6 +150,9 @@ public sealed class FeaturedItemsResponseDto : FeaturedDisplaySettingsDto
         ReduceImageSizes = config.ReduceImageSize;
         TrackDisplayedItems = personalization.RepeatCooldownDays > 0;
         PersonalizationEnabled = config.PersonalizationPolicy.Enabled;
+        ActivePresetId = activePresetId;
+        ActivePresetName = activePresetName;
+        NextPresetChange = nextPresetChange;
     }
 
     public IReadOnlyList<FeaturedItemDto> Items { get; }
@@ -142,6 +164,15 @@ public sealed class FeaturedItemsResponseDto : FeaturedDisplaySettingsDto
     public bool ReduceImageSizes { get; }
     public bool TrackDisplayedItems { get; }
     public bool PersonalizationEnabled { get; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? ActivePresetId { get; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? ActivePresetName { get; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public DateTimeOffset? NextPresetChange { get; }
 }
 
 public sealed class FeaturedPreferencesResponse

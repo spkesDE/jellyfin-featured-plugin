@@ -43,7 +43,8 @@ public sealed partial class FeaturedController
         }
     }
 
-    private FeaturedRuntimeConfigurationDto CreateRuntimeConfiguration() => new(_config);
+    private FeaturedRuntimeConfigurationDto CreateRuntimeConfiguration()
+        => new(_config, _presetResolution.ActivePresetId, _presetResolution.ActivePresetName, _presetResolution.NextScheduleChange);
 
     [HttpGet("config-script")]
     [ProducesResponseType(StatusCodes.Status200OK)]

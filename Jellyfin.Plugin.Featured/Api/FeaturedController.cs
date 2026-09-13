@@ -11,6 +11,7 @@ public sealed partial class FeaturedController : ControllerBase
 {
     private static readonly JsonSerializerOptions RuntimeConfigJsonOptions = new(JsonSerializerDefaults.Web);
     private readonly PluginConfiguration _config;
+    private readonly FeaturedPresetResolution _presetResolution;
     private readonly IUserManager _userManager;
     private readonly ILibraryManager _libraryManager;
     private readonly IUserDataManager _userDataManager;
@@ -41,7 +42,9 @@ public sealed partial class FeaturedController : ControllerBase
         _personalization = personalization;
         _trailerResolver = trailerResolver;
         _logger = logger;
-        _config = PluginConfigurationNormalizer.Normalize(Plugin.Instance?.Configuration);
+        PluginConfiguration baseConfig = PluginConfigurationNormalizer.Normalize(Plugin.Instance?.Configuration);
+        _presetResolution = FeaturedPresetResolver.Resolve(baseConfig, DateTimeOffset.UtcNow);
+        _config = _presetResolution.Configuration;
     }
 
 
