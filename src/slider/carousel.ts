@@ -36,6 +36,7 @@ export class FeaturedCarousel {
   private destroyed = false;
   private lastReportedItemId: string | null = null;
   private trailerPlayer: TrailerPlayer | null = null;
+  private trailerSlide: HTMLElement | null = null;
   private trailerDelayTimer: number | null = null;
   private trailerItemId: string | null = null;
 
@@ -352,6 +353,8 @@ export class FeaturedCarousel {
         return;
       }
       this.trailerPlayer = player;
+      this.trailerSlide = slide;
+      slide.classList.add('ec-trailer-active');
       slide.querySelectorAll(':scope > .ec-trailer').forEach((element) => element.remove());
       slide.querySelector('.ec-backdrop')?.after(player.element);
       if (this.response.waitForTrailerToFinish) this.pauseTimer();
@@ -366,6 +369,8 @@ export class FeaturedCarousel {
     this.trailerDelayTimer = null;
     this.trailerPlayer?.destroy();
     this.trailerPlayer = null;
+    this.trailerSlide?.classList.remove('ec-trailer-active');
+    this.trailerSlide = null;
     this.trailerItemId = null;
   }
 

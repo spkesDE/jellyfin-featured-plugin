@@ -390,6 +390,19 @@
   height: var(--ec-height);
 }
 
+.ec-root.ec-hero .ec-slide.ec-trailer-active {
+  background: linear-gradient(to bottom,
+      #000 0%,
+      #000 76%,
+      rgba(0, 0, 0, .88) 84%,
+      rgba(0, 0, 0, .48) 92%,
+      transparent 100%);
+}
+
+.ec-root.ec-hero .ec-slide.ec-trailer-active .ec-backdrop {
+  opacity: 0;
+}
+
 .ec-root.ec-hero .ec-backdrop,
 .ec-root.ec-hero .ec-trailer {
   -webkit-mask-image: linear-gradient(to bottom,
