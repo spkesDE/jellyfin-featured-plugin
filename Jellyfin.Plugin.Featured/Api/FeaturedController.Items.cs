@@ -1,4 +1,6 @@
+using System.Diagnostics;
 using System.Net.Mime;
+using System.Text.Json;
 using Jellyfin.Extensions;
 using MediaBrowser.Controller.Entities;
 using Microsoft.AspNetCore.Authorization;
@@ -51,6 +53,8 @@ public sealed partial class FeaturedController
 
     private ActionResult<FeaturedItemsResponseDto> BuildItemsResponse(HashSet<Guid> excludedIds)
     {
+        long requestStarted = Stopwatch.GetTimestamp();
+        long checkpoint = requestStarted;
         try
         {
             Jellyfin.Database.Implementations.Entities.User? activeUser = GetActiveUser();
@@ -60,28 +64,119 @@ public sealed partial class FeaturedController
             }
 
             int requestedCount = _config.EnableInfiniteLoading ? InfiniteBatchSize : _config.RandomMediaCount;
+            double userConfigMilliseconds = GetElapsedMilliseconds(ref checkpoint);
+
             FeaturedPersonalizationContext personalization = _personalization.Resolve(_config, activeUser.Id);
+            double personalizationMilliseconds = GetElapsedMilliseconds(ref checkpoint);
+
             IReadOnlyDictionary<Guid, DateTimeOffset> recentHistory = _historyStore.GetRecentItems(activeUser.Id, personalization.RepeatCooldownHours);
+            double historyMilliseconds = GetElapsedMilliseconds(ref checkpoint);
+
             HashSet<Guid> allExcludedIds = [.. excludedIds, .. recentHistory.Keys];
-            List<BaseItem> selectedItems;
-            if (!_preparedCache.TryGetItems(activeUser, _config, personalization, allExcludedIds, requestedCount, out selectedItems))
+            List<FeaturedItemDto> items;
+            bool preparedCacheHit = _preparedCache.TryGetItems(
+                activeUser,
+                _config,
+                personalization,
+                allExcludedIds,
+                requestedCount,
+                out items,
+                out string preparedCacheStatus,
+                out double cachedDtoMilliseconds);
+            double preparedCacheMilliseconds = Math.Max(0, GetElapsedMilliseconds(ref checkpoint) - cachedDtoMilliseconds);
+
+            double ruleEngineMilliseconds = 0;
+            double dtoMilliseconds = cachedDtoMilliseconds;
+            IReadOnlyList<BaseItem>? coldPoolItems = null;
+            if (!preparedCacheHit && FeaturedPreparedCache.CanPopulateFromRequest(preparedCacheStatus))
             {
-                selectedItems = CreateEngine().SelectItems(activeUser, excludedIds, recentHistory, requestedCount, personalization).Items;
+                FeaturedSelection coldPool = CreateEngine().SelectItems(
+                    activeUser,
+                    [],
+                    recentHistory,
+                    FeaturedPreparedCache.GetRequestedPoolSize(_config),
+                    personalization);
+                LogRuleEngineTiming(coldPool.Timing);
+                coldPoolItems = coldPool.Items;
+                ruleEngineMilliseconds += GetElapsedMilliseconds(ref checkpoint);
+                _preparedCache.StoreRequestPool(activeUser, _config, personalization, coldPool.Items);
+
+                preparedCacheHit = _preparedCache.TryGetItems(
+                    activeUser,
+                    _config,
+                    personalization,
+                    allExcludedIds,
+                    requestedCount,
+                    out items,
+                    out string coldFillStatus,
+                    out double coldFillDtoMilliseconds);
+                preparedCacheMilliseconds += Math.Max(0, GetElapsedMilliseconds(ref checkpoint) - coldFillDtoMilliseconds);
+                dtoMilliseconds += coldFillDtoMilliseconds;
+                preparedCacheStatus = preparedCacheHit ? "cold-filled" : $"cold-fill-{coldFillStatus}";
+            }
+
+            if (!preparedCacheHit)
+            {
+                List<BaseItem> selectedItems;
+                if (coldPoolItems is not null)
+                {
+                    selectedItems = coldPoolItems
+                        .Where(item => !allExcludedIds.Contains(item.Id))
+                        .Take(requestedCount)
+                        .ToList();
+                }
+                else
+                {
+                    FeaturedSelection liveSelection = CreateEngine()
+                        .SelectItems(activeUser, excludedIds, recentHistory, requestedCount, personalization);
+                    LogRuleEngineTiming(liveSelection.Timing);
+                    selectedItems = liveSelection.Items;
+                    ruleEngineMilliseconds += GetElapsedMilliseconds(ref checkpoint);
+                }
+
+                items = selectedItems.Select(item => _itemDtoFactory.Create(item, activeUser, _config)).ToList();
+                dtoMilliseconds += GetElapsedMilliseconds(ref checkpoint);
                 if (_config.EnablePreparedCache) _preparedCache.QueueUserRefresh(activeUser.Id);
             }
 
-            List<FeaturedItemDto> items = selectedItems.Select(item => CreateItemResponse(item, activeUser)).ToList();
-            return new JsonResult(
-                new FeaturedItemsResponseDto(
-                    _config,
-                    items,
-                    InfiniteBatchSize,
-                    requestedCount,
-                    personalization,
-                    _presetResolution.ActivePresetId,
-                    _presetResolution.ActivePresetName,
-                    _presetResolution.NextScheduleChange),
-                RuntimeConfigJsonOptions);
+            FeaturedItemsResponseDto payload = new FeaturedItemsResponseDto(
+                _config,
+                items,
+                InfiniteBatchSize,
+                requestedCount,
+                personalization,
+                _presetResolution.ActivePresetId,
+                _presetResolution.ActivePresetName,
+                _presetResolution.NextScheduleChange);
+            string json = JsonSerializer.Serialize(payload, RuntimeConfigJsonOptions);
+            double serializationMilliseconds = GetElapsedMilliseconds(ref checkpoint);
+            double totalMilliseconds = Stopwatch.GetElapsedTime(requestStarted).TotalMilliseconds;
+
+            Response.Headers["X-Featured-Prepared-Cache"] = preparedCacheStatus;
+            if (_config.Debug)
+            {
+                Response.Headers["Server-Timing"] = string.Join(", ",
+                    FormatServerTiming("user-config", userConfigMilliseconds),
+                    FormatServerTiming("personalization", personalizationMilliseconds),
+                    FormatServerTiming("history", historyMilliseconds),
+                    FormatServerTiming("prepared-cache", preparedCacheMilliseconds, preparedCacheStatus),
+                    FormatServerTiming("rule-engine", ruleEngineMilliseconds),
+                    FormatServerTiming("dto-trailers", dtoMilliseconds),
+                    FormatServerTiming("serialization", serializationMilliseconds),
+                    FormatServerTiming("total", totalMilliseconds));
+                LogRequestTiming(
+                    userConfigMilliseconds,
+                    personalizationMilliseconds,
+                    historyMilliseconds,
+                    preparedCacheMilliseconds,
+                    preparedCacheStatus,
+                    ruleEngineMilliseconds,
+                    dtoMilliseconds,
+                    serializationMilliseconds,
+                    totalMilliseconds);
+            }
+
+            return Content(json, MediaTypeNames.Application.Json);
         }
         catch (Exception ex)
         {
@@ -92,34 +187,49 @@ public sealed partial class FeaturedController
 
     private FeaturedRuleEngine CreateEngine() => new(_config, _userManager, _libraryManager, _userDataManager, _candidateCache);
 
-    private FeaturedItemDto CreateItemResponse(
-        BaseItem item,
-        Jellyfin.Database.Implementations.Entities.User activeUser)
+    private static double GetElapsedMilliseconds(ref long checkpoint)
     {
-        IReadOnlyList<FeaturedTrailerDto> trailers = _config.EnableBackgroundTrailers
-            ? _trailerResolver.ResolveCandidates(item, activeUser, _config)
-            : [];
-        return new FeaturedItemDto
-        {
-            Id = item.Id.ToString(),
-            Name = item.Name,
-            MediaType = item.GetBaseItemKind().ToString(),
-            ImageType = item.HasImage(MediaBrowser.Model.Entities.ImageType.Backdrop) ? "Backdrop" : "Primary",
-            Tagline = item.Tagline,
-            OfficialRating = item.OfficialRating,
-            HasLogo = item.HasImage(MediaBrowser.Model.Entities.ImageType.Logo),
-            ProductionYear = _config.ShowYear ? item.ProductionYear : null,
-            RuntimeMinutes = _config.ShowRuntime && item.RunTimeTicks.HasValue
-                ? (int)Math.Round(TimeSpan.FromTicks(item.RunTimeTicks.Value).TotalMinutes)
-                : null,
-            Trailer = trailers.FirstOrDefault(),
-            Trailers = trailers.Count > 0 ? trailers : null,
-            Overview = _config.ShowDescription ? item.Overview : null,
-            CriticRating = _config.ShowRating ? item.CriticRating : null,
-            CommunityRating = _config.ShowRating && item.CommunityRating.HasValue
-                ? Math.Round(Convert.ToDecimal(item.CommunityRating), 2)
-                : null
-        };
+        long now = Stopwatch.GetTimestamp();
+        double elapsed = Stopwatch.GetElapsedTime(checkpoint, now).TotalMilliseconds;
+        checkpoint = now;
+        return elapsed;
+    }
+
+    private static string FormatServerTiming(string name, double milliseconds, string? description = null)
+        => description is null
+            ? FormattableString.Invariant($"{name};dur={milliseconds:0.###}")
+            : FormattableString.Invariant($"{name};dur={milliseconds:0.###};desc=\"{description}\"");
+
+    private void LogRequestTiming(
+        double userConfig,
+        double personalization,
+        double history,
+        double preparedCache,
+        string preparedCacheStatus,
+        double ruleEngine,
+        double dtoTrailers,
+        double serialization,
+        double total)
+    {
+        string report = FormattableString.Invariant($"""
+            Featured request timing
+            -----------------------
+            user/config       {userConfig,8:0.0} ms
+            personalization   {personalization,8:0.0} ms
+            history           {history,8:0.0} ms
+            prepared cache    {preparedCache,8:0.0} ms  {preparedCacheStatus.ToUpperInvariant()}
+            rule engine       {ruleEngine,8:0.0} ms
+            DTO/trailers      {dtoTrailers,8:0.0} ms
+            serialization     {serialization,8:0.0} ms
+            -----------------------
+            total             {total,8:0.0} ms
+            """);
+        _logger.LogInformation("{FeaturedRequestTiming}", report);
+    }
+
+    private void LogRuleEngineTiming(FeaturedRuleEngineTiming timing)
+    {
+        if (_config.Debug) _logger.LogInformation("{RuleEngineTiming}", timing.FormatReport());
     }
 
     private static HashSet<Guid> ParseExcludedItemIds(string? value)

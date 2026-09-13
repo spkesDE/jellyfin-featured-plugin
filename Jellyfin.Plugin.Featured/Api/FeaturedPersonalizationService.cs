@@ -9,7 +9,13 @@ public sealed record FeaturedPersonalizationContext(
     int RepeatCooldownHours,
     bool HasOverrides)
 {
-    internal string Fingerprint => JsonSerializer.Serialize(new { SourceRules, Profile, RepeatCooldownHours });
+    internal string Fingerprint => JsonSerializer.Serialize(new
+    {
+        SourceRules,
+        Profile,
+        ExcludedGenres,
+        RepeatCooldownHours
+    });
 }
 
 public sealed class FeaturedPersonalizationService

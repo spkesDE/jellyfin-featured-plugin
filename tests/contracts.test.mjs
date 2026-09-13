@@ -218,7 +218,7 @@ test('proper trailer support keeps resolution and playback source independent', 
   assert.match(carousel, /Math\.max\(YOUTUBE_CONTROL_CONCEALMENT_MS, this\.response\.trailerDelayMilliseconds\)/);
   assert.match(carousel, /muted: concealYouTube \? true : this\.trailerMuted/);
   assert.match(player, /concealDurationMilliseconds[\s\S]*?setTimeout[\s\S]*?onReveal/);
-  assert.match(player, /onConcealStart\?\.\(options\.concealDurationMilliseconds/);
+  assert.match(player, /onConcealStart\?\.\(duration\)/);
   assert.match(carousel, /startTrailerCountdown\(durationMilliseconds\)[\s\S]*?setInterval\(update, 100\)/);
   assert.match(carousel, /createElementNS\('http:\/\/www\.w3\.org\/2000\/svg', 'svg'\)[\s\S]*?pathLength[\s\S]*?countdownRing\.append/);
   assert.match(styles, /\.ec-countdown-ring[\s\S]*?\.ec-countdown-progress[\s\S]*?stroke-dasharray:\s*100/);
@@ -239,12 +239,12 @@ test('proper trailer support keeps resolution and playback source independent', 
   assert.match(player, /youtube-nocookie\.com'[\s\S]*?youtube\.com'/);
   assert.match(player, /origin: window\.location\.origin/);
   assert.match(player, /hostIndex === 0 \? 2500 : 8000/);
-  assert.match(player, /hostIndex \+ 1 < hosts\.length[\s\S]*?startPlayer\(api, videoId, options, hostIndex \+ 1\)/);
+  assert.match(player, /hostIndex \+ 1 < YOUTUBE_HOSTS\.length[\s\S]*?startPlayer\(api, videoId, options, hostIndex \+ 1\)/);
   assert.match(player, /defaultMuted = options\.muted[\s\S]*?setAttribute\('webkit-playsinline', ''\)/);
   assert.match(player, /setAttribute\('allow', 'autoplay; encrypted-media; picture-in-picture'\)/);
   assert.match(player, /isIosTrailerClient[\s\S]*?navigator\.platform === 'MacIntel'[\s\S]*?navigator\.maxTouchPoints > 1/);
   assert.match(carousel, /startTrailersMuted \|\| isIosTrailerClient\(\)/);
-  assert.match(player, /YouTube player API timed out[\s\S]*?8000/);
+  assert.match(player, /YOUTUBE_API_TIMEOUT_MS = 8_000[\s\S]*?YouTube player API timed out[\s\S]*?YOUTUBE_API_TIMEOUT_MS/);
   assert.match(player, /onError: \(\{ data \}\)[\s\S]*?YouTube trailer failed with player error/);
   assert.match(carousel, /item\.trailers\?\.length[\s\S]*?candidateIndex \+ 1 < candidates\.length[\s\S]*?startTrailer\(slide, item, candidateIndex \+ 1\)/);
   assert.match(carousel, /void player\.play\(\)\.catch\(recover\)/);
@@ -343,11 +343,107 @@ test('normalization retains the saved 12.x bounds', async () => {
   ]) assert.equal(normalizer.includes(expression), true, `missing normalization contract: ${expression}`);
 });
 
-test('prepared cache samples eligible items instead of always returning the first items', async () => {
+test('prepared cache rotates through a shuffle bag before repeating items', async () => {
   const preparedCache = await read('Jellyfin.Plugin.Featured/Api/FeaturedPreparedCache.cs');
-  assert.match(preparedCache, /Where\(item => !excludedIds\.Contains\(item\.Id\)\)[\s\S]*?SelectRandomItems\(eligibleItems, requestedCount\)/);
-  assert.match(preparedCache, /Random\.Shared\.Next\(index, candidates\.Count\)/);
-  assert.doesNotMatch(preparedCache, /entry\.Items[\s\S]{0,160}?\.Take\(requestedCount\)/);
+  assert.match(preparedCache, /TryTake\(excludedIds, requestedCount, out items, out dtoCreationMilliseconds\)/);
+  assert.match(preparedCache, /_remaining\.Count\(item => !excludedIds\.Contains\(item\.Id\)\) < count[\s\S]*?CreateShuffledBag\(_items\)/);
+  assert.match(preparedCache, /PreparedItem candidate = _remaining\.Dequeue\(\)[\s\S]*?_remaining\.Enqueue\(candidate\)[\s\S]*?items\.Add\(candidate\.Dto\.Value\)/);
+  assert.match(preparedCache, /Random\.Shared\.Next\(index \+ 1\)/);
+  assert.doesNotMatch(preparedCache, /SelectRandomItems/);
+});
+
+test('prepared cache fingerprint includes excluded genres', async () => {
+  const personalization = await read('Jellyfin.Plugin.Featured/Api/FeaturedPersonalizationService.cs');
+  const fingerprint = personalization.slice(
+    personalization.indexOf('internal string Fingerprint'),
+    personalization.indexOf('public sealed class FeaturedPersonalizationService')
+  );
+  assert.match(fingerprint, /SourceRules/);
+  assert.match(fingerprint, /Profile/);
+  assert.match(fingerprint, /ExcludedGenres/);
+  assert.match(fingerprint, /RepeatCooldownHours/);
+});
+
+test('warm prepared responses reuse prebuilt DTOs and expose bypass diagnostics', async () => {
+  const [preparedCache, itemsController, dtoFactory] = await Promise.all([
+    read('Jellyfin.Plugin.Featured/Api/FeaturedPreparedCache.cs'),
+    read('Jellyfin.Plugin.Featured/Api/FeaturedController.Items.cs'),
+    read('Jellyfin.Plugin.Featured/Api/FeaturedItemDtoFactory.cs')
+  ]);
+  assert.match(preparedCache, /new Lazy<FeaturedItemDto>[\s\S]*?_itemDtoFactory\.Create\(item, user, config\)/);
+  assert.match(preparedCache, /out string status/);
+  for (const status of ['disabled', 'live-mixing-required', 'not-warmed', 'fingerprint-mismatch', 'insufficient-eligible-items', 'hit']) {
+    assert.equal(preparedCache.includes(`\"${status}\"`), true, `missing prepared-cache status ${status}`);
+  }
+  assert.match(itemsController, /X-Featured-Prepared-Cache/);
+  assert.match(itemsController, /Server-Timing/);
+  assert.match(itemsController, /Featured request timing/);
+  assert.match(itemsController, /JsonSerializer\.Serialize\(payload, RuntimeConfigJsonOptions\)/);
+  assert.match(itemsController, /CanPopulateFromRequest\(preparedCacheStatus\)[\s\S]*?GetRequestedPoolSize\(_config\)[\s\S]*?StoreRequestPool/);
+  assert.match(itemsController, /preparedCacheHit \? "cold-filled"/);
+  assert.match(preparedCache, /eagerlyBuildDtos: false, replaceExisting: false/);
+  assert.match(preparedCache, /eagerlyBuildDtos: true, replaceExisting: true/);
+  assert.match(dtoFactory, /ResolveCandidates\(item, activeUser, config\)/);
+});
+
+test('rule engine debug timing separates query, filtering, scoring, and allocation phases', async () => {
+  const [engine, models, controller, diagnostics, preparedCache] = await Promise.all([
+    read('Jellyfin.Plugin.Featured/Api/FeaturedRuleEngine.cs'),
+    read('Jellyfin.Plugin.Featured/Api/FeaturedRuleEngine.Models.cs'),
+    read('Jellyfin.Plugin.Featured/Api/FeaturedController.Items.cs'),
+    read('Jellyfin.Plugin.Featured/Api/FeaturedController.Diagnostics.cs'),
+    read('Jellyfin.Plugin.Featured/Api/FeaturedPreparedCache.cs')
+  ]);
+  for (const label of [
+    'source candidates', 'allowed-items access', 'user-data batch', 'global filters',
+    'rule filters', 'personalization/scoring', 'pool allocation'
+  ]) assert.equal(models.includes(label), true, `missing rule timing phase ${label}`);
+  assert.match(engine, /GetSourceCandidates[\s\S]*?sourceCandidatesMilliseconds/);
+  assert.match(engine, /GetAllowedItemIds[\s\S]*?allowedItemsAccessMilliseconds/);
+  assert.match(engine, /GetUserDataBatch[\s\S]*?userDataBatchMilliseconds/);
+  assert.match(engine, /globallyFilteredItemIds[\s\S]*?globalFiltersMilliseconds/);
+  assert.match(engine, /OrderForProfile[\s\S]*?personalizationScoringMilliseconds/);
+  assert.match(engine, /FillFromPools[\s\S]*?poolAllocationMilliseconds/);
+  assert.match(controller, /LogRuleEngineTiming\(coldPool\.Timing\)/);
+  assert.match(controller, /LogRuleEngineTiming\(liveSelection\.Timing\)/);
+  assert.match(diagnostics, /LogRuleEngineTiming\(selection\.Timing\)/);
+  assert.match(preparedCache, /config\.Debug[\s\S]*?selection\.Timing\.FormatReport\(\)/);
+});
+
+test('rule engine user access stays in memory and is evaluated once per distinct candidate', async () => {
+  const [engine, access, filters] = await Promise.all([
+    read('Jellyfin.Plugin.Featured/Api/FeaturedRuleEngine.cs'),
+    read('Jellyfin.Plugin.Featured/Api/FeaturedUserAccess.cs'),
+    read('Jellyfin.Plugin.Featured/Api/FeaturedRuleEngine.Filters.cs')
+  ]);
+  assert.match(engine, /DistinctBy\(item => item\.Id\)[\s\S]*?FeaturedUserAccess\.GetAllowedItemIds/);
+  assert.match(access, /item\.IsVisibleStandalone\(activeUser\)/);
+  assert.doesNotMatch(access, /InternalItemsQuery|GetItemList|ItemIds\s*=/);
+  const eligibility = filters.slice(
+    filters.indexOf('private static bool IsEligibleItem'),
+    filters.indexOf('private static bool IsSupportedItemType')
+  );
+  assert.doesNotMatch(eligibility, /activeUser|\.IsVisible\(/);
+});
+
+test('infinite loading waits for navigation before prefetching and ignores vertical swipes', async () => {
+  const carousel = await read('src/slider/carousel.ts');
+  assert.match(carousel, /hasLeftInitialSlide = false/);
+  assert.match(carousel, /if \(!this\.hasLeftInitialSlide\) return false/);
+  assert.match(carousel, /this\.hasLeftInitialSlide \|\|= this\.index > 0/);
+  assert.match(carousel, /Math\.abs\(deltaX\) > Math\.abs\(deltaY\) \* 1\.2/);
+  assert.match(carousel, /suppressClickUntil = performance\.now\(\) \+ 500/);
+  assert.match(carousel, /event\.stopImmediatePropagation\(\)/);
+});
+
+test('YouTube player creation remains load-gated and video errors stay item-specific', async () => {
+  const player = await read('src/slider/trailer.ts');
+  const appendIndex = player.indexOf('this.element.appendChild(iframe)');
+  const loadIndex = player.indexOf("iframe.addEventListener('load'");
+  const playerIndex = player.indexOf('this.player = new api.Player(iframe');
+  assert.ok(loadIndex >= 0 && playerIndex > loadIndex && appendIndex > playerIndex);
+  assert.match(player, /YOUTUBE_ITEM_SPECIFIC_ERRORS = new Set\(\[2, 100, 101, 150\]\)/);
+  assert.match(player, /YOUTUBE_ITEM_SPECIFIC_ERRORS\.has\(data\)[\s\S]*?this\.fail\(options, error\)[\s\S]*?recover\(error\)/);
 });
 
 test('source mixer v2 applies limits, fallbacks, diversity, and cooldown recovery', async () => {

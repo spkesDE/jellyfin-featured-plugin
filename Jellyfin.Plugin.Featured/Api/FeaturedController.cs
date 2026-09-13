@@ -20,7 +20,7 @@ public sealed partial class FeaturedController : ControllerBase
     private readonly FeaturedPreparedCache _preparedCache;
     private readonly FeaturedPersonalizationService _personalization;
     private readonly FeaturedPreferenceOptionsCache _preferenceOptionsCache;
-    private readonly TrailerResolver _trailerResolver;
+    private readonly FeaturedItemDtoFactory _itemDtoFactory;
     private readonly ILogger<FeaturedController> _logger;
 
     public FeaturedController(
@@ -32,7 +32,7 @@ public sealed partial class FeaturedController : ControllerBase
         FeaturedPreparedCache preparedCache,
         FeaturedPersonalizationService personalization,
         FeaturedPreferenceOptionsCache preferenceOptionsCache,
-        TrailerResolver trailerResolver,
+        FeaturedItemDtoFactory itemDtoFactory,
         ILogger<FeaturedController> logger)
     {
         _userManager = userManager;
@@ -43,7 +43,7 @@ public sealed partial class FeaturedController : ControllerBase
         _preparedCache = preparedCache;
         _personalization = personalization;
         _preferenceOptionsCache = preferenceOptionsCache;
-        _trailerResolver = trailerResolver;
+        _itemDtoFactory = itemDtoFactory;
         _logger = logger;
         PluginConfiguration baseConfig = PluginConfigurationNormalizer.Normalize(Plugin.Instance?.Configuration);
         _presetResolution = FeaturedPresetResolver.Resolve(baseConfig, DateTimeOffset.UtcNow);

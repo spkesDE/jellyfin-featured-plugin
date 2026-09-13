@@ -16,6 +16,7 @@ public sealed class PluginServiceRegistrator : IPluginServiceRegistrator
         serviceCollection.AddSingleton<FeaturedPersonalizationService>();
         serviceCollection.AddSingleton<FeaturedPreferenceOptionsCache>();
         serviceCollection.AddSingleton<TrailerResolver>();
+        serviceCollection.AddSingleton<FeaturedItemDtoFactory>();
         serviceCollection.AddSingleton<FeaturedCandidateCache>();
         serviceCollection.AddSingleton<FeaturedPreparedCache>();
         serviceCollection.AddSingleton<IScheduledTask, RefreshFeaturedCacheTask>();

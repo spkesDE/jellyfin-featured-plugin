@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Jellyfin.Data.Enums;
 using Jellyfin.Extensions;
 using MediaBrowser.Controller.Entities;
@@ -35,6 +36,8 @@ internal sealed partial class FeaturedRuleEngine
         int requestedCount,
         FeaturedPersonalizationContext? personalization = null)
     {
+        long totalStarted = Stopwatch.GetTimestamp();
+        long phaseStarted = totalStarted;
         List<FeaturedRuleDiagnostic> diagnostics = [];
         List<BaseItem> result = [];
         HashSet<string> selectedKeys = new(StringComparer.OrdinalIgnoreCase);
@@ -53,7 +56,13 @@ internal sealed partial class FeaturedRuleEngine
             .SelectMany(candidateSet => candidateSet.Items)
             .DistinctBy(item => item.Id)
             .ToList();
-        HashSet<Guid> allowedItemIds = GetAllowedItemIds(distinctCandidates, activeUser);
+        double sourceCandidatesMilliseconds = ElapsedMilliseconds(phaseStarted);
+
+        phaseStarted = Stopwatch.GetTimestamp();
+        HashSet<Guid> allowedItemIds = FeaturedUserAccess.GetAllowedItemIds(distinctCandidates, activeUser);
+        double allowedItemsAccessMilliseconds = ElapsedMilliseconds(phaseStarted);
+
+        phaseStarted = Stopwatch.GetTimestamp();
         bool needsUserData = profile is not null
             || _config.GlobalFilters.Any(filter => filter.Field == FeaturedFilterFields.Played)
             || candidatesByRule.Any(candidateSet =>
@@ -63,16 +72,23 @@ internal sealed partial class FeaturedRuleEngine
                 distinctCandidates.Where(item => allowedItemIds.Contains(item.Id)).ToList(),
                 activeUser)
             : null;
+        double userDataBatchMilliseconds = ElapsedMilliseconds(phaseStarted);
+
+        phaseStarted = Stopwatch.GetTimestamp();
         HashSet<Guid>? globallyFilteredItemIds = _config.GlobalFilters.Length == 0
             ? null
             : distinctCandidates
                 .Where(item => MatchesAllFilters(item, _config.GlobalFilters, selectionUserData))
                 .Select(item => item.Id)
                 .ToHashSet();
+        double globalFiltersMilliseconds = ElapsedMilliseconds(phaseStarted);
 
         List<FeaturedRulePool> pools = [];
+        double ruleFiltersMilliseconds = 0;
+        double personalizationScoringMilliseconds = 0;
         for (int index = 0; index < candidatesByRule.Count; index++)
         {
+            phaseStarted = Stopwatch.GetTimestamp();
             FeaturedSourceRule rule = candidatesByRule[index].Rule;
             List<BaseItem> candidates = candidatesByRule[index].Items;
             List<BaseItem> afterFilters = candidates
@@ -81,7 +97,7 @@ internal sealed partial class FeaturedRuleEngine
                 .Where(item => excludedGenres.Length == 0 || !ContainsAny(item.Genres, excludedGenres))
                 .ToList();
             List<BaseItem> eligibleBeforeCooldown = afterFilters
-                .Where(item => IsEligibleItem(item, activeUser, allowedItemIds, requestExcludedIds))
+                .Where(item => IsEligibleItem(item, allowedItemIds, requestExcludedIds))
                 .DistinctBy(item => item.Id)
                 .ToList();
             List<BaseItem> eligible = eligibleBeforeCooldown
@@ -93,6 +109,9 @@ internal sealed partial class FeaturedRuleEngine
                     .OrderBy(item => recentHistory[item.Id])
                     .ToList()
                 : [];
+            ruleFiltersMilliseconds += ElapsedMilliseconds(phaseStarted);
+
+            phaseStarted = Stopwatch.GetTimestamp();
             if (rule.Type != FeaturedSourceTypes.ManualLists)
             {
                 eligible = OrderForProfile(eligible, profile, selectionUserData);
@@ -100,7 +119,9 @@ internal sealed partial class FeaturedRuleEngine
                     .OrderBy(item => recentHistory[item.Id])
                     .ToList();
             }
+            personalizationScoringMilliseconds += ElapsedMilliseconds(phaseStarted);
 
+            phaseStarted = Stopwatch.GetTimestamp();
             FeaturedRuleDiagnostic stats = new()
             {
                 Id = rule.Id,
@@ -114,8 +135,10 @@ internal sealed partial class FeaturedRuleEngine
                 IsFallback = rule.IsFallback
             };
             pools.Add(new FeaturedRulePool(index, rule, eligible, cooldownEligible, stats));
+            ruleFiltersMilliseconds += ElapsedMilliseconds(phaseStarted);
         }
 
+        phaseStarted = Stopwatch.GetTimestamp();
         List<FeaturedRulePool> primaryPools = pools.Where(pool => !pool.Rule.IsFallback).ToList();
         List<FeaturedRulePool> fallbackPools = pools.Where(pool => pool.Rule.IsFallback).ToList();
         FillFromPools(primaryPools, requestedCount, result, selectedKeys, diversity, enforceDiversity: true);
@@ -140,21 +163,21 @@ internal sealed partial class FeaturedRuleEngine
         }
 
         diagnostics.AddRange(pools.Select(pool => pool.Stats));
-        return new FeaturedSelection(result, diagnostics, profile is not null);
+        double poolAllocationMilliseconds = ElapsedMilliseconds(phaseStarted);
+        FeaturedRuleEngineTiming timing = new(
+            sourceCandidatesMilliseconds,
+            allowedItemsAccessMilliseconds,
+            userDataBatchMilliseconds,
+            globalFiltersMilliseconds,
+            ruleFiltersMilliseconds,
+            personalizationScoringMilliseconds,
+            poolAllocationMilliseconds,
+            ElapsedMilliseconds(totalStarted));
+        return new FeaturedSelection(result, diagnostics, profile is not null, timing);
     }
 
-    private HashSet<Guid> GetAllowedItemIds(
-        IEnumerable<BaseItem> candidates,
-        Jellyfin.Database.Implementations.Entities.User activeUser)
-    {
-        Guid[] itemIds = candidates.Select(item => item.Id).Distinct().ToArray();
-        if (itemIds.Length == 0) return [];
-
-        InternalItemsQuery query = CreateCandidateQuery(activeUser, false);
-        query.ItemIds = itemIds;
-        query.Limit = itemIds.Length;
-        return _libraryManager.GetItemList(query).Select(item => item.Id).ToHashSet();
-    }
+    private static double ElapsedMilliseconds(long started)
+        => Stopwatch.GetElapsedTime(started).TotalMilliseconds;
 
     private Dictionary<Guid, BaseItem> GetAllowedManualItems(
         IEnumerable<FeaturedManualItem> configuredItems)

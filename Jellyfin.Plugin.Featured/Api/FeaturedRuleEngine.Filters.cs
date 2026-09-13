@@ -95,12 +95,10 @@ internal sealed partial class FeaturedRuleEngine
 
     private static bool IsEligibleItem(
         BaseItem item,
-        Jellyfin.Database.Implementations.Entities.User activeUser,
         HashSet<Guid> allowedItemIds,
         HashSet<Guid> excludedIds)
     {
         return allowedItemIds.Contains(item.Id)
-            && item.IsVisible(activeUser)
             && !excludedIds.Contains(item.Id)
             && IsSupportedItemType(item)
             && (item.HasImage(MediaBrowser.Model.Entities.ImageType.Backdrop)

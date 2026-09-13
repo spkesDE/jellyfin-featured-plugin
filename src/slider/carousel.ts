@@ -30,7 +30,9 @@ export class FeaturedCarousel {
   private pendingIndex: number | null = null;
   private timer: number | null = null;
   private autoplayEnabled: boolean;
-  private touchStartX: number | null = null;
+  private touchStart: { x: number; y: number } | null = null;
+  private suppressClickUntil = 0;
+  private hasLeftInitialSlide = false;
   private status: HTMLElement | null = null;
   private autoplayButton: HTMLButtonElement | null = null;
   private trailerCountdownProgress: SVGCircleElement | null = null;
@@ -153,6 +155,8 @@ export class FeaturedCarousel {
     this.root.addEventListener('keydown', this.onKeyDown);
     this.root.addEventListener('touchstart', this.onTouchStart, { passive: true });
     this.root.addEventListener('touchend', this.onTouchEnd, { passive: true });
+    this.root.addEventListener('touchcancel', this.onTouchCancel, { passive: true });
+    this.root.addEventListener('click', this.onClickAfterSwipe, true);
     document.addEventListener('keydown', this.onTrailerHotkey, true);
     document.addEventListener('visibilitychange', this.onVisibilityChange);
     this.show(0, false);
@@ -197,6 +201,7 @@ export class FeaturedCarousel {
         return;
       }
       this.index = nextIndex;
+      this.hasLeftInitialSlide ||= this.index > 0 || this.discardedItemCount > 0;
       this.ensureIndexIsRendered();
     } else {
       this.index = (nextIndex + this.slides.length) % this.slides.length;
@@ -265,6 +270,9 @@ export class FeaturedCarousel {
 
   private shouldPrefetchNextBatch(): boolean {
     if (!this.response.infiniteLoading || !this.hasMore || !this.loadItems || this.destroyed) return false;
+    // The initial batch is already enough to paint the carousel. Wait until the
+    // viewer advances before using bandwidth and server time on another batch.
+    if (!this.hasLeftInitialSlide) return false;
     const prefetchDistance = Math.max(1, this.response.batchSize);
     return this.items.length - this.index <= prefetchDistance;
   }
@@ -548,14 +556,30 @@ export class FeaturedCarousel {
   };
 
   private onTouchStart = (event: TouchEvent): void => {
-    this.touchStartX = event.changedTouches[0]?.clientX ?? null;
+    const touch = event.changedTouches[0];
+    this.touchStart = touch ? { x: touch.clientX, y: touch.clientY } : null;
   };
 
   private onTouchEnd = (event: TouchEvent): void => {
-    if (this.touchStartX === null) return;
-    const delta = (event.changedTouches[0]?.clientX ?? this.touchStartX) - this.touchStartX;
-    this.touchStartX = null;
-    if (Math.abs(delta) >= 45) this.show(this.index + (delta < 0 ? 1 : -1));
+    if (!this.touchStart) return;
+    const touch = event.changedTouches[0];
+    const deltaX = (touch?.clientX ?? this.touchStart.x) - this.touchStart.x;
+    const deltaY = (touch?.clientY ?? this.touchStart.y) - this.touchStart.y;
+    this.touchStart = null;
+    if (Math.abs(deltaX) >= 45 && Math.abs(deltaX) > Math.abs(deltaY) * 1.2) {
+      this.suppressClickUntil = performance.now() + 500;
+      this.show(this.index + (deltaX < 0 ? 1 : -1));
+    }
+  };
+
+  private onTouchCancel = (): void => {
+    this.touchStart = null;
+  };
+
+  private onClickAfterSwipe = (event: MouseEvent): void => {
+    if (performance.now() >= this.suppressClickUntil) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
   };
 
   private onVisibilityChange = (): void => {

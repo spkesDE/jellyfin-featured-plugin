@@ -193,9 +193,11 @@ const YOUTUBE_HOSTS = [
   'https://www.youtube-nocookie.com',
   'https://www.youtube.com'
 ] as const;
-const YOUTUBE_STARTUP_TIMEOUT_MS = 10_000;
 const YOUTUBE_API_TIMEOUT_MS = 8_000;
-const YOUTUBE_NON_RECOVERABLE_ERRORS = new Set([2, 100, 101, 150]);
+// These codes describe the requested video, not the selected YouTube host.
+// Let the carousel try the item's next trailer candidate without poisoning or
+// retrying the privacy host for a video that cannot be embedded there either.
+const YOUTUBE_ITEM_SPECIFIC_ERRORS = new Set([2, 100, 101, 150]);
 
 let youtubePlayerSequence = 0;
 let youtubeApiPromise: Promise<YouTubeApi> | null = null;
@@ -298,6 +300,7 @@ export class YouTubePlayer implements TrailerPlayer {
     }
 
     const attempt = ++this.attempt;
+    const startupTimeout = hostIndex === 0 ? 2500 : 8000;
     let recoveryStarted = false;
     let playbackConfirmed = false;
 
@@ -404,7 +407,7 @@ export class YouTubePlayer implements TrailerPlayer {
                   code: data
                 });
 
-                if (YOUTUBE_NON_RECOVERABLE_ERRORS.has(data)) {
+                if (YOUTUBE_ITEM_SPECIFIC_ERRORS.has(data)) {
                   this.fail(options, error);
                 } else {
                   recover(error);
@@ -423,8 +426,8 @@ export class YouTubePlayer implements TrailerPlayer {
     }, { once: true });
 
     this.startupTimer = window.setTimeout(() => {
-      recover(new Error(`YouTube trailer did not start within ${YOUTUBE_STARTUP_TIMEOUT_MS} ms.`));
-    }, YOUTUBE_STARTUP_TIMEOUT_MS);
+      recover(new Error(`YouTube trailer did not start within ${startupTimeout} ms.`));
+    }, startupTimeout);
 
     this.element.appendChild(iframe);
   }

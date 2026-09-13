@@ -26,6 +26,7 @@ public sealed partial class FeaturedController
             FeaturedPersonalizationContext personalization = _personalization.Resolve(_config, activeUser.Id);
             IReadOnlyDictionary<Guid, DateTimeOffset> recentHistory = _historyStore.GetRecentItems(activeUser.Id, personalization.RepeatCooldownHours);
             FeaturedSelection selection = CreateEngine().SelectItems(activeUser, [], recentHistory, requestedCount, personalization);
+            LogRuleEngineTiming(selection.Timing);
             DateTimeOffset now = DateTimeOffset.UtcNow;
             HashSet<string> referencedManualListIds = _config.SourceRules
                 .Where(rule => rule.Enabled && rule.Type == FeaturedSourceTypes.ManualLists)

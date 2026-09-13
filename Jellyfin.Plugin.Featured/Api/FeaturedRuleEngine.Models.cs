@@ -24,7 +24,33 @@ public sealed class FeaturedRuleDiagnostic
 internal sealed record FeaturedSelection(
     List<BaseItem> Items,
     List<FeaturedRuleDiagnostic> RuleStats,
-    bool UserProfileApplied);
+    bool UserProfileApplied,
+    FeaturedRuleEngineTiming Timing);
+
+internal sealed record FeaturedRuleEngineTiming(
+    double SourceCandidatesMilliseconds,
+    double AllowedItemsAccessMilliseconds,
+    double UserDataBatchMilliseconds,
+    double GlobalFiltersMilliseconds,
+    double RuleFiltersMilliseconds,
+    double PersonalizationScoringMilliseconds,
+    double PoolAllocationMilliseconds,
+    double TotalMilliseconds)
+{
+    internal string FormatReport() => FormattableString.Invariant($"""
+        Rule engine timing
+        ------------------------------
+        source candidates       {SourceCandidatesMilliseconds,8:0.0} ms
+        allowed-items access    {AllowedItemsAccessMilliseconds,8:0.0} ms
+        user-data batch         {UserDataBatchMilliseconds,8:0.0} ms
+        global filters          {GlobalFiltersMilliseconds,8:0.0} ms
+        rule filters            {RuleFiltersMilliseconds,8:0.0} ms
+        personalization/scoring {PersonalizationScoringMilliseconds,8:0.0} ms
+        pool allocation         {PoolAllocationMilliseconds,8:0.0} ms
+        ------------------------------
+        total                   {TotalMilliseconds,8:0.0} ms
+        """);
+}
 
 internal sealed class FeaturedRulePool
 {
