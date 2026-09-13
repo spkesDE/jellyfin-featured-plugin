@@ -64,13 +64,16 @@ test('item and runtime contracts retain their established names and interval uni
 });
 
 test('featured presets resolve schedules and override all roadmap sections', async () => {
-  const [configuration, normalizer, resolver, controller, response, cache] = await Promise.all([
+  const [configuration, normalizer, resolver, controller, response, cache, defaults, presetTab, runtime] = await Promise.all([
     read('Jellyfin.Plugin.Featured/Configuration/PluginConfiguration.cs'),
     read('Jellyfin.Plugin.Featured/Configuration/PluginConfigurationNormalizer.cs'),
     read('Jellyfin.Plugin.Featured/Configuration/FeaturedPresetResolver.cs'),
     read('Jellyfin.Plugin.Featured/Api/FeaturedController.cs'),
     read('Jellyfin.Plugin.Featured/Api/FeaturedResponseDtos.cs'),
-    read('Jellyfin.Plugin.Featured/Api/FeaturedPreparedCache.cs')
+    read('Jellyfin.Plugin.Featured/Api/FeaturedPreparedCache.cs'),
+    read('src/config/libs/defaults.ts'),
+    read('src/config/tabs/PresetsTab.vue'),
+    read('src/runtime.ts')
   ]);
   for (const section of ['SourceRules', 'GlobalFilters', 'PersonalizationPolicy', 'Mixer', 'Layout', 'Trailers']) {
     assert.match(configuration, new RegExp(`class FeaturedPreset[\\s\\S]*?${section}`), `preset misses ${section}`);
@@ -84,6 +87,11 @@ test('featured presets resolve schedules and override all roadmap sections', asy
   assert.match(response, /public string\? ActivePresetName \{ get; \}/);
   assert.match(response, /public DateTimeOffset\? NextPresetChange \{ get; \}/);
   assert.match(cache, /FeaturedPresetResolver\.Resolve\(baseConfig, DateTimeOffset\.UtcNow\)\.Configuration/);
+  assert.match(defaults, /createPresetFromConfig[\s\S]*?SourceRules: structuredClone[\s\S]*?PersonalizationPolicy[\s\S]*?Mixer:[\s\S]*?Layout:[\s\S]*?Trailers:/);
+  assert.match(presetTab, /ConfigDateTime v-model="preset\.StartsAt"[\s\S]*?ConfigDateTime v-model="preset\.EndsAt"/);
+  assert.match(presetTab, /store\.updatePresetSnapshot\(index\)[\s\S]*?store\.duplicatePreset\(index\)/);
+  assert.match(runtime, /schedulePresetRefresh\(response\.nextPresetChange\)/);
+  assert.match(runtime, /Date\.now\(\) < boundary[\s\S]*?scheduleFullRefresh\(\)/);
 });
 
 test('personalization is authenticated, policy-bound, and user scoped', async () => {

@@ -45,6 +45,7 @@ export interface FeaturedPluginConfig {
   UserProfiles: FeaturedUserProfile[];
   PersonalizationDefaults: FeaturedPersonalizationDefaults;
   PersonalizationPolicy: FeaturedPersonalizationPolicy;
+  Presets: FeaturedPreset[];
   RepeatCooldownDays: number;
   RelaxRepeatCooldownWhenNeeded: boolean;
   MaximumItemsPerGenre: number;
@@ -96,6 +97,74 @@ export interface FeaturedPluginConfig {
   Heading: string;
   PlayButtonText: string;
   Debug: boolean;
+}
+
+export interface FeaturedPreset {
+  Id: string;
+  Name: string;
+  Enabled: boolean;
+  Priority: number;
+  StartsAt: string | null;
+  EndsAt: string | null;
+  SourceRules: FeaturedSourceRule[];
+  GlobalFilters: FeaturedFilterRule[];
+  PersonalizationPolicy: FeaturedPersonalizationPolicy;
+  Mixer: FeaturedPresetMixerSettings;
+  Layout: FeaturedPresetLayoutSettings;
+  Trailers: FeaturedPresetTrailerSettings;
+}
+
+export interface FeaturedPresetMixerSettings {
+  RepeatCooldownDays: number;
+  RelaxRepeatCooldownWhenNeeded: boolean;
+  MaximumItemsPerGenre: number;
+  MaximumItemsPerFranchise: number;
+  ExcludeItemsFromSameSeries: boolean;
+  RandomMediaCount: number;
+}
+
+export interface FeaturedPresetLayoutSettings {
+  EnableAutoplay: boolean;
+  ShowAutoplayButton: boolean;
+  AutoplayInterval: number;
+  ShowPlayButton: boolean;
+  ShowNavigationArrows: boolean;
+  ShowSlidePosition: boolean;
+  MediaPadding: number;
+  TitleDisplayMode: 'logo' | 'title';
+  ShowRating: boolean;
+  ShowDescription: boolean;
+  HideOnTvLayout: boolean;
+  UseHeroLayout: boolean;
+  HeroHeightMode: HeroHeightMode;
+  TabletBannerHeight: number;
+  MobileBannerHeight: number;
+  HeroBorderRadius: number;
+  HeroGradientStrength: number;
+  HeroTextPosition: HeroTextPosition;
+  TransitionEffect: TransitionEffect;
+  HeroBackdropPosition: HeroBackdropPosition;
+  BannerHeight: number;
+  ShowYear: boolean;
+  ShowRuntime: boolean;
+  ShowSecondaryButton: boolean;
+  SecondaryButtonText: string | null;
+  ShowPaginationDots: boolean;
+  Heading: string | null;
+  PlayButtonText: string | null;
+}
+
+export interface FeaturedPresetTrailerSettings {
+  EnableBackgroundTrailers: boolean;
+  TrailerSourcePriority: TrailerSourcePriority;
+  FallBackToRemoteTrailers: boolean;
+  StartTrailersMuted: boolean;
+  WaitForTrailerToFinish: boolean;
+  TrailerDelayMilliseconds: number;
+  TrailerStartOffsetSeconds: number;
+  TrailerEndOffsetSeconds: number;
+  MultipleTrailerMode: MultipleTrailerMode;
+  AllowTrailersOnMobile: boolean;
 }
 
 export interface FeaturedTrailerOverride {
@@ -169,4 +238,7 @@ export interface RuntimeConfig extends FeaturedDisplaySettings {
   heading: string | null;
   playButtonText: string | null;
   debug: boolean;
+  activePresetId?: string;
+  activePresetName?: string;
+  nextPresetChange?: string;
 }

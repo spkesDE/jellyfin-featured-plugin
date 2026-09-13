@@ -35,6 +35,9 @@ export interface FeaturedResponse extends FeaturedDisplaySettings {
   reduceImageSizes: boolean;
   trackDisplayedItems: boolean;
   personalizationEnabled: boolean;
+  activePresetId?: string;
+  activePresetName?: string;
+  nextPresetChange?: string;
 }
 
 export interface FeaturedUserPreferences {
@@ -87,6 +90,9 @@ export interface FeaturedDiagnostics {
   jellyfinVersion: string;
   pluginVersion: string;
   currentUser: string;
+  activePresetId: string;
+  activePresetName: string;
+  nextPresetChange: string;
   sources: string[];
   matchingItems: number;
   eligibleItems: number;

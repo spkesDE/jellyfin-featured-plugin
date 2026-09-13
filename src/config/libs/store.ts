@@ -1,9 +1,9 @@
 import { computed, inject, reactive, ref, type ComputedRef, type InjectionKey, type Ref, type WritableComputedRef } from 'vue';
 import { getApiClient, requestJson } from '../../core/apiClient';
 import { t } from '../../i18n';
-import type { FeaturedFilterRule, FeaturedManualList, FeaturedPluginConfig, SourceType } from '../../types/config';
+import type { FeaturedFilterRule, FeaturedManualList, FeaturedPluginConfig, FeaturedPreset, SourceType } from '../../types/config';
 import type { FeaturedDiagnostics, FeaturedResponse, FeaturedSearchItem } from '../../types/featured';
-import { createDefaultConfig, createFilterRule, createManualList, createSourceRule, createUserProfile, normalizeConfig } from './defaults';
+import { createDefaultConfig, createFilterRule, createManualList, createPresetFromConfig, createSourceRule, createUserProfile, normalizeConfig, refreshPresetFromConfig } from './defaults';
 import { loadLibrariesAndCollections, loadRatings, loadUsers } from './jellyfinApi';
 import type { ConfigCollection, ConfigLibrary, ConfigPlaylist, ConfigRating, ConfigTab, ConfigUser, SaveState } from './types';
 
@@ -43,6 +43,10 @@ export interface ConfigStore {
   moveManualItem(list: FeaturedManualList, from: number, to: number): void;
   addUserProfile(userId: string): void;
   removeUserProfile(index: number): void;
+  addPreset(name?: string): void;
+  updatePresetSnapshot(index: number): void;
+  duplicatePreset(index: number): void;
+  removePreset(index: number): void;
   clearDisplayHistory(userIds: string[]): Promise<void>;
 }
 
@@ -222,6 +226,26 @@ export function createConfigStore(): ConfigStore {
   function removeUserProfile(index: number): void {
     config.UserProfiles.splice(index, 1);
   }
+  function addPreset(name = t('preset.defaultName')): void {
+    config.Presets.push(createPresetFromConfig(config, name));
+  }
+  function updatePresetSnapshot(index: number): void {
+    const preset = config.Presets[index];
+    if (!preset) return;
+    config.Presets.splice(index, 1, refreshPresetFromConfig(preset, config));
+  }
+  function duplicatePreset(index: number): void {
+    const preset = config.Presets[index];
+    if (!preset) return;
+    const copy = structuredClone(preset) as FeaturedPreset;
+    copy.Id = globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    copy.Name = t('preset.copyName', { name: preset.Name });
+    copy.Enabled = false;
+    config.Presets.splice(index + 1, 0, copy);
+  }
+  function removePreset(index: number): void {
+    config.Presets.splice(index, 1);
+  }
   async function clearDisplayHistory(userIds: string[]): Promise<void> {
     if (!userIds.length) return;
     await requestJson<{ ok: boolean }>('featured/config/history/clear', {
@@ -238,7 +262,9 @@ export function createConfigStore(): ConfigStore {
     },
     addSource, removeSource, moveSource, addFilter, removeFilter,
     addManualList, removeManualList, addManualItem, removeManualItem, moveManualItem,
-    addUserProfile, removeUserProfile, clearDisplayHistory
+    addUserProfile, removeUserProfile,
+    addPreset, updatePresetSnapshot, duplicatePreset, removePreset,
+    clearDisplayHistory
   };
 }
 

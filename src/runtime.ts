@@ -21,6 +21,7 @@ let routeEventsBound = false;
 let routeEventHandler: (() => void) | null = null;
 let originalHistoryPushState: History['pushState'] | null = null;
 let originalHistoryReplaceState: History['replaceState'] | null = null;
+let presetRefreshTimer: number | null = null;
 
 type HistoryMethodName = 'pushState' | 'replaceState';
 
@@ -50,6 +51,25 @@ function recordMountFailure(): void {
 function resetMountFailures(): void {
   mountFailureAttempts = 0;
   nextMountAttemptAt = 0;
+}
+
+function schedulePresetRefresh(nextPresetChange?: string): void {
+  if (presetRefreshTimer !== null) window.clearTimeout(presetRefreshTimer);
+  presetRefreshTimer = null;
+  if (!nextPresetChange) return;
+  const boundary = new Date(nextPresetChange).getTime();
+  if (!Number.isFinite(boundary)) return;
+  const remaining = boundary - Date.now();
+  if (remaining <= 0) {
+    presetRefreshTimer = window.setTimeout(scheduleFullRefresh, 250);
+    return;
+  }
+  const delay = Math.min(remaining + 250, 2_147_000_000);
+  presetRefreshTimer = window.setTimeout(() => {
+    presetRefreshTimer = null;
+    if (Date.now() < boundary) schedulePresetRefresh(nextPresetChange);
+    else scheduleFullRefresh();
+  }, delay);
 }
 
 function createPlaceholder(container: Element): HTMLElement {
@@ -134,6 +154,7 @@ async function mount(container: Element): Promise<void> {
   const placeholder = createPlaceholder(container);
   try {
     const response = removeEpisodeItems(await requestJson<FeaturedResponse>('featured/items'));
+    schedulePresetRefresh(response.nextPresetChange);
     if (
       mountToken !== lifecycleToken ||
       !container.isConnected ||
@@ -360,6 +381,8 @@ export function destroy(): void {
   observer = null;
   unbindRouteEvents();
   cancelAdminNavigationRefresh();
+  if (presetRefreshTimer !== null) window.clearTimeout(presetRefreshTimer);
+  presetRefreshTimer = null;
   instances.forEach((instance) => instance.destroy());
   instances.clear();
   placeholders.forEach((placeholder) => placeholder.remove());

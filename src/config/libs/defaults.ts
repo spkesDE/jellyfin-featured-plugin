@@ -1,4 +1,4 @@
-import type { FeaturedFilterRule, FeaturedManualList, FeaturedPluginConfig, FeaturedSourceRule, FeaturedUserProfile, SourceType } from '../../types/config';
+import type { FeaturedFilterRule, FeaturedManualList, FeaturedPluginConfig, FeaturedPreset, FeaturedSourceRule, FeaturedUserProfile, SourceType } from '../../types/config';
 import type { RuntimeConfig } from '../../types/config';
 import type { FeaturedDisplaySettings } from '../../types/display';
 import type { FeaturedResponse } from '../../types/featured';
@@ -29,6 +29,63 @@ export function createUserProfile(userId = ''): FeaturedUserProfile {
   };
 }
 
+export function createPresetFromConfig(config: FeaturedPluginConfig, name = 'Featured preset'): FeaturedPreset {
+  return {
+    Id: createId(), Name: name, Enabled: false, Priority: 0, StartsAt: null, EndsAt: null,
+    SourceRules: structuredClone(config.SourceRules),
+    GlobalFilters: structuredClone(config.GlobalFilters),
+    PersonalizationPolicy: structuredClone(config.PersonalizationPolicy),
+    Mixer: {
+      RepeatCooldownDays: config.RepeatCooldownDays,
+      RelaxRepeatCooldownWhenNeeded: config.RelaxRepeatCooldownWhenNeeded,
+      MaximumItemsPerGenre: config.MaximumItemsPerGenre,
+      MaximumItemsPerFranchise: config.MaximumItemsPerFranchise,
+      ExcludeItemsFromSameSeries: config.ExcludeItemsFromSameSeries,
+      RandomMediaCount: config.RandomMediaCount
+    },
+    Layout: {
+      EnableAutoplay: config.EnableAutoplay, ShowAutoplayButton: config.ShowAutoplayButton,
+      AutoplayInterval: config.AutoplayInterval, ShowPlayButton: config.ShowPlayButton,
+      ShowNavigationArrows: config.ShowNavigationArrows, ShowSlidePosition: config.ShowSlidePosition,
+      MediaPadding: config.MediaPadding, TitleDisplayMode: config.TitleDisplayMode,
+      ShowRating: config.ShowRating, ShowDescription: config.ShowDescription,
+      HideOnTvLayout: config.HideOnTvLayout, UseHeroLayout: config.UseHeroLayout,
+      HeroHeightMode: config.HeroHeightMode, TabletBannerHeight: config.TabletBannerHeight,
+      MobileBannerHeight: config.MobileBannerHeight, HeroBorderRadius: config.HeroBorderRadius,
+      HeroGradientStrength: config.HeroGradientStrength, HeroTextPosition: config.HeroTextPosition,
+      TransitionEffect: config.TransitionEffect, HeroBackdropPosition: config.HeroBackdropPosition,
+      BannerHeight: config.BannerHeight, ShowYear: config.ShowYear, ShowRuntime: config.ShowRuntime,
+      ShowSecondaryButton: config.ShowSecondaryButton, SecondaryButtonText: config.SecondaryButtonText || null,
+      ShowPaginationDots: config.ShowPaginationDots, Heading: config.Heading || null,
+      PlayButtonText: config.PlayButtonText || null
+    },
+    Trailers: {
+      EnableBackgroundTrailers: config.EnableBackgroundTrailers,
+      TrailerSourcePriority: config.TrailerSourcePriority,
+      FallBackToRemoteTrailers: config.FallBackToRemoteTrailers,
+      StartTrailersMuted: config.StartTrailersMuted,
+      WaitForTrailerToFinish: config.WaitForTrailerToFinish,
+      TrailerDelayMilliseconds: config.TrailerDelayMilliseconds,
+      TrailerStartOffsetSeconds: config.TrailerStartOffsetSeconds,
+      TrailerEndOffsetSeconds: config.TrailerEndOffsetSeconds,
+      MultipleTrailerMode: config.MultipleTrailerMode,
+      AllowTrailersOnMobile: config.AllowTrailersOnMobile
+    }
+  };
+}
+
+export function refreshPresetFromConfig(preset: FeaturedPreset, config: FeaturedPluginConfig): FeaturedPreset {
+  const snapshot = createPresetFromConfig(config, preset.Name);
+  return {
+    ...snapshot,
+    Id: preset.Id,
+    Enabled: preset.Enabled,
+    Priority: preset.Priority,
+    StartsAt: preset.StartsAt,
+    EndsAt: preset.EndsAt
+  };
+}
+
 export const CONFIG_DEFAULTS: FeaturedPluginConfig = {
   FrontendInjectionMethod: 'automatic',
   EnableFrontendBootstrap: true,
@@ -45,6 +102,7 @@ export const CONFIG_DEFAULTS: FeaturedPluginConfig = {
     AllowPreferredGenres: true, AllowUnplayedBoost: true, AllowFavouriteBoost: true,
     AllowInProgressSeriesBoost: true, AllowRepeatCooldown: false
   },
+  Presets: [],
   RepeatCooldownDays: 0,
   RelaxRepeatCooldownWhenNeeded: false,
   MaximumItemsPerGenre: 0,
@@ -203,6 +261,24 @@ export function normalizeConfig(value: unknown): FeaturedPluginConfig {
         ...createUserProfile(profile.UserId), ...profile,
         PreferredGenres: Array.isArray(profile.PreferredGenres) ? profile.PreferredGenres : []
       }))
+    : [];
+  config.Presets = Array.isArray(source.Presets)
+    ? source.Presets.map((preset) => {
+        const fallback = createPresetFromConfig(config);
+        return {
+          ...fallback, ...preset,
+          Id: preset.Id || fallback.Id,
+          Name: preset.Name || fallback.Name,
+          StartsAt: preset.StartsAt ?? null,
+          EndsAt: preset.EndsAt ?? null,
+          SourceRules: Array.isArray(preset.SourceRules) ? structuredClone(preset.SourceRules) : fallback.SourceRules,
+          GlobalFilters: normalizeFilters(preset.GlobalFilters),
+          PersonalizationPolicy: { ...fallback.PersonalizationPolicy, ...(preset.PersonalizationPolicy ?? {}) },
+          Mixer: { ...fallback.Mixer, ...(preset.Mixer ?? {}) },
+          Layout: { ...fallback.Layout, ...(preset.Layout ?? {}) },
+          Trailers: { ...fallback.Trailers, ...(preset.Trailers ?? {}) }
+        };
+      })
     : [];
   config.PersonalizationDefaults = {
     ...createDefaultConfig().PersonalizationDefaults,
