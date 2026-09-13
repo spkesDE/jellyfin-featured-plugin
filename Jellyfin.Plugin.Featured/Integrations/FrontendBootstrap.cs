@@ -52,6 +52,7 @@ internal static class FrontendBootstrap
                     @keyframes ec-bootstrap-shimmer{from{background-position:100% 0}to{background-position:-120% 0}}
                     @media(max-width:1000px){.ec-bootstrap-placeholder{--ec-height:var(--ec-tablet-height)!important;--ec-hero-overlap:100px!important}}
                     @media(max-width:700px){.ec-bootstrap-placeholder{--ec-height:var(--ec-mobile-height)!important;--ec-hero-overlap:75px!important}}
+                    @media(max-width:700px),(hover:none) and (pointer:coarse){.ec-bootstrap-placeholder.ec-bootstrap-hero{margin-bottom:calc(1.25rem + var(--ec-media-padding,0px))}}
                     @media(prefers-reduced-motion:reduce){.ec-bootstrap-viewport{animation:none}}
                 `;
                 (document.head || document.documentElement).appendChild(style);

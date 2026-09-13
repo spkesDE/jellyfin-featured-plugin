@@ -253,6 +253,15 @@ test('bootstrap and runtime placeholders share responsive and reduced-motion val
   assert.match(bootstrap, /prefers-reduced-motion:reduce[^\n]+animation:none/);
 });
 
+test('touch layouts keep the first Jellyfin section below the hero', async () => {
+  const [styles, bootstrap] = await Promise.all([
+    read('src/styles/featured.css'),
+    read('Jellyfin.Plugin.Featured/Integrations/FrontendBootstrap.cs')
+  ]);
+  assert.match(styles, /@media \(max-width: 700px\), \(hover: none\) and \(pointer: coarse\)[\s\S]*?\.ec-root\.ec-ready\.ec-hero,[\s\S]*?\.ec-root\.ec-placeholder\.ec-hero[\s\S]*?margin-bottom:\s*calc\(1\.25rem \+ var\(--ec-media-padding, 0px\)\)/);
+  assert.match(bootstrap, /@media\(max-width:700px\),\(hover:none\) and \(pointer:coarse\)[\s\S]*?\.ec-bootstrap-placeholder\.ec-bootstrap-hero\{margin-bottom:calc\(1\.25rem \+ var\(--ec-media-padding,0px\)\)\}/);
+});
+
 test('frontend bootstrap can be disabled independently of frontend injection', async () => {
   const [configuration, defaults, advancedTab, bootstrap] = await Promise.all([
     read('Jellyfin.Plugin.Featured/Configuration/PluginConfiguration.cs'),

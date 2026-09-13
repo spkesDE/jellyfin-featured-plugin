@@ -580,6 +580,13 @@
   }
 }
 
+@media (max-width: 700px), (hover: none) and (pointer: coarse) {
+  .ec-root.ec-ready.ec-hero,
+  .ec-root.ec-placeholder.ec-hero {
+    margin-bottom: calc(1.25rem + var(--ec-media-padding, 0px));
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .ec-slide {
     transition-duration: .01ms !important;
