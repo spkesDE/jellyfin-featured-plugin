@@ -53,6 +53,26 @@ public sealed class PluginConfiguration : BasePluginConfiguration
 
     public bool EnableBackgroundTrailers { get; set; }
 
+    public string TrailerSourcePriority { get; set; } = FeaturedTrailerSourcePriorities.PreferLocal;
+
+    public bool FallBackToRemoteTrailers { get; set; } = true;
+
+    public bool StartTrailersMuted { get; set; } = true;
+
+    public bool WaitForTrailerToFinish { get; set; }
+
+    public int TrailerDelayMilliseconds { get; set; } = 1500;
+
+    public int TrailerStartOffsetSeconds { get; set; }
+
+    public int TrailerEndOffsetSeconds { get; set; }
+
+    public string MultipleTrailerMode { get; set; } = FeaturedMultipleTrailerModes.First;
+
+    public bool AllowTrailersOnMobile { get; set; }
+
+    public FeaturedTrailerOverride[] TrailerOverrides { get; set; } = [];
+
     public int AutoplayInterval { get; set; } = 10;
 
     public bool ShowPlayButton { get; set; } = true;
@@ -190,6 +210,32 @@ public sealed class FeaturedManualItem
     public DateTimeOffset? StartsAt { get; set; }
 
     public DateTimeOffset? EndsAt { get; set; }
+}
+
+public sealed class FeaturedTrailerOverride
+{
+    public string ItemId { get; set; } = string.Empty;
+
+    public string Name { get; set; } = string.Empty;
+
+    public string? Url { get; set; }
+
+    public string? LocalTrailerItemId { get; set; }
+}
+
+public static class FeaturedTrailerSourcePriorities
+{
+    public const string PreferLocal = "prefer_local";
+    public const string PreferRemote = "prefer_remote";
+    public const string LocalOnly = "local_only";
+    public const string RemoteOnly = "remote_only";
+    public const string Automatic = "automatic";
+}
+
+public static class FeaturedMultipleTrailerModes
+{
+    public const string First = "first";
+    public const string Random = "random";
 }
 
 public sealed class FeaturedUserProfile

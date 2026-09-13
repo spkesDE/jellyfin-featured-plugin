@@ -71,6 +71,21 @@ internal static class PluginConfigurationNormalizer
         config.MaximumItemsPerFranchise = Math.Clamp(config.MaximumItemsPerFranchise, 0, 100);
         config.RandomMediaCount = Math.Clamp(config.RandomMediaCount, 1, 100);
         config.AutoplayInterval = Math.Clamp(config.AutoplayInterval, 1, 3600);
+        config.TrailerSourcePriority = config.TrailerSourcePriority switch
+        {
+            FeaturedTrailerSourcePriorities.PreferRemote => FeaturedTrailerSourcePriorities.PreferRemote,
+            FeaturedTrailerSourcePriorities.LocalOnly => FeaturedTrailerSourcePriorities.LocalOnly,
+            FeaturedTrailerSourcePriorities.RemoteOnly => FeaturedTrailerSourcePriorities.RemoteOnly,
+            FeaturedTrailerSourcePriorities.Automatic => FeaturedTrailerSourcePriorities.Automatic,
+            _ => FeaturedTrailerSourcePriorities.PreferLocal
+        };
+        config.TrailerDelayMilliseconds = Math.Clamp(config.TrailerDelayMilliseconds, 0, 30000);
+        config.TrailerStartOffsetSeconds = Math.Clamp(config.TrailerStartOffsetSeconds, 0, 3600);
+        config.TrailerEndOffsetSeconds = Math.Clamp(config.TrailerEndOffsetSeconds, 0, 3600);
+        config.MultipleTrailerMode = config.MultipleTrailerMode == FeaturedMultipleTrailerModes.Random
+            ? FeaturedMultipleTrailerModes.Random
+            : FeaturedMultipleTrailerModes.First;
+        config.TrailerOverrides = NormalizeTrailerOverrides(config.TrailerOverrides);
         config.BannerHeight = Math.Clamp(config.BannerHeight, 240, 900);
         config.TabletBannerHeight = Math.Clamp(config.TabletBannerHeight, 240, 700);
         config.MobileBannerHeight = Math.Clamp(config.MobileBannerHeight, 220, 600);
@@ -174,6 +189,37 @@ internal static class PluginConfigurationNormalizer
             .DistinctBy(profile => profile.UserId, StringComparer.OrdinalIgnoreCase)
             .Take(100)
             .ToArray();
+    }
+
+    private static FeaturedTrailerOverride[] NormalizeTrailerOverrides(FeaturedTrailerOverride[]? overrides)
+    {
+        return (overrides ?? [])
+            .Where(entry => entry is not null && Guid.TryParse(entry.ItemId, out _))
+            .Select(entry =>
+            {
+                entry.ItemId = entry.ItemId.Trim();
+                entry.Name = entry.Name?.Trim() ?? string.Empty;
+                entry.Url = NormalizeTrailerUrl(entry.Url);
+                entry.LocalTrailerItemId = Guid.TryParse(entry.LocalTrailerItemId, out Guid localId)
+                    ? localId.ToString()
+                    : null;
+                return entry;
+            })
+            .Where(entry => entry.Url is not null || entry.LocalTrailerItemId is not null)
+            .DistinctBy(entry => entry.ItemId, StringComparer.OrdinalIgnoreCase)
+            .Take(200)
+            .ToArray();
+    }
+
+    private static string? NormalizeTrailerUrl(string? value)
+    {
+        if (!Uri.TryCreate(value?.Trim(), UriKind.Absolute, out Uri? uri)
+            || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
+        {
+            return null;
+        }
+
+        return uri.ToString();
     }
 
     private static string NormalizeId(string? value)

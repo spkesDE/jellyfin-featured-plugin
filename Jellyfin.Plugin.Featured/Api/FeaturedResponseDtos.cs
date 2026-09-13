@@ -8,6 +8,12 @@ public abstract class FeaturedDisplaySettingsDto
     {
         ShowAutoplayButton = config.ShowAutoplayButton;
         EnableBackgroundTrailers = config.EnableBackgroundTrailers;
+        StartTrailersMuted = config.StartTrailersMuted;
+        WaitForTrailerToFinish = config.WaitForTrailerToFinish;
+        TrailerDelayMilliseconds = config.TrailerDelayMilliseconds;
+        TrailerStartOffsetSeconds = config.TrailerStartOffsetSeconds;
+        TrailerEndOffsetSeconds = config.TrailerEndOffsetSeconds;
+        AllowTrailersOnMobile = config.AllowTrailersOnMobile;
         ShowPlayButton = config.ShowPlayButton;
         ShowNavigationArrows = config.ShowNavigationArrows;
         ShowSlidePosition = config.ShowSlidePosition;
@@ -37,6 +43,12 @@ public abstract class FeaturedDisplaySettingsDto
 
     public bool ShowAutoplayButton { get; }
     public bool EnableBackgroundTrailers { get; }
+    public bool StartTrailersMuted { get; }
+    public bool WaitForTrailerToFinish { get; }
+    public int TrailerDelayMilliseconds { get; }
+    public int TrailerStartOffsetSeconds { get; }
+    public int TrailerEndOffsetSeconds { get; }
+    public bool AllowTrailersOnMobile { get; }
     public bool ShowPlayButton { get; }
     public bool ShowNavigationArrows { get; }
     public bool ShowSlidePosition { get; }
@@ -224,7 +236,7 @@ public sealed class FeaturedItemDto
     public string? OfficialRating { get; init; }
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public string? LocalTrailerId { get; init; }
+    public FeaturedTrailerDto? Trailer { get; init; }
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Overview { get; init; }
@@ -242,4 +254,22 @@ public sealed class FeaturedItemDto
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public int? RuntimeMinutes { get; init; }
+}
+
+public sealed class FeaturedTrailerDto
+{
+    public required string Type { get; init; }
+    public required string Provider { get; init; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Name { get; init; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Url { get; init; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? VideoId { get; init; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? ItemId { get; init; }
 }

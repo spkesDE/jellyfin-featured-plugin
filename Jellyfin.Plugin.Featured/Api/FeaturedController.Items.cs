@@ -88,12 +88,6 @@ public sealed partial class FeaturedController
         BaseItem item,
         Jellyfin.Database.Implementations.Entities.User activeUser)
     {
-        BaseItem? trailer = null;
-        if (_config.EnableBackgroundTrailers && item is IHasTrailers itemWithTrailers)
-        {
-            trailer = itemWithTrailers.LocalTrailers.FirstOrDefault(candidate => candidate.IsVisible(activeUser));
-        }
-
         return new FeaturedItemDto
         {
             Id = item.Id.ToString(),
@@ -107,7 +101,7 @@ public sealed partial class FeaturedController
             RuntimeMinutes = _config.ShowRuntime && item.RunTimeTicks.HasValue
                 ? (int)Math.Round(TimeSpan.FromTicks(item.RunTimeTicks.Value).TotalMinutes)
                 : null,
-            LocalTrailerId = trailer?.Id.ToString(),
+            Trailer = _config.EnableBackgroundTrailers ? _trailerResolver.Resolve(item, activeUser, _config) : null,
             Overview = _config.ShowDescription ? item.Overview : null,
             CriticRating = _config.ShowRating ? item.CriticRating : null,
             CommunityRating = _config.ShowRating && item.CommunityRating.HasValue
