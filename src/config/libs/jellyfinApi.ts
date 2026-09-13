@@ -1,6 +1,6 @@
 import { getApiClient, requestJson } from '../../core/apiClient';
 import { t } from '../../i18n';
-import type { JellyfinItem, JellyfinItemFilters, JellyfinUser, ParentalRating } from '../../types/jellyfin';
+import type { FeaturedConfigOptions, JellyfinItem, JellyfinItemFilters, JellyfinUser, ParentalRating } from '../../types/jellyfin';
 import type { ConfigCollection, ConfigLibrary, ConfigPlaylist, ConfigRating, ConfigUser } from './types';
 
 function normalizeItems(payload: unknown): JellyfinItem[] {
@@ -35,15 +35,22 @@ export async function loadLibrariesAndCollections(): Promise<{
         .includes(String(item.CollectionType).toLowerCase()))
       .map(({ Id, Name, CollectionType }) => ({ Id, Name, CollectionType }));
     const collectionRoots = roots.filter((item) => String(item.CollectionType).toLowerCase() === 'boxsets');
-    const [childGroups, playlistPayload, filterPayload] = await Promise.all([
+    const [childGroups, playlistPayload, filterPayload, configOptions] = await Promise.all([
       Promise.all(collectionRoots.map((root) => requestJson(`Items?parentId=${encodeURIComponent(root.Id)}`).catch(() => ({ Items: [] })))),
       requestJson(`Items?includeItemTypes=Playlist&recursive=true${userQuery}`).catch(() => ({ Items: [] })),
-      requestJson<JellyfinItemFilters>(`Items/Filters?includeItemTypes=Movie,Series,MusicVideo,Video,AudioBook,Book,MusicAlbum,Photo,PhotoAlbum${userQuery}`).catch((): JellyfinItemFilters => ({}))
+      requestJson<JellyfinItemFilters>(`Items/Filters?includeItemTypes=Movie,Series,MusicVideo,Video,AudioBook,Book,MusicAlbum,Photo,PhotoAlbum${userQuery}`).catch((): JellyfinItemFilters => ({})),
+      requestJson<FeaturedConfigOptions>('featured/config/options').catch((): FeaturedConfigOptions => ({}))
     ]);
-    const collections = mergeNamedItems(childGroups.flatMap(normalizeItems).map(({ Id, Name }) => ({ Id, Name })));
-    const playlists = mergeNamedItems(normalizeItems(playlistPayload).map(({ Id, Name }) => ({ Id, Name })));
-    const genres = mergeStrings(filterPayload.Genres);
-    const tags = mergeStrings(filterPayload.Tags);
+    const collections = mergeNamedItems(
+      childGroups.flatMap(normalizeItems).map(({ Id, Name }) => ({ Id, Name })),
+      (configOptions.collections ?? []).map(({ id, name }) => ({ Id: id, Name: name }))
+    );
+    const playlists = mergeNamedItems(
+      normalizeItems(playlistPayload).map(({ Id, Name }) => ({ Id, Name })),
+      (configOptions.playlists ?? []).map(({ id, name }) => ({ Id: id, Name: name }))
+    );
+    const genres = mergeStrings(filterPayload.Genres, configOptions.genres);
+    const tags = mergeStrings(filterPayload.Tags, configOptions.tags);
     return { libraries, collections, playlists, genres, tags };
   } catch {
     return { libraries: [], collections: [], playlists: [], genres: [], tags: [] };

@@ -40,7 +40,6 @@ export function createPresetFromConfig(config: FeaturedPluginConfig, name = 'Fea
       RelaxRepeatCooldownWhenNeeded: config.RelaxRepeatCooldownWhenNeeded,
       MaximumItemsPerGenre: config.MaximumItemsPerGenre,
       MaximumItemsPerFranchise: config.MaximumItemsPerFranchise,
-      ExcludeItemsFromSameSeries: config.ExcludeItemsFromSameSeries,
       RandomMediaCount: config.RandomMediaCount
     },
     Layout: {
@@ -109,7 +108,6 @@ export const CONFIG_DEFAULTS: FeaturedPluginConfig = {
   RelaxRepeatCooldownWhenNeeded: false,
   MaximumItemsPerGenre: 0,
   MaximumItemsPerFranchise: 0,
-  ExcludeItemsFromSameSeries: false,
   RandomMediaCount: 5,
   EnableInfiniteLoading: false,
   MaximumParentRating: -2,

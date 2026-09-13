@@ -219,7 +219,6 @@ public sealed class FeaturedPreparedCache
         => config.RelaxRepeatCooldownWhenNeeded
             || config.MaximumItemsPerGenre > 0
             || config.MaximumItemsPerFranchise > 0
-            || config.ExcludeItemsFromSameSeries
             || config.SourceRules.Any(rule => rule.MinimumItems > 0 || rule.MaximumItems > 0 || rule.IsFallback);
 
     private static PluginConfiguration GetCurrentConfiguration()

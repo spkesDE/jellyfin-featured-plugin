@@ -50,7 +50,6 @@ export interface FeaturedPluginConfig {
   RelaxRepeatCooldownWhenNeeded: boolean;
   MaximumItemsPerGenre: number;
   MaximumItemsPerFranchise: number;
-  ExcludeItemsFromSameSeries: boolean;
   RandomMediaCount: number;
   EnableInfiniteLoading: boolean;
   MaximumParentRating: number;
@@ -119,7 +118,6 @@ export interface FeaturedPresetMixerSettings {
   RelaxRepeatCooldownWhenNeeded: boolean;
   MaximumItemsPerGenre: number;
   MaximumItemsPerFranchise: number;
-  ExcludeItemsFromSameSeries: boolean;
   RandomMediaCount: number;
 }
 

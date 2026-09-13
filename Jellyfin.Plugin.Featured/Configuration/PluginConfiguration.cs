@@ -39,8 +39,6 @@ public sealed class PluginConfiguration : BasePluginConfiguration
 
     public int MaximumItemsPerFranchise { get; set; }
 
-    public bool ExcludeItemsFromSameSeries { get; set; }
-
     public int RandomMediaCount { get; set; } = 5;
 
     public bool EnableInfiniteLoading { get; set; }
@@ -167,7 +165,6 @@ public sealed class FeaturedPresetMixerSettings
     public bool RelaxRepeatCooldownWhenNeeded { get; set; }
     public int MaximumItemsPerGenre { get; set; }
     public int MaximumItemsPerFranchise { get; set; }
-    public bool ExcludeItemsFromSameSeries { get; set; }
     public int RandomMediaCount { get; set; } = 5;
 }
 

@@ -244,19 +244,34 @@ test('source mixer v2 applies limits, fallbacks, diversity, and cooldown recover
     assert.equal(defaults.includes(property), true, `frontend defaults miss ${property}`);
     assert.equal(sourceCard.includes(`rule.${property}`), true, `source editor misses ${property}`);
   }
-  for (const property of ['MaximumItemsPerGenre', 'MaximumItemsPerFranchise', 'ExcludeItemsFromSameSeries']) {
+  for (const property of ['MaximumItemsPerGenre', 'MaximumItemsPerFranchise']) {
     assert.equal(configuration.includes(property), true, `backend misses ${property}`);
     assert.equal(defaults.includes(property), true, `frontend defaults miss ${property}`);
-    assert.equal(sourcesTab.includes(`store.config.${property}`), true, `diversity editor misses ${property}`);
+    assert.equal(filtersTab.includes(`store.config.${property}`), true, `global diversity editor misses ${property}`);
   }
   assert.match(normalizer, /MinimumItems > rule\.MaximumItems[\s\S]*?MinimumItems = rule\.MaximumItems/);
   assert.match(engine, /primaryPools[\s\S]*?fallbackPools/);
   assert.match(engine, /GetItemIdentity[\s\S]*?ProviderIds\.TryGetValue/);
-  assert.match(engine, /FeaturedDiversityTracker[\s\S]*?TmdbCollectionName[\s\S]*?IHasSeries/);
+  assert.match(engine, /FeaturedDiversityTracker[\s\S]*?TmdbCollectionName/);
   assert.match(history, /GetRecentItems[\s\S]*?DisplayedAt/);
   assert.match(engine, /ActivateCooldownItems[\s\S]*?cooldownRelaxed:\s*true/);
   assert.match(preparedCache, /RequiresLiveMixing[\s\S]*?MinimumItems[\s\S]*?IsFallback/);
   assert.match(filtersTab, /RelaxRepeatCooldownWhenNeeded/);
+});
+
+test('configuration discovery uses the authenticated server options fallback', async () => {
+  const [discovery, filtersTab, sourcesTab, styles] = await Promise.all([
+    read('src/config/libs/jellyfinApi.ts'),
+    read('src/config/tabs/FiltersTab.vue'),
+    read('src/config/tabs/SourcesTab.vue'),
+    read('src/config/config.css')
+  ]);
+  assert.match(discovery, /requestJson<FeaturedConfigOptions>\('featured\/config\/options'\)/);
+  assert.match(discovery, /mergeStrings\(filterPayload\.Genres, configOptions\.genres\)/);
+  assert.match(filtersTab, /store\.config\.MaximumItemsPerGenre[\s\S]*?store\.config\.MaximumItemsPerFranchise/);
+  assert.doesNotMatch(sourcesTab, /MaximumItemsPerGenre|ExcludeItemsFromSameSeries/);
+  assert.match(styles, /\.jmp-configForm\s*\{[\s\S]*?padding:\s*0 clamp\(\.75rem, 2vw, 1\.5rem\) 2rem/);
+  assert.match(styles, /\.jmp-section-plain > \.jmp-subsection\s*\{[\s\S]*?margin-bottom:\s*1rem/);
 });
 
 test('featured selection excludes samples and other video extras', async () => {

@@ -40,6 +40,15 @@ async function clearHistory(): Promise<void> {
       </ConfigCard>
 
       <div class="ec-filterSecondary">
+        <ConfigCard :title="t('filter.diversityTitle')" :help="t('filter.diversityHelp')">
+          <div class="ec-diversityGrid">
+            <ConfigNumber v-model="store.config.MaximumItemsPerGenre" :label="t('filter.maximumPerGenre')"
+              :help-text="t('filter.maximumPerGenreHelp')" :min="0" :max="100" :step="1" />
+            <ConfigNumber v-model="store.config.MaximumItemsPerFranchise" :label="t('filter.maximumPerFranchise')"
+              :help-text="t('filter.maximumPerFranchiseHelp')" :min="0" :max="100" :step="1" />
+          </div>
+        </ConfigCard>
+
         <ConfigCard :title="t('filter.resultLimits')" :help="t('filter.resultLimitsHelp')">
           <ConfigCheckbox v-model="store.config.EnableInfiniteLoading" :label="t('filter.continuous')" :help-text="t('filter.continuousHelp')" />
           <ConfigNumber
@@ -89,9 +98,12 @@ async function clearHistory(): Promise<void> {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.ec-diversityGrid { display: grid; gap: 1rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
 @media (max-width: 900px) {
   .ec-filterSecondary {
     grid-template-columns: 1fr;
   }
+  .ec-diversityGrid { grid-template-columns: 1fr; }
 }
 </style>

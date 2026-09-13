@@ -62,7 +62,6 @@ internal static class FeaturedPresetResolver
         config.RelaxRepeatCooldownWhenNeeded = preset.Mixer.RelaxRepeatCooldownWhenNeeded;
         config.MaximumItemsPerGenre = preset.Mixer.MaximumItemsPerGenre;
         config.MaximumItemsPerFranchise = preset.Mixer.MaximumItemsPerFranchise;
-        config.ExcludeItemsFromSameSeries = preset.Mixer.ExcludeItemsFromSameSeries;
         config.RandomMediaCount = preset.Mixer.RandomMediaCount;
 
         config.EnableInfiniteLoading = preset.Layout.EnableInfiniteLoading;

@@ -98,7 +98,7 @@ You can combine as many sources as you like. Give a source more weight if you wa
 
 Each source may also reserve a minimum number of slots, cap its maximum contribution, or act as a fallback. Primary sources are mixed first; fallback sources are considered only when the primary sources cannot fill the requested feed. Empty and duplicate-heavy sources donate their unused quota to the remaining sources.
 
-Optional diversity controls limit titles with the same primary genre or TMDb movie franchise and can avoid multiple entries carrying the same Jellyfin series metadata. These limits are best-effort: if they would leave the carousel short, deferred titles become eligible again. Duplicates are detected by stable provider IDs where available, with media type, title, and year as a fallback identity.
+Global feed-diversity controls limit titles with the same primary genre or TMDb movie franchise. These limits are best-effort: if they would leave the carousel short, deferred titles become eligible again. Duplicates are detected by stable provider IDs where available, with media type, title, and year as a fallback identity.
 
 The repeat cooldown can remain strict or reuse the oldest recently displayed items after all fresh primary and fallback candidates have been exhausted. Advanced mixer rules are evaluated for every request so source limits and feed-wide diversity remain exact; the prepared cache continues to serve configurations that only use weighted mixing.
 

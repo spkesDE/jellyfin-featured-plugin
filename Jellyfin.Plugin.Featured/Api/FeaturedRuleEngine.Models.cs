@@ -1,6 +1,5 @@
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Entities.Movies;
-using MediaBrowser.Controller.Entities.TV;
 
 namespace Jellyfin.Plugin.Featured.Api;
 
@@ -56,16 +55,13 @@ internal sealed class FeaturedDiversityTracker
 {
     private readonly int _maximumItemsPerGenre;
     private readonly int _maximumItemsPerFranchise;
-    private readonly bool _excludeItemsFromSameSeries;
     private readonly Dictionary<string, int> _genreCounts = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, int> _franchiseCounts = new(StringComparer.OrdinalIgnoreCase);
-    private readonly HashSet<string> _series = new(StringComparer.OrdinalIgnoreCase);
 
     internal FeaturedDiversityTracker(PluginConfiguration config)
     {
         _maximumItemsPerGenre = config.MaximumItemsPerGenre;
         _maximumItemsPerFranchise = config.MaximumItemsPerFranchise;
-        _excludeItemsFromSameSeries = config.ExcludeItemsFromSameSeries;
     }
 
     internal bool CanAdd(BaseItem item)
@@ -84,16 +80,13 @@ internal sealed class FeaturedDiversityTracker
             return false;
         }
 
-        string? series = GetSeries(item);
-        return !_excludeItemsFromSameSeries || series is null || !_series.Contains(series);
+        return true;
     }
 
     internal void Record(BaseItem item)
     {
         Increment(_genreCounts, GetPrimaryGenre(item));
         Increment(_franchiseCounts, GetFranchise(item));
-        string? series = GetSeries(item);
-        if (series is not null) _series.Add(series);
     }
 
     private static string? GetPrimaryGenre(BaseItem item)
@@ -102,11 +95,6 @@ internal sealed class FeaturedDiversityTracker
     private static string? GetFranchise(BaseItem item)
         => item is Movie movie && !string.IsNullOrWhiteSpace(movie.TmdbCollectionName)
             ? movie.TmdbCollectionName.Trim()
-            : null;
-
-    private static string? GetSeries(BaseItem item)
-        => item is IHasSeries series && !string.IsNullOrWhiteSpace(series.SeriesName)
-            ? series.SeriesName.Trim()
             : null;
 
     private static int GetCount(Dictionary<string, int> counts, string key)
