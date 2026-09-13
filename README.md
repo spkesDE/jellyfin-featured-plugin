@@ -96,11 +96,7 @@ A random selection is enabled by default, so you should see the banner without h
 
 You can combine as many sources as you like. Give a source more weight if you want its titles to appear more often. Filters can apply to the whole banner or only to one source.
 
-Each source may also reserve a minimum number of slots, cap its maximum contribution, or act as a fallback. Primary sources are mixed first; fallback sources are considered only when the primary sources cannot fill the requested feed. Empty and duplicate-heavy sources donate their unused quota to the remaining sources.
-
-Global feed-diversity controls limit titles with the same primary genre or TMDb movie franchise. These limits are best-effort: if they would leave the carousel short, deferred titles become eligible again. Duplicates are detected by stable provider IDs where available, with media type, title, and year as a fallback identity.
-
-The repeat cooldown can remain strict or reuse the oldest recently displayed items after all fresh primary and fallback candidates have been exhausted. Advanced mixer rules are evaluated for every request so source limits and feed-wide diversity remain exact; the prepared cache continues to serve configurations that only use weighted mixing.
+You can also set minimums or maximums for individual sources and mark a source as a fallback. Feed-diversity settings help prevent one genre or film series from dominating the banner. A repeat cooldown keeps recently shown titles out of the rotation for a while.
 
 ## Display Options
 
@@ -110,31 +106,23 @@ You can also choose which details and controls are shown, including the title or
 
 ## Trailer Support
 
-The `Trailers` settings choose whether Jellyfin Featured prefers local or remote metadata, restricts playback to one source type, or selects automatically. Remote trailers already discovered by Jellyfin are used directly, so YouTube playback does not require a separate TMDb API key. YouTube is embedded through its player API; direct MP4, WebM, OGV, and OGG URLs use the browser video player. Unsupported providers remain available through an external trailer button.
+Jellyfin Featured can play local trailers and supported online trailers in the background. You can choose which type to prefer, start trailers muted, add a delay, adjust start and end points, and decide whether they should play on mobile devices.
 
-Playback can start after a delay, begin or end at an offset, remain muted, wait for the trailer to finish before advancing, and be disabled on mobile clients. When Jellyfin returns several trailers, the first or a random entry can be selected. Manual overrides assign a remote URL or visible local Jellyfin trailer item to one title and always take precedence over discovered metadata.
+If a title needs a specific trailer, add a manual override in the `Trailers` tab. Unsupported online trailers can still be opened with a trailer button.
 
 ## Personalization
 
-Administrators configure the server defaults and the settings users may override under `User Profiles`. Available controls include source activation, source weights, preferred genres, scoring boosts, and an optional personal repeat cooldown. Existing per-user admin profiles remain available as user-specific server defaults.
+Administrators choose which options users may change under `User Profiles`. These can include content sources, source shares, preferred genres, favourites, unwatched titles, in-progress series, and the repeat cooldown.
 
-When personalization is enabled, users can open `Featured settings` from Jellyfin's user menu or its main user-settings page and save settings for their own account. Settings they leave unchanged continue to inherit server defaults; `Reset to server defaults` removes all personal overrides. Genre options are derived only from content visible to the active user, and the normal Jellyfin access checks still apply to every returned item.
-
-Integrations may use the authenticated preference API directly:
-
-```http
-GET /featured/preferences
-PUT /featured/preferences
-GET /featured/preferences/options
-```
+When personalization is enabled, users can open `Featured settings` from Jellyfin's user menu or settings page. Their choices affect only their own account. `Reset to server defaults` restores the experience chosen by the administrator.
 
 ## Presets and Scheduling
 
-The `Presets & Schedule` tab captures the current source mix, source and global filters, personalization policy, display layout, and trailer configuration as one reusable snapshot. This makes it possible to prepare experiences such as Christmas, Halloween, weekends, kids mornings, or Friday nights without replacing the normal configuration.
+Presets let you prepare a complete Featured experience for occasions such as Christmas, Halloween, weekends, kids mornings, or Friday nights.
 
-Every preset can have an optional start and end time, an enabled state, and a priority. The normal settings are the `Default` fallback whenever no preset is active. If schedules overlap, the preset with the higher priority wins; equal priorities prefer the preset with the later start time. End times are exclusive, so the default or next scheduled preset takes over exactly at that boundary.
+First configure the sources, filters, layout, personalization, and trailers you want. Then open `Presets & Schedule`, capture the current settings, choose a name and time period, and enable the preset. Outside that period, Jellyfin Featured automatically returns to your normal settings.
 
-New snapshots are disabled initially. Configure the other tabs first, capture those settings, then name and schedule the preset. `Update from current settings` refreshes its captured content while retaining its name, schedule, enabled state, and priority. The web carousel refreshes automatically at the next schedule boundary, and user personalization continues to operate within the active preset according to that preset's policy.
+If two presets overlap, use the priority setting to choose which one should be shown. `Update from current settings` refreshes an existing preset without changing its name or schedule.
 
 ## Troubleshooting
 
@@ -159,10 +147,6 @@ This project is licensed under the [MIT License](./LICENSE).
 ## Credits
 
 Jellyfin Featured is a remake of the original [Jellyfin Editor's Choice plugin](https://github.com/lachlandcp/jellyfin-editors-choice-plugin) by [lachlandcp](https://github.com/lachlandcp). Thanks to the original project for the idea and foundation.
-
-## Contributing
-
-Want to help improve Jellyfin Featured? See the [contributing guide](./CONTRIBUTING.md). If you want to build the plugin yourself, follow the [build guide](./BUILD.md).
 
 ## More Jellyfin plugins
 
