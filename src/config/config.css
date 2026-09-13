@@ -1,6 +1,5 @@
                 #FeaturedConfigPage .jmp-configForm {
                     box-sizing: border-box;
-                    padding: 0 clamp(.75rem, 2vw, 1.5rem) 2rem;
                 }
 
                 #FeaturedConfigPage .jmp-configForm,
@@ -430,7 +429,7 @@
                     margin-bottom: 0;
                 }
 
-                #FeaturedConfigPage .jmp-section-plain > .jmp-subsection {
+                #FeaturedConfigPage .jmp-section-plain>.jmp-subsection {
                     margin-bottom: 1rem;
                 }
 
