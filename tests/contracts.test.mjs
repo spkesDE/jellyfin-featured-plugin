@@ -158,7 +158,7 @@ test('personalization is authenticated, policy-bound, user scoped, and fast to r
   assert.match(navigation, /USER_SETTINGS_PAGE_LINK_ATTR[\s\S]*?section\.appendChild\(entry\)/);
   assert.match(navigation, /\.lnkHomePreferences/);
   assert.match(navigation, /openPreferencesDialog\(\)/);
-  assert.match(navigation, /pointerenter', preloadPreferencesDialog/);
+  assert.doesNotMatch(navigation, /preloadPreferencesDialog|preferences\/bootstrap/);
   assert.match(navigation, /userSettingsEnabled = config\.personalizationEnabled/);
   assert.match(styles, /ec-preferences-spinner/);
   assert.match(styles, /env\(safe-area-inset-top\)/);

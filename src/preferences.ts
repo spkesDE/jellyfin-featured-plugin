@@ -25,10 +25,6 @@ function loadPreferencesBootstrap(): Promise<FeaturedPreferencesBootstrapRespons
   return bootstrapRequest;
 }
 
-export function preloadPreferencesDialog(): void {
-  void loadPreferencesBootstrap().catch(() => undefined);
-}
-
 function invalidatePreferencesBootstrap(): void {
   bootstrapCache = null;
 }
