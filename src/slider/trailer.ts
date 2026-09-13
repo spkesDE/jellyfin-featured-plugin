@@ -46,6 +46,10 @@ abstract class HtmlVideoPlayer implements TrailerPlayer {
     this.element.loop = options.loop && options.endOffsetSeconds === 0;
     this.element.autoplay = true;
     this.element.playsInline = true;
+    this.element.controls = false;
+    this.element.disablePictureInPicture = true;
+    this.element.tabIndex = -1;
+    this.element.setAttribute('aria-hidden', 'true');
     this.element.addEventListener('loadedmetadata', () => {
       if (options.startOffsetSeconds > 0 && options.startOffsetSeconds < this.element.duration) {
         this.element.currentTime = options.startOffsetSeconds;
@@ -109,6 +113,8 @@ export class YouTubePlayer implements TrailerPlayer {
   constructor(videoId: string, options: TrailerPlaybackOptions) {
     this.element = document.createElement('div');
     this.element.className = 'ec-trailer';
+    this.element.tabIndex = -1;
+    this.element.setAttribute('aria-hidden', 'true');
     this.ready = this.initialize(videoId, options);
   }
 
@@ -138,6 +144,10 @@ export class YouTubePlayer implements TrailerPlayer {
       },
       events: {
         onReady: ({ target }) => {
+          const iframe = target.getIframe();
+          iframe.classList.add('ec-trailer');
+          iframe.tabIndex = -1;
+          iframe.setAttribute('aria-hidden', 'true');
           if (options.muted) target.mute(); else target.unMute();
           if (options.startOffsetSeconds > 0) target.seekTo(options.startOffsetSeconds, true);
           target.playVideo();
@@ -168,6 +178,7 @@ interface YouTubePlayerInstance {
   destroy(): void;
   getCurrentTime(): number;
   getDuration(): number;
+  getIframe(): HTMLIFrameElement;
   mute(): void;
   pauseVideo(): void;
   playVideo(): void;

@@ -161,6 +161,7 @@
   max-width: none;
   min-width: 100vw;
   object-fit: cover;
+  pointer-events: none;
   position: absolute;
   top: 50%;
   transform: translate(-50%, -50%);

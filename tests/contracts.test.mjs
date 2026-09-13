@@ -166,6 +166,8 @@ test('proper trailer support keeps resolution and playback source independent', 
   assert.match(carousel, /trailerItemId === item\.id[\s\S]*?this\.stopTrailer\(\)/);
   assert.match(carousel, /querySelectorAll\(':scope > \.ec-trailer'\)/);
   assert.match(styles, /\.ec-trailer\s*\{[\s\S]*?height:\s*max\(100%, 56\.25vw\)[\s\S]*?min-width:\s*100vw[\s\S]*?translate\(-50%, -50%\)/);
+  assert.match(styles, /\.ec-trailer\s*\{[\s\S]*?pointer-events:\s*none/);
+  assert.match(player, /target\.getIframe\(\)[\s\S]*?tabIndex = -1[\s\S]*?aria-hidden/);
 });
 
 test('source mixer constraints survive personalized source cloning', async () => {
