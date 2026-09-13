@@ -50,13 +50,18 @@ abstract class HtmlVideoPlayer implements TrailerPlayer {
     this.element.className = 'ec-trailer';
     this.element.src = url;
     this.element.muted = options.muted;
+    this.element.defaultMuted = options.muted;
     this.element.volume = Math.max(0, Math.min(1, options.volume / 100));
     this.element.loop = options.loop && options.endOffsetSeconds === 0;
     this.element.autoplay = true;
     this.element.playsInline = true;
+    this.element.preload = 'auto';
     this.element.controls = false;
     this.element.disablePictureInPicture = true;
     this.element.tabIndex = -1;
+    this.element.setAttribute('playsinline', '');
+    this.element.setAttribute('webkit-playsinline', '');
+    if (options.muted) this.element.setAttribute('muted', '');
     this.element.setAttribute('aria-hidden', 'true');
     this.element.addEventListener('loadedmetadata', () => {
       if (options.startOffsetSeconds > 0 && options.startOffsetSeconds < this.element.duration) {
@@ -185,6 +190,7 @@ export class YouTubePlayer implements TrailerPlayer {
           const iframe = target.getIframe();
           iframe.classList.add('ec-trailer');
           iframe.tabIndex = -1;
+          iframe.setAttribute('allow', 'autoplay; encrypted-media; picture-in-picture');
           iframe.setAttribute('aria-hidden', 'true');
           if (options.muted) target.mute(); else target.unMute();
           target.setVolume(options.volume);
@@ -295,4 +301,9 @@ export function isMobileTrailerClient(): boolean {
   return window.matchMedia?.('(max-width: 767px)').matches
     || window.matchMedia?.('(pointer: coarse)').matches
     || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+}
+
+export function isIosTrailerClient(): boolean {
+  return /iPhone|iPad|iPod/i.test(navigator.userAgent)
+    || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 }

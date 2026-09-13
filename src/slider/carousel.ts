@@ -2,7 +2,7 @@ import type { FeaturedItem, FeaturedResponse } from '../types/featured';
 import { t } from '../i18n';
 import { CONSOLE_PREFIX, PLUGIN_VERSION } from '../constants';
 import { createSlide, loadSlideArtwork } from './render';
-import { createTrailerPlayer, isMobileTrailerClient, type TrailerPlayer } from './trailer';
+import { createTrailerPlayer, isIosTrailerClient, isMobileTrailerClient, type TrailerPlayer } from './trailer';
 import { applyHeroLayoutVariables } from './layout';
 
 export type FeaturedItemLoader = (excludedItemIds: readonly string[]) => Promise<FeaturedResponse>;
@@ -55,7 +55,8 @@ export class FeaturedCarousel {
     this.seenItemIds = new Set(this.items.map((item) => item.id));
     this.hasMore = response.infiniteLoading && response.hasMore;
     this.autoplayEnabled = response.autoplay;
-    this.trailerMuted = response.startTrailersMuted;
+    // Safari only permits unattended inline playback when the media starts muted.
+    this.trailerMuted = response.startTrailersMuted || isIosTrailerClient();
     this.root = document.createElement('section');
     this.root.className = `ec-root ec-ready ec-effect-${response.transitionEffect} ec-height-${response.heroHeightMode} ec-text-${response.heroTextPosition}${response.useHeroLayout ? ' ec-hero' : ''}`;
     this.root.dataset.featuredVersion = PLUGIN_VERSION;
