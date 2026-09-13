@@ -152,7 +152,13 @@ test('source mixer v2 applies limits, fallbacks, diversity, and cooldown recover
   const [configuration, normalizer, engine, history, preparedCache, defaults, sourceCard, sourcesTab, filtersTab] = await Promise.all([
     read('Jellyfin.Plugin.Featured/Configuration/PluginConfiguration.cs'),
     read('Jellyfin.Plugin.Featured/Configuration/PluginConfigurationNormalizer.cs'),
-    read('Jellyfin.Plugin.Featured/Api/FeaturedRuleEngine.cs'),
+    Promise.all([
+      read('Jellyfin.Plugin.Featured/Api/FeaturedRuleEngine.cs'),
+      read('Jellyfin.Plugin.Featured/Api/FeaturedRuleEngine.Allocation.cs'),
+      read('Jellyfin.Plugin.Featured/Api/FeaturedRuleEngine.Candidates.cs'),
+      read('Jellyfin.Plugin.Featured/Api/FeaturedRuleEngine.Filters.cs'),
+      read('Jellyfin.Plugin.Featured/Api/FeaturedRuleEngine.Models.cs')
+    ]).then((parts) => parts.join('\n')),
     read('Jellyfin.Plugin.Featured/Api/FeaturedDisplayHistoryStore.cs'),
     read('Jellyfin.Plugin.Featured/Api/FeaturedPreparedCache.cs'),
     read('src/config/libs/defaults.ts'),
@@ -181,7 +187,7 @@ test('source mixer v2 applies limits, fallbacks, diversity, and cooldown recover
 });
 
 test('featured selection excludes samples and other video extras', async () => {
-  const ruleEngine = await read('Jellyfin.Plugin.Featured/Api/FeaturedRuleEngine.cs');
+  const ruleEngine = await read('Jellyfin.Plugin.Featured/Api/FeaturedRuleEngine.Filters.cs');
   assert.match(ruleEngine, /IsSupportedItemType\(BaseItem item\)[\s\S]*?item\.ExtraType is null[\s\S]*?FeaturedMediaTypes\.Contains/);
   assert.match(ruleEngine, /SampleFileNameRegex[\s\S]*?Path\.GetFileNameWithoutExtension\(item\.Path\)[\s\S]*?SampleFileNameRegex\.IsMatch\(fileName\)/);
 });
