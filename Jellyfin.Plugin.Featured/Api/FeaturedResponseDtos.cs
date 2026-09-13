@@ -102,6 +102,7 @@ public sealed class FeaturedRuntimeConfigurationDto : FeaturedDisplaySettingsDto
         EnableAutoplay = config.EnableAutoplay;
         AutoplayInterval = config.AutoplayInterval;
         ReduceImageSize = config.ReduceImageSize;
+        PersonalizationEnabled = config.PersonalizationPolicy.Enabled;
         Debug = config.Debug;
         ActivePresetId = activePresetId;
         ActivePresetName = activePresetName;
@@ -116,6 +117,7 @@ public sealed class FeaturedRuntimeConfigurationDto : FeaturedDisplaySettingsDto
     public bool EnableAutoplay { get; }
     public int AutoplayInterval { get; }
     public bool ReduceImageSize { get; }
+    public bool PersonalizationEnabled { get; }
     public bool Debug { get; }
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]

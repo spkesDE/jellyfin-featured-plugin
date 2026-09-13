@@ -210,6 +210,7 @@ export function createRuntimeConfigDefaults(): RuntimeConfig {
     enableAutoplay: config.EnableAutoplay,
     autoplayInterval: config.AutoplayInterval,
     reduceImageSize: config.ReduceImageSize,
+    personalizationEnabled: config.PersonalizationPolicy.Enabled,
     secondaryButtonText: config.SecondaryButtonText || null,
     heading: config.Heading || null,
     playButtonText: config.PlayButtonText || null,

@@ -234,6 +234,7 @@ export interface RuntimeConfig extends FeaturedDisplaySettings {
   enableAutoplay: boolean;
   autoplayInterval: number;
   reduceImageSize: boolean;
+  personalizationEnabled: boolean;
   secondaryButtonText: string | null;
   heading: string | null;
   playButtonText: string | null;

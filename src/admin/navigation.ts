@@ -4,9 +4,67 @@ import {
   CONFIGURATION_PAGE_NAME,
   PLUGIN_DISPLAY_NAME
 } from '../constants';
+import { config } from '../config';
+import { t } from '../i18n';
+import { openPreferencesDialog } from '../preferences';
+
+const USER_SETTINGS_LINK_ATTR = 'data-featured-user-settings-link';
+const USER_PREFERENCES_SELECTOR = 'a[href="#/mypreferencesmenu"], a[href$="/#/mypreferencesmenu"]';
 
 let refreshScheduled = false;
 let refreshFrame: number | null = null;
+let userSettingsEnabled = config.personalizationEnabled;
+
+export function isUserSettingsMenu(element: Element): boolean {
+  return element.matches('ul[role="menu"]') && element.querySelector(USER_PREFERENCES_SELECTOR) !== null;
+}
+
+export function ensureUserSettingsMenuEntry(): void {
+  document.querySelectorAll<HTMLElement>('ul[role="menu"]').forEach((menu) => {
+    if (!isUserSettingsMenu(menu)) return;
+    const existing = menu.querySelector<HTMLElement>(`[${USER_SETTINGS_LINK_ATTR}="true"]`);
+    if (!userSettingsEnabled) {
+      existing?.remove();
+      return;
+    }
+    if (existing) return;
+
+    const settingsEntry = menu.querySelector<HTMLAnchorElement>(USER_PREFERENCES_SELECTOR);
+    if (!settingsEntry) return;
+    const entry = settingsEntry.cloneNode(true) as HTMLAnchorElement;
+    entry.setAttribute(USER_SETTINGS_LINK_ATTR, 'true');
+    entry.href = '#';
+    entry.removeAttribute('id');
+    entry.querySelector('.MuiListItemIcon-root')?.replaceChildren(createUserSettingsIcon());
+    const label = entry.querySelector('.MuiListItemText-primary') ?? entry.querySelector('.MuiTypography-root');
+    if (label) label.textContent = t('preferences.menuEntry');
+    else entry.textContent = t('preferences.menuEntry');
+    entry.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', bubbles: true }));
+      window.setTimeout(() => void openPreferencesDialog(), 0);
+    });
+    settingsEntry.after(entry);
+  });
+}
+
+function createUserSettingsIcon(): HTMLSpanElement {
+  const icon = document.createElement('span');
+  icon.className = 'material-icons';
+  icon.setAttribute('aria-hidden', 'true');
+  icon.textContent = 'view_carousel';
+  return icon;
+}
+
+export function setUserSettingsMenuEnabled(enabled: boolean): void {
+  userSettingsEnabled = enabled;
+  if (!enabled) {
+    document.querySelectorAll(`[${USER_SETTINGS_LINK_ATTR}="true"]`).forEach((entry) => entry.remove());
+  } else {
+    scheduleAdminNavigationRefresh();
+  }
+}
 
 export function isPluginConfigurationLink(element: Element | null): boolean {
   return !!(
@@ -158,6 +216,7 @@ export function scheduleAdminNavigationRefresh(): void {
     refreshFrame = null;
     refreshScheduled = false;
     ensureAdminNavigationLink();
+    ensureUserSettingsMenuEntry();
   });
 }
 

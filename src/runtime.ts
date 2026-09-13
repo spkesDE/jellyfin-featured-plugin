@@ -4,7 +4,7 @@ import { FeaturedCarousel } from './slider/carousel';
 import { heroImageUrl, logoUrl } from './slider/images';
 import { applyHeroLayoutVariables } from './slider/layout';
 import type { FeaturedResponse } from './types/featured';
-import { cancelAdminNavigationRefresh, scheduleAdminNavigationRefresh } from './admin/navigation';
+import { cancelAdminNavigationRefresh, isUserSettingsMenu, scheduleAdminNavigationRefresh, setUserSettingsMenuEnabled } from './admin/navigation';
 import { CONSOLE_PREFIX } from './constants';
 
 const HOME_SELECTOR = '#indexPage:not(.hide) #homeTab.is-active .homeSectionsContainer, #homeTab.is-active .homeSectionsContainer';
@@ -163,6 +163,7 @@ async function mount(container: Element): Promise<void> {
   const placeholder = createPlaceholder(container);
   try {
     const response = removeEpisodeItems(await requestJson<FeaturedResponse>('featured/items'));
+    setUserSettingsMenuEnabled(response.personalizationEnabled);
     schedulePresetRefresh(response.nextPresetChange);
     if (
       mountToken !== lifecycleToken ||
@@ -308,7 +309,9 @@ function mutationAddsAdminNavigation(mutation: MutationRecord): boolean {
   return Array.from(mutation.addedNodes).some((node) => (
     node instanceof Element
     && (node.matches('ul[aria-labelledby="plugins-subheader"]')
-      || node.querySelector('ul[aria-labelledby="plugins-subheader"]') !== null)
+      || node.querySelector('ul[aria-labelledby="plugins-subheader"]') !== null
+      || isUserSettingsMenu(node)
+      || Array.from(node.querySelectorAll('ul[role="menu"]')).some(isUserSettingsMenu))
   ));
 }
 

@@ -24,23 +24,6 @@
   box-sizing: border-box;
 }
 
-.ec-personalize {
-  align-items: center;
-  background: rgb(0 0 0 / .38);
-  border: 0;
-  border-radius: 50%;
-  color: #fff;
-  cursor: pointer;
-  display: flex;
-  height: 2.6rem;
-  justify-content: center;
-  position: absolute;
-  right: max(1rem, env(safe-area-inset-right));
-  top: 1rem;
-  width: 2.6rem;
-  z-index: 5;
-}
-
 .ec-preferences-backdrop { align-items: center; background: rgb(0 0 0 / .72); display: flex; inset: 0; justify-content: center; padding: 1rem; position: fixed; z-index: 99999; }
 .ec-preferences-dialog, .ec-preferences-loading { background: #202020; border-radius: .65rem; box-shadow: 0 1rem 3rem rgb(0 0 0 / .55); color: #fff; max-height: min(90vh, 54rem); max-width: 44rem; overflow: auto; padding: 1.25rem; width: 100%; }
 .ec-preferences-dialog > header { align-items: center; display: flex; justify-content: space-between; }

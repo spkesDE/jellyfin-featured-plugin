@@ -98,12 +98,14 @@ test('featured presets resolve schedules and override all roadmap sections', asy
 });
 
 test('personalization is authenticated, policy-bound, and user scoped', async () => {
-  const [controller, service, store, response, frontend] = await Promise.all([
+  const [controller, service, store, response, frontend, navigation, carousel] = await Promise.all([
     read('Jellyfin.Plugin.Featured/Api/FeaturedController.Preferences.cs'),
     read('Jellyfin.Plugin.Featured/Api/FeaturedPersonalizationService.cs'),
     read('Jellyfin.Plugin.Featured/Api/FeaturedPreferenceStore.cs'),
     read('Jellyfin.Plugin.Featured/Api/FeaturedResponseDtos.cs'),
-    read('src/preferences.ts')
+    read('src/preferences.ts'),
+    read('src/admin/navigation.ts'),
+    read('src/slider/carousel.ts')
   ]);
   assert.match(controller, /\[HttpGet\("preferences"\)\][\s\S]*?\[Authorize\]/);
   assert.match(controller, /\[HttpPut\("preferences"\)\][\s\S]*?\[Authorize\]/);
@@ -118,6 +120,11 @@ test('personalization is authenticated, policy-bound, and user scoped', async ()
   assert.match(frontend, /body: \{ reset: true \}/);
   assert.match(frontend, /body: \{ preferences \}/);
   assert.match(frontend, /current\.defaults\.sourceEnabled/);
+  assert.match(navigation, /USER_PREFERENCES_SELECTOR[\s\S]*?#\/mypreferencesmenu/);
+  assert.match(navigation, /settingsEntry\.after\(entry\)/);
+  assert.match(navigation, /openPreferencesDialog\(\)/);
+  assert.match(navigation, /userSettingsEnabled = config\.personalizationEnabled/);
+  assert.doesNotMatch(carousel, /ec-personalize|openPreferencesDialog/);
 });
 
 test('proper trailer support keeps resolution and playback source independent', async () => {
