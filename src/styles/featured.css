@@ -558,7 +558,7 @@
     object-position: left center;
   }
 
-  .ec-backdrop::after {
+  .ec-root.ec-hero .ec-slide::after {
     background: linear-gradient(0deg, rgba(5, 7, 12, .96) 0%, rgba(5, 7, 12, .54) 58%, rgba(5, 7, 12, .08) 100%);
   }
 

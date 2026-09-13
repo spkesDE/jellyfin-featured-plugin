@@ -204,6 +204,8 @@ test('proper trailer support keeps resolution and playback source independent', 
   assert.match(styles, /\.ec-root\.ec-hero \.ec-backdrop,[\s\S]*?transparent 74%/);
   assert.match(styles, /\.ec-root\.ec-hero \.ec-slide::after[\s\S]*?transparent 78%/);
   assert.match(styles, /\.ec-slide\.ec-trailer-active \.ec-backdrop\s*\{[\s\S]*?opacity:\s*0/);
+  assert.match(styles, /@media \(max-width: 700px\)[\s\S]*?\.ec-root\.ec-hero \.ec-slide::after\s*\{[\s\S]*?linear-gradient\(0deg/);
+  assert.doesNotMatch(styles, /\.ec-backdrop::after/);
   assert.match(player, /target\.getIframe\(\)[\s\S]*?tabIndex = -1[\s\S]*?aria-hidden/);
   assert.match(player, /defaultMuted = options\.muted[\s\S]*?setAttribute\('webkit-playsinline', ''\)/);
   assert.match(player, /setAttribute\('allow', 'autoplay; encrypted-media; picture-in-picture'\)/);
