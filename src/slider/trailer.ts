@@ -8,6 +8,7 @@ export interface TrailerPlaybackOptions {
   endOffsetSeconds: number;
   loop: boolean;
   onEnded: () => void;
+  onError: (error: Error) => void;
   concealDurationMilliseconds?: number;
   onConcealStart?: (durationMilliseconds: number) => void;
   onReveal?: () => void;
@@ -133,6 +134,7 @@ export class YouTubePlayer implements TrailerPlayer {
   private player: YouTubePlayerInstance | null = null;
   private endTimer: number | null = null;
   private revealTimer: number | null = null;
+  private startupTimer: number | null = null;
   private destroyed = false;
   private readonly ready: Promise<void>;
 
@@ -169,6 +171,7 @@ export class YouTubePlayer implements TrailerPlayer {
     this.destroyed = true;
     if (this.endTimer !== null) window.clearInterval(this.endTimer);
     if (this.revealTimer !== null) window.clearTimeout(this.revealTimer);
+    if (this.startupTimer !== null) window.clearTimeout(this.startupTimer);
     this.player?.destroy();
     this.player = null;
     this.element.remove();
@@ -177,6 +180,10 @@ export class YouTubePlayer implements TrailerPlayer {
   private async initialize(videoId: string, options: TrailerPlaybackOptions): Promise<void> {
     const api = await loadYouTubeApi();
     if (this.destroyed) return;
+    this.startupTimer = window.setTimeout(() => {
+      this.startupTimer = null;
+      if (!this.destroyed) options.onError(new Error('YouTube trailer did not become ready in time.'));
+    }, 8000);
     this.player = new api.Player(this.element, {
       videoId,
       host: 'https://www.youtube-nocookie.com',
@@ -187,6 +194,8 @@ export class YouTubePlayer implements TrailerPlayer {
       },
       events: {
         onReady: ({ target }) => {
+          if (this.startupTimer !== null) window.clearTimeout(this.startupTimer);
+          this.startupTimer = null;
           const iframe = target.getIframe();
           iframe.classList.add('ec-trailer');
           iframe.tabIndex = -1;
@@ -222,6 +231,11 @@ export class YouTubePlayer implements TrailerPlayer {
         },
         onStateChange: ({ data }) => {
           if (data === 0 && !options.loop) options.onEnded();
+        },
+        onError: ({ data }) => {
+          if (this.startupTimer !== null) window.clearTimeout(this.startupTimer);
+          this.startupTimer = null;
+          options.onError(new Error(`YouTube trailer failed with player error ${data}.`));
         }
       }
     });
@@ -252,6 +266,7 @@ interface YouTubePlayerOptions {
   events: {
     onReady: (event: { target: YouTubePlayerInstance }) => void;
     onStateChange: (event: { data: number }) => void;
+    onError: (event: { data: number }) => void;
   };
 }
 
@@ -261,22 +276,38 @@ function loadYouTubeApi(): Promise<YouTubeApi> {
   const youtubeWindow = window as Window & { YT?: YouTubeApi; onYouTubeIframeAPIReady?: () => void };
   if (youtubeWindow.YT?.Player) return Promise.resolve(youtubeWindow.YT);
   if (youtubeApiPromise) return youtubeApiPromise;
-  youtubeApiPromise = new Promise((resolve, reject) => {
+  const pending = new Promise<YouTubeApi>((resolve, reject) => {
+    let settled = false;
+    const finish = (api?: YouTubeApi, error?: Error): void => {
+      if (settled) return;
+      settled = true;
+      window.clearTimeout(timeout);
+      if (api) resolve(api);
+      else reject(error ?? new Error('YouTube player API did not initialize.'));
+    };
+    const timeout = window.setTimeout(
+      () => finish(undefined, new Error('YouTube player API timed out.')),
+      8000
+    );
     const previousReady = youtubeWindow.onYouTubeIframeAPIReady;
     youtubeWindow.onYouTubeIframeAPIReady = () => {
       previousReady?.();
-      if (youtubeWindow.YT?.Player) resolve(youtubeWindow.YT);
-      else reject(new Error('YouTube player API did not initialize.'));
+      if (youtubeWindow.YT?.Player) finish(youtubeWindow.YT);
+      else finish(undefined, new Error('YouTube player API did not initialize.'));
     };
     if (!document.querySelector('script[data-ec-youtube-api]')) {
       const script = document.createElement('script');
       script.src = 'https://www.youtube.com/iframe_api';
       script.dataset.ecYoutubeApi = 'true';
-      script.onerror = () => reject(new Error('YouTube player API could not be loaded.'));
+      script.onerror = () => finish(undefined, new Error('YouTube player API could not be loaded.'));
       document.head.appendChild(script);
     }
   });
-  return youtubeApiPromise;
+  youtubeApiPromise = pending;
+  void pending.catch(() => {
+    if (youtubeApiPromise === pending) youtubeApiPromise = null;
+  });
+  return pending;
 }
 
 export class ExternalPlayer {

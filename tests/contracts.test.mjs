@@ -185,7 +185,7 @@ test('proper trailer support keeps resolution and playback source independent', 
   assert.match(carousel, /provider === 'youtube'[\s\S]*?hideYouTubeTrailerUntilControlsFade/);
   assert.match(carousel, /addEventListener\('keydown', this\.onTrailerHotkey, true\)/);
   assert.match(carousel, /onReveal:[\s\S]*?classList\.remove\('ec-youtube-trailer-concealed'\)[\s\S]*?classList\.add\('ec-trailer-active'\)/);
-  assert.match(carousel, /launchDelayMilliseconds = concealYouTube \? 0 : this\.response\.trailerDelayMilliseconds/);
+  assert.match(carousel, /launchDelayMilliseconds = concealYouTube \|\| candidateIndex > 0 \? 0 : this\.response\.trailerDelayMilliseconds/);
   assert.match(carousel, /Math\.max\(YOUTUBE_CONTROL_CONCEALMENT_MS, this\.response\.trailerDelayMilliseconds\)/);
   assert.match(carousel, /muted: concealYouTube \? true : this\.trailerMuted/);
   assert.match(player, /concealDurationMilliseconds[\s\S]*?setTimeout[\s\S]*?onReveal/);
@@ -209,6 +209,10 @@ test('proper trailer support keeps resolution and playback source independent', 
   assert.match(player, /setAttribute\('allow', 'autoplay; encrypted-media; picture-in-picture'\)/);
   assert.match(player, /isIosTrailerClient[\s\S]*?navigator\.platform === 'MacIntel'[\s\S]*?navigator\.maxTouchPoints > 1/);
   assert.match(carousel, /startTrailersMuted \|\| isIosTrailerClient\(\)/);
+  assert.match(player, /YouTube player API timed out[\s\S]*?8000/);
+  assert.match(player, /onError: \(\{ data \}\)[\s\S]*?YouTube trailer failed with player error/);
+  assert.match(carousel, /item\.trailers\?\.length[\s\S]*?candidateIndex \+ 1 < candidates\.length[\s\S]*?startTrailer\(slide, item, candidateIndex \+ 1\)/);
+  assert.match(carousel, /void player\.play\(\)\.catch\(recover\)/);
 });
 
 test('source mixer constraints survive personalized source cloning', async () => {

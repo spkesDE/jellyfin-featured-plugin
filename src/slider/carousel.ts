@@ -42,6 +42,7 @@ export class FeaturedCarousel {
   private trailerSlide: HTMLElement | null = null;
   private trailerDelayTimer: number | null = null;
   private trailerItemId: string | null = null;
+  private trailerCandidateIndex = -1;
   private trailerMuted: boolean;
   private trailerVolume = 100;
   private trailerPaused = false;
@@ -356,16 +357,21 @@ export class FeaturedCarousel {
     if (this.pendingIndex !== null) this.pendingIndex = Math.max(0, this.pendingIndex - removeCount);
   }
 
-  private startTrailer(slide: HTMLElement, item: FeaturedItem): void {
-    if (!this.response.enableBackgroundTrailers || !item.trailer || document.hidden) return;
+  private startTrailer(slide: HTMLElement, item: FeaturedItem, candidateIndex = 0): void {
+    const candidates = item.trailers?.length ? item.trailers : item.trailer ? [item.trailer] : [];
+    const trailer = candidates[candidateIndex];
+    if (!this.response.enableBackgroundTrailers || !trailer || document.hidden) return;
     if (!this.response.allowTrailersOnMobile && isMobileTrailerClient()) return;
-    if (this.trailerItemId === item.id && (this.trailerPlayer || this.trailerDelayTimer !== null)) return;
+    if (this.trailerItemId === item.id
+      && this.trailerCandidateIndex === candidateIndex
+      && (this.trailerPlayer || this.trailerDelayTimer !== null)) return;
     this.stopTrailer();
     this.trailerItemId = item.id;
+    this.trailerCandidateIndex = candidateIndex;
     const expectedIndex = this.index;
-    const concealYouTube = item.trailer.provider === 'youtube'
+    const concealYouTube = trailer.provider === 'youtube'
       && this.response.hideYouTubeTrailerUntilControlsFade;
-    const launchDelayMilliseconds = concealYouTube ? 0 : this.response.trailerDelayMilliseconds;
+    const launchDelayMilliseconds = concealYouTube || candidateIndex > 0 ? 0 : this.response.trailerDelayMilliseconds;
     const concealDurationMilliseconds = concealYouTube
       ? Math.max(YOUTUBE_CONTROL_CONCEALMENT_MS, this.response.trailerDelayMilliseconds)
       : 0;
@@ -376,7 +382,14 @@ export class FeaturedCarousel {
       if (this.destroyed || document.hidden || this.index !== expectedIndex) return;
       if (!concealYouTube) this.stopTrailerCountdown();
       let player: TrailerPlayer | null = null;
-      player = createTrailerPlayer(item.trailer!, {
+      const recover = (): void => {
+        if (this.destroyed || this.index !== expectedIndex) return;
+        if (player && this.trailerPlayer !== player) return;
+        this.stopTrailer();
+        if (candidateIndex + 1 < candidates.length) this.startTrailer(slide, item, candidateIndex + 1);
+        else this.restartTimer();
+      };
+      player = createTrailerPlayer(trailer, {
         muted: concealYouTube ? true : this.trailerMuted,
         volume: this.trailerVolume,
         startOffsetSeconds: this.response.trailerStartOffsetSeconds,
@@ -396,11 +409,11 @@ export class FeaturedCarousel {
           if (this.response.waitForTrailerToFinish && this.autoplayEnabled && this.index === expectedIndex) {
             this.show(this.index + 1, false);
           }
-        }
+        },
+        onError: recover
       });
       if (!player) {
-        this.stopTrailerCountdown();
-        this.trailerItemId = null;
+        recover();
         return;
       }
       this.trailerPlayer = player;
@@ -412,9 +425,7 @@ export class FeaturedCarousel {
       slide.querySelectorAll(':scope > .ec-trailer').forEach((element) => element.remove());
       slide.querySelector('.ec-backdrop')?.after(player.element);
       if (this.response.waitForTrailerToFinish) this.pauseTimer();
-      void player.play().catch(() => {
-        if (this.trailerPlayer === player) this.restartTimer();
-      });
+      void player.play().catch(recover);
     }, launchDelayMilliseconds);
   }
 
@@ -428,6 +439,7 @@ export class FeaturedCarousel {
     this.trailerSlide?.classList.remove('ec-youtube-trailer-concealed');
     this.trailerSlide = null;
     this.trailerItemId = null;
+    this.trailerCandidateIndex = -1;
     this.trailerPaused = false;
     this.trailerConcealed = false;
   }
