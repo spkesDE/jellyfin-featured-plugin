@@ -14,7 +14,7 @@ public sealed partial class FeaturedController
     {
         Jellyfin.Database.Implementations.Entities.User? activeUser = GetActiveUser();
         if (activeUser == null) return NotFound();
-        return Ok(CreatePreferencesResponse(activeUser));
+        return new JsonResult(CreatePreferencesResponse(activeUser), RuntimeConfigJsonOptions);
     }
 
     [HttpPut("preferences")]
@@ -40,7 +40,7 @@ public sealed partial class FeaturedController
         }
 
         _preparedCache.QueueUserRefresh(activeUser.Id);
-        return Ok(CreatePreferencesResponse(activeUser));
+        return new JsonResult(CreatePreferencesResponse(activeUser), RuntimeConfigJsonOptions);
     }
 
     [HttpGet("preferences/options")]
@@ -58,7 +58,9 @@ public sealed partial class FeaturedController
             Enabled = rule.Enabled,
             Weight = rule.Weight
         }).ToArray();
-        return Ok(new FeaturedPreferenceOptionsResponse(_config.PersonalizationPolicy, sources, GetVisibleGenres(activeUser)));
+        return new JsonResult(
+            new FeaturedPreferenceOptionsResponse(_config.PersonalizationPolicy, sources, GetVisibleGenres(activeUser)),
+            RuntimeConfigJsonOptions);
     }
 
     private FeaturedPreferencesResponse CreatePreferencesResponse(Jellyfin.Database.Implementations.Entities.User user)
@@ -80,4 +82,3 @@ public sealed partial class FeaturedController
             .ToArray();
     }
 }
-

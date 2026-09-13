@@ -111,6 +111,8 @@ test('personalization is authenticated, policy-bound, and user scoped', async ()
   assert.match(controller, /\[HttpPut\("preferences"\)\][\s\S]*?\[Authorize\]/);
   assert.match(controller, /\[HttpGet\("preferences\/options"\)\][\s\S]*?\[Authorize\]/);
   assert.match(controller, /GetVisibleGenres\(activeUser\)/);
+  assert.equal((controller.match(/RuntimeConfigJsonOptions/g) ?? []).length, 3);
+  assert.match(controller, /new JsonResult\(CreatePreferencesResponse\(activeUser\), RuntimeConfigJsonOptions\)/);
   assert.match(service, /policy\.AllowSourceSelection[\s\S]*?sourceIds\.Contains/);
   assert.match(service, /policy\.AllowPreferredGenres[\s\S]*?allowedGenres\.Contains/);
   assert.match(service, /ResolveDefaults\(PluginConfiguration config, Guid userId\)[\s\S]*?Resolve\(config, userId, null\)/);
