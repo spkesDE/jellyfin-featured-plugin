@@ -284,8 +284,9 @@ test('configuration discovery uses the authenticated server options fallback', a
   assert.match(discovery, /mergeStrings\(filterPayload\.Genres, configOptions\.genres\)/);
   assert.match(filtersTab, /store\.config\.MaximumItemsPerGenre[\s\S]*?store\.config\.MaximumItemsPerFranchise/);
   assert.doesNotMatch(sourcesTab, /MaximumItemsPerGenre|ExcludeItemsFromSameSeries/);
-  assert.match(styles, /\.jmp-configForm\s*\{[\s\S]*?padding:\s*0 clamp\(\.75rem, 2vw, 1\.5rem\) 2rem/);
-  assert.match(styles, /\.jmp-section-plain > \.jmp-subsection\s*\{[\s\S]*?margin-bottom:\s*1rem/);
+  assert.match(styles, /\.jmp-configForm\s*\{[\s\S]*?box-sizing:\s*border-box/);
+  assert.match(styles, /\.jmp-configForm,[\s\S]*?width:\s*100%[\s\S]*?max-width:\s*none\s*!important/);
+  assert.match(styles, /\.jmp-section-plain\s*>\s*\.jmp-subsection\s*\{[\s\S]*?margin-bottom:\s*1rem/);
 });
 
 test('featured selection excludes samples and other video extras', async () => {
