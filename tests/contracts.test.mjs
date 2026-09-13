@@ -121,14 +121,15 @@ test('personalization is authenticated, policy-bound, and user scoped', async ()
 });
 
 test('proper trailer support keeps resolution and playback source independent', async () => {
-  const [configuration, normalizer, resolver, response, player, carousel, trailerTab] = await Promise.all([
+  const [configuration, normalizer, resolver, response, player, carousel, trailerTab, styles] = await Promise.all([
     read('Jellyfin.Plugin.Featured/Configuration/PluginConfiguration.cs'),
     read('Jellyfin.Plugin.Featured/Configuration/PluginConfigurationNormalizer.cs'),
     read('Jellyfin.Plugin.Featured/Api/TrailerResolver.cs'),
     read('Jellyfin.Plugin.Featured/Api/FeaturedResponseDtos.cs'),
     read('src/slider/trailer.ts'),
     read('src/slider/carousel.ts'),
-    read('src/config/tabs/TrailersTab.vue')
+    read('src/config/tabs/TrailersTab.vue'),
+    read('src/styles/featured.css')
   ]);
   for (const setting of [
     'TrailerSourcePriority', 'FallBackToRemoteTrailers', 'StartTrailersMuted',
@@ -150,6 +151,9 @@ test('proper trailer support keeps resolution and playback source independent', 
   assert.doesNotMatch(player, /youtube[\s\S]{0,120}\.mp4/i);
   assert.match(carousel, /waitForTrailerToFinish[\s\S]*?pauseTimer\(\)/);
   assert.match(carousel, /trailerDelayMilliseconds/);
+  assert.match(carousel, /trailerItemId === item\.id[\s\S]*?this\.stopTrailer\(\)/);
+  assert.match(carousel, /querySelectorAll\(':scope > \.ec-trailer'\)/);
+  assert.match(styles, /\.ec-trailer\s*\{[\s\S]*?height:\s*max\(100%, 56\.25vw\)[\s\S]*?min-width:\s*100vw[\s\S]*?translate\(-50%, -50%\)/);
 });
 
 test('source mixer constraints survive personalized source cloning', async () => {

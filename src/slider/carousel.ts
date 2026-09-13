@@ -38,6 +38,7 @@ export class FeaturedCarousel {
   private lastReportedItemId: string | null = null;
   private trailerPlayer: TrailerPlayer | null = null;
   private trailerDelayTimer: number | null = null;
+  private trailerItemId: string | null = null;
 
   constructor(response: FeaturedResponse, loadItems?: FeaturedItemLoader, reportDisplayed?: FeaturedItemDisplayReporter) {
     this.response = response;
@@ -340,6 +341,9 @@ export class FeaturedCarousel {
   private startTrailer(slide: HTMLElement, item: FeaturedItem): void {
     if (!this.response.enableBackgroundTrailers || !item.trailer || document.hidden) return;
     if (!this.response.allowTrailersOnMobile && isMobileTrailerClient()) return;
+    if (this.trailerItemId === item.id && (this.trailerPlayer || this.trailerDelayTimer !== null)) return;
+    this.stopTrailer();
+    this.trailerItemId = item.id;
     const expectedIndex = this.index;
     this.trailerDelayTimer = window.setTimeout(() => {
       this.trailerDelayTimer = null;
@@ -355,8 +359,12 @@ export class FeaturedCarousel {
           }
         }
       });
-      if (!player) return;
+      if (!player) {
+        this.trailerItemId = null;
+        return;
+      }
       this.trailerPlayer = player;
+      slide.querySelectorAll(':scope > .ec-trailer').forEach((element) => element.remove());
       slide.querySelector('.ec-backdrop')?.after(player.element);
       if (this.response.waitForTrailerToFinish) this.pauseTimer();
       void player.play().catch(() => {
@@ -370,6 +378,7 @@ export class FeaturedCarousel {
     this.trailerDelayTimer = null;
     this.trailerPlayer?.destroy();
     this.trailerPlayer = null;
+    this.trailerItemId = null;
   }
 
   private pauseTimer = (): void => {

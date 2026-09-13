@@ -171,12 +171,17 @@
 }
 
 .ec-trailer {
+  aspect-ratio: 16 / 9;
   border: 0;
-  height: 100%;
-  inset: 0;
+  height: max(100%, 56.25vw);
+  left: 50%;
+  max-width: none;
+  min-width: 100vw;
   object-fit: cover;
   position: absolute;
-  width: 100%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: max(100vw, calc(var(--ec-height) * 1.7778));
   z-index: 0;
 }
 
