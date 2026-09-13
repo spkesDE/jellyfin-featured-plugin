@@ -233,6 +233,7 @@ test('all details interactions use the shared navigation helper', async () => {
   ]);
   assert.equal(render.includes('#/details'), false);
   assert.equal((render.match(/openItemDetails\(item\.id\)/g) ?? []).length, 3);
+  assert.match(render, /addEventListener\('keydown'[\s\S]*?target\?\.closest\('button'\)[\s\S]*?openItemDetails\(item\.id\)/);
   assert.match(navigation, /window\.Emby\?\.Page\?\.showItem/);
   assert.match(navigation, /#\/details\?id=/);
 });

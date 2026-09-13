@@ -131,6 +131,8 @@ export function createSlide(item: FeaturedItem, response: FeaturedResponse): HTM
     openItemDetails(item.id);
   });
   slide.addEventListener('keydown', (event) => {
+    const target = event.target instanceof Element ? event.target : null;
+    if (target?.closest('button')) return;
     if (event.key !== 'Enter' && event.key !== ' ') return;
     event.preventDefault();
     openItemDetails(item.id);
