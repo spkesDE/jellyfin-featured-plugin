@@ -12,7 +12,7 @@ Jellyfin Featured adds a large, rotating banner to your Jellyfin home page. Use 
 - Give each Jellyfin user more of what they like, including favourites, unwatched titles, preferred genres and series they have already started.
 - Let users personalize their own source mix while the administrator keeps control of which settings may be changed.
 - Choose between a classic banner and a larger hero layout, then adjust the height, artwork, text, buttons and transitions.
-- Rotate titles automatically, load more while browsing, or play muted local trailers in the background.
+- Rotate titles automatically, load more while browsing, or play local, direct-video, and YouTube trailers in the background.
 
 Jellyfin Featured works in Jellyfin Web and clients that display the Jellyfin Web interface. Some native TV apps use their own home screen and cannot show the banner.
 
@@ -107,6 +107,12 @@ The repeat cooldown can remain strict or reuse the oldest recently displayed ite
 The default hero layout is designed to work without much tweaking. If you want a different look, you can change the banner height, artwork position, text alignment, gradients, corners, spacing, and transition style. Separate height settings are available for desktop, tablet, and mobile screens.
 
 You can also choose which details and controls are shown, including the title or logo, description, rating, year, runtime, buttons, arrows, and page dots. Autoplay, background trailers, and the number of featured titles are optional.
+
+## Trailer Support
+
+The `Trailers` settings choose whether Jellyfin Featured prefers local or remote metadata, restricts playback to one source type, or selects automatically. Remote trailers already discovered by Jellyfin are used directly, so YouTube playback does not require a separate TMDb API key. YouTube is embedded through its player API; direct MP4, WebM, OGV, and OGG URLs use the browser video player. Unsupported providers remain available through an external trailer button.
+
+Playback can start after a delay, begin or end at an offset, remain muted, wait for the trailer to finish before advancing, and be disabled on mobile clients. When Jellyfin returns several trailers, the first or a random entry can be selected. Manual overrides assign a remote URL or visible local Jellyfin trailer item to one title and always take precedence over discovered metadata.
 
 ## Personalization
 
