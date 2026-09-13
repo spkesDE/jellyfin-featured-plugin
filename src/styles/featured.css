@@ -24,11 +24,11 @@
   box-sizing: border-box;
 }
 
-.ec-preferences-backdrop { align-items: center; background: rgb(0 0 0 / .72); display: flex; inset: 0; justify-content: center; overflow: auto; padding: max(1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) max(1rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left)); position: fixed; z-index: 99999; }
-.ec-preferences-dialog { background: rgb(32 32 32 / .98); border-radius: .45rem; box-shadow: 0 1rem 3rem rgb(0 0 0 / .55); box-sizing: border-box; color: #fff; display: flex; flex-direction: column; margin: auto; max-height: min(46rem, calc(100dvh - 2rem)); max-width: 46rem; overflow: hidden; width: 100%; }
+.ec-preferences-backdrop { align-items: center; background: rgb(0 0 0 / .72); box-sizing: border-box; display: flex; inset: 0; justify-content: center; overflow: auto; padding: max(1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) max(1rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left)); position: fixed; z-index: 99999; }
+.ec-preferences-dialog { background: rgb(32 32 32 / .98); border-radius: .45rem; box-shadow: 0 1rem 3rem rgb(0 0 0 / .55); box-sizing: border-box; color: #fff; display: flex; flex-direction: column; height: min(52rem, calc(100dvh - 2rem)); margin: auto; max-height: calc(100dvh - 2rem); max-width: calc(100vw - 2rem); overflow: hidden; width: 64rem; }
 .ec-preferences-header { align-items: center; background: rgb(0 0 0 / .18); display: flex; flex: 0 0 auto; justify-content: space-between; min-height: 3.6rem; padding: .45rem .65rem .45rem 1.4rem; }
 .ec-preferences-dialog h2 { font-size: 1.45rem; font-weight: 400; margin: 0; }
-.ec-preferences-content { min-height: 0; overflow: auto; padding: .3rem 1.4rem 1.4rem; }
+.ec-preferences-content { flex: 1 1 auto; min-height: 0; overflow: auto; padding: .3rem 1.4rem 1.4rem; }
 .ec-preferences-help { line-height: 1.45; opacity: .75; }
 .ec-preferences-dialog fieldset { border: 0; border-top: 1px solid rgb(255 255 255 / .14); margin: 1.25rem 0 0; padding: 1.1rem 0 0; }
 .ec-preferences-dialog legend { font-size: 1.1rem; font-weight: 500; padding: 0 .8rem 0 0; }
@@ -65,7 +65,7 @@
 
 @media (max-width: 600px) {
   .ec-preferences-backdrop { align-items: stretch; padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom); }
-  .ec-preferences-dialog { border-radius: 0; max-height: 100dvh; }
+  .ec-preferences-dialog { border-radius: 0; height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom)); max-height: none; max-width: none; width: 100%; }
   .ec-preferences-content { padding-inline: 1rem; }
   .ec-preferences-header { padding-left: 1rem; }
   .ec-preference-genres, .ec-preference-boosts { grid-template-columns: 1fr; }

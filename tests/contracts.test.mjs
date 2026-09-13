@@ -162,6 +162,9 @@ test('personalization is authenticated, policy-bound, user scoped, and fast to r
   assert.match(navigation, /userSettingsEnabled = config\.personalizationEnabled/);
   assert.match(styles, /ec-preferences-spinner/);
   assert.match(styles, /env\(safe-area-inset-top\)/);
+  assert.match(styles, /\.ec-preferences-dialog[^}]*height: min\(52rem, calc\(100dvh - 2rem\)\)[^}]*width: 64rem/);
+  assert.match(styles, /\.ec-preferences-content[^}]*flex: 1 1 auto/);
+  assert.match(styles, /@media \(max-width: 600px\)[\s\S]*?\.ec-preferences-dialog[^}]*width: 100%/);
   assert.doesNotMatch(carousel, /ec-personalize|openPreferencesDialog/);
 });
 
