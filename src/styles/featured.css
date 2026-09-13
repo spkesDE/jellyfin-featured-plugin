@@ -439,10 +439,11 @@
 .ec-root.ec-hero .ec-slide.ec-trailer-active {
   background: linear-gradient(to bottom,
       #000 0%,
-      #000 76%,
-      rgba(0, 0, 0, .88) 84%,
-      rgba(0, 0, 0, .48) 92%,
-      transparent 100%);
+      #000 54%,
+      rgba(0, 0, 0, .88) 60%,
+      rgba(0, 0, 0, .58) 67%,
+      rgba(0, 0, 0, .24) 73%,
+      transparent 80%);
 }
 
 .ec-root.ec-hero .ec-slide.ec-trailer-active .ec-backdrop {
@@ -452,22 +453,22 @@
 .ec-root.ec-hero .ec-backdrop,
 .ec-root.ec-hero .ec-trailer {
   -webkit-mask-image: linear-gradient(to bottom,
-      #000 34%,
-      rgba(0, 0, 0, .92) 48%,
-      rgba(0, 0, 0, .62) 62%,
-      rgba(0, 0, 0, .24) 76%,
-      transparent 92%);
+      #000 28%,
+      rgba(0, 0, 0, .92) 40%,
+      rgba(0, 0, 0, .58) 52%,
+      rgba(0, 0, 0, .22) 64%,
+      transparent 74%);
   mask-image: linear-gradient(to bottom,
-      #000 34%,
-      rgba(0, 0, 0, .92) 48%,
-      rgba(0, 0, 0, .62) 62%,
-      rgba(0, 0, 0, .24) 76%,
-      transparent 92%);
+      #000 28%,
+      rgba(0, 0, 0, .92) 40%,
+      rgba(0, 0, 0, .58) 52%,
+      rgba(0, 0, 0, .22) 64%,
+      transparent 74%);
 }
 
 .ec-root.ec-hero .ec-slide::after {
-  -webkit-mask-image: linear-gradient(to bottom, #000 40%, rgba(0, 0, 0, .82) 62%, transparent 100%);
-  mask-image: linear-gradient(to bottom, #000 40%, rgba(0, 0, 0, .82) 62%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 32%, rgba(0, 0, 0, .78) 48%, rgba(0, 0, 0, .28) 64%, transparent 78%);
+  mask-image: linear-gradient(to bottom, #000 32%, rgba(0, 0, 0, .78) 48%, rgba(0, 0, 0, .28) 64%, transparent 78%);
 }
 
 .ec-root.ec-hero .ec-content {
