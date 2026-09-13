@@ -7,6 +7,7 @@ export interface FeaturedItem {
   imageType: 'Backdrop' | 'Primary';
   mediaType: string;
   trailer?: FeaturedTrailer | null;
+  trailers?: FeaturedTrailer[] | null;
   overview?: string | null;
   critic_rating?: number;
   community_rating?: number;

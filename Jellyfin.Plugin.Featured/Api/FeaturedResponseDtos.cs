@@ -277,6 +277,9 @@ public sealed class FeaturedItemDto
     public FeaturedTrailerDto? Trailer { get; init; }
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public IReadOnlyList<FeaturedTrailerDto>? Trailers { get; init; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Overview { get; init; }
 
     [JsonPropertyName("critic_rating")]

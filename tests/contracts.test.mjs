@@ -160,10 +160,13 @@ test('proper trailer support keeps resolution and playback source independent', 
     assert.equal(trailerTab.includes(`store.config.${setting}`), true, `trailer editor misses ${setting}`);
   }
   assert.match(normalizer, /NormalizeTrailerUrl[\s\S]*?Uri\.UriSchemeHttp[\s\S]*?Uri\.UriSchemeHttps/);
-  assert.match(resolver, /ResolveManual\(manual, activeUser\)[\s\S]*?if \(manualTrailer is not null\) return manualTrailer/);
-  assert.match(resolver, /LocalOnly => local\(\)[\s\S]*?RemoteOnly => remote\(\)[\s\S]*?PreferRemote => remote\(\) \?\? local\(\)/);
+  assert.match(resolver, /ResolveManual\(manual, activeUser\)[\s\S]*?if \(manualTrailer is not null\) candidates\.Add\(manualTrailer\)/);
+  assert.match(resolver, /LocalOnly:[\s\S]*?AddRange\(local\)[\s\S]*?RemoteOnly:[\s\S]*?AddRange\(remote\)/);
   assert.match(resolver, /provider = videoId is not null[\s\S]*?"youtube"[\s\S]*?"direct"[\s\S]*?"external"/);
   assert.match(response, /public FeaturedTrailerDto\? Trailer \{ get; init; \}/);
+  assert.match(response, /IReadOnlyList<FeaturedTrailerDto>\? Trailers \{ get; init; \}/);
+  assert.match(resolver, /ResolveCandidates[\s\S]*?DistinctBy\(GetCandidateKey/);
+  assert.match(resolver, /PreferRemote[\s\S]*?candidates\.AddRange\(remote\)[\s\S]*?candidates\.AddRange\(local\)/);
   assert.doesNotMatch(response, /LocalTrailerId/);
   for (const adapter of ['JellyfinLocalPlayer', 'YouTubePlayer', 'DirectVideoPlayer', 'ExternalPlayer']) {
     assert.match(player, new RegExp(`class ${adapter}`));

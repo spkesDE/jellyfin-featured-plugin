@@ -18,24 +18,49 @@ public sealed class TrailerResolver
         BaseItem item,
         Jellyfin.Database.Implementations.Entities.User activeUser,
         PluginConfiguration config)
+        => ResolveCandidates(item, activeUser, config).FirstOrDefault();
+
+    public IReadOnlyList<FeaturedTrailerDto> ResolveCandidates(
+        BaseItem item,
+        Jellyfin.Database.Implementations.Entities.User activeUser,
+        PluginConfiguration config)
     {
+        List<FeaturedTrailerDto> candidates = [];
         FeaturedTrailerOverride? manual = config.TrailerOverrides
             .FirstOrDefault(entry => string.Equals(entry.ItemId, item.Id.ToString(), StringComparison.OrdinalIgnoreCase));
         FeaturedTrailerDto? manualTrailer = ResolveManual(manual, activeUser);
-        if (manualTrailer is not null) return manualTrailer;
+        if (manualTrailer is not null) candidates.Add(manualTrailer);
 
-        if (item is not IHasTrailers trailers) return null;
-
-        Func<FeaturedTrailerDto?> local = () => ResolveLocal(trailers, activeUser, config.MultipleTrailerMode);
-        Func<FeaturedTrailerDto?> remote = () => ResolveRemote(trailers, config.MultipleTrailerMode);
-        return config.TrailerSourcePriority switch
+        if (item is IHasTrailers trailers)
         {
-            FeaturedTrailerSourcePriorities.LocalOnly => local(),
-            FeaturedTrailerSourcePriorities.RemoteOnly => remote(),
-            FeaturedTrailerSourcePriorities.PreferRemote => remote() ?? local(),
-            FeaturedTrailerSourcePriorities.Automatic => local() ?? remote(),
-            _ => local() ?? (config.FallBackToRemoteTrailers ? remote() : null)
-        };
+            IReadOnlyList<FeaturedTrailerDto> local = ResolveLocal(trailers, activeUser, config.MultipleTrailerMode);
+            IReadOnlyList<FeaturedTrailerDto> remote = ResolveRemote(trailers, config.MultipleTrailerMode);
+            switch (config.TrailerSourcePriority)
+            {
+                case FeaturedTrailerSourcePriorities.LocalOnly:
+                    candidates.AddRange(local);
+                    break;
+                case FeaturedTrailerSourcePriorities.RemoteOnly:
+                    candidates.AddRange(remote);
+                    break;
+                case FeaturedTrailerSourcePriorities.PreferRemote:
+                    candidates.AddRange(remote);
+                    candidates.AddRange(local);
+                    break;
+                case FeaturedTrailerSourcePriorities.Automatic:
+                    candidates.AddRange(local);
+                    candidates.AddRange(remote);
+                    break;
+                default:
+                    candidates.AddRange(local);
+                    if (config.FallBackToRemoteTrailers) candidates.AddRange(remote);
+                    break;
+            }
+        }
+
+        return candidates
+            .DistinctBy(GetCandidateKey, StringComparer.OrdinalIgnoreCase)
+            .ToArray();
     }
 
     private FeaturedTrailerDto? ResolveManual(
@@ -52,32 +77,38 @@ public sealed class TrailerResolver
         return string.IsNullOrWhiteSpace(entry.Url) ? null : CreateRemote(entry.Url, entry.Name);
     }
 
-    private static FeaturedTrailerDto? ResolveLocal(
+    private static IReadOnlyList<FeaturedTrailerDto> ResolveLocal(
         IHasTrailers trailers,
         Jellyfin.Database.Implementations.Entities.User activeUser,
         string multipleMode)
     {
-        BaseItem[] candidates = trailers.LocalTrailers.Where(candidate => candidate.IsVisible(activeUser)).ToArray();
-        BaseItem? selected = Select(candidates, multipleMode);
-        return selected is null ? null : CreateLocal(selected.Id, selected.Name);
-    }
-
-    private static FeaturedTrailerDto? ResolveRemote(IHasTrailers trailers, string multipleMode)
-    {
-        MediaUrl[] candidates = trailers.RemoteTrailers
-            .Where(candidate => IsHttpUrl(candidate.Url))
+        return OrderCandidates(trailers.LocalTrailers.Where(candidate => candidate.IsVisible(activeUser)), multipleMode)
+            .Select(candidate => CreateLocal(candidate.Id, candidate.Name))
             .ToArray();
-        MediaUrl? selected = Select(candidates, multipleMode);
-        return selected is null ? null : CreateRemote(selected.Url, selected.Name);
     }
 
-    private static T? Select<T>(IReadOnlyList<T> candidates, string multipleMode) where T : class
+    private static IReadOnlyList<FeaturedTrailerDto> ResolveRemote(IHasTrailers trailers, string multipleMode)
     {
-        if (candidates.Count == 0) return null;
-        return multipleMode == FeaturedMultipleTrailerModes.Random
-            ? candidates[Random.Shared.Next(candidates.Count)]
-            : candidates[0];
+        return OrderCandidates(trailers.RemoteTrailers.Where(candidate => IsHttpUrl(candidate.Url)), multipleMode)
+            .Select(candidate => CreateRemote(candidate.Url, candidate.Name))
+            .ToArray();
     }
+
+    private static IReadOnlyList<T> OrderCandidates<T>(IEnumerable<T> source, string multipleMode)
+    {
+        List<T> candidates = source.ToList();
+        if (multipleMode != FeaturedMultipleTrailerModes.Random) return candidates;
+        for (int index = candidates.Count - 1; index > 0; index--)
+        {
+            int swapIndex = Random.Shared.Next(index + 1);
+            (candidates[index], candidates[swapIndex]) = (candidates[swapIndex], candidates[index]);
+        }
+
+        return candidates;
+    }
+
+    private static string GetCandidateKey(FeaturedTrailerDto trailer)
+        => $"{trailer.Provider}|{trailer.ItemId ?? trailer.VideoId ?? trailer.Url}";
 
     private static FeaturedTrailerDto CreateLocal(Guid itemId, string? name) => new()
     {
