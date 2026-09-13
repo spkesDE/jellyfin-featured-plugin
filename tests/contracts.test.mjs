@@ -22,6 +22,10 @@ test('critical C# and TypeScript defaults stay in parity', async () => {
   ]);
   const expected = {
     RandomMediaCount: '5',
+    RepeatCooldownDays: '1',
+    RelaxRepeatCooldownWhenNeeded: 'false',
+    MaximumItemsPerGenre: '0',
+    MaximumItemsPerFranchise: '0',
     EnableAutoplay: 'true',
     AutoplayInterval: '10',
     UseHeroLayout: 'true',
@@ -37,9 +41,17 @@ test('critical C# and TypeScript defaults stay in parity', async () => {
     BannerHeight: '360',
     ShowPaginationDots: 'true',
     TrailerDelayMilliseconds: '1500',
+    EnableBackgroundTrailers: 'false',
     StartTrailersMuted: 'true',
     HideYouTubeTrailerUntilControlsFade: 'true',
-    FallBackToRemoteTrailers: 'true'
+    FallBackToRemoteTrailers: 'true',
+    AllowTrailersOnMobile: 'false',
+    AllowSourceSelection: 'false',
+    AllowSourceWeights: 'false',
+    AllowPreferredGenres: 'true',
+    AllowUnplayedBoost: 'true',
+    AllowFavouriteBoost: 'true',
+    AllowInProgressSeriesBoost: 'true'
   };
   for (const [name, value] of Object.entries(expected)) {
     const csharpValue = value.startsWith("'") ? `"${value.slice(1, -1)}"` : value;
@@ -435,6 +447,23 @@ test('infinite loading waits for navigation before prefetching and ignores verti
   assert.match(carousel, /Math\.abs\(deltaX\) > Math\.abs\(deltaY\) \* 1\.2/);
   assert.match(carousel, /suppressClickUntil = performance\.now\(\) \+ 500/);
   assert.match(carousel, /event\.stopImmediatePropagation\(\)/);
+});
+
+test('infinite-loading batches reject both old and same-response duplicates', async () => {
+  const carousel = await read('src/slider/carousel.ts');
+  assert.match(carousel, /this\.loadItems\(\[\.\.\.this\.seenItemIds\]\)/);
+  assert.match(carousel, /filter\(\(item\) => \{[\s\S]*?this\.seenItemIds\.has\(item\.id\)[\s\S]*?this\.seenItemIds\.add\(item\.id\)[\s\S]*?return true/);
+  assert.match(carousel, /MAX_SEEN_ITEM_IDS = 500/);
+});
+
+test('trailer volume survives reloads and restricted storage contexts', async () => {
+  const carousel = await read('src/slider/carousel.ts');
+  assert.match(carousel, /TRAILER_VOLUME_STORAGE_KEY = 'jellyfin-featured\.trailer-volume'/);
+  assert.match(carousel, /function readTrailerVolume[\s\S]*?localStorage\.getItem[\s\S]*?catch[\s\S]*?DEFAULT_TRAILER_VOLUME/);
+  assert.match(carousel, /function saveTrailerVolume[\s\S]*?localStorage\.setItem[\s\S]*?catch/);
+  assert.match(carousel, /this\.trailerVolume = readTrailerVolume\(\)/);
+  assert.match(carousel, /this\.trailerVolume = 10[\s\S]*?saveTrailerVolume\(this\.trailerVolume\)/);
+  assert.match(carousel, /direction \* 10[\s\S]*?saveTrailerVolume\(this\.trailerVolume\)/);
 });
 
 test('YouTube player creation remains load-gated and video errors stay item-specific', async () => {

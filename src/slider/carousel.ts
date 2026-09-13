@@ -12,6 +12,27 @@ const MAX_DOM_SLIDES = 20;
 const MAX_CACHED_ITEMS = 100;
 const MAX_SEEN_ITEM_IDS = 500;
 const YOUTUBE_CONTROL_CONCEALMENT_MS = 5000;
+const TRAILER_VOLUME_STORAGE_KEY = 'jellyfin-featured.trailer-volume';
+const DEFAULT_TRAILER_VOLUME = 100;
+
+function readTrailerVolume(): number {
+  try {
+    const stored = window.localStorage.getItem(TRAILER_VOLUME_STORAGE_KEY);
+    if (stored === null) return DEFAULT_TRAILER_VOLUME;
+    const parsed = Number(stored);
+    return Number.isFinite(parsed) ? Math.max(0, Math.min(100, parsed)) : DEFAULT_TRAILER_VOLUME;
+  } catch {
+    return DEFAULT_TRAILER_VOLUME;
+  }
+}
+
+function saveTrailerVolume(volume: number): void {
+  try {
+    window.localStorage.setItem(TRAILER_VOLUME_STORAGE_KEY, String(volume));
+  } catch {
+    // Storage can be unavailable in restricted/private browser contexts.
+  }
+}
 
 export class FeaturedCarousel {
   readonly root: HTMLElement;
@@ -46,7 +67,7 @@ export class FeaturedCarousel {
   private trailerItemId: string | null = null;
   private trailerCandidateIndex = -1;
   private trailerMuted: boolean;
-  private trailerVolume = 100;
+  private trailerVolume: number;
   private trailerPaused = false;
   private trailerConcealed = false;
 
@@ -58,8 +79,9 @@ export class FeaturedCarousel {
     this.seenItemIds = new Set(this.items.map((item) => item.id));
     this.hasMore = response.infiniteLoading && response.hasMore;
     this.autoplayEnabled = response.autoplay;
+    this.trailerVolume = readTrailerVolume();
     // Safari only permits unattended inline playback when the media starts muted.
-    this.trailerMuted = response.startTrailersMuted || isIosTrailerClient();
+    this.trailerMuted = response.startTrailersMuted || isIosTrailerClient() || this.trailerVolume === 0;
     this.root = document.createElement('section');
     this.root.className = `ec-root ec-ready ec-effect-${response.transitionEffect} ec-height-${response.heroHeightMode} ec-text-${response.heroTextPosition}${response.useHeroLayout ? ' ec-hero' : ''}${response.showControlsOnHoverOnly ? ' ec-controls-hover' : ''}`;
     this.root.dataset.featuredVersion = PLUGIN_VERSION;
@@ -326,9 +348,12 @@ export class FeaturedCarousel {
     this.loadingMore = this.loadItems([...this.seenItemIds])
       .then((response) => {
         if (this.destroyed) return;
-        const newItems = (response.items ?? []).filter((item) => !this.seenItemIds.has(item.id));
-        newItems.forEach((item) => {
+        const newItems = (response.items ?? []).filter((item) => {
+          if (this.seenItemIds.has(item.id)) return false;
           this.seenItemIds.add(item.id);
+          return true;
+        });
+        newItems.forEach((item) => {
           this.items.push(item);
         });
         this.hasMore = response.hasMore && newItems.length > 0;
@@ -525,6 +550,7 @@ export class FeaturedCarousel {
       this.trailerMuted = !this.trailerMuted;
       if (!this.trailerMuted && this.trailerVolume === 0) {
         this.trailerVolume = 10;
+        saveTrailerVolume(this.trailerVolume);
         void this.trailerPlayer.setVolume(this.trailerVolume);
       }
       if (!this.trailerConcealed) void this.trailerPlayer.setMuted(this.trailerMuted);
@@ -537,6 +563,7 @@ export class FeaturedCarousel {
       event.stopPropagation();
       const direction = volumeUp ? 1 : -1;
       this.trailerVolume = Math.max(0, Math.min(100, this.trailerVolume + (direction * 10)));
+      saveTrailerVolume(this.trailerVolume);
       this.trailerMuted = this.trailerVolume === 0;
       void this.trailerPlayer.setVolume(this.trailerVolume);
       if (!this.trailerConcealed) void this.trailerPlayer.setMuted(this.trailerMuted);
