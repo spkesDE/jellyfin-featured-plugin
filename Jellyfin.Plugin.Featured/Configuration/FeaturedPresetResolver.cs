@@ -65,6 +65,7 @@ internal static class FeaturedPresetResolver
         config.ExcludeItemsFromSameSeries = preset.Mixer.ExcludeItemsFromSameSeries;
         config.RandomMediaCount = preset.Mixer.RandomMediaCount;
 
+        config.EnableInfiniteLoading = preset.Layout.EnableInfiniteLoading;
         config.EnableAutoplay = preset.Layout.EnableAutoplay;
         config.ShowAutoplayButton = preset.Layout.ShowAutoplayButton;
         config.AutoplayInterval = preset.Layout.AutoplayInterval;
@@ -104,5 +105,6 @@ internal static class FeaturedPresetResolver
         config.TrailerEndOffsetSeconds = preset.Trailers.TrailerEndOffsetSeconds;
         config.MultipleTrailerMode = preset.Trailers.MultipleTrailerMode;
         config.AllowTrailersOnMobile = preset.Trailers.AllowTrailersOnMobile;
+        config.TrailerOverrides = preset.Trailers.Overrides;
     }
 }

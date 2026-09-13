@@ -124,6 +124,7 @@ export interface FeaturedPresetMixerSettings {
 }
 
 export interface FeaturedPresetLayoutSettings {
+  EnableInfiniteLoading: boolean;
   EnableAutoplay: boolean;
   ShowAutoplayButton: boolean;
   AutoplayInterval: number;
@@ -165,6 +166,7 @@ export interface FeaturedPresetTrailerSettings {
   TrailerEndOffsetSeconds: number;
   MultipleTrailerMode: MultipleTrailerMode;
   AllowTrailersOnMobile: boolean;
+  Overrides: FeaturedTrailerOverride[];
 }
 
 export interface FeaturedTrailerOverride {

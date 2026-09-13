@@ -83,6 +83,8 @@ test('featured presets resolve schedules and override all roadmap sections', asy
   assert.match(resolver, /OrderByDescending\(candidate => candidate\.Preset\.Priority\)[\s\S]*?ThenByDescending\(candidate => candidate\.Preset\.StartsAt/);
   assert.match(resolver, /config\.SourceRules = preset\.SourceRules[\s\S]*?config\.PersonalizationPolicy = preset\.PersonalizationPolicy/);
   assert.match(resolver, /config\.UseHeroLayout = preset\.Layout\.UseHeroLayout[\s\S]*?config\.TrailerSourcePriority = preset\.Trailers\.TrailerSourcePriority/);
+  assert.match(resolver, /config\.EnableInfiniteLoading = preset\.Layout\.EnableInfiniteLoading/);
+  assert.match(resolver, /config\.TrailerOverrides = preset\.Trailers\.Overrides/);
   assert.match(controller, /FeaturedPresetResolver\.Resolve\(baseConfig, DateTimeOffset\.UtcNow\)/);
   assert.match(response, /public string\? ActivePresetName \{ get; \}/);
   assert.match(response, /public DateTimeOffset\? NextPresetChange \{ get; \}/);
@@ -91,7 +93,8 @@ test('featured presets resolve schedules and override all roadmap sections', asy
   assert.match(presetTab, /ConfigDateTime v-model="preset\.StartsAt"[\s\S]*?ConfigDateTime v-model="preset\.EndsAt"/);
   assert.match(presetTab, /store\.updatePresetSnapshot\(index\)[\s\S]*?store\.duplicatePreset\(index\)/);
   assert.match(runtime, /schedulePresetRefresh\(response\.nextPresetChange\)/);
-  assert.match(runtime, /Date\.now\(\) < boundary[\s\S]*?scheduleFullRefresh\(\)/);
+  assert.match(runtime, /Date\.now\(\) < boundary[\s\S]*?refreshForPresetBoundary\(\)/);
+  assert.match(runtime, /function refreshForPresetBoundary[\s\S]*?instance\.destroy\(\)[\s\S]*?scheduleScan\(\)/);
 });
 
 test('personalization is authenticated, policy-bound, and user scoped', async () => {

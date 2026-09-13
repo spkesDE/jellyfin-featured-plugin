@@ -61,15 +61,24 @@ function schedulePresetRefresh(nextPresetChange?: string): void {
   if (!Number.isFinite(boundary)) return;
   const remaining = boundary - Date.now();
   if (remaining <= 0) {
-    presetRefreshTimer = window.setTimeout(scheduleFullRefresh, 250);
+    presetRefreshTimer = window.setTimeout(refreshForPresetBoundary, 250);
     return;
   }
   const delay = Math.min(remaining + 250, 2_147_000_000);
   presetRefreshTimer = window.setTimeout(() => {
     presetRefreshTimer = null;
     if (Date.now() < boundary) schedulePresetRefresh(nextPresetChange);
-    else scheduleFullRefresh();
+    else refreshForPresetBoundary();
   }, delay);
+}
+
+function refreshForPresetBoundary(): void {
+  lifecycleToken += 1;
+  instances.forEach((instance) => instance.destroy());
+  instances.clear();
+  placeholders.forEach((placeholder) => placeholder.remove());
+  placeholders.clear();
+  scheduleScan();
 }
 
 function createPlaceholder(container: Element): HTMLElement {

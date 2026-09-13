@@ -173,6 +173,7 @@ public sealed class FeaturedPresetMixerSettings
 
 public sealed class FeaturedPresetLayoutSettings
 {
+    public bool EnableInfiniteLoading { get; set; }
     public bool EnableAutoplay { get; set; } = true;
     public bool ShowAutoplayButton { get; set; } = true;
     public int AutoplayInterval { get; set; } = 10;
@@ -215,6 +216,7 @@ public sealed class FeaturedPresetTrailerSettings
     public int TrailerEndOffsetSeconds { get; set; }
     public string MultipleTrailerMode { get; set; } = FeaturedMultipleTrailerModes.First;
     public bool AllowTrailersOnMobile { get; set; }
+    public FeaturedTrailerOverride[] Overrides { get; set; } = [];
 }
 
 public sealed class FeaturedSourceRule

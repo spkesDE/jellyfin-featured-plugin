@@ -44,6 +44,7 @@ export function createPresetFromConfig(config: FeaturedPluginConfig, name = 'Fea
       RandomMediaCount: config.RandomMediaCount
     },
     Layout: {
+      EnableInfiniteLoading: config.EnableInfiniteLoading,
       EnableAutoplay: config.EnableAutoplay, ShowAutoplayButton: config.ShowAutoplayButton,
       AutoplayInterval: config.AutoplayInterval, ShowPlayButton: config.ShowPlayButton,
       ShowNavigationArrows: config.ShowNavigationArrows, ShowSlidePosition: config.ShowSlidePosition,
@@ -69,7 +70,8 @@ export function createPresetFromConfig(config: FeaturedPluginConfig, name = 'Fea
       TrailerStartOffsetSeconds: config.TrailerStartOffsetSeconds,
       TrailerEndOffsetSeconds: config.TrailerEndOffsetSeconds,
       MultipleTrailerMode: config.MultipleTrailerMode,
-      AllowTrailersOnMobile: config.AllowTrailersOnMobile
+      AllowTrailersOnMobile: config.AllowTrailersOnMobile,
+      Overrides: structuredClone(config.TrailerOverrides)
     }
   };
 }

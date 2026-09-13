@@ -169,6 +169,7 @@ internal static class PluginConfigurationNormalizer
         trailers.MultipleTrailerMode = trailers.MultipleTrailerMode == FeaturedMultipleTrailerModes.Random
             ? FeaturedMultipleTrailerModes.Random
             : FeaturedMultipleTrailerModes.First;
+        trailers.Overrides = NormalizeTrailerOverrides(trailers.Overrides);
     }
 
     private static FeaturedSourceRule NormalizeSourceRule(FeaturedSourceRule rule)
