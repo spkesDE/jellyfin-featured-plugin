@@ -128,6 +128,14 @@ PUT /featured/preferences
 GET /featured/preferences/options
 ```
 
+## Presets and Scheduling
+
+The `Presets & Schedule` tab captures the current source mix, source and global filters, personalization policy, display layout, and trailer configuration as one reusable snapshot. This makes it possible to prepare experiences such as Christmas, Halloween, weekends, kids mornings, or Friday nights without replacing the normal configuration.
+
+Every preset can have an optional start and end time, an enabled state, and a priority. The normal settings are the `Default` fallback whenever no preset is active. If schedules overlap, the preset with the higher priority wins; equal priorities prefer the preset with the later start time. End times are exclusive, so the default or next scheduled preset takes over exactly at that boundary.
+
+New snapshots are disabled initially. Configure the other tabs first, capture those settings, then name and schedule the preset. `Update from current settings` refreshes its captured content while retaining its name, schedule, enabled state, and priority. The web carousel refreshes automatically at the next schedule boundary, and user personalization continues to operate within the active preset according to that preset's policy.
+
 ## Troubleshooting
 
 If the featured carousel does not appear:
