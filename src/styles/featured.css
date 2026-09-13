@@ -202,6 +202,13 @@
   z-index: 0;
 }
 
+.ec-youtube-frame {
+  border: 0;
+  height: 100%;
+  pointer-events: none;
+  width: 100%;
+}
+
 .ec-slide.ec-youtube-trailer-concealed > .ec-trailer,
 .ec-slide.ec-youtube-trailer-concealed > iframe {
   opacity: 0;

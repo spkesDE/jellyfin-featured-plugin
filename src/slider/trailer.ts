@@ -178,10 +178,12 @@ export class DirectVideoPlayer extends HtmlVideoPlayer {
 export class YouTubePlayer implements TrailerPlayer {
   readonly element: HTMLDivElement;
   private player: YouTubePlayerInstance | null = null;
+  private attempt = 0;
   private endTimer: number | null = null;
   private revealTimer: number | null = null;
   private startupTimer: number | null = null;
   private destroyed = false;
+  private failed = false;
   private readonly ready: Promise<void>;
 
   constructor(videoId: string, options: TrailerPlaybackOptions) {
@@ -226,24 +228,47 @@ export class YouTubePlayer implements TrailerPlayer {
   private async initialize(videoId: string, options: TrailerPlaybackOptions): Promise<void> {
     const api = await loadYouTubeApi();
     if (this.destroyed) return;
+    this.startPlayer(api, videoId, options, 0);
+  }
+
+  private startPlayer(
+    api: YouTubeApi,
+    videoId: string,
+    options: TrailerPlaybackOptions,
+    hostIndex: number
+  ): void {
+    if (this.destroyed || this.failed) return;
+    const hosts = ['https://www.youtube-nocookie.com', 'https://www.youtube.com'];
+    const attempt = ++this.attempt;
+    const startupTimeoutMilliseconds = hostIndex === 0 ? 2500 : 8000;
+    if (this.startupTimer !== null) window.clearTimeout(this.startupTimer);
+    this.player?.destroy();
+    this.player = null;
+    this.element.replaceChildren();
+    const mount = document.createElement('div');
+    this.element.appendChild(mount);
     this.startupTimer = window.setTimeout(() => {
       this.startupTimer = null;
-      if (!this.destroyed) options.onError(new Error('YouTube trailer did not become ready in time.'));
-    }, 8000);
-    this.player = new api.Player(this.element, {
+      if (this.destroyed || attempt !== this.attempt) return;
+      if (hostIndex + 1 < hosts.length) this.startPlayer(api, videoId, options, hostIndex + 1);
+      else this.fail(options, new Error('YouTube trailer did not become ready in time.'));
+    }, startupTimeoutMilliseconds);
+    this.player = new api.Player(mount, {
       videoId,
-      host: 'https://www.youtube-nocookie.com',
+      host: hosts[hostIndex],
       playerVars: {
         autoplay: 1, controls: 0, disablekb: 1, fs: 0, loop: options.loop ? 1 : 0,
         modestbranding: 1, mute: options.muted ? 1 : 0, playsinline: 1, rel: 0,
-        start: options.startOffsetSeconds, playlist: options.loop ? videoId : undefined
+        origin: window.location.origin, start: options.startOffsetSeconds,
+        playlist: options.loop ? videoId : undefined
       },
       events: {
         onReady: ({ target }) => {
+          if (this.destroyed || attempt !== this.attempt) return;
           if (this.startupTimer !== null) window.clearTimeout(this.startupTimer);
           this.startupTimer = null;
           const iframe = target.getIframe();
-          iframe.classList.add('ec-trailer');
+          iframe.classList.add('ec-youtube-frame');
           iframe.tabIndex = -1;
           iframe.setAttribute('allow', 'autoplay; encrypted-media; picture-in-picture');
           iframe.setAttribute('aria-hidden', 'true');
@@ -276,15 +301,24 @@ export class YouTubePlayer implements TrailerPlayer {
           }
         },
         onStateChange: ({ data }) => {
+          if (this.destroyed || attempt !== this.attempt) return;
           if (data === 0 && !options.loop) options.onEnded();
         },
         onError: ({ data }) => {
+          if (this.destroyed || attempt !== this.attempt) return;
           if (this.startupTimer !== null) window.clearTimeout(this.startupTimer);
           this.startupTimer = null;
-          options.onError(new Error(`YouTube trailer failed with player error ${data}.`));
+          if (hostIndex + 1 < hosts.length) this.startPlayer(api, videoId, options, hostIndex + 1);
+          else this.fail(options, new Error(`YouTube trailer failed with player error ${data}.`));
         }
       }
     });
+  }
+
+  private fail(options: TrailerPlaybackOptions, error: Error): void {
+    if (this.destroyed || this.failed) return;
+    this.failed = true;
+    options.onError(error);
   }
 }
 

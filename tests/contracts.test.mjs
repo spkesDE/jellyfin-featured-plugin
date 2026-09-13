@@ -233,6 +233,10 @@ test('proper trailer support keeps resolution and playback source independent', 
   assert.match(styles, /@media \(max-width: 700px\)[\s\S]*?\.ec-root\.ec-hero \.ec-slide::after\s*\{[\s\S]*?linear-gradient\(0deg/);
   assert.doesNotMatch(styles, /\.ec-backdrop::after/);
   assert.match(player, /target\.getIframe\(\)[\s\S]*?tabIndex = -1[\s\S]*?aria-hidden/);
+  assert.match(player, /youtube-nocookie\.com'[\s\S]*?youtube\.com'/);
+  assert.match(player, /origin: window\.location\.origin/);
+  assert.match(player, /hostIndex === 0 \? 2500 : 8000/);
+  assert.match(player, /hostIndex \+ 1 < hosts\.length[\s\S]*?startPlayer\(api, videoId, options, hostIndex \+ 1\)/);
   assert.match(player, /defaultMuted = options\.muted[\s\S]*?setAttribute\('webkit-playsinline', ''\)/);
   assert.match(player, /setAttribute\('allow', 'autoplay; encrypted-media; picture-in-picture'\)/);
   assert.match(player, /isIosTrailerClient[\s\S]*?navigator\.platform === 'MacIntel'[\s\S]*?navigator\.maxTouchPoints > 1/);
