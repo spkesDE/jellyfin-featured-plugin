@@ -354,6 +354,7 @@ export class FeaturedCarousel {
       }
       this.trailerPlayer = player;
       this.trailerSlide = slide;
+      this.root.classList.add('ec-trailer-playing');
       slide.classList.add('ec-trailer-active');
       slide.querySelectorAll(':scope > .ec-trailer').forEach((element) => element.remove());
       slide.querySelector('.ec-backdrop')?.after(player.element);
@@ -369,6 +370,7 @@ export class FeaturedCarousel {
     this.trailerDelayTimer = null;
     this.trailerPlayer?.destroy();
     this.trailerPlayer = null;
+    this.root.classList.remove('ec-trailer-playing');
     this.trailerSlide?.classList.remove('ec-trailer-active');
     this.trailerSlide = null;
     this.trailerItemId = null;

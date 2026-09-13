@@ -397,16 +397,28 @@
 }
 
 .ec-root.ec-hero .ec-slide.ec-trailer-active {
-  background: linear-gradient(to bottom,
-      #000 0%,
-      #000 76%,
-      rgba(0, 0, 0, .88) 84%,
-      rgba(0, 0, 0, .48) 92%,
-      transparent 100%);
+  background: #000;
 }
 
 .ec-root.ec-hero .ec-slide.ec-trailer-active .ec-backdrop {
   opacity: 0;
+}
+
+.ec-root.ec-hero.ec-trailer-playing::after {
+  background: linear-gradient(to bottom,
+      #000 0%,
+      rgba(0, 0, 0, .94) 18%,
+      rgba(0, 0, 0, .68) 48%,
+      rgba(0, 0, 0, .28) 76%,
+      transparent 100%);
+  content: '';
+  height: calc(var(--ec-hero-overlap, 150px) + 80px);
+  left: 0;
+  pointer-events: none;
+  position: absolute;
+  right: 0;
+  top: 100%;
+  z-index: 1;
 }
 
 .ec-root.ec-hero .ec-backdrop,
