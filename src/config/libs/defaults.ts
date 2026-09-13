@@ -101,12 +101,12 @@ export const CONFIG_DEFAULTS: FeaturedPluginConfig = {
     InProgressSeriesBoost: 30, PreferredGenres: []
   },
   PersonalizationPolicy: {
-    Enabled: true, AllowSourceSelection: true, AllowSourceWeights: true,
+    Enabled: true, AllowSourceSelection: false, AllowSourceWeights: false,
     AllowPreferredGenres: true, AllowUnplayedBoost: true, AllowFavouriteBoost: true,
     AllowInProgressSeriesBoost: true, AllowRepeatCooldown: false
   },
   Presets: [],
-  RepeatCooldownDays: 0,
+  RepeatCooldownDays: 1,
   RelaxRepeatCooldownWhenNeeded: false,
   MaximumItemsPerGenre: 0,
   MaximumItemsPerFranchise: 0,

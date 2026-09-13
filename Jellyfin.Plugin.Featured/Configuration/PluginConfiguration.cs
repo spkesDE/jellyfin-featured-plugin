@@ -31,13 +31,13 @@ public sealed class PluginConfiguration : BasePluginConfiguration
 
     public FeaturedPreset[] Presets { get; set; } = [];
 
-    public int RepeatCooldownDays { get; set; }
+    public int RepeatCooldownDays { get; set; } = 1;
 
-    public bool RelaxRepeatCooldownWhenNeeded { get; set; }
+    public bool RelaxRepeatCooldownWhenNeeded { get; set; } = false;
 
-    public int MaximumItemsPerGenre { get; set; }
+    public int MaximumItemsPerGenre { get; set; } = 0;
 
-    public int MaximumItemsPerFranchise { get; set; }
+    public int MaximumItemsPerFranchise { get; set; } = 0;
 
     public int RandomMediaCount { get; set; } = 5;
 
@@ -51,7 +51,7 @@ public sealed class PluginConfiguration : BasePluginConfiguration
 
     public bool ShowAutoplayButton { get; set; } = true;
 
-    public bool EnableBackgroundTrailers { get; set; }
+    public bool EnableBackgroundTrailers { get; set; } = false;
 
     public string TrailerSourcePriority { get; set; } = FeaturedTrailerSourcePriorities.PreferLocal;
 
@@ -71,7 +71,7 @@ public sealed class PluginConfiguration : BasePluginConfiguration
 
     public string MultipleTrailerMode { get; set; } = FeaturedMultipleTrailerModes.First;
 
-    public bool AllowTrailersOnMobile { get; set; }
+    public bool AllowTrailersOnMobile { get; set; } = false;
 
     public FeaturedTrailerOverride[] TrailerOverrides { get; set; } = [];
 
@@ -364,9 +364,9 @@ public sealed class FeaturedPersonalizationPolicy
 {
     public bool Enabled { get; set; } = true;
 
-    public bool AllowSourceSelection { get; set; } = true;
+    public bool AllowSourceSelection { get; set; } = false;
 
-    public bool AllowSourceWeights { get; set; } = true;
+    public bool AllowSourceWeights { get; set; } = false;
 
     public bool AllowPreferredGenres { get; set; } = true;
 
