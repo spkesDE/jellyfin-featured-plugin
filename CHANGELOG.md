@@ -1,5 +1,23 @@
 # Changelog
 
+## v12.2.1.0 - 2026-09-13
+
+### Features
+
+- feat(carousel): implement trailer volume management with local storage
+
+### Fixes
+
+- fix(cache): enhance prepared cache diagnostics and add response serialization
+- fix(config): set new default values
+
+### Documentation
+
+- docs: update README and add cache and trailer behavior documentation
+
+### Refactoring
+
+- refactor(ruleEngine): Refactor Featured Rule Engine and Enhance Timing Diagnostics
 ## v12.2.0.0 - 2026-09-13
 
 ### Features
