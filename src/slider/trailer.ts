@@ -40,13 +40,18 @@ abstract class HtmlVideoPlayer implements TrailerPlayer {
   private readonly startOffsetSeconds: number;
   private readonly loop: boolean;
   private readonly onEnded: () => void;
+  private readonly onError: (error: Error) => void;
   private ended = false;
+  private failed = false;
+  private destroyed = false;
+  private playbackWatchdog: number | null = null;
 
   protected constructor(url: string, options: TrailerPlaybackOptions) {
     this.endOffsetSeconds = options.endOffsetSeconds;
     this.startOffsetSeconds = options.startOffsetSeconds;
     this.loop = options.loop;
     this.onEnded = options.onEnded;
+    this.onError = options.onError;
     this.element = document.createElement('video');
     this.element.className = 'ec-trailer';
     this.element.src = url;
@@ -71,6 +76,13 @@ abstract class HtmlVideoPlayer implements TrailerPlayer {
     });
     this.element.addEventListener('timeupdate', this.handleTimeUpdate);
     this.element.addEventListener('ended', this.handleEnded);
+    this.element.addEventListener('playing', this.clearPlaybackWatchdog);
+    this.element.addEventListener('canplay', this.clearPlaybackWatchdog);
+    this.element.addEventListener('waiting', this.armPlaybackWatchdog);
+    this.element.addEventListener('stalled', this.armPlaybackWatchdog);
+    this.element.addEventListener('error', this.handleMediaError);
+    this.element.addEventListener('abort', this.handleMediaError);
+    this.armPlaybackWatchdog();
   }
 
   async play(): Promise<void> {
@@ -90,8 +102,16 @@ abstract class HtmlVideoPlayer implements TrailerPlayer {
   }
 
   destroy(): void {
+    this.destroyed = true;
+    this.clearPlaybackWatchdog();
     this.element.removeEventListener('timeupdate', this.handleTimeUpdate);
     this.element.removeEventListener('ended', this.handleEnded);
+    this.element.removeEventListener('playing', this.clearPlaybackWatchdog);
+    this.element.removeEventListener('canplay', this.clearPlaybackWatchdog);
+    this.element.removeEventListener('waiting', this.armPlaybackWatchdog);
+    this.element.removeEventListener('stalled', this.armPlaybackWatchdog);
+    this.element.removeEventListener('error', this.handleMediaError);
+    this.element.removeEventListener('abort', this.handleMediaError);
     this.element.pause();
     this.element.removeAttribute('src');
     this.element.load();
@@ -99,6 +119,7 @@ abstract class HtmlVideoPlayer implements TrailerPlayer {
   }
 
   private handleTimeUpdate = (): void => {
+    this.clearPlaybackWatchdog();
     if (this.endOffsetSeconds <= 0 || !Number.isFinite(this.element.duration)) return;
     if (this.element.currentTime < this.element.duration - this.endOffsetSeconds) return;
     if (this.loop) {
@@ -113,8 +134,33 @@ abstract class HtmlVideoPlayer implements TrailerPlayer {
   private handleEnded = (): void => {
     if (this.ended) return;
     this.ended = true;
+    this.clearPlaybackWatchdog();
     this.onEnded();
   };
+
+  private armPlaybackWatchdog = (): void => {
+    this.clearPlaybackWatchdog();
+    this.playbackWatchdog = window.setTimeout(() => {
+      this.playbackWatchdog = null;
+      this.fail(new Error('Trailer playback stalled.'));
+    }, 8000);
+  };
+
+  private clearPlaybackWatchdog = (): void => {
+    if (this.playbackWatchdog !== null) window.clearTimeout(this.playbackWatchdog);
+    this.playbackWatchdog = null;
+  };
+
+  private handleMediaError = (): void => {
+    this.fail(new Error('Trailer media could not be played.'));
+  };
+
+  private fail(error: Error): void {
+    if (this.destroyed || this.failed) return;
+    this.failed = true;
+    this.clearPlaybackWatchdog();
+    this.onError(error);
+  }
 }
 
 export class JellyfinLocalPlayer extends HtmlVideoPlayer {

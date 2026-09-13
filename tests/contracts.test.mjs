@@ -213,6 +213,10 @@ test('proper trailer support keeps resolution and playback source independent', 
   assert.match(player, /onError: \(\{ data \}\)[\s\S]*?YouTube trailer failed with player error/);
   assert.match(carousel, /item\.trailers\?\.length[\s\S]*?candidateIndex \+ 1 < candidates\.length[\s\S]*?startTrailer\(slide, item, candidateIndex \+ 1\)/);
   assert.match(carousel, /void player\.play\(\)\.catch\(recover\)/);
+  assert.match(player, /addEventListener\('waiting', this\.armPlaybackWatchdog\)[\s\S]*?addEventListener\('stalled', this\.armPlaybackWatchdog\)/);
+  assert.match(player, /addEventListener\('error', this\.handleMediaError\)[\s\S]*?addEventListener\('abort', this\.handleMediaError\)/);
+  assert.match(player, /Trailer playback stalled[\s\S]*?8000/);
+  assert.match(player, /destroyed \|\| this\.failed[\s\S]*?this\.onError\(error\)/);
 });
 
 test('source mixer constraints survive personalized source cloning', async () => {
