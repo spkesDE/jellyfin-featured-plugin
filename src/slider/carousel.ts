@@ -130,7 +130,7 @@ export class FeaturedCarousel {
     this.root.addEventListener('keydown', this.onKeyDown);
     this.root.addEventListener('touchstart', this.onTouchStart, { passive: true });
     this.root.addEventListener('touchend', this.onTouchEnd, { passive: true });
-    document.addEventListener('keydown', this.onTrailerHotkey);
+    document.addEventListener('keydown', this.onTrailerHotkey, true);
     document.addEventListener('visibilitychange', this.onVisibilityChange);
     this.show(0, false);
     this.updateAutoplayButton();
@@ -141,7 +141,7 @@ export class FeaturedCarousel {
     if (this.destroyed) return;
     this.destroyed = true;
     this.pauseTimer();
-    document.removeEventListener('keydown', this.onTrailerHotkey);
+    document.removeEventListener('keydown', this.onTrailerHotkey, true);
     document.removeEventListener('visibilitychange', this.onVisibilityChange);
     this.stopTrailer(this.slides[this.index - this.windowStart]);
     this.root.remove();
@@ -361,6 +361,8 @@ export class FeaturedCarousel {
           if (!player || this.trailerPlayer !== player) return;
           this.trailerConcealed = false;
           slide.classList.remove('ec-youtube-trailer-concealed');
+          this.root.classList.add('ec-trailer-playing');
+          slide.classList.add('ec-trailer-active');
           void player.setMuted(this.trailerMuted);
         },
         onEnded: () => {
@@ -377,8 +379,8 @@ export class FeaturedCarousel {
       this.trailerPaused = false;
       this.trailerConcealed = concealYouTube;
       this.trailerSlide = slide;
-      this.root.classList.add('ec-trailer-playing');
-      slide.classList.add('ec-trailer-active');
+      this.root.classList.toggle('ec-trailer-playing', !concealYouTube);
+      slide.classList.toggle('ec-trailer-active', !concealYouTube);
       slide.classList.toggle('ec-youtube-trailer-concealed', concealYouTube);
       slide.querySelectorAll(':scope > .ec-trailer').forEach((element) => element.remove());
       slide.querySelector('.ec-backdrop')?.after(player.element);

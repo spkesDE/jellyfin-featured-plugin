@@ -179,6 +179,8 @@ test('proper trailer support keeps resolution and playback source independent', 
   assert.match(carousel, /restartTimer[\s\S]*?this\.trailerPaused/);
   assert.match(carousel, /YOUTUBE_CONTROL_CONCEALMENT_MS = 5000/);
   assert.match(carousel, /provider === 'youtube'[\s\S]*?hideYouTubeTrailerUntilControlsFade/);
+  assert.match(carousel, /addEventListener\('keydown', this\.onTrailerHotkey, true\)/);
+  assert.match(carousel, /onReveal:[\s\S]*?classList\.remove\('ec-youtube-trailer-concealed'\)[\s\S]*?classList\.add\('ec-trailer-active'\)/);
   assert.match(carousel, /launchDelayMilliseconds = concealYouTube \? 0 : this\.response\.trailerDelayMilliseconds/);
   assert.match(carousel, /Math\.max\(YOUTUBE_CONTROL_CONCEALMENT_MS, this\.response\.trailerDelayMilliseconds\)/);
   assert.match(carousel, /muted: concealYouTube \? true : this\.trailerMuted/);

@@ -150,6 +150,7 @@
   inset: 0;
   position: absolute;
   transform: scale(1.015);
+  transition: opacity .8s ease;
   z-index: 0;
 }
 
