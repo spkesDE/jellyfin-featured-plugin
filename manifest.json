@@ -10,7 +10,7 @@
   "versions": [
     {
       "version": "12.2.1.0",
-      "changelog": "- feat(carousel): implement trailer volume management with local storage\n- fix(cache): enhance prepared cache diagnostics and add response serialization\n- fix(config): set new default values\n- docs: update README and add cache and trailer behavior documentation\n- refactor(ruleEngine): Refactor Featured Rule Engine and Enhance Timing Diagnostics\n",
+      "changelog": "- feat(carousel): implement trailer volume management with local storage\n- perf(ruleEngine): dramatically reduce featured loading times by replacing expensive access re-queries with in-memory Jellyfin visibility checks\n- perf(cache): restore reliable prepared-cache hits with deterministic personalization fingerprints so warm requests can skip rule-engine work\n- fix(cache): enhance prepared cache diagnostics and add response serialization\n- fix(config): set new default values\n- docs: update README and add cache and trailer behavior documentation\n- refactor(ruleEngine): Refactor Featured Rule Engine and Enhance Timing Diagnostics\n",
       "targetAbi": "12.0.0.0",
       "sourceUrl": "https://github.com/spkesDE/jellyfin-featured-plugin/releases/download/v12.2.1.0/Featured.zip",
       "checksum": "39e3f9eb4b03e8f89afd4b4f418dba7a",
