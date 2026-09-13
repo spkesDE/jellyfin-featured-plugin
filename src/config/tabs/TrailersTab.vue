@@ -46,6 +46,8 @@ function addOverride(item: FeaturedSearchItem): void {
           <ConfigCheckbox v-if="store.config.TrailerSourcePriority === 'prefer_local'"
             v-model="store.config.FallBackToRemoteTrailers" :label="t('trailers.remoteFallback')" />
           <ConfigCheckbox v-model="store.config.StartTrailersMuted" :label="t('trailers.startMuted')" />
+          <ConfigCheckbox v-model="store.config.HideYouTubeTrailerUntilControlsFade"
+            :label="t('trailers.hideYouTubeControls')" :help-text="t('trailers.hideYouTubeControlsHelp')" />
           <ConfigCheckbox v-model="store.config.WaitForTrailerToFinish" :label="t('trailers.waitForFinish')"
             :help-text="t('trailers.waitForFinishHelp')" />
           <ConfigCheckbox v-model="store.config.AllowTrailersOnMobile" :label="t('trailers.allowMobile')" />

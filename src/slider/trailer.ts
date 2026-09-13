@@ -7,6 +7,8 @@ export interface TrailerPlaybackOptions {
   endOffsetSeconds: number;
   loop: boolean;
   onEnded: () => void;
+  concealDurationMilliseconds?: number;
+  onReveal?: () => void;
 }
 
 export interface TrailerPlayer {
@@ -117,6 +119,7 @@ export class YouTubePlayer implements TrailerPlayer {
   readonly element: HTMLDivElement;
   private player: YouTubePlayerInstance | null = null;
   private endTimer: number | null = null;
+  private revealTimer: number | null = null;
   private destroyed = false;
   private readonly ready: Promise<void>;
 
@@ -147,6 +150,7 @@ export class YouTubePlayer implements TrailerPlayer {
   destroy(): void {
     this.destroyed = true;
     if (this.endTimer !== null) window.clearInterval(this.endTimer);
+    if (this.revealTimer !== null) window.clearTimeout(this.revealTimer);
     this.player?.destroy();
     this.player = null;
     this.element.remove();
@@ -172,6 +176,14 @@ export class YouTubePlayer implements TrailerPlayer {
           if (options.muted) target.mute(); else target.unMute();
           if (options.startOffsetSeconds > 0) target.seekTo(options.startOffsetSeconds, true);
           target.playVideo();
+          if ((options.concealDurationMilliseconds ?? 0) > 0) {
+            this.revealTimer = window.setTimeout(() => {
+              this.revealTimer = null;
+              if (!this.destroyed) options.onReveal?.();
+            }, options.concealDurationMilliseconds);
+          } else {
+            options.onReveal?.();
+          }
           if (options.endOffsetSeconds > 0) {
             this.endTimer = window.setInterval(() => {
               const duration = target.getDuration();

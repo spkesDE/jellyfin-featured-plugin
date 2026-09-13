@@ -302,6 +302,8 @@
   "trailers.source.automatic": "Automatic",
   "trailers.remoteFallback": "Fall back to remote trailers",
   "trailers.startMuted": "Start muted",
+  "trailers.hideYouTubeControls": "Hide YouTube trailer until controls disappear (5 seconds)",
+  "trailers.hideYouTubeControlsHelp": "Starts YouTube trailers invisibly and muted. They fade in after five seconds, or after the configured trailer delay when it is longer.",
   "trailers.waitForFinish": "Wait for trailer to finish",
   "trailers.waitForFinishHelp": "Pauses carousel autoplay while a trailer is playing and advances when it ends.",
   "trailers.allowMobile": "Allow trailers on mobile",

@@ -38,6 +38,7 @@ test('critical C# and TypeScript defaults stay in parity', async () => {
     ShowPaginationDots: 'true',
     TrailerDelayMilliseconds: '1500',
     StartTrailersMuted: 'true',
+    HideYouTubeTrailerUntilControlsFade: 'true',
     FallBackToRemoteTrailers: 'true'
   };
   for (const [name, value] of Object.entries(expected)) {
@@ -151,6 +152,7 @@ test('proper trailer support keeps resolution and playback source independent', 
   ]);
   for (const setting of [
     'TrailerSourcePriority', 'FallBackToRemoteTrailers', 'StartTrailersMuted',
+    'HideYouTubeTrailerUntilControlsFade',
     'WaitForTrailerToFinish', 'TrailerDelayMilliseconds', 'TrailerStartOffsetSeconds',
     'TrailerEndOffsetSeconds', 'MultipleTrailerMode', 'AllowTrailersOnMobile', 'TrailerOverrides'
   ]) {
@@ -175,6 +177,13 @@ test('proper trailer support keeps resolution and playback source independent', 
   assert.match(carousel, /event\.code !== 'Space'[\s\S]*?trailerPlayer\.pause\(\)[\s\S]*?trailerPlayer\.play\(\)/);
   assert.match(carousel, /closest\('input, textarea, select, button,[\s\S]*?\[role="dialog"\]'/);
   assert.match(carousel, /restartTimer[\s\S]*?this\.trailerPaused/);
+  assert.match(carousel, /YOUTUBE_CONTROL_CONCEALMENT_MS = 5000/);
+  assert.match(carousel, /provider === 'youtube'[\s\S]*?hideYouTubeTrailerUntilControlsFade/);
+  assert.match(carousel, /launchDelayMilliseconds = concealYouTube \? 0 : this\.response\.trailerDelayMilliseconds/);
+  assert.match(carousel, /Math\.max\(YOUTUBE_CONTROL_CONCEALMENT_MS, this\.response\.trailerDelayMilliseconds\)/);
+  assert.match(carousel, /muted: concealYouTube \? true : this\.trailerMuted/);
+  assert.match(player, /concealDurationMilliseconds[\s\S]*?setTimeout[\s\S]*?onReveal/);
+  assert.match(styles, /\.ec-youtube-trailer-concealed[\s\S]*?opacity:\s*0/);
   assert.match(carousel, /querySelectorAll\(':scope > \.ec-trailer'\)/);
   assert.match(carousel, /classList\.add\('ec-trailer-playing'\)[\s\S]*?classList\.remove\('ec-trailer-playing'\)/);
   assert.match(carousel, /classList\.add\('ec-trailer-active'\)[\s\S]*?classList\.remove\('ec-trailer-active'\)/);

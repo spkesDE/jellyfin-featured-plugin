@@ -11,6 +11,7 @@ export type FeaturedItemDisplayReporter = (itemId: string) => Promise<unknown>;
 const MAX_DOM_SLIDES = 20;
 const MAX_CACHED_ITEMS = 100;
 const MAX_SEEN_ITEM_IDS = 500;
+const YOUTUBE_CONTROL_CONCEALMENT_MS = 5000;
 
 export class FeaturedCarousel {
   readonly root: HTMLElement;
@@ -41,6 +42,7 @@ export class FeaturedCarousel {
   private trailerItemId: string | null = null;
   private trailerMuted: boolean;
   private trailerPaused = false;
+  private trailerConcealed = false;
 
   constructor(response: FeaturedResponse, loadItems?: FeaturedItemLoader, reportDisplayed?: FeaturedItemDisplayReporter) {
     this.response = response;
@@ -339,14 +341,28 @@ export class FeaturedCarousel {
     this.stopTrailer();
     this.trailerItemId = item.id;
     const expectedIndex = this.index;
+    const concealYouTube = item.trailer.provider === 'youtube'
+      && this.response.hideYouTubeTrailerUntilControlsFade;
+    const launchDelayMilliseconds = concealYouTube ? 0 : this.response.trailerDelayMilliseconds;
+    const concealDurationMilliseconds = concealYouTube
+      ? Math.max(YOUTUBE_CONTROL_CONCEALMENT_MS, this.response.trailerDelayMilliseconds)
+      : 0;
     this.trailerDelayTimer = window.setTimeout(() => {
       this.trailerDelayTimer = null;
       if (this.destroyed || document.hidden || this.index !== expectedIndex) return;
-      const player = createTrailerPlayer(item.trailer!, {
-        muted: this.trailerMuted,
+      let player: TrailerPlayer | null = null;
+      player = createTrailerPlayer(item.trailer!, {
+        muted: concealYouTube ? true : this.trailerMuted,
         startOffsetSeconds: this.response.trailerStartOffsetSeconds,
         endOffsetSeconds: this.response.trailerEndOffsetSeconds,
         loop: !this.response.waitForTrailerToFinish,
+        concealDurationMilliseconds,
+        onReveal: () => {
+          if (!player || this.trailerPlayer !== player) return;
+          this.trailerConcealed = false;
+          slide.classList.remove('ec-youtube-trailer-concealed');
+          void player.setMuted(this.trailerMuted);
+        },
         onEnded: () => {
           if (this.response.waitForTrailerToFinish && this.autoplayEnabled && this.index === expectedIndex) {
             this.show(this.index + 1, false);
@@ -359,16 +375,18 @@ export class FeaturedCarousel {
       }
       this.trailerPlayer = player;
       this.trailerPaused = false;
+      this.trailerConcealed = concealYouTube;
       this.trailerSlide = slide;
       this.root.classList.add('ec-trailer-playing');
       slide.classList.add('ec-trailer-active');
+      slide.classList.toggle('ec-youtube-trailer-concealed', concealYouTube);
       slide.querySelectorAll(':scope > .ec-trailer').forEach((element) => element.remove());
       slide.querySelector('.ec-backdrop')?.after(player.element);
       if (this.response.waitForTrailerToFinish) this.pauseTimer();
       void player.play().catch(() => {
         if (this.trailerPlayer === player) this.restartTimer();
       });
-    }, this.response.trailerDelayMilliseconds);
+    }, launchDelayMilliseconds);
   }
 
   private stopTrailer(_slide?: HTMLElement): void {
@@ -378,9 +396,11 @@ export class FeaturedCarousel {
     this.trailerPlayer = null;
     this.root.classList.remove('ec-trailer-playing');
     this.trailerSlide?.classList.remove('ec-trailer-active');
+    this.trailerSlide?.classList.remove('ec-youtube-trailer-concealed');
     this.trailerSlide = null;
     this.trailerItemId = null;
     this.trailerPaused = false;
+    this.trailerConcealed = false;
   }
 
   private pauseTimer = (): void => {
@@ -423,7 +443,7 @@ export class FeaturedCarousel {
     if (event.key.toLowerCase() === 'm') {
       event.preventDefault();
       this.trailerMuted = !this.trailerMuted;
-      void this.trailerPlayer.setMuted(this.trailerMuted);
+      if (!this.trailerConcealed) void this.trailerPlayer.setMuted(this.trailerMuted);
       return;
     }
     if (event.code !== 'Space' && event.key !== ' ') return;

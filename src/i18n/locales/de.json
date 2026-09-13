@@ -302,6 +302,8 @@
   "trailers.source.automatic": "Automatisch",
   "trailers.remoteFallback": "Auf Remote-Trailer zurückfallen",
   "trailers.startMuted": "Stumm starten",
+  "trailers.hideYouTubeControls": "YouTube-Trailer ausblenden, bis die Bedienelemente verschwunden sind (5 Sekunden)",
+  "trailers.hideYouTubeControlsHelp": "Startet YouTube-Trailer unsichtbar und stumm. Die Einblendung erfolgt nach fünf Sekunden oder, falls länger, nach der eingestellten Trailer-Verzögerung.",
   "trailers.waitForFinish": "Auf Trailer-Ende warten",
   "trailers.waitForFinishHelp": "Pausiert den automatischen Slide-Wechsel während der Trailer läuft und wechselt nach dessen Ende weiter.",
   "trailers.allowMobile": "Trailer auf Mobilgeräten erlauben",

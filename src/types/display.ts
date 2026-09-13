@@ -4,6 +4,7 @@ export interface FeaturedDisplaySettings {
   showAutoplayButton: boolean;
   enableBackgroundTrailers: boolean;
   startTrailersMuted: boolean;
+  hideYouTubeTrailerUntilControlsFade: boolean;
   waitForTrailerToFinish: boolean;
   trailerDelayMilliseconds: number;
   trailerStartOffsetSeconds: number;

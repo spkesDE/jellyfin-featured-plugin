@@ -59,6 +59,8 @@ public sealed class PluginConfiguration : BasePluginConfiguration
 
     public bool StartTrailersMuted { get; set; } = true;
 
+    public bool HideYouTubeTrailerUntilControlsFade { get; set; } = true;
+
     public bool WaitForTrailerToFinish { get; set; }
 
     public int TrailerDelayMilliseconds { get; set; } = 1500;
@@ -207,6 +209,7 @@ public sealed class FeaturedPresetTrailerSettings
     public string TrailerSourcePriority { get; set; } = FeaturedTrailerSourcePriorities.PreferLocal;
     public bool FallBackToRemoteTrailers { get; set; } = true;
     public bool StartTrailersMuted { get; set; } = true;
+    public bool HideYouTubeTrailerUntilControlsFade { get; set; } = true;
     public bool WaitForTrailerToFinish { get; set; }
     public int TrailerDelayMilliseconds { get; set; } = 1500;
     public int TrailerStartOffsetSeconds { get; set; }

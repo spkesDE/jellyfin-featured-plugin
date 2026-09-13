@@ -60,6 +60,7 @@ export interface FeaturedPluginConfig {
   TrailerSourcePriority: TrailerSourcePriority;
   FallBackToRemoteTrailers: boolean;
   StartTrailersMuted: boolean;
+  HideYouTubeTrailerUntilControlsFade: boolean;
   WaitForTrailerToFinish: boolean;
   TrailerDelayMilliseconds: number;
   TrailerStartOffsetSeconds: number;
@@ -158,6 +159,7 @@ export interface FeaturedPresetTrailerSettings {
   TrailerSourcePriority: TrailerSourcePriority;
   FallBackToRemoteTrailers: boolean;
   StartTrailersMuted: boolean;
+  HideYouTubeTrailerUntilControlsFade: boolean;
   WaitForTrailerToFinish: boolean;
   TrailerDelayMilliseconds: number;
   TrailerStartOffsetSeconds: number;
