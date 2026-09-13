@@ -41,7 +41,7 @@ public sealed partial class FeaturedController
         if (activeUser == null) return NotFound();
         if (request is null || request.ItemId == Guid.Empty) return BadRequest();
         FeaturedPersonalizationContext personalization = _personalization.Resolve(_config, activeUser.Id);
-        if (personalization.RepeatCooldownDays <= 0) return Ok(new { ok = true });
+        if (personalization.RepeatCooldownHours <= 0) return Ok(new { ok = true });
         BaseItem? item = _libraryManager.GetItemById(request.ItemId);
         if (item is null || !item.IsVisible(activeUser)) return NotFound();
         _historyStore.Record(activeUser.Id, item.Id);
@@ -61,7 +61,7 @@ public sealed partial class FeaturedController
 
             int requestedCount = _config.EnableInfiniteLoading ? InfiniteBatchSize : _config.RandomMediaCount;
             FeaturedPersonalizationContext personalization = _personalization.Resolve(_config, activeUser.Id);
-            IReadOnlyDictionary<Guid, DateTimeOffset> recentHistory = _historyStore.GetRecentItems(activeUser.Id, personalization.RepeatCooldownDays);
+            IReadOnlyDictionary<Guid, DateTimeOffset> recentHistory = _historyStore.GetRecentItems(activeUser.Id, personalization.RepeatCooldownHours);
             HashSet<Guid> allExcludedIds = [.. excludedIds, .. recentHistory.Keys];
             List<BaseItem> selectedItems;
             if (!_preparedCache.TryGetItems(activeUser, _config, personalization, allExcludedIds, requestedCount, out selectedItems))

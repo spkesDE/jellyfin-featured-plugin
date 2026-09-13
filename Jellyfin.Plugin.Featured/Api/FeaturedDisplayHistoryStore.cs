@@ -34,12 +34,12 @@ public sealed class FeaturedDisplayHistoryStore : IDisposable
             Timeout.InfiniteTimeSpan);
     }
 
-    internal HashSet<Guid> GetRecentItemIds(Guid userId, int cooldownDays)
-        => GetRecentItems(userId, cooldownDays).Keys.ToHashSet();
+    internal HashSet<Guid> GetRecentItemIds(Guid userId, int cooldownHours)
+        => GetRecentItems(userId, cooldownHours).Keys.ToHashSet();
 
-    internal IReadOnlyDictionary<Guid, DateTimeOffset> GetRecentItems(Guid userId, int cooldownDays)
+    internal IReadOnlyDictionary<Guid, DateTimeOffset> GetRecentItems(Guid userId, int cooldownHours)
     {
-        if (cooldownDays <= 0) return new Dictionary<Guid, DateTimeOffset>();
+        if (cooldownHours <= 0) return new Dictionary<Guid, DateTimeOffset>();
         lock (_syncRoot)
         {
             EnsureLoaded();
@@ -49,7 +49,7 @@ public sealed class FeaturedDisplayHistoryStore : IDisposable
                 return new Dictionary<Guid, DateTimeOffset>();
             }
 
-            DateTimeOffset cutoff = DateTimeOffset.UtcNow.AddDays(-cooldownDays);
+            DateTimeOffset cutoff = DateTimeOffset.UtcNow.AddHours(-cooldownHours);
             return history
                 .Where(entry => entry.DisplayedAt >= cutoff)
                 .Select(entry => new

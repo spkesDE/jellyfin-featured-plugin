@@ -98,6 +98,7 @@ public sealed class FeaturedUserPreferences
     public int? FavouriteBoost { get; set; }
     public int? InProgressSeriesBoost { get; set; }
     public int? RepeatCooldownDays { get; set; }
+    public int? RepeatCooldownHours { get; set; }
 
     internal FeaturedUserPreferences Copy() => new()
     {
@@ -108,6 +109,7 @@ public sealed class FeaturedUserPreferences
         UnplayedBoost = UnplayedBoost,
         FavouriteBoost = FavouriteBoost,
         InProgressSeriesBoost = InProgressSeriesBoost,
-        RepeatCooldownDays = RepeatCooldownDays
+        RepeatCooldownDays = RepeatCooldownDays,
+        RepeatCooldownHours = RepeatCooldownHours
     };
 }

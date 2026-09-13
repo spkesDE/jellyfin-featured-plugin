@@ -99,7 +99,7 @@ test('featured presets resolve schedules and override all roadmap sections', asy
 });
 
 test('personalization is authenticated, policy-bound, user scoped, and fast to reopen', async () => {
-  const [controller, service, store, response, frontend, navigation, carousel, engine, optionsCache, services, styles] = await Promise.all([
+  const [controller, service, store, response, frontend, navigation, carousel, engine, optionsCache, services, styles, history] = await Promise.all([
     read('Jellyfin.Plugin.Featured/Api/FeaturedController.Preferences.cs'),
     read('Jellyfin.Plugin.Featured/Api/FeaturedPersonalizationService.cs'),
     read('Jellyfin.Plugin.Featured/Api/FeaturedPreferenceStore.cs'),
@@ -110,7 +110,8 @@ test('personalization is authenticated, policy-bound, user scoped, and fast to r
     read('Jellyfin.Plugin.Featured/Api/FeaturedRuleEngine.cs'),
     read('Jellyfin.Plugin.Featured/Api/FeaturedPreferenceOptionsCache.cs'),
     read('Jellyfin.Plugin.Featured/PluginServiceRegistrator.cs'),
-    read('src/styles/featured.css')
+    read('src/styles/featured.css'),
+    read('Jellyfin.Plugin.Featured/Api/FeaturedDisplayHistoryStore.cs')
   ]);
   assert.match(controller, /\[HttpGet\("preferences"\)\][\s\S]*?\[Authorize\]/);
   assert.match(controller, /\[HttpPut\("preferences"\)\][\s\S]*?\[Authorize\]/);
@@ -130,8 +131,13 @@ test('personalization is authenticated, policy-bound, user scoped, and fast to r
   assert.match(engine, /excludedGenres[\s\S]*?!ContainsAny\(item\.Genres, excludedGenres\)/);
   assert.match(service, /ResolveDefaults\(PluginConfiguration config, Guid userId\)[\s\S]*?Resolve\(config, userId, null\)/);
   assert.match(service, /if \(IsEmpty\(normalized\)\) _store\.Remove\(userId\)/);
+  assert.match(service, /config\.RepeatCooldownDays \* 24[\s\S]*?saved\?\.RepeatCooldownHours[\s\S]*?saved\?\.RepeatCooldownDays/);
+  assert.match(service, /submitted\.RepeatCooldownHours[\s\S]*?3650 \* 24/);
   assert.match(store, /userId\.ToString\("N"\)/);
+  assert.match(store, /public int\? RepeatCooldownHours/);
+  assert.match(history, /GetRecentItems\(Guid userId, int cooldownHours\)[\s\S]*?AddHours\(-cooldownHours\)/);
   assert.match(response, /public bool PersonalizationEnabled \{ get; \}/);
+  assert.match(response, /public int RepeatCooldownHours/);
   assert.match(frontend, /body: \{ reset: true \}/);
   assert.match(frontend, /body: \{ preferences \}/);
   assert.match(frontend, /GenrePreferenceState = 'neutral' \| 'preferred' \| 'excluded'/);
@@ -142,6 +148,10 @@ test('personalization is authenticated, policy-bound, user scoped, and fast to r
   assert.match(frontend, /bootstrapCacheLifetime = 30_000/);
   assert.match(frontend, /className = 'emby-checkbox'/);
   assert.match(frontend, /raised button-submit emby-button/);
+  assert.match(frontend, /\[1, 'preferences\.cooldown\.1h'\]/);
+  assert.match(frontend, /\[24, 'preferences\.cooldown\.24h'\]/);
+  assert.match(frontend, /dataset\.cooldownHours = 'true'/);
+  assert.match(frontend, /preferences\.repeatCooldownHours = value/);
   assert.match(navigation, /USER_PREFERENCES_SELECTOR[\s\S]*?#\/mypreferencesmenu/);
   assert.match(navigation, /settingsEntry\.after\(entry\)/);
   assert.match(navigation, /#myPreferencesMenuPage/);

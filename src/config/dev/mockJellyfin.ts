@@ -63,6 +63,7 @@ export function installMockJellyfin(): void {
             rule.Enabled && rule.Type === 'MANUAL_LISTS' && rule.ManualListIds.includes(list.Id))).length,
           userProfileApplied: config.UserProfiles.some((profile) => profile.Enabled && profile.UserId === 'editor-1'),
           repeatCooldownDays: config.RepeatCooldownDays,
+          repeatCooldownHours: config.RepeatCooldownDays * 24,
           historyEntries: 12,
           basePath: '/',
           cache: 'disabled',

@@ -41,6 +41,8 @@
 .ec-preference-number { margin: 0; }
 .ec-preference-number .inputLabel { font-size: .82rem; margin-bottom: .2rem; opacity: .75; }
 .ec-preference-number input { box-sizing: border-box; margin: 0; width: 100%; }
+.ec-preference-cooldown { margin: 0; }
+.ec-preference-cooldown select { margin: 0; width: 100%; }
 .ec-preference-genres { display: grid; gap: .3rem 1rem; grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .ec-preference-genres legend { grid-column: 1 / -1; }
 .ec-preference-genres-help { grid-column: 1 / -1; margin: 0 0 .35rem; opacity: .72; }

@@ -24,7 +24,7 @@ public sealed partial class FeaturedController
 
             int requestedCount = _config.EnableInfiniteLoading ? InfiniteBatchSize : _config.RandomMediaCount;
             FeaturedPersonalizationContext personalization = _personalization.Resolve(_config, activeUser.Id);
-            IReadOnlyDictionary<Guid, DateTimeOffset> recentHistory = _historyStore.GetRecentItems(activeUser.Id, personalization.RepeatCooldownDays);
+            IReadOnlyDictionary<Guid, DateTimeOffset> recentHistory = _historyStore.GetRecentItems(activeUser.Id, personalization.RepeatCooldownHours);
             FeaturedSelection selection = CreateEngine().SelectItems(activeUser, [], recentHistory, requestedCount, personalization);
             DateTimeOffset now = DateTimeOffset.UtcNow;
             HashSet<string> referencedManualListIds = _config.SourceRules
@@ -51,7 +51,8 @@ public sealed partial class FeaturedController
                     && (!list.StartsAt.HasValue || list.StartsAt <= now)
                     && (!list.EndsAt.HasValue || list.EndsAt > now)),
                 ["userProfileApplied"] = selection.UserProfileApplied,
-                ["repeatCooldownDays"] = personalization.RepeatCooldownDays,
+                ["repeatCooldownDays"] = personalization.RepeatCooldownHours / 24d,
+                ["repeatCooldownHours"] = personalization.RepeatCooldownHours,
                 ["historyEntries"] = _historyStore.GetEntryCount(activeUser.Id),
                 ["rules"] = selection.RuleStats.Select(stat => new Dictionary<string, object>
                 {

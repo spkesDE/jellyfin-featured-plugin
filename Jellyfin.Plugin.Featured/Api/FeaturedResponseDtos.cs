@@ -154,7 +154,7 @@ public sealed class FeaturedItemsResponseDto : FeaturedDisplaySettingsDto
         Autoplay = config.EnableAutoplay;
         AutoplayInterval = config.AutoplayInterval * 1000;
         ReduceImageSizes = config.ReduceImageSize;
-        TrackDisplayedItems = personalization.RepeatCooldownDays > 0;
+        TrackDisplayedItems = personalization.RepeatCooldownHours > 0;
         PersonalizationEnabled = config.PersonalizationPolicy.Enabled;
         ActivePresetId = activePresetId;
         ActivePresetName = activePresetName;
@@ -199,7 +199,8 @@ public sealed class FeaturedPreferencesResponse
             UnplayedBoost = effective.Profile.UnplayedBoost,
             FavouriteBoost = effective.Profile.FavouriteBoost,
             InProgressSeriesBoost = effective.Profile.InProgressSeriesBoost,
-            RepeatCooldownDays = effective.RepeatCooldownDays
+            RepeatCooldownDays = (int)Math.Ceiling(effective.RepeatCooldownHours / 24d),
+            RepeatCooldownHours = effective.RepeatCooldownHours
         };
         Defaults = new FeaturedEffectivePreferences
         {
@@ -210,7 +211,8 @@ public sealed class FeaturedPreferencesResponse
             UnplayedBoost = defaults.Profile.UnplayedBoost,
             FavouriteBoost = defaults.Profile.FavouriteBoost,
             InProgressSeriesBoost = defaults.Profile.InProgressSeriesBoost,
-            RepeatCooldownDays = defaults.RepeatCooldownDays
+            RepeatCooldownDays = (int)Math.Ceiling(defaults.RepeatCooldownHours / 24d),
+            RepeatCooldownHours = defaults.RepeatCooldownHours
         };
     }
 
@@ -230,6 +232,7 @@ public sealed class FeaturedEffectivePreferences
     public int FavouriteBoost { get; set; }
     public int InProgressSeriesBoost { get; set; }
     public int RepeatCooldownDays { get; set; }
+    public int RepeatCooldownHours { get; set; }
 }
 
 public sealed class FeaturedPreferencesUpdate

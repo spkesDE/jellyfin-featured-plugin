@@ -50,6 +50,7 @@ export interface FeaturedUserPreferences {
   favouriteBoost: number | null;
   inProgressSeriesBoost: number | null;
   repeatCooldownDays: number | null;
+  repeatCooldownHours: number | null;
 }
 
 export interface FeaturedEffectivePreferences {
@@ -61,6 +62,7 @@ export interface FeaturedEffectivePreferences {
   favouriteBoost: number;
   inProgressSeriesBoost: number;
   repeatCooldownDays: number;
+  repeatCooldownHours: number;
 }
 
 export interface FeaturedPreferencesResponse {
@@ -108,6 +110,7 @@ export interface FeaturedDiagnostics {
   manualListsActive: number;
   userProfileApplied: boolean;
   repeatCooldownDays: number;
+  repeatCooldownHours: number;
   historyEntries: number;
   basePath: string;
   cache: string;

@@ -6,10 +6,10 @@ public sealed record FeaturedPersonalizationContext(
     FeaturedSourceRule[] SourceRules,
     FeaturedUserProfile Profile,
     string[] ExcludedGenres,
-    int RepeatCooldownDays,
+    int RepeatCooldownHours,
     bool HasOverrides)
 {
-    internal string Fingerprint => JsonSerializer.Serialize(new { SourceRules, Profile, RepeatCooldownDays });
+    internal string Fingerprint => JsonSerializer.Serialize(new { SourceRules, Profile, RepeatCooldownHours });
 }
 
 public sealed class FeaturedPersonalizationService
@@ -72,8 +72,14 @@ public sealed class FeaturedPersonalizationService
         }).ToArray();
         string[] excludedGenres = policy.AllowPreferredGenres && saved?.ExcludedGenres is not null
             ? saved.ExcludedGenres : [];
-        int cooldown = policy.Enabled && policy.AllowRepeatCooldown && saved?.RepeatCooldownDays is int days
-            ? days : config.RepeatCooldownDays;
+        int defaultCooldownHours = config.RepeatCooldownDays * 24;
+        int cooldown = policy.Enabled && policy.AllowRepeatCooldown
+            ? saved?.RepeatCooldownHours is int hours
+                ? Math.Clamp(hours, 0, 3650 * 24)
+                : saved?.RepeatCooldownDays is int legacyDays
+                    ? Math.Clamp(legacyDays, 0, 3650) * 24
+                    : defaultCooldownHours
+            : defaultCooldownHours;
         return new FeaturedPersonalizationContext(sources, effectiveProfile, excludedGenres, cooldown, saved is not null);
     }
 
@@ -125,7 +131,14 @@ public sealed class FeaturedPersonalizationService
         if (policy.AllowUnplayedBoost && submitted.UnplayedBoost.HasValue) normalized.UnplayedBoost = Math.Clamp(submitted.UnplayedBoost.Value, 0, 100);
         if (policy.AllowFavouriteBoost && submitted.FavouriteBoost.HasValue) normalized.FavouriteBoost = Math.Clamp(submitted.FavouriteBoost.Value, 0, 100);
         if (policy.AllowInProgressSeriesBoost && submitted.InProgressSeriesBoost.HasValue) normalized.InProgressSeriesBoost = Math.Clamp(submitted.InProgressSeriesBoost.Value, 0, 100);
-        if (policy.AllowRepeatCooldown && submitted.RepeatCooldownDays.HasValue) normalized.RepeatCooldownDays = Math.Clamp(submitted.RepeatCooldownDays.Value, 0, 3650);
+        if (policy.AllowRepeatCooldown && submitted.RepeatCooldownHours.HasValue)
+        {
+            normalized.RepeatCooldownHours = Math.Clamp(submitted.RepeatCooldownHours.Value, 0, 3650 * 24);
+        }
+        else if (policy.AllowRepeatCooldown && submitted.RepeatCooldownDays.HasValue)
+        {
+            normalized.RepeatCooldownHours = Math.Clamp(submitted.RepeatCooldownDays.Value, 0, 3650) * 24;
+        }
         if (IsEmpty(normalized)) _store.Remove(userId);
         else _store.Set(userId, normalized);
         return normalized;
@@ -139,5 +152,6 @@ public sealed class FeaturedPersonalizationService
             && !preferences.UnplayedBoost.HasValue
             && !preferences.FavouriteBoost.HasValue
             && !preferences.InProgressSeriesBoost.HasValue
+            && !preferences.RepeatCooldownHours.HasValue
             && !preferences.RepeatCooldownDays.HasValue;
 }

@@ -68,6 +68,42 @@ function numberField(label: string, value: number, max: number): HTMLLabelElemen
   return wrapper;
 }
 
+const cooldownChoices: Array<[number, TranslationKey]> = [
+  [0, 'preferences.cooldown.off'],
+  [1, 'preferences.cooldown.1h'],
+  [6, 'preferences.cooldown.6h'],
+  [12, 'preferences.cooldown.12h'],
+  [24, 'preferences.cooldown.24h'],
+  [72, 'preferences.cooldown.3d'],
+  [168, 'preferences.cooldown.7d'],
+  [336, 'preferences.cooldown.14d'],
+  [720, 'preferences.cooldown.30d']
+];
+
+function cooldownField(value: number): HTMLDivElement {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'selectContainer ec-preference-cooldown';
+  const fieldId = 'ec-preference-cooldown-hours';
+  const label = document.createElement('label');
+  label.className = 'selectLabel';
+  label.htmlFor = fieldId;
+  label.textContent = t('preferences.cooldown');
+  const select = document.createElement('select');
+  select.id = fieldId;
+  select.className = 'emby-select emby-select-withcolor';
+  select.dataset.cooldownHours = 'true';
+  const values = new Set(cooldownChoices.map(([hours]) => hours));
+  if (!values.has(value)) select.add(new Option(t('preferences.cooldown.custom', { hours: value }), String(value)));
+  for (const [hours, key] of cooldownChoices) select.add(new Option(t(key), String(hours)));
+  select.value = String(value);
+  const arrow = document.createElement('div');
+  arrow.className = 'selectArrowContainer';
+  arrow.setAttribute('aria-hidden', 'true');
+  arrow.innerHTML = '<span class="selectArrow material-icons keyboard_arrow_down"></span>';
+  wrapper.append(label, select, arrow);
+  return wrapper;
+}
+
 type GenrePreferenceState = 'neutral' | 'preferred' | 'excluded';
 
 function genreSelector(genre: string, initialState: GenrePreferenceState): HTMLButtonElement {
@@ -163,15 +199,15 @@ export async function openPreferencesDialog(): Promise<void> {
     const boostFields: Array<[keyof FeaturedUserPreferences, string, number, boolean]> = [
       ['unplayedBoost', t('preferences.unplayed'), effective.unplayedBoost, options.policy.allowUnplayedBoost],
       ['favouriteBoost', t('preferences.favourites'), effective.favouriteBoost, options.policy.allowFavouriteBoost],
-      ['inProgressSeriesBoost', t('preferences.inProgress'), effective.inProgressSeriesBoost, options.policy.allowInProgressSeriesBoost],
-      ['repeatCooldownDays', t('preferences.cooldown'), effective.repeatCooldownDays, options.policy.allowRepeatCooldown]
+      ['inProgressSeriesBoost', t('preferences.inProgress'), effective.inProgressSeriesBoost, options.policy.allowInProgressSeriesBoost]
     ];
     for (const [key, label, value, allowed] of boostFields) {
       if (!allowed) continue;
-      const field = numberField(label, value, key === 'repeatCooldownDays' ? 3650 : 100);
+      const field = numberField(label, value, 100);
       field.dataset.preferenceKey = key;
       boosts.appendChild(field);
     }
+    if (options.policy.allowRepeatCooldown) boosts.appendChild(cooldownField(effective.repeatCooldownHours));
     if (boosts.children.length > 1) content.appendChild(boosts);
 
     dialog.appendChild(content);
@@ -204,7 +240,8 @@ export async function openPreferencesDialog(): Promise<void> {
       event.preventDefault();
       const preferences: FeaturedUserPreferences = {
         sourceEnabled: {}, sourceWeights: {}, preferredGenres: null, excludedGenres: null,
-        unplayedBoost: null, favouriteBoost: null, inProgressSeriesBoost: null, repeatCooldownDays: null
+        unplayedBoost: null, favouriteBoost: null, inProgressSeriesBoost: null,
+        repeatCooldownDays: null, repeatCooldownHours: null
       };
       dialog.querySelectorAll<HTMLElement>('[data-source-id]').forEach((field) => {
         const id = field.dataset.sourceId!;
@@ -231,10 +268,15 @@ export async function openPreferencesDialog(): Promise<void> {
           ? null : excludedGenres;
       }
       dialog.querySelectorAll<HTMLElement>('[data-preference-key]').forEach((field) => {
-        const key = field.dataset.preferenceKey as 'unplayedBoost' | 'favouriteBoost' | 'inProgressSeriesBoost' | 'repeatCooldownDays';
+        const key = field.dataset.preferenceKey as 'unplayedBoost' | 'favouriteBoost' | 'inProgressSeriesBoost';
         const value = Number(field.querySelector<HTMLInputElement>('input')!.value);
         if (value !== current.defaults[key]) preferences[key] = value;
       });
+      const cooldown = dialog.querySelector<HTMLSelectElement>('[data-cooldown-hours]');
+      if (cooldown) {
+        const value = Number(cooldown.value);
+        if (value !== current.defaults.repeatCooldownHours) preferences.repeatCooldownHours = value;
+      }
       setBusy(true);
       try {
         await requestJson('featured/preferences', { method: 'PUT', body: { preferences } });

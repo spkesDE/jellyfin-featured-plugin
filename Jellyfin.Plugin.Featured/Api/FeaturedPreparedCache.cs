@@ -203,7 +203,7 @@ public sealed class FeaturedPreparedCache
         }
 
         FeaturedPersonalizationContext personalization = _personalization.Resolve(config, user.Id);
-        IReadOnlyDictionary<Guid, DateTimeOffset> recentHistory = _historyStore.GetRecentItems(user.Id, personalization.RepeatCooldownDays);
+        IReadOnlyDictionary<Guid, DateTimeOffset> recentHistory = _historyStore.GetRecentItems(user.Id, personalization.RepeatCooldownHours);
         FeaturedRuleEngine engine = new(config, _userManager, _libraryManager, _userDataManager, _candidateCache);
         FeaturedSelection selection = engine.SelectItems(user, [], recentHistory, GetPoolSize(config), personalization);
         _entries[user.Id] = new PreparedEntry(
