@@ -311,7 +311,9 @@ function mutationAddsAdminNavigation(mutation: MutationRecord): boolean {
     && (node.matches('ul[aria-labelledby="plugins-subheader"]')
       || node.querySelector('ul[aria-labelledby="plugins-subheader"]') !== null
       || isUserSettingsMenu(node)
-      || Array.from(node.querySelectorAll('ul[role="menu"]')).some(isUserSettingsMenu))
+      || Array.from(node.querySelectorAll('ul[role="menu"]')).some(isUserSettingsMenu)
+      || node.matches('#myPreferencesMenuPage')
+      || node.querySelector('#myPreferencesMenuPage') !== null)
   ));
 }
 

@@ -9,6 +9,7 @@ import { t } from '../i18n';
 import { openPreferencesDialog } from '../preferences';
 
 const USER_SETTINGS_LINK_ATTR = 'data-featured-user-settings-link';
+const USER_SETTINGS_PAGE_LINK_ATTR = 'data-featured-user-settings-page-link';
 const USER_PREFERENCES_SELECTOR = 'a[href="#/mypreferencesmenu"], a[href$="/#/mypreferencesmenu"]';
 
 let refreshScheduled = false;
@@ -49,6 +50,45 @@ export function ensureUserSettingsMenuEntry(): void {
   });
 }
 
+export function ensureUserSettingsPageEntry(): void {
+  const page = document.querySelector<HTMLElement>('#myPreferencesMenuPage');
+  if (!page) return;
+  const existing = page.querySelector<HTMLElement>(`[${USER_SETTINGS_PAGE_LINK_ATTR}="true"]`);
+  if (!userSettingsEnabled) {
+    existing?.remove();
+    return;
+  }
+  if (existing) return;
+
+  const section = page.querySelector<HTMLElement>('.readOnlyContent > .verticalSection')
+    ?? page.querySelector<HTMLElement>('.verticalSection');
+  const template = section?.querySelector<HTMLAnchorElement>('.lnkHomePreferences')
+    ?? section?.querySelector<HTMLAnchorElement>('a.listItem-border');
+  if (!section || !template) return;
+
+  const entry = template.cloneNode(true) as HTMLAnchorElement;
+  entry.setAttribute(USER_SETTINGS_PAGE_LINK_ATTR, 'true');
+  entry.setAttribute('href', '#');
+  entry.removeAttribute('id');
+  Array.from(entry.classList).filter((className) => className.startsWith('lnk')).forEach((className) => {
+    entry.classList.remove(className);
+  });
+  const icon = entry.querySelector<HTMLElement>('.listItemIcon');
+  if (icon) {
+    icon.className = 'material-icons listItemIcon listItemIcon-transparent';
+    icon.textContent = 'view_carousel';
+  }
+  const label = entry.querySelector('.listItemBodyText');
+  if (label) label.textContent = t('preferences.menuEntry');
+  else entry.textContent = t('preferences.menuEntry');
+  entry.addEventListener('click', (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    void openPreferencesDialog();
+  });
+  section.appendChild(entry);
+}
+
 function createUserSettingsIcon(): HTMLSpanElement {
   const icon = document.createElement('span');
   icon.className = 'material-icons';
@@ -61,6 +101,7 @@ export function setUserSettingsMenuEnabled(enabled: boolean): void {
   userSettingsEnabled = enabled;
   if (!enabled) {
     document.querySelectorAll(`[${USER_SETTINGS_LINK_ATTR}="true"]`).forEach((entry) => entry.remove());
+    document.querySelectorAll(`[${USER_SETTINGS_PAGE_LINK_ATTR}="true"]`).forEach((entry) => entry.remove());
   } else {
     scheduleAdminNavigationRefresh();
   }
@@ -217,6 +258,7 @@ export function scheduleAdminNavigationRefresh(): void {
     refreshScheduled = false;
     ensureAdminNavigationLink();
     ensureUserSettingsMenuEntry();
+    ensureUserSettingsPageEntry();
   });
 }
 

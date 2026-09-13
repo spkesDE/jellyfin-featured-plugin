@@ -118,7 +118,7 @@ Playback can start after a delay, begin or end at an offset, remain muted, wait 
 
 Administrators configure the server defaults and the settings users may override under `User Profiles`. Available controls include source activation, source weights, preferred genres, scoring boosts, and an optional personal repeat cooldown. Existing per-user admin profiles remain available as user-specific server defaults.
 
-When personalization is enabled, users can open `Featured settings` from Jellyfin's user menu and save settings for their own account. Settings they leave unchanged continue to inherit server defaults; `Reset to server defaults` removes all personal overrides. Genre options are derived only from content visible to the active user, and the normal Jellyfin access checks still apply to every returned item.
+When personalization is enabled, users can open `Featured settings` from Jellyfin's user menu or its main user-settings page and save settings for their own account. Settings they leave unchanged continue to inherit server defaults; `Reset to server defaults` removes all personal overrides. Genre options are derived only from content visible to the active user, and the normal Jellyfin access checks still apply to every returned item.
 
 Integrations may use the authenticated preference API directly:
 

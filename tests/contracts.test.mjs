@@ -122,6 +122,9 @@ test('personalization is authenticated, policy-bound, and user scoped', async ()
   assert.match(frontend, /current\.defaults\.sourceEnabled/);
   assert.match(navigation, /USER_PREFERENCES_SELECTOR[\s\S]*?#\/mypreferencesmenu/);
   assert.match(navigation, /settingsEntry\.after\(entry\)/);
+  assert.match(navigation, /#myPreferencesMenuPage/);
+  assert.match(navigation, /USER_SETTINGS_PAGE_LINK_ATTR[\s\S]*?section\.appendChild\(entry\)/);
+  assert.match(navigation, /\.lnkHomePreferences/);
   assert.match(navigation, /openPreferencesDialog\(\)/);
   assert.match(navigation, /userSettingsEnabled = config\.personalizationEnabled/);
   assert.doesNotMatch(carousel, /ec-personalize|openPreferencesDialog/);
