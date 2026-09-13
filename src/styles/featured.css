@@ -24,38 +24,57 @@
   box-sizing: border-box;
 }
 
-.ec-preferences-backdrop { align-items: flex-start; background: rgb(0 0 0 / .72); display: flex; inset: 0; justify-content: center; overflow: auto; padding: 1rem; position: fixed; z-index: 99999; }
-.ec-preferences-dialog, .ec-preferences-loading { background: #202020; border-radius: .65rem; box-shadow: 0 1rem 3rem rgb(0 0 0 / .55); box-sizing: border-box; color: #fff; margin: auto; max-height: calc(100dvh - 2rem); max-width: 48rem; overflow: auto; padding: 1.25rem; width: 100%; }
-.ec-preferences-dialog > header { align-items: center; display: flex; justify-content: space-between; }
-.ec-preferences-dialog h2 { margin: 0; }
-.ec-preferences-dialog fieldset { border: 1px solid rgb(255 255 255 / .15); border-radius: .45rem; margin: 1rem 0 0; padding: .85rem; }
-.ec-preferences-dialog legend { font-weight: 700; padding: 0 .35rem; }
-.ec-preferences-hotkeys { align-items: center; background: rgb(255 255 255 / .06); border-radius: .45rem; display: flex; flex-wrap: wrap; gap: .55rem 1rem; padding: .65rem .75rem; }
+.ec-preferences-backdrop { align-items: center; background: rgb(0 0 0 / .72); display: flex; inset: 0; justify-content: center; overflow: auto; padding: max(1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) max(1rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left)); position: fixed; z-index: 99999; }
+.ec-preferences-dialog { background: rgb(32 32 32 / .98); border-radius: .45rem; box-shadow: 0 1rem 3rem rgb(0 0 0 / .55); box-sizing: border-box; color: #fff; display: flex; flex-direction: column; margin: auto; max-height: min(46rem, calc(100dvh - 2rem)); max-width: 46rem; overflow: hidden; width: 100%; }
+.ec-preferences-header { align-items: center; background: rgb(0 0 0 / .18); display: flex; flex: 0 0 auto; justify-content: space-between; min-height: 3.6rem; padding: .45rem .65rem .45rem 1.4rem; }
+.ec-preferences-dialog h2 { font-size: 1.45rem; font-weight: 400; margin: 0; }
+.ec-preferences-content { min-height: 0; overflow: auto; padding: .3rem 1.4rem 1.4rem; }
+.ec-preferences-help { line-height: 1.45; opacity: .75; }
+.ec-preferences-dialog fieldset { border: 0; border-top: 1px solid rgb(255 255 255 / .14); margin: 1.25rem 0 0; padding: 1.1rem 0 0; }
+.ec-preferences-dialog legend { font-size: 1.1rem; font-weight: 500; padding: 0 .8rem 0 0; }
+.ec-preferences-hotkeys { align-items: center; background: rgb(255 255 255 / .06); border-radius: .25rem; display: flex; flex-wrap: wrap; gap: .55rem 1rem; margin-top: 1rem; padding: .75rem 1rem; }
 .ec-preferences-hotkeys strong { margin-right: auto; }
 .ec-preferences-hotkeys kbd { background: rgb(0 0 0 / .34); border: 1px solid rgb(255 255 255 / .28); border-radius: .25rem; box-shadow: 0 1px 0 rgb(255 255 255 / .16); display: inline-block; font: inherit; font-size: .85em; font-weight: 700; min-width: 1.7rem; padding: .12rem .38rem; text-align: center; }
-.ec-preferences-close { background: none; border: 0; color: inherit; cursor: pointer; font-size: 2rem; }
-.ec-preference-source { align-items: center; display: grid; gap: .75rem; grid-template-columns: minmax(0, 1fr) minmax(11rem, auto); margin: .4rem 0; }
-.ec-preference-check { align-items: center; display: flex; gap: .55rem; min-height: 2rem; }
-.ec-preference-number { align-items: center; display: flex; gap: .5rem; justify-content: space-between; }
-.ec-preference-number input { background: rgb(255 255 255 / .1); border: 1px solid rgb(255 255 255 / .2); border-radius: .25rem; color: inherit; padding: .45rem; width: 4.5rem; }
+.ec-preferences-close { color: inherit; flex: 0 0 auto; }
+.ec-preference-source { align-items: center; display: grid; gap: .75rem 1.5rem; grid-template-columns: minmax(0, 1fr) 8rem; padding: .45rem 0; }
+.ec-preference-check { min-height: 2.5rem; }
+.ec-preference-number { margin: 0; }
+.ec-preference-number .inputLabel { font-size: .82rem; margin-bottom: .2rem; opacity: .75; }
+.ec-preference-number input { box-sizing: border-box; margin: 0; width: 100%; }
 .ec-preference-genres { display: grid; gap: .3rem 1rem; grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .ec-preference-genres legend { grid-column: 1 / -1; }
 .ec-preference-genres-help { grid-column: 1 / -1; margin: 0 0 .35rem; opacity: .72; }
-.ec-preference-genre { align-items: center; background: transparent; border: 0; color: inherit; cursor: pointer; display: flex; font: inherit; gap: .55rem; min-width: 0; padding: .25rem 0; text-align: left; }
+.ec-preference-genre { align-items: center; background: transparent; border: 0; border-radius: .2rem; color: inherit; cursor: pointer; display: flex; font: inherit; gap: .55rem; min-width: 0; padding: .4rem .25rem; text-align: left; }
 .ec-preference-genre-marker { align-items: center; border: 1px solid rgb(255 255 255 / .38); border-radius: .18rem; display: inline-flex; flex: 0 0 1.25rem; font-size: 1rem; font-weight: 800; height: 1.25rem; justify-content: center; line-height: 1; }
 .ec-preference-genre[data-genre-state="preferred"] .ec-preference-genre-marker { background: #00a4dc; border-color: #00a4dc; color: #fff; }
 .ec-preference-genre[data-genre-state="excluded"] .ec-preference-genre-marker { background: #b3261e; border-color: #ef6c63; color: #fff; }
+.ec-preference-genre:hover { background: rgb(255 255 255 / .07); }
 .ec-preference-genre:focus-visible { outline: 2px solid #00a4dc; outline-offset: .15rem; }
 .ec-preference-boosts { display: grid; gap: .7rem 1rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .ec-preference-boosts legend { grid-column: 1 / -1; }
-.ec-preferences-actions { display: flex; gap: .75rem; justify-content: flex-end; margin-top: 1.2rem; }
+.ec-preferences-actions { align-items: center; background: rgb(0 0 0 / .16); border-top: 1px solid rgb(255 255 255 / .12); display: flex; flex: 0 0 auto; gap: .75rem; justify-content: flex-end; padding: .8rem 1.4rem; }
 .ec-preferences-status { align-self: center; color: #ffb4ab; flex: 1; }
-.ec-preferences-actions button { border: 0; border-radius: .3rem; cursor: pointer; font: inherit; font-weight: 700; padding: .7rem 1rem; }
-.ec-preferences-save { background: #00a4dc; color: #fff; }
+.ec-preferences-actions button { margin: 0; }
+.ec-preferences-loading-shell { min-height: 12rem; }
+.ec-preferences-loading { align-items: center; display: flex; flex: 1; flex-direction: column; gap: 1rem; justify-content: center; min-height: 8rem; padding: 2rem; text-align: center; }
+.ec-preferences-spinner { animation: ec-preferences-spin .8s linear infinite; border: .22rem solid rgb(255 255 255 / .24); border-radius: 50%; border-top-color: #00a4dc; height: 2rem; width: 2rem; }
+
+@keyframes ec-preferences-spin { to { transform: rotate(360deg); } }
 
 @media (max-width: 600px) {
+  .ec-preferences-backdrop { align-items: stretch; padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom); }
+  .ec-preferences-dialog { border-radius: 0; max-height: 100dvh; }
+  .ec-preferences-content { padding-inline: 1rem; }
+  .ec-preferences-header { padding-left: 1rem; }
   .ec-preference-genres, .ec-preference-boosts { grid-template-columns: 1fr; }
   .ec-preference-source { grid-template-columns: 1fr; }
+  .ec-preference-number { max-width: 9rem; }
+  .ec-preferences-actions { flex-wrap: wrap; padding: .75rem 1rem; }
+  .ec-preferences-status { flex-basis: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ec-preferences-spinner { animation: none; }
 }
 
 .ec-heading {

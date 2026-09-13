@@ -98,8 +98,8 @@ test('featured presets resolve schedules and override all roadmap sections', asy
   assert.match(runtime, /function refreshForPresetBoundary[\s\S]*?instance\.destroy\(\)[\s\S]*?scheduleScan\(\)/);
 });
 
-test('personalization is authenticated, policy-bound, and user scoped', async () => {
-  const [controller, service, store, response, frontend, navigation, carousel, engine] = await Promise.all([
+test('personalization is authenticated, policy-bound, user scoped, and fast to reopen', async () => {
+  const [controller, service, store, response, frontend, navigation, carousel, engine, optionsCache, services, styles] = await Promise.all([
     read('Jellyfin.Plugin.Featured/Api/FeaturedController.Preferences.cs'),
     read('Jellyfin.Plugin.Featured/Api/FeaturedPersonalizationService.cs'),
     read('Jellyfin.Plugin.Featured/Api/FeaturedPreferenceStore.cs'),
@@ -107,14 +107,23 @@ test('personalization is authenticated, policy-bound, and user scoped', async ()
     read('src/preferences.ts'),
     read('src/admin/navigation.ts'),
     read('src/slider/carousel.ts'),
-    read('Jellyfin.Plugin.Featured/Api/FeaturedRuleEngine.cs')
+    read('Jellyfin.Plugin.Featured/Api/FeaturedRuleEngine.cs'),
+    read('Jellyfin.Plugin.Featured/Api/FeaturedPreferenceOptionsCache.cs'),
+    read('Jellyfin.Plugin.Featured/PluginServiceRegistrator.cs'),
+    read('src/styles/featured.css')
   ]);
   assert.match(controller, /\[HttpGet\("preferences"\)\][\s\S]*?\[Authorize\]/);
   assert.match(controller, /\[HttpPut\("preferences"\)\][\s\S]*?\[Authorize\]/);
   assert.match(controller, /\[HttpGet\("preferences\/options"\)\][\s\S]*?\[Authorize\]/);
+  assert.match(controller, /\[HttpGet\("preferences\/bootstrap"\)\][\s\S]*?\[Authorize\]/);
   assert.match(controller, /GetVisibleGenres\(activeUser\)/);
-  assert.equal((controller.match(/RuntimeConfigJsonOptions/g) ?? []).length, 3);
+  assert.equal((controller.match(/RuntimeConfigJsonOptions/g) ?? []).length, 4);
   assert.match(controller, /new JsonResult\(CreatePreferencesResponse\(activeUser\), RuntimeConfigJsonOptions\)/);
+  assert.match(controller, /CreatePreferenceOptionsResponse\(activeUser, effective\)/);
+  assert.match(optionsCache, /ConcurrentDictionary<Guid, Lazy<CacheEntry>>/);
+  assert.match(optionsCache, /TimeSpan\.FromMinutes\(2\)/);
+  assert.match(optionsCache, /LazyThreadSafetyMode\.ExecutionAndPublication/);
+  assert.match(services, /AddSingleton<FeaturedPreferenceOptionsCache>/);
   assert.match(service, /policy\.AllowSourceSelection[\s\S]*?sourceIds\.Contains/);
   assert.match(service, /policy\.AllowPreferredGenres[\s\S]*?allowedGenres\.Contains/);
   assert.match(service, /submitted\.ExcludedGenres[\s\S]*?allowedGenres\.Contains[\s\S]*?!preferredGenres\.Contains/);
@@ -129,13 +138,20 @@ test('personalization is authenticated, policy-bound, and user scoped', async ()
   assert.match(frontend, /state === 'neutral' \? 'preferred' : state === 'preferred' \? 'excluded' : 'neutral'/);
   assert.doesNotMatch(frontend, /JellyfinFeatured\?\.refresh/);
   assert.match(frontend, /current\.defaults\.sourceEnabled/);
+  assert.match(frontend, /featured\/preferences\/bootstrap/);
+  assert.match(frontend, /bootstrapCacheLifetime = 30_000/);
+  assert.match(frontend, /className = 'emby-checkbox'/);
+  assert.match(frontend, /raised button-submit emby-button/);
   assert.match(navigation, /USER_PREFERENCES_SELECTOR[\s\S]*?#\/mypreferencesmenu/);
   assert.match(navigation, /settingsEntry\.after\(entry\)/);
   assert.match(navigation, /#myPreferencesMenuPage/);
   assert.match(navigation, /USER_SETTINGS_PAGE_LINK_ATTR[\s\S]*?section\.appendChild\(entry\)/);
   assert.match(navigation, /\.lnkHomePreferences/);
   assert.match(navigation, /openPreferencesDialog\(\)/);
+  assert.match(navigation, /pointerenter', preloadPreferencesDialog/);
   assert.match(navigation, /userSettingsEnabled = config\.personalizationEnabled/);
+  assert.match(styles, /ec-preferences-spinner/);
+  assert.match(styles, /env\(safe-area-inset-top\)/);
   assert.doesNotMatch(carousel, /ec-personalize|openPreferencesDialog/);
 });
 

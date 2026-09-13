@@ -87,6 +87,11 @@ export interface FeaturedPreferenceOptions {
   genres: string[];
 }
 
+export interface FeaturedPreferencesBootstrapResponse {
+  current: FeaturedPreferencesResponse;
+  options: FeaturedPreferenceOptions;
+}
+
 export interface FeaturedDiagnostics {
   frontendInjection: boolean;
   frontendInjectionMethod: string;

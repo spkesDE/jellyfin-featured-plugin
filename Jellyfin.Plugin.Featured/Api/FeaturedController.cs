@@ -19,6 +19,7 @@ public sealed partial class FeaturedController : ControllerBase
     private readonly FeaturedCandidateCache _candidateCache;
     private readonly FeaturedPreparedCache _preparedCache;
     private readonly FeaturedPersonalizationService _personalization;
+    private readonly FeaturedPreferenceOptionsCache _preferenceOptionsCache;
     private readonly TrailerResolver _trailerResolver;
     private readonly ILogger<FeaturedController> _logger;
 
@@ -30,6 +31,7 @@ public sealed partial class FeaturedController : ControllerBase
         FeaturedCandidateCache candidateCache,
         FeaturedPreparedCache preparedCache,
         FeaturedPersonalizationService personalization,
+        FeaturedPreferenceOptionsCache preferenceOptionsCache,
         TrailerResolver trailerResolver,
         ILogger<FeaturedController> logger)
     {
@@ -40,6 +42,7 @@ public sealed partial class FeaturedController : ControllerBase
         _candidateCache = candidateCache;
         _preparedCache = preparedCache;
         _personalization = personalization;
+        _preferenceOptionsCache = preferenceOptionsCache;
         _trailerResolver = trailerResolver;
         _logger = logger;
         PluginConfiguration baseConfig = PluginConfigurationNormalizer.Normalize(Plugin.Instance?.Configuration);

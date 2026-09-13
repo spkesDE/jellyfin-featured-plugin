@@ -1,10 +1,10 @@
 import { requestJson } from './core/apiClient';
 import { t, type TranslationKey } from './i18n';
-import type {
-  FeaturedPreferenceOptions,
-  FeaturedPreferencesResponse,
-  FeaturedUserPreferences
-} from './types/featured';
+import type { FeaturedPreferencesBootstrapResponse, FeaturedUserPreferences } from './types/featured';
+
+const bootstrapCacheLifetime = 30_000;
+let bootstrapCache: { value: FeaturedPreferencesBootstrapResponse; expiresAt: number } | null = null;
+let bootstrapRequest: Promise<FeaturedPreferencesBootstrapResponse> | null = null;
 
 const sourceKeys: Record<string, TranslationKey> = {
   LIBRARIES: 'source.type.libraries', COLLECTIONS: 'source.type.collections', FAVOURITES: 'source.type.favourites',
@@ -13,24 +13,53 @@ const sourceKeys: Record<string, TranslationKey> = {
   MANUAL_LISTS: 'source.type.manual_lists'
 };
 
+function loadPreferencesBootstrap(): Promise<FeaturedPreferencesBootstrapResponse> {
+  if (bootstrapCache && bootstrapCache.expiresAt > Date.now()) return Promise.resolve(bootstrapCache.value);
+  if (bootstrapRequest) return bootstrapRequest;
+  bootstrapRequest = requestJson<FeaturedPreferencesBootstrapResponse>('featured/preferences/bootstrap')
+    .then((value) => {
+      bootstrapCache = { value, expiresAt: Date.now() + bootstrapCacheLifetime };
+      return value;
+    })
+    .finally(() => { bootstrapRequest = null; });
+  return bootstrapRequest;
+}
+
+export function preloadPreferencesDialog(): void {
+  void loadPreferencesBootstrap().catch(() => undefined);
+}
+
+function invalidatePreferencesBootstrap(): void {
+  bootstrapCache = null;
+}
+
 function checkbox(label: string, checked: boolean, disabled: boolean): HTMLLabelElement {
   const wrapper = document.createElement('label');
-  wrapper.className = 'ec-preference-check';
+  wrapper.className = 'emby-checkbox-label ec-preference-check';
   const input = document.createElement('input');
   input.type = 'checkbox';
+  input.className = 'emby-checkbox';
   input.checked = checked;
   input.disabled = disabled;
-  wrapper.append(input, document.createTextNode(label));
+  const text = document.createElement('span');
+  text.className = 'checkboxLabel';
+  text.textContent = label;
+  const outline = document.createElement('span');
+  outline.className = 'checkboxOutline';
+  outline.innerHTML = '<span class="material-icons checkboxIcon checkboxIcon-checked check"></span><span class="material-icons checkboxIcon checkboxIcon-unchecked"></span>';
+  wrapper.append(input, text, outline);
   return wrapper;
 }
 
 function numberField(label: string, value: number, max: number): HTMLLabelElement {
   const wrapper = document.createElement('label');
-  wrapper.className = 'ec-preference-number';
+  wrapper.className = 'inputContainer ec-preference-number';
   const text = document.createElement('span');
+  text.className = 'inputLabel';
   text.textContent = label;
   const input = document.createElement('input');
   input.type = 'number';
+  input.className = 'emby-input';
   input.min = '0';
   input.max = String(max);
   input.step = '1';
@@ -68,16 +97,22 @@ function genreSelector(genre: string, initialState: GenrePreferenceState): HTMLB
 
 export async function openPreferencesDialog(): Promise<void> {
   if (document.querySelector('.ec-preferences-backdrop')) return;
+  const previouslyFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
   const backdrop = document.createElement('div');
   backdrop.className = 'ec-preferences-backdrop';
-  backdrop.innerHTML = `<div class="ec-preferences-loading" role="status">${t('preferences.loading')}</div>`;
+  backdrop.innerHTML = `<section class="ec-preferences-dialog ec-preferences-loading-shell" role="dialog" aria-modal="true" aria-labelledby="ec-preferences-title"><header class="ec-preferences-header"><h2 id="ec-preferences-title">${t('preferences.title')}</h2><button type="button" class="paper-icon-button-light ec-preferences-close" aria-label="${t('preferences.close')}"><span class="material-icons" aria-hidden="true">close</span></button></header><div class="ec-preferences-loading" role="status"><span class="ec-preferences-spinner" aria-hidden="true"></span><span>${t('preferences.loading')}</span></div></section>`;
   document.body.appendChild(backdrop);
+  const close = (): void => {
+    backdrop.remove();
+    previouslyFocused?.focus();
+  };
+  backdrop.querySelector('.ec-preferences-close')?.addEventListener('click', close);
+  backdrop.addEventListener('click', (event) => { if (event.target === backdrop) close(); });
+  backdrop.addEventListener('keydown', (event) => { if (event.key === 'Escape') close(); });
 
   try {
-    const [current, options] = await Promise.all([
-      requestJson<FeaturedPreferencesResponse>('featured/preferences'),
-      requestJson<FeaturedPreferenceOptions>('featured/preferences/options')
-    ]);
+    const { current, options } = await loadPreferencesBootstrap();
+    if (!backdrop.isConnected) return;
     if (!options.policy.enabled) throw new Error(t('preferences.disabled'));
     const effective = current.effective;
     const dialog = document.createElement('form');
@@ -85,11 +120,14 @@ export async function openPreferencesDialog(): Promise<void> {
     dialog.setAttribute('role', 'dialog');
     dialog.setAttribute('aria-modal', 'true');
     dialog.setAttribute('aria-labelledby', 'ec-preferences-title');
-    dialog.innerHTML = `<header><h2 id="ec-preferences-title">${t('preferences.title')}</h2><button type="button" class="ec-preferences-close" aria-label="${t('preferences.close')}">×</button></header><p>${t('preferences.help')}</p>`;
+    dialog.innerHTML = `<header class="ec-preferences-header"><h2 id="ec-preferences-title">${t('preferences.title')}</h2><button type="button" class="paper-icon-button-light ec-preferences-close" aria-label="${t('preferences.close')}"><span class="material-icons" aria-hidden="true">close</span></button></header>`;
+    const content = document.createElement('div');
+    content.className = 'ec-preferences-content';
+    content.innerHTML = `<p class="ec-preferences-help">${t('preferences.help')}</p>`;
     const hotkeys = document.createElement('aside');
     hotkeys.className = 'ec-preferences-hotkeys';
     hotkeys.innerHTML = `<strong>${t('preferences.hotkeys')}</strong><span><kbd>M</kbd> ${t('preferences.hotkeyMute')}</span><span><kbd>+ / −</kbd> ${t('preferences.hotkeyVolume')}</span><span><kbd>${t('preferences.hotkeySpace')}</kbd> ${t('preferences.hotkeyPause')}</span>`;
-    dialog.appendChild(hotkeys);
+    content.appendChild(hotkeys);
 
     const sources = document.createElement('fieldset');
     sources.innerHTML = `<legend>${t('preferences.sources')}</legend>`;
@@ -104,7 +142,7 @@ export async function openPreferencesDialog(): Promise<void> {
       row.append(enabled, weight);
       sources.appendChild(row);
     }
-    dialog.appendChild(sources);
+    content.appendChild(sources);
 
     if (options.policy.allowPreferredGenres && options.genres.length) {
       const genres = document.createElement('fieldset');
@@ -116,7 +154,7 @@ export async function openPreferencesDialog(): Promise<void> {
           : effective.preferredGenres.includes(genre) ? 'preferred' : 'neutral';
         genres.appendChild(genreSelector(genre, initialState));
       }
-      dialog.appendChild(genres);
+      content.appendChild(genres);
     }
 
     const boosts = document.createElement('fieldset');
@@ -134,17 +172,16 @@ export async function openPreferencesDialog(): Promise<void> {
       field.dataset.preferenceKey = key;
       boosts.appendChild(field);
     }
-    if (boosts.children.length > 1) dialog.appendChild(boosts);
+    if (boosts.children.length > 1) content.appendChild(boosts);
+
+    dialog.appendChild(content);
 
     const actions = document.createElement('div');
     actions.className = 'ec-preferences-actions';
-    actions.innerHTML = `<span class="ec-preferences-status" aria-live="polite"></span><button type="button" class="ec-preferences-reset">${t('preferences.reset')}</button><button type="submit" class="ec-preferences-save">${t('preferences.save')}</button>`;
+    actions.innerHTML = `<span class="ec-preferences-status" aria-live="polite"></span><button type="button" class="raised emby-button ec-preferences-reset">${t('preferences.reset')}</button><button type="submit" class="raised button-submit emby-button ec-preferences-save">${t('preferences.save')}</button>`;
     dialog.appendChild(actions);
     backdrop.replaceChildren(dialog);
-    const close = (): void => backdrop.remove();
     dialog.querySelector('.ec-preferences-close')?.addEventListener('click', close);
-    backdrop.addEventListener('click', (event) => { if (event.target === backdrop) close(); });
-    dialog.addEventListener('keydown', (event) => { if (event.key === 'Escape') close(); });
     const status = dialog.querySelector<HTMLElement>('.ec-preferences-status')!;
     const setBusy = (busy: boolean): void => {
       dialog.querySelectorAll<HTMLButtonElement>('button').forEach((button) => { button.disabled = busy; });
@@ -156,6 +193,7 @@ export async function openPreferencesDialog(): Promise<void> {
       setBusy(true);
       try {
         await requestJson('featured/preferences', { method: 'PUT', body: { reset: true } });
+        invalidatePreferencesBootstrap();
         close();
       } catch (error) {
         showSaveError(error);
@@ -200,6 +238,7 @@ export async function openPreferencesDialog(): Promise<void> {
       setBusy(true);
       try {
         await requestJson('featured/preferences', { method: 'PUT', body: { preferences } });
+        invalidatePreferencesBootstrap();
         close();
       } catch (error) {
         showSaveError(error);
@@ -208,7 +247,12 @@ export async function openPreferencesDialog(): Promise<void> {
     });
     dialog.querySelector<HTMLInputElement>('input, button')?.focus();
   } catch (error) {
-    backdrop.innerHTML = `<div class="ec-preferences-loading" role="alert">${error instanceof Error ? error.message : String(error)}</div>`;
+    if (!backdrop.isConnected) return;
+    const loading = backdrop.querySelector<HTMLElement>('.ec-preferences-loading');
+    if (loading) {
+      loading.setAttribute('role', 'alert');
+      loading.replaceChildren(document.createTextNode(error instanceof Error ? error.message : String(error)));
+    }
     window.setTimeout(() => backdrop.remove(), 3500);
   }
 }

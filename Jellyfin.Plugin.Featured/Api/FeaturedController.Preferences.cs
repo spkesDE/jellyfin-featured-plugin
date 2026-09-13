@@ -51,16 +51,21 @@ public sealed partial class FeaturedController
         Jellyfin.Database.Implementations.Entities.User? activeUser = GetActiveUser();
         if (activeUser == null) return NotFound();
         FeaturedPersonalizationContext effective = _personalization.Resolve(_config, activeUser.Id);
-        FeaturedPreferenceSourceOption[] sources = effective.SourceRules.Select(rule => new FeaturedPreferenceSourceOption
-        {
-            Id = rule.Id,
-            Type = rule.Type,
-            Enabled = rule.Enabled,
-            Weight = rule.Weight
-        }).ToArray();
-        return new JsonResult(
-            new FeaturedPreferenceOptionsResponse(_config.PersonalizationPolicy, sources, GetVisibleGenres(activeUser)),
-            RuntimeConfigJsonOptions);
+        return new JsonResult(CreatePreferenceOptionsResponse(activeUser, effective), RuntimeConfigJsonOptions);
+    }
+
+    [HttpGet("preferences/bootstrap")]
+    [Authorize]
+    [Produces(MediaTypeNames.Application.Json)]
+    public ActionResult<FeaturedPreferencesBootstrapResponse> GetPreferencesBootstrap()
+    {
+        Jellyfin.Database.Implementations.Entities.User? activeUser = GetActiveUser();
+        if (activeUser == null) return NotFound();
+        FeaturedPersonalizationContext effective = _personalization.Resolve(_config, activeUser.Id);
+        FeaturedPersonalizationContext defaults = _personalization.ResolveDefaults(_config, activeUser.Id);
+        FeaturedPreferencesResponse current = new(_personalization.Get(activeUser.Id), effective, defaults);
+        FeaturedPreferenceOptionsResponse options = CreatePreferenceOptionsResponse(activeUser, effective);
+        return new JsonResult(new FeaturedPreferencesBootstrapResponse(current, options), RuntimeConfigJsonOptions);
     }
 
     private FeaturedPreferencesResponse CreatePreferencesResponse(Jellyfin.Database.Implementations.Entities.User user)
@@ -71,6 +76,25 @@ public sealed partial class FeaturedController
     }
 
     private string[] GetVisibleGenres(Jellyfin.Database.Implementations.Entities.User user)
+    {
+        return _preferenceOptionsCache.GetOrCreate(user.Id, () => QueryVisibleGenres(user));
+    }
+
+    private FeaturedPreferenceOptionsResponse CreatePreferenceOptionsResponse(
+        Jellyfin.Database.Implementations.Entities.User user,
+        FeaturedPersonalizationContext effective)
+    {
+        FeaturedPreferenceSourceOption[] sources = effective.SourceRules.Select(rule => new FeaturedPreferenceSourceOption
+        {
+            Id = rule.Id,
+            Type = rule.Type,
+            Enabled = rule.Enabled,
+            Weight = rule.Weight
+        }).ToArray();
+        return new FeaturedPreferenceOptionsResponse(_config.PersonalizationPolicy, sources, GetVisibleGenres(user));
+    }
+
+    private string[] QueryVisibleGenres(Jellyfin.Database.Implementations.Entities.User user)
     {
         InternalItemsQuery query = new(user) { IncludeItemTypes = FeaturedMediaTypes.All };
         return _libraryManager.GetItemList(query)

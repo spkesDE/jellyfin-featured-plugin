@@ -252,6 +252,20 @@ public sealed class FeaturedPreferenceOptionsResponse
     public string[] Genres { get; }
 }
 
+public sealed class FeaturedPreferencesBootstrapResponse
+{
+    internal FeaturedPreferencesBootstrapResponse(
+        FeaturedPreferencesResponse current,
+        FeaturedPreferenceOptionsResponse options)
+    {
+        Current = current;
+        Options = options;
+    }
+
+    public FeaturedPreferencesResponse Current { get; }
+    public FeaturedPreferenceOptionsResponse Options { get; }
+}
+
 public sealed class FeaturedPreferenceSourceOption
 {
     public string Id { get; set; } = string.Empty;
