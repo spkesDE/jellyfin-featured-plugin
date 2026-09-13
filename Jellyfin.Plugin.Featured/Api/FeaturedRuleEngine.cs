@@ -43,6 +43,7 @@ internal sealed partial class FeaturedRuleEngine
             candidate.Enabled
             && Guid.TryParse(candidate.UserId, out Guid userId)
             && userId == activeUser.Id);
+        string[] excludedGenres = personalization?.ExcludedGenres ?? [];
 
         List<(FeaturedSourceRule Rule, List<BaseItem> Items)> candidatesByRule = (personalization?.SourceRules ?? _config.SourceRules)
             .Where(rule => rule.Enabled)
@@ -77,6 +78,7 @@ internal sealed partial class FeaturedRuleEngine
             List<BaseItem> afterFilters = candidates
                 .Where(item => globallyFilteredItemIds is null || globallyFilteredItemIds.Contains(item.Id))
                 .Where(item => MatchesAllFilters(item, rule.Filters, selectionUserData))
+                .Where(item => excludedGenres.Length == 0 || !ContainsAny(item.Genres, excludedGenres))
                 .ToList();
             List<BaseItem> eligibleBeforeCooldown = afterFilters
                 .Where(item => IsEligibleItem(item, activeUser, allowedItemIds, requestExcludedIds))

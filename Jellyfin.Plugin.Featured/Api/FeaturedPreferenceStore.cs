@@ -93,6 +93,7 @@ public sealed class FeaturedUserPreferences
     public Dictionary<string, bool> SourceEnabled { get; set; } = new(StringComparer.OrdinalIgnoreCase);
     public Dictionary<string, int> SourceWeights { get; set; } = new(StringComparer.OrdinalIgnoreCase);
     public string[]? PreferredGenres { get; set; }
+    public string[]? ExcludedGenres { get; set; }
     public int? UnplayedBoost { get; set; }
     public int? FavouriteBoost { get; set; }
     public int? InProgressSeriesBoost { get; set; }
@@ -103,6 +104,7 @@ public sealed class FeaturedUserPreferences
         SourceEnabled = new Dictionary<string, bool>(SourceEnabled ?? [], StringComparer.OrdinalIgnoreCase),
         SourceWeights = new Dictionary<string, int>(SourceWeights ?? [], StringComparer.OrdinalIgnoreCase),
         PreferredGenres = PreferredGenres?.ToArray(),
+        ExcludedGenres = ExcludedGenres?.ToArray(),
         UnplayedBoost = UnplayedBoost,
         FavouriteBoost = FavouriteBoost,
         InProgressSeriesBoost = InProgressSeriesBoost,

@@ -5,6 +5,7 @@ namespace Jellyfin.Plugin.Featured.Api;
 public sealed record FeaturedPersonalizationContext(
     FeaturedSourceRule[] SourceRules,
     FeaturedUserProfile Profile,
+    string[] ExcludedGenres,
     int RepeatCooldownDays,
     bool HasOverrides)
 {
@@ -69,9 +70,11 @@ public sealed class FeaturedPersonalizationService
             RecentDays = rule.RecentDays,
             Filters = rule.Filters
         }).ToArray();
+        string[] excludedGenres = policy.AllowPreferredGenres && saved?.ExcludedGenres is not null
+            ? saved.ExcludedGenres : [];
         int cooldown = policy.Enabled && policy.AllowRepeatCooldown && saved?.RepeatCooldownDays is int days
             ? days : config.RepeatCooldownDays;
-        return new FeaturedPersonalizationContext(sources, effectiveProfile, cooldown, saved is not null);
+        return new FeaturedPersonalizationContext(sources, effectiveProfile, excludedGenres, cooldown, saved is not null);
     }
 
     internal FeaturedUserPreferences? Get(Guid userId) => _store.Get(userId);
@@ -107,6 +110,18 @@ public sealed class FeaturedPersonalizationService
                 .Take(50)
                 .ToArray();
         }
+        if (policy.AllowPreferredGenres && submitted.ExcludedGenres is not null)
+        {
+            HashSet<string> preferredGenres = (normalized.PreferredGenres ?? [])
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+            normalized.ExcludedGenres = submitted.ExcludedGenres
+                .Where(genre => !string.IsNullOrWhiteSpace(genre) && allowedGenres.Contains(genre.Trim()))
+                .Select(genre => genre.Trim())
+                .Where(genre => !preferredGenres.Contains(genre))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .Take(50)
+                .ToArray();
+        }
         if (policy.AllowUnplayedBoost && submitted.UnplayedBoost.HasValue) normalized.UnplayedBoost = Math.Clamp(submitted.UnplayedBoost.Value, 0, 100);
         if (policy.AllowFavouriteBoost && submitted.FavouriteBoost.HasValue) normalized.FavouriteBoost = Math.Clamp(submitted.FavouriteBoost.Value, 0, 100);
         if (policy.AllowInProgressSeriesBoost && submitted.InProgressSeriesBoost.HasValue) normalized.InProgressSeriesBoost = Math.Clamp(submitted.InProgressSeriesBoost.Value, 0, 100);
@@ -120,6 +135,7 @@ public sealed class FeaturedPersonalizationService
         => preferences.SourceEnabled.Count == 0
             && preferences.SourceWeights.Count == 0
             && preferences.PreferredGenres is null
+            && preferences.ExcludedGenres is null
             && !preferences.UnplayedBoost.HasValue
             && !preferences.FavouriteBoost.HasValue
             && !preferences.InProgressSeriesBoost.HasValue

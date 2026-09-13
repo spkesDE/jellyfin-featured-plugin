@@ -191,6 +191,7 @@ public sealed class FeaturedPreferencesResponse
             SourceEnabled = effective.SourceRules.ToDictionary(rule => rule.Id, rule => rule.Enabled),
             SourceWeights = effective.SourceRules.ToDictionary(rule => rule.Id, rule => rule.Weight),
             PreferredGenres = effective.Profile.PreferredGenres,
+            ExcludedGenres = effective.ExcludedGenres,
             UnplayedBoost = effective.Profile.UnplayedBoost,
             FavouriteBoost = effective.Profile.FavouriteBoost,
             InProgressSeriesBoost = effective.Profile.InProgressSeriesBoost,
@@ -201,6 +202,7 @@ public sealed class FeaturedPreferencesResponse
             SourceEnabled = defaults.SourceRules.ToDictionary(rule => rule.Id, rule => rule.Enabled),
             SourceWeights = defaults.SourceRules.ToDictionary(rule => rule.Id, rule => rule.Weight),
             PreferredGenres = defaults.Profile.PreferredGenres,
+            ExcludedGenres = defaults.ExcludedGenres,
             UnplayedBoost = defaults.Profile.UnplayedBoost,
             FavouriteBoost = defaults.Profile.FavouriteBoost,
             InProgressSeriesBoost = defaults.Profile.InProgressSeriesBoost,
@@ -219,6 +221,7 @@ public sealed class FeaturedEffectivePreferences
     public Dictionary<string, bool> SourceEnabled { get; set; } = [];
     public Dictionary<string, int> SourceWeights { get; set; } = [];
     public string[] PreferredGenres { get; set; } = [];
+    public string[] ExcludedGenres { get; set; } = [];
     public int UnplayedBoost { get; set; }
     public int FavouriteBoost { get; set; }
     public int InProgressSeriesBoost { get; set; }
