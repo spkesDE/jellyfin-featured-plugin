@@ -46,7 +46,7 @@ test('critical C# and TypeScript defaults stay in parity', async () => {
 
 test('item and runtime contracts retain their established names and interval units', async () => {
   const [controller, dtos] = await Promise.all([
-    read('Jellyfin.Plugin.Featured/Api/FeaturedController.cs'),
+    read('Jellyfin.Plugin.Featured/Api/FeaturedController.Items.cs'),
     read('Jellyfin.Plugin.Featured/Api/FeaturedResponseDtos.cs')
   ]);
   assert.match(dtos, /public int AutoplayInterval \{ get; \}/);
@@ -62,7 +62,7 @@ test('item and runtime contracts retain their established names and interval uni
 
 test('personalization is authenticated, policy-bound, and user scoped', async () => {
   const [controller, service, store, response, frontend] = await Promise.all([
-    read('Jellyfin.Plugin.Featured/Api/FeaturedController.cs'),
+    read('Jellyfin.Plugin.Featured/Api/FeaturedController.Preferences.cs'),
     read('Jellyfin.Plugin.Featured/Api/FeaturedPersonalizationService.cs'),
     read('Jellyfin.Plugin.Featured/Api/FeaturedPreferenceStore.cs'),
     read('Jellyfin.Plugin.Featured/Api/FeaturedResponseDtos.cs'),
