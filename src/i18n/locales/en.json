@@ -281,6 +281,8 @@
   "display.secondaryButtonText": "Secondary button text",
   "display.moreInfo": "More info",
   "display.showNavigation": "Show navigation arrows",
+  "display.showControlsOnHoverOnly": "Show controls only on hover",
+  "display.showControlsOnHoverOnlyHelp": "Keeps controls visible on touch devices and while keyboard focus is inside the banner.",
   "display.showPosition": "Show slide position (for example 3 / 5)",
   "display.showPaginationDots": "Show pagination dots",
   "display.hideTv": "Hide on TV layouts",

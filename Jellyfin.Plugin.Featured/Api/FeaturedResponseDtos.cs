@@ -17,6 +17,7 @@ public abstract class FeaturedDisplaySettingsDto
         AllowTrailersOnMobile = config.AllowTrailersOnMobile;
         ShowPlayButton = config.ShowPlayButton;
         ShowNavigationArrows = config.ShowNavigationArrows;
+        ShowControlsOnHoverOnly = config.ShowControlsOnHoverOnly;
         ShowSlidePosition = config.ShowSlidePosition;
         MediaPadding = config.MediaPadding;
         TitleDisplayMode = config.TitleDisplayMode;
@@ -53,6 +54,7 @@ public abstract class FeaturedDisplaySettingsDto
     public bool AllowTrailersOnMobile { get; }
     public bool ShowPlayButton { get; }
     public bool ShowNavigationArrows { get; }
+    public bool ShowControlsOnHoverOnly { get; }
     public bool ShowSlidePosition { get; }
     public int MediaPadding { get; }
     public string TitleDisplayMode { get; }

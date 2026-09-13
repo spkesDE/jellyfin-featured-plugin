@@ -262,6 +262,27 @@ test('touch layouts keep the first Jellyfin section below the hero', async () =>
   assert.match(bootstrap, /@media\(max-width:700px\),\(hover:none\) and \(pointer:coarse\)[\s\S]*?\.ec-bootstrap-placeholder\.ec-bootstrap-hero\{margin-bottom:calc\(1\.25rem \+ var\(--ec-media-padding,0px\)\)\}/);
 });
 
+test('carousel controls can be hidden until hover without affecting touch input', async () => {
+  const [configuration, resolver, response, defaults, displayTab, preview, carousel, styles] = await Promise.all([
+    read('Jellyfin.Plugin.Featured/Configuration/PluginConfiguration.cs'),
+    read('Jellyfin.Plugin.Featured/Configuration/FeaturedPresetResolver.cs'),
+    read('Jellyfin.Plugin.Featured/Api/FeaturedResponseDtos.cs'),
+    read('src/config/libs/defaults.ts'),
+    read('src/config/tabs/DisplayTab.vue'),
+    read('src/config/components/BannerPreview.vue'),
+    read('src/slider/carousel.ts'),
+    read('src/styles/featured.css')
+  ]);
+  assert.match(configuration, /ShowControlsOnHoverOnly/);
+  assert.match(resolver, /config\.ShowControlsOnHoverOnly = preset\.Layout\.ShowControlsOnHoverOnly/);
+  assert.match(response, /ShowControlsOnHoverOnly = config\.ShowControlsOnHoverOnly/);
+  assert.match(defaults, /ShowControlsOnHoverOnly:\s*false/);
+  assert.match(displayTab, /v-model="store\.config\.ShowControlsOnHoverOnly"/);
+  assert.match(preview, /'controls-on-hover': store\.config\.ShowControlsOnHoverOnly/);
+  assert.match(carousel, /showControlsOnHoverOnly \? ' ec-controls-hover'/);
+  assert.match(styles, /@media \(hover: hover\) and \(pointer: fine\)[\s\S]*?\.ec-root\.ec-controls-hover \.ec-controls[\s\S]*?opacity:\s*0[\s\S]*?:focus-within \.ec-controls[\s\S]*?opacity:\s*1/);
+});
+
 test('frontend bootstrap can be disabled independently of frontend injection', async () => {
   const [configuration, defaults, advancedTab, bootstrap] = await Promise.all([
     read('Jellyfin.Plugin.Featured/Configuration/PluginConfiguration.cs'),

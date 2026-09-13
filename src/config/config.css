@@ -1094,3 +1094,17 @@
                     margin: 0;
                     opacity: .7;
                 }
+
+                @media (hover: hover) and (pointer: fine) {
+                    #FeaturedConfigPage .ec-configPreview.controls-on-hover .ec-configPreviewControls {
+                        opacity: 0;
+                        transform: translateY(-.2rem);
+                        transition: opacity .2s ease, transform .2s ease;
+                    }
+
+                    #FeaturedConfigPage .ec-configPreview.controls-on-hover:hover .ec-configPreviewControls,
+                    #FeaturedConfigPage .ec-configPreview.controls-on-hover:focus-within .ec-configPreviewControls {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }

@@ -59,7 +59,7 @@ export class FeaturedCarousel {
     // Safari only permits unattended inline playback when the media starts muted.
     this.trailerMuted = response.startTrailersMuted || isIosTrailerClient();
     this.root = document.createElement('section');
-    this.root.className = `ec-root ec-ready ec-effect-${response.transitionEffect} ec-height-${response.heroHeightMode} ec-text-${response.heroTextPosition}${response.useHeroLayout ? ' ec-hero' : ''}`;
+    this.root.className = `ec-root ec-ready ec-effect-${response.transitionEffect} ec-height-${response.heroHeightMode} ec-text-${response.heroTextPosition}${response.useHeroLayout ? ' ec-hero' : ''}${response.showControlsOnHoverOnly ? ' ec-controls-hover' : ''}`;
     this.root.dataset.featuredVersion = PLUGIN_VERSION;
     applyHeroLayoutVariables(this.root, response);
     this.root.setAttribute('aria-roledescription', 'carousel');

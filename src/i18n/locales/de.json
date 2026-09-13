@@ -281,6 +281,8 @@
   "display.secondaryButtonText": "Text der sekundären Schaltfläche",
   "display.moreInfo": "Weitere Infos",
   "display.showNavigation": "Navigationspfeile anzeigen",
+  "display.showControlsOnHoverOnly": "Steuerung nur bei Hover anzeigen",
+  "display.showControlsOnHoverOnlyHelp": "Auf Touch-Geräten und bei Tastaturfokus bleibt die Steuerung sichtbar.",
   "display.showPosition": "Slide-Position anzeigen (zum Beispiel 3 / 5)",
   "display.showPaginationDots": "Seitennavigationspunkte anzeigen",
   "display.hideTv": "In TV-Layouts ausblenden",

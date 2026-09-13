@@ -81,6 +81,8 @@ public sealed class PluginConfiguration : BasePluginConfiguration
 
     public bool ShowNavigationArrows { get; set; } = true;
 
+    public bool ShowControlsOnHoverOnly { get; set; }
+
     public bool ShowSlidePosition { get; set; } = true;
 
     public int MediaPadding { get; set; }
@@ -178,6 +180,7 @@ public sealed class FeaturedPresetLayoutSettings
     public int AutoplayInterval { get; set; } = 10;
     public bool ShowPlayButton { get; set; } = true;
     public bool ShowNavigationArrows { get; set; } = true;
+    public bool ShowControlsOnHoverOnly { get; set; }
     public bool ShowSlidePosition { get; set; } = true;
     public int MediaPadding { get; set; }
     public string TitleDisplayMode { get; set; } = "logo";

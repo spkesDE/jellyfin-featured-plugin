@@ -70,6 +70,7 @@ internal static class FeaturedPresetResolver
         config.AutoplayInterval = preset.Layout.AutoplayInterval;
         config.ShowPlayButton = preset.Layout.ShowPlayButton;
         config.ShowNavigationArrows = preset.Layout.ShowNavigationArrows;
+        config.ShowControlsOnHoverOnly = preset.Layout.ShowControlsOnHoverOnly;
         config.ShowSlidePosition = preset.Layout.ShowSlidePosition;
         config.MediaPadding = preset.Layout.MediaPadding;
         config.TitleDisplayMode = preset.Layout.TitleDisplayMode;

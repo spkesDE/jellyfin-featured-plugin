@@ -64,7 +64,7 @@ const mediaCards = [
         <div v-if="store.config.Heading && !store.config.UseHeroLayout" class="ec-jellyfinMockHeading">
           {{ store.config.Heading }}
         </div>
-        <div class="ec-configPreview" :class="[`text-${store.config.HeroTextPosition}`, { 'is-hero': store.config.UseHeroLayout }]" :style="previewStyle">
+        <div class="ec-configPreview" :class="[`text-${store.config.HeroTextPosition}`, { 'is-hero': store.config.UseHeroLayout, 'controls-on-hover': store.config.ShowControlsOnHoverOnly }]" :style="previewStyle">
           <div class="ec-configPreviewBackdrop" :style="backdropStyle" />
           <div class="ec-configPreviewShade" />
           <div class="ec-configPreviewContent">

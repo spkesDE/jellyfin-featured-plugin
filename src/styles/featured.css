@@ -350,6 +350,22 @@
   mix-blend-mode: difference;
 }
 
+@media (hover: hover) and (pointer: fine) {
+  .ec-root.ec-controls-hover .ec-controls {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-.25rem);
+    transition: opacity .2s ease, transform .2s ease;
+  }
+
+  .ec-root.ec-controls-hover:hover .ec-controls,
+  .ec-root.ec-controls-hover:focus-within .ec-controls {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+}
+
 .ec-control {
   align-items: center;
   background: transparent;

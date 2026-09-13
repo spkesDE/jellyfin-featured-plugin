@@ -71,6 +71,7 @@ export interface FeaturedPluginConfig {
   AutoplayInterval: number;
   ShowPlayButton: boolean;
   ShowNavigationArrows: boolean;
+  ShowControlsOnHoverOnly: boolean;
   ShowSlidePosition: boolean;
   MediaPadding: number;
   TitleDisplayMode: 'logo' | 'title';
@@ -129,6 +130,7 @@ export interface FeaturedPresetLayoutSettings {
   AutoplayInterval: number;
   ShowPlayButton: boolean;
   ShowNavigationArrows: boolean;
+  ShowControlsOnHoverOnly: boolean;
   ShowSlidePosition: boolean;
   MediaPadding: number;
   TitleDisplayMode: 'logo' | 'title';

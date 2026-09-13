@@ -12,6 +12,7 @@ export interface FeaturedDisplaySettings {
   allowTrailersOnMobile: boolean;
   showPlayButton: boolean;
   showNavigationArrows: boolean;
+  showControlsOnHoverOnly: boolean;
   showSlidePosition: boolean;
   mediaPadding: number;
   titleDisplayMode: 'logo' | 'title';
