@@ -57,6 +57,9 @@ public sealed class FeaturedPersonalizationService
                 ? enabled : rule.Enabled,
             Weight = policy.Enabled && policy.AllowSourceWeights && saved?.SourceWeights.TryGetValue(rule.Id, out int weight) == true
                 ? weight : rule.Weight,
+            MinimumItems = rule.MinimumItems,
+            MaximumItems = rule.MaximumItems,
+            IsFallback = rule.IsFallback,
             EditorUserId = rule.EditorUserId,
             LibraryIds = rule.LibraryIds,
             CollectionIds = rule.CollectionIds,

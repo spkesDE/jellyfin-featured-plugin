@@ -83,6 +83,13 @@ test('personalization is authenticated, policy-bound, and user scoped', async ()
   assert.match(frontend, /current\.defaults\.sourceEnabled/);
 });
 
+test('source mixer constraints survive personalized source cloning', async () => {
+  const service = await read('Jellyfin.Plugin.Featured/Api/FeaturedPersonalizationService.cs');
+  for (const property of ['MinimumItems', 'MaximumItems', 'IsFallback']) {
+    assert.match(service, new RegExp(`${property}\\s*=\\s*rule\\.${property}`));
+  }
+});
+
 test('all details interactions use the shared navigation helper', async () => {
   const [render, navigation] = await Promise.all([
     read('src/slider/render.ts'),
@@ -139,6 +146,38 @@ test('prepared cache samples eligible items instead of always returning the firs
   assert.match(preparedCache, /Where\(item => !excludedIds\.Contains\(item\.Id\)\)[\s\S]*?SelectRandomItems\(eligibleItems, requestedCount\)/);
   assert.match(preparedCache, /Random\.Shared\.Next\(index, candidates\.Count\)/);
   assert.doesNotMatch(preparedCache, /entry\.Items[\s\S]{0,160}?\.Take\(requestedCount\)/);
+});
+
+test('source mixer v2 applies limits, fallbacks, diversity, and cooldown recovery', async () => {
+  const [configuration, normalizer, engine, history, preparedCache, defaults, sourceCard, sourcesTab, filtersTab] = await Promise.all([
+    read('Jellyfin.Plugin.Featured/Configuration/PluginConfiguration.cs'),
+    read('Jellyfin.Plugin.Featured/Configuration/PluginConfigurationNormalizer.cs'),
+    read('Jellyfin.Plugin.Featured/Api/FeaturedRuleEngine.cs'),
+    read('Jellyfin.Plugin.Featured/Api/FeaturedDisplayHistoryStore.cs'),
+    read('Jellyfin.Plugin.Featured/Api/FeaturedPreparedCache.cs'),
+    read('src/config/libs/defaults.ts'),
+    read('src/config/components/SourceRuleCard.vue'),
+    read('src/config/tabs/SourcesTab.vue'),
+    read('src/config/tabs/FiltersTab.vue')
+  ]);
+  for (const property of ['MinimumItems', 'MaximumItems', 'IsFallback']) {
+    assert.equal(configuration.includes(property), true, `backend misses ${property}`);
+    assert.equal(defaults.includes(property), true, `frontend defaults miss ${property}`);
+    assert.equal(sourceCard.includes(`rule.${property}`), true, `source editor misses ${property}`);
+  }
+  for (const property of ['MaximumItemsPerGenre', 'MaximumItemsPerFranchise', 'ExcludeItemsFromSameSeries']) {
+    assert.equal(configuration.includes(property), true, `backend misses ${property}`);
+    assert.equal(defaults.includes(property), true, `frontend defaults miss ${property}`);
+    assert.equal(sourcesTab.includes(`store.config.${property}`), true, `diversity editor misses ${property}`);
+  }
+  assert.match(normalizer, /MinimumItems > rule\.MaximumItems[\s\S]*?MinimumItems = rule\.MaximumItems/);
+  assert.match(engine, /primaryPools[\s\S]*?fallbackPools/);
+  assert.match(engine, /GetItemIdentity[\s\S]*?ProviderIds\.TryGetValue/);
+  assert.match(engine, /FeaturedDiversityTracker[\s\S]*?TmdbCollectionName[\s\S]*?IHasSeries/);
+  assert.match(history, /GetRecentItems[\s\S]*?DisplayedAt/);
+  assert.match(engine, /ActivateCooldownItems[\s\S]*?cooldownRelaxed:\s*true/);
+  assert.match(preparedCache, /RequiresLiveMixing[\s\S]*?MinimumItems[\s\S]*?IsFallback/);
+  assert.match(filtersTab, /RelaxRepeatCooldownWhenNeeded/);
 });
 
 test('featured selection excludes samples and other video extras', async () => {
