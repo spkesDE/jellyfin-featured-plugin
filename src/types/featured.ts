@@ -44,6 +44,7 @@ export interface FeaturedUserPreferences {
   sourceEnabled: Record<string, boolean>;
   sourceWeights: Record<string, number>;
   preferredGenres: string[] | null;
+  excludedGenres: string[] | null;
   unplayedBoost: number | null;
   favouriteBoost: number | null;
   inProgressSeriesBoost: number | null;
@@ -54,6 +55,7 @@ export interface FeaturedEffectivePreferences {
   sourceEnabled: Record<string, boolean>;
   sourceWeights: Record<string, number>;
   preferredGenres: string[];
+  excludedGenres: string[];
   unplayedBoost: number;
   favouriteBoost: number;
   inProgressSeriesBoost: number;

@@ -98,14 +98,15 @@ test('featured presets resolve schedules and override all roadmap sections', asy
 });
 
 test('personalization is authenticated, policy-bound, and user scoped', async () => {
-  const [controller, service, store, response, frontend, navigation, carousel] = await Promise.all([
+  const [controller, service, store, response, frontend, navigation, carousel, engine] = await Promise.all([
     read('Jellyfin.Plugin.Featured/Api/FeaturedController.Preferences.cs'),
     read('Jellyfin.Plugin.Featured/Api/FeaturedPersonalizationService.cs'),
     read('Jellyfin.Plugin.Featured/Api/FeaturedPreferenceStore.cs'),
     read('Jellyfin.Plugin.Featured/Api/FeaturedResponseDtos.cs'),
     read('src/preferences.ts'),
     read('src/admin/navigation.ts'),
-    read('src/slider/carousel.ts')
+    read('src/slider/carousel.ts'),
+    read('Jellyfin.Plugin.Featured/Api/FeaturedRuleEngine.cs')
   ]);
   assert.match(controller, /\[HttpGet\("preferences"\)\][\s\S]*?\[Authorize\]/);
   assert.match(controller, /\[HttpPut\("preferences"\)\][\s\S]*?\[Authorize\]/);
@@ -115,12 +116,17 @@ test('personalization is authenticated, policy-bound, and user scoped', async ()
   assert.match(controller, /new JsonResult\(CreatePreferencesResponse\(activeUser\), RuntimeConfigJsonOptions\)/);
   assert.match(service, /policy\.AllowSourceSelection[\s\S]*?sourceIds\.Contains/);
   assert.match(service, /policy\.AllowPreferredGenres[\s\S]*?allowedGenres\.Contains/);
+  assert.match(service, /submitted\.ExcludedGenres[\s\S]*?allowedGenres\.Contains[\s\S]*?!preferredGenres\.Contains/);
+  assert.match(engine, /excludedGenres[\s\S]*?!ContainsAny\(item\.Genres, excludedGenres\)/);
   assert.match(service, /ResolveDefaults\(PluginConfiguration config, Guid userId\)[\s\S]*?Resolve\(config, userId, null\)/);
   assert.match(service, /if \(IsEmpty\(normalized\)\) _store\.Remove\(userId\)/);
   assert.match(store, /userId\.ToString\("N"\)/);
   assert.match(response, /public bool PersonalizationEnabled \{ get; \}/);
   assert.match(frontend, /body: \{ reset: true \}/);
   assert.match(frontend, /body: \{ preferences \}/);
+  assert.match(frontend, /GenrePreferenceState = 'neutral' \| 'preferred' \| 'excluded'/);
+  assert.match(frontend, /state === 'neutral' \? 'preferred' : state === 'preferred' \? 'excluded' : 'neutral'/);
+  assert.doesNotMatch(frontend, /JellyfinFeatured\?\.refresh/);
   assert.match(frontend, /current\.defaults\.sourceEnabled/);
   assert.match(navigation, /USER_PREFERENCES_SELECTOR[\s\S]*?#\/mypreferencesmenu/);
   assert.match(navigation, /settingsEntry\.after\(entry\)/);

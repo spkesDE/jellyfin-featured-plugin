@@ -24,19 +24,25 @@
   box-sizing: border-box;
 }
 
-.ec-preferences-backdrop { align-items: center; background: rgb(0 0 0 / .72); display: flex; inset: 0; justify-content: center; padding: 1rem; position: fixed; z-index: 99999; }
-.ec-preferences-dialog, .ec-preferences-loading { background: #202020; border-radius: .65rem; box-shadow: 0 1rem 3rem rgb(0 0 0 / .55); color: #fff; max-height: min(90vh, 54rem); max-width: 44rem; overflow: auto; padding: 1.25rem; width: 100%; }
+.ec-preferences-backdrop { align-items: flex-start; background: rgb(0 0 0 / .72); display: flex; inset: 0; justify-content: center; overflow: auto; padding: 1rem; position: fixed; z-index: 99999; }
+.ec-preferences-dialog, .ec-preferences-loading { background: #202020; border-radius: .65rem; box-shadow: 0 1rem 3rem rgb(0 0 0 / .55); box-sizing: border-box; color: #fff; margin: auto; max-height: calc(100dvh - 2rem); max-width: 48rem; overflow: auto; padding: 1.25rem; width: 100%; }
 .ec-preferences-dialog > header { align-items: center; display: flex; justify-content: space-between; }
 .ec-preferences-dialog h2 { margin: 0; }
 .ec-preferences-dialog fieldset { border: 1px solid rgb(255 255 255 / .15); border-radius: .45rem; margin: 1rem 0 0; padding: .85rem; }
 .ec-preferences-dialog legend { font-weight: 700; padding: 0 .35rem; }
 .ec-preferences-close { background: none; border: 0; color: inherit; cursor: pointer; font-size: 2rem; }
-.ec-preference-source { align-items: center; display: grid; gap: .75rem; grid-template-columns: minmax(0, 1fr) 8rem; margin: .4rem 0; }
+.ec-preference-source { align-items: center; display: grid; gap: .75rem; grid-template-columns: minmax(0, 1fr) minmax(11rem, auto); margin: .4rem 0; }
 .ec-preference-check { align-items: center; display: flex; gap: .55rem; min-height: 2rem; }
 .ec-preference-number { align-items: center; display: flex; gap: .5rem; justify-content: space-between; }
 .ec-preference-number input { background: rgb(255 255 255 / .1); border: 1px solid rgb(255 255 255 / .2); border-radius: .25rem; color: inherit; padding: .45rem; width: 4.5rem; }
 .ec-preference-genres { display: grid; gap: .3rem 1rem; grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .ec-preference-genres legend { grid-column: 1 / -1; }
+.ec-preference-genres-help { grid-column: 1 / -1; margin: 0 0 .35rem; opacity: .72; }
+.ec-preference-genre { align-items: center; background: transparent; border: 0; color: inherit; cursor: pointer; display: flex; font: inherit; gap: .55rem; min-width: 0; padding: .25rem 0; text-align: left; }
+.ec-preference-genre-marker { align-items: center; border: 1px solid rgb(255 255 255 / .38); border-radius: .18rem; display: inline-flex; flex: 0 0 1.25rem; font-size: 1rem; font-weight: 800; height: 1.25rem; justify-content: center; line-height: 1; }
+.ec-preference-genre[data-genre-state="preferred"] .ec-preference-genre-marker { background: #00a4dc; border-color: #00a4dc; color: #fff; }
+.ec-preference-genre[data-genre-state="excluded"] .ec-preference-genre-marker { background: #b3261e; border-color: #ef6c63; color: #fff; }
+.ec-preference-genre:focus-visible { outline: 2px solid #00a4dc; outline-offset: .15rem; }
 .ec-preference-boosts { display: grid; gap: .7rem 1rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .ec-preference-boosts legend { grid-column: 1 / -1; }
 .ec-preferences-actions { display: flex; gap: .75rem; justify-content: flex-end; margin-top: 1.2rem; }

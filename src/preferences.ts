@@ -39,6 +39,33 @@ function numberField(label: string, value: number, max: number): HTMLLabelElemen
   return wrapper;
 }
 
+type GenrePreferenceState = 'neutral' | 'preferred' | 'excluded';
+
+function genreSelector(genre: string, initialState: GenrePreferenceState): HTMLButtonElement {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'ec-preference-genre';
+  button.dataset.genre = genre;
+  const marker = document.createElement('span');
+  marker.className = 'ec-preference-genre-marker';
+  marker.setAttribute('aria-hidden', 'true');
+  const label = document.createElement('span');
+  label.textContent = genre;
+  button.append(marker, label);
+
+  const setState = (state: GenrePreferenceState): void => {
+    button.dataset.genreState = state;
+    marker.textContent = state === 'preferred' ? '✓' : state === 'excluded' ? '×' : '';
+    button.setAttribute('aria-label', `${genre}: ${t(`preferences.genre.${state}`)}`);
+  };
+  setState(initialState);
+  button.addEventListener('click', () => {
+    const state = button.dataset.genreState as GenrePreferenceState;
+    setState(state === 'neutral' ? 'preferred' : state === 'preferred' ? 'excluded' : 'neutral');
+  });
+  return button;
+}
+
 export async function openPreferencesDialog(): Promise<void> {
   if (document.querySelector('.ec-preferences-backdrop')) return;
   const backdrop = document.createElement('div');
@@ -78,11 +105,12 @@ export async function openPreferencesDialog(): Promise<void> {
     if (options.policy.allowPreferredGenres && options.genres.length) {
       const genres = document.createElement('fieldset');
       genres.className = 'ec-preference-genres';
-      genres.innerHTML = `<legend>${t('preferences.genres')}</legend>`;
+      genres.innerHTML = `<legend>${t('preferences.genres')}</legend><p class="ec-preference-genres-help">${t('preferences.genresHelp')}</p>`;
       for (const genre of options.genres) {
-        const field = checkbox(genre, effective.preferredGenres.includes(genre), false);
-        field.dataset.genre = genre;
-        genres.appendChild(field);
+        const initialState: GenrePreferenceState = effective.excludedGenres.includes(genre)
+          ? 'excluded'
+          : effective.preferredGenres.includes(genre) ? 'preferred' : 'neutral';
+        genres.appendChild(genreSelector(genre, initialState));
       }
       dialog.appendChild(genres);
     }
@@ -125,7 +153,6 @@ export async function openPreferencesDialog(): Promise<void> {
       try {
         await requestJson('featured/preferences', { method: 'PUT', body: { reset: true } });
         close();
-        window.setTimeout(() => window.JellyfinFeatured?.refresh(), 0);
       } catch (error) {
         showSaveError(error);
         setBusy(false);
@@ -134,7 +161,7 @@ export async function openPreferencesDialog(): Promise<void> {
     dialog.addEventListener('submit', async (event) => {
       event.preventDefault();
       const preferences: FeaturedUserPreferences = {
-        sourceEnabled: {}, sourceWeights: {}, preferredGenres: null,
+        sourceEnabled: {}, sourceWeights: {}, preferredGenres: null, excludedGenres: null,
         unplayedBoost: null, favouriteBoost: null, inProgressSeriesBoost: null, repeatCooldownDays: null
       };
       dialog.querySelectorAll<HTMLElement>('[data-source-id]').forEach((field) => {
@@ -148,12 +175,18 @@ export async function openPreferencesDialog(): Promise<void> {
         }
       });
       if (options.policy.allowPreferredGenres) {
-        const selectedGenres = Array.from(dialog.querySelectorAll<HTMLElement>('[data-genre]'))
-          .filter((field) => field.querySelector<HTMLInputElement>('input')?.checked)
+        const genreFields = Array.from(dialog.querySelectorAll<HTMLElement>('[data-genre]'));
+        const selectedGenres = genreFields
+          .filter((field) => field.dataset.genreState === 'preferred')
+          .map((field) => field.dataset.genre!);
+        const excludedGenres = genreFields
+          .filter((field) => field.dataset.genreState === 'excluded')
           .map((field) => field.dataset.genre!);
         const normalized = (values: string[]): string => [...values].sort((a, b) => a.localeCompare(b)).join('\n');
         preferences.preferredGenres = normalized(selectedGenres) === normalized(current.defaults.preferredGenres)
           ? null : selectedGenres;
+        preferences.excludedGenres = normalized(excludedGenres) === normalized(current.defaults.excludedGenres)
+          ? null : excludedGenres;
       }
       dialog.querySelectorAll<HTMLElement>('[data-preference-key]').forEach((field) => {
         const key = field.dataset.preferenceKey as 'unplayedBoost' | 'favouriteBoost' | 'inProgressSeriesBoost' | 'repeatCooldownDays';
@@ -164,7 +197,6 @@ export async function openPreferencesDialog(): Promise<void> {
       try {
         await requestJson('featured/preferences', { method: 'PUT', body: { preferences } });
         close();
-        window.setTimeout(() => window.JellyfinFeatured?.refresh(), 0);
       } catch (error) {
         showSaveError(error);
         setBusy(false);
