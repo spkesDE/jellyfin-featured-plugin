@@ -33,6 +33,7 @@ export class FeaturedCarousel {
   private touchStartX: number | null = null;
   private status: HTMLElement | null = null;
   private autoplayButton: HTMLButtonElement | null = null;
+  private trailerCountdownProgress: SVGCircleElement | null = null;
   private trailerCountdownTimer: number | null = null;
   private dots: HTMLButtonElement[] = [];
   private destroyed = false;
@@ -97,6 +98,24 @@ export class FeaturedCarousel {
       this.autoplayButton = document.createElement('button');
       this.autoplayButton.type = 'button';
       this.autoplayButton.className = 'ec-control ec-autoplay emby-scrollbuttons-button paper-icon-button-light';
+      const countdownRing = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      countdownRing.classList.add('ec-countdown-ring');
+      countdownRing.setAttribute('viewBox', '0 0 40 40');
+      countdownRing.setAttribute('aria-hidden', 'true');
+      const countdownTrack = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      countdownTrack.classList.add('ec-countdown-track');
+      countdownTrack.setAttribute('cx', '20');
+      countdownTrack.setAttribute('cy', '20');
+      countdownTrack.setAttribute('r', '17');
+      const countdownProgress = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      countdownProgress.classList.add('ec-countdown-progress');
+      countdownProgress.setAttribute('cx', '20');
+      countdownProgress.setAttribute('cy', '20');
+      countdownProgress.setAttribute('r', '17');
+      countdownProgress.setAttribute('pathLength', '100');
+      countdownRing.append(countdownTrack, countdownProgress);
+      this.trailerCountdownProgress = countdownProgress;
+      this.autoplayButton.appendChild(countdownRing);
       this.autoplayButton.addEventListener('click', () => {
         this.autoplayEnabled = !this.autoplayEnabled;
         this.updateAutoplayButton();
@@ -414,18 +433,18 @@ export class FeaturedCarousel {
 
   private startTrailerCountdown(durationMilliseconds?: number): void {
     this.clearTrailerCountdownTimer();
-    if (!this.autoplayButton) return;
+    if (!this.autoplayButton || !this.trailerCountdownProgress) return;
     this.autoplayButton.classList.add('ec-countdown-active');
     this.autoplayButton.classList.toggle('ec-countdown-loading', durationMilliseconds === undefined);
     if (durationMilliseconds === undefined) {
-      this.autoplayButton.style.setProperty('--ec-countdown-angle', '90deg');
+      this.trailerCountdownProgress.style.removeProperty('stroke-dashoffset');
       return;
     }
     const duration = Math.max(1, durationMilliseconds);
     const endsAt = performance.now() + duration;
     const update = (): void => {
       const remaining = Math.max(0, endsAt - performance.now());
-      this.autoplayButton!.style.setProperty('--ec-countdown-angle', `${(remaining / duration) * 360}deg`);
+      this.trailerCountdownProgress!.style.strokeDashoffset = String(100 - ((remaining / duration) * 100));
     };
     update();
     this.trailerCountdownTimer = window.setInterval(update, 100);
@@ -439,7 +458,7 @@ export class FeaturedCarousel {
   private stopTrailerCountdown(): void {
     this.clearTrailerCountdownTimer();
     this.autoplayButton?.classList.remove('ec-countdown-active', 'ec-countdown-loading');
-    this.autoplayButton?.style.removeProperty('--ec-countdown-angle');
+    this.trailerCountdownProgress?.style.removeProperty('stroke-dashoffset');
   }
 
   private pauseTimer = (): void => {

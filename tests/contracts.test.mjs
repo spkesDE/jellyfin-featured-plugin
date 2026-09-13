@@ -188,7 +188,8 @@ test('proper trailer support keeps resolution and playback source independent', 
   assert.match(player, /concealDurationMilliseconds[\s\S]*?setTimeout[\s\S]*?onReveal/);
   assert.match(player, /onConcealStart\?\.\(options\.concealDurationMilliseconds/);
   assert.match(carousel, /startTrailerCountdown\(durationMilliseconds\)[\s\S]*?setInterval\(update, 100\)/);
-  assert.match(styles, /\.ec-autoplay::after[\s\S]*?conic-gradient[\s\S]*?radial-gradient/);
+  assert.match(carousel, /createElementNS\('http:\/\/www\.w3\.org\/2000\/svg', 'svg'\)[\s\S]*?pathLength[\s\S]*?countdownRing\.append/);
+  assert.match(styles, /\.ec-countdown-ring[\s\S]*?\.ec-countdown-progress[\s\S]*?stroke-dasharray:\s*100/);
   assert.doesNotMatch(carousel, /trailerCountdownLabel|Math\.ceil\(remaining \/ 1000\)/);
   assert.doesNotMatch(styles, /ec-trailer-countdown/);
   assert.match(styles, /\.ec-youtube-trailer-concealed[\s\S]*?opacity:\s*0/);

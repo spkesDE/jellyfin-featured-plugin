@@ -377,29 +377,57 @@
   font-size: 1.2rem;
 }
 
-.ec-autoplay::after {
-  background: conic-gradient(from -90deg, #fff var(--ec-countdown-angle, 360deg), rgba(255, 255, 255, .2) 0);
-  border-radius: 50%;
-  content: '';
-  inset: -.16rem;
+.ec-countdown-ring {
+  height: 100%;
+  inset: 0;
   opacity: 0;
   pointer-events: none;
   position: absolute;
   transition: opacity .2s ease;
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 0);
-  mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 0);
+  width: 100%;
+}
+
+.ec-countdown-track,
+.ec-countdown-progress {
+  fill: none;
+  stroke-width: 2;
+  transform: rotate(-90deg);
+  transform-origin: center;
+}
+
+.ec-countdown-track {
+  stroke: rgba(255, 255, 255, .22);
+}
+
+.ec-countdown-progress {
+  stroke: #fff;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 0;
+  stroke-linecap: round;
+  transition: stroke-dashoffset .1s linear;
+}
+
+.ec-autoplay .material-icons {
+  position: relative;
+  z-index: 1;
 }
 
 .ec-autoplay.ec-countdown-active {
   opacity: .95;
 }
 
-.ec-autoplay.ec-countdown-active::after {
+.ec-autoplay.ec-countdown-active .ec-countdown-ring {
   opacity: 1;
 }
 
-.ec-autoplay.ec-countdown-loading::after {
+.ec-autoplay.ec-countdown-loading .ec-countdown-ring {
   animation: ec-countdown-spin .9s linear infinite;
+}
+
+.ec-autoplay.ec-countdown-loading .ec-countdown-progress {
+  stroke-dasharray: 24 76;
+  stroke-dashoffset: 0 !important;
+  transition: none;
 }
 
 @keyframes ec-countdown-spin {
@@ -561,7 +589,7 @@
     animation: none;
   }
 
-  .ec-autoplay.ec-countdown-loading::after {
+  .ec-autoplay.ec-countdown-loading .ec-countdown-ring {
     animation: none;
   }
 }
