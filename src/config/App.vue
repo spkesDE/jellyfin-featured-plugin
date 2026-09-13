@@ -8,6 +8,7 @@ import DisplayTab from './tabs/DisplayTab.vue';
 import FiltersTab from './tabs/FiltersTab.vue';
 import ManualListsTab from './tabs/ManualListsTab.vue';
 import SourcesTab from './tabs/SourcesTab.vue';
+import TrailersTab from './tabs/TrailersTab.vue';
 import UserProfilesTab from './tabs/UserProfilesTab.vue';
 
 const store = createConfigStore();
@@ -41,6 +42,7 @@ onBeforeUnmount(() => {
         <UserProfilesTab v-show="store.activeTab.value === 'users'" />
         <FiltersTab v-show="store.activeTab.value === 'filters'" />
         <DisplayTab v-show="store.activeTab.value === 'display'" />
+        <TrailersTab v-show="store.activeTab.value === 'trailers'" />
         <AdvancedTab v-show="store.activeTab.value === 'advanced'" />
       </div>
     </form>

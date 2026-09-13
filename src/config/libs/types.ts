@@ -1,4 +1,4 @@
-export type ConfigTab = 'sources' | 'manual' | 'users' | 'filters' | 'display' | 'advanced';
+export type ConfigTab = 'sources' | 'manual' | 'users' | 'filters' | 'display' | 'trailers' | 'advanced';
 export type SaveState = 'clean' | 'dirty' | 'saved';
 
 export interface ConfigUser { Id: string; Name: string }

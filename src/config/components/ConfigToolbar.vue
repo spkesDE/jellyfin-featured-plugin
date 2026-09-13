@@ -11,6 +11,7 @@ const tabs: Array<{ id: ConfigTab; label: string }> = [
   { id: 'users', label: t('tab.users') },
   { id: 'filters', label: t('tab.filters') },
   { id: 'display', label: t('tab.display') },
+  { id: 'trailers', label: t('tab.trailers') },
   { id: 'advanced', label: t('tab.advanced') }
 ];
 

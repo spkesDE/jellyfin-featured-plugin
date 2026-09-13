@@ -76,7 +76,6 @@ const titleOptions: SelectOption[] = [
         <ConfigCheckbox v-model="store.config.EnableAutoplay" :label="t('display.enableAutoplay')" :help-text="t('display.autoplayHelp')" />
         <ConfigNumber v-if="store.config.EnableAutoplay" v-model="store.config.AutoplayInterval" :label="t('display.intervalSeconds')" :min="1" :max="3600" :step="1" />
         <ConfigCheckbox v-if="store.config.EnableAutoplay" v-model="store.config.ShowAutoplayButton" :label="t('display.showAutoplayControl')" />
-        <ConfigCheckbox v-model="store.config.EnableBackgroundTrailers" :label="t('display.backgroundTrailers')" />
         <ConfigNumber v-if="!store.config.EnableInfiniteLoading" v-model="store.config.RandomMediaCount" :label="t('display.maximumSlides')" :min="1" :max="100" :step="1" />
       </ConfigCard>
     </div>
