@@ -1,5 +1,17 @@
 # Changelog
 
+## v12.2.2.0 - 2026-09-14
+
+### Features
+
+- feat: implement Jellyfin theme tokens and update styles across components
+- feat(i18n): enhance translation workflow and fallback handling
+
+### Documentation
+
+- docs: add translation status badge to README
+- docs: highlight 12.2.1 performance improvements
+- docs: add performance in README
 ## v12.2.1.0 - 2026-09-13
 
 ### Features

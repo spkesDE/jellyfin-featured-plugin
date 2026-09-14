@@ -9,6 +9,14 @@
   "imageUrl": "https://raw.githubusercontent.com/spkesDE/jellyfin-featured-plugin/main/logo.png",
   "versions": [
     {
+      "version": "12.2.2.0",
+      "changelog": "- feat: implement Jellyfin theme tokens and update styles across components\n- feat(i18n): enhance translation workflow and fallback handling\n- docs: add translation status badge to README\n- docs: highlight 12.2.1 performance improvements\n- docs: add performance in README\n",
+      "targetAbi": "12.0.0.0",
+      "sourceUrl": "https://github.com/spkesDE/jellyfin-featured-plugin/releases/download/v12.2.2.0/Featured.zip",
+      "checksum": "a43d188f7d8ff512f4d287cabf4fd4a2",
+      "timestamp": "2026-09-14 09:11:50"
+    },
+    {
       "version": "12.2.1.0",
       "changelog": "- feat(carousel): implement trailer volume management with local storage\n- perf(ruleEngine): dramatically reduce featured loading times by replacing expensive access re-queries with in-memory Jellyfin visibility checks\n- perf(cache): restore reliable prepared-cache hits with deterministic personalization fingerprints so warm requests can skip rule-engine work\n- fix(cache): enhance prepared cache diagnostics and add response serialization\n- fix(config): set new default values\n- docs: update README and add cache and trailer behavior documentation\n- refactor(ruleEngine): Refactor Featured Rule Engine and Enhance Timing Diagnostics\n",
       "targetAbi": "12.0.0.0",
