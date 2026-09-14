@@ -1,5 +1,11 @@
 # Jellyfin Featured
 
+[![License](https://img.shields.io/github/license/spkesDE/jellyfin-featured-plugin?style=flat-square)](./LICENSE)
+[![Release](https://img.shields.io/github/v/release/spkesDE/jellyfin-featured-plugin?style=flat-square)](https://github.com/spkesDE/jellyfin-featured-plugin/releases/latest)
+[![Jellyfin](https://img.shields.io/badge/Jellyfin-12.x-00A4DC?style=flat-square&logo=jellyfin&logoColor=white)](https://jellyfin.org/)
+[![Build](https://img.shields.io/github/actions/workflow/status/spkesDE/jellyfin-featured-plugin/ci.yml?branch=main&style=flat-square&label=build)](https://github.com/spkesDE/jellyfin-featured-plugin/actions/workflows/ci.yml)
+[![Downloads](https://img.shields.io/github/downloads/spkesDE/jellyfin-featured-plugin/total?style=flat-square)](https://github.com/spkesDE/jellyfin-featured-plugin/releases)
+
 ![Jellyfin Featured banner](./banner.png)
 
 Jellyfin Featured adds a large, rotating banner to your Jellyfin home page. Use it to highlight favourites, new additions, collections, playlists, or anything else you want people on your server to discover.
