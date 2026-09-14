@@ -1,5 +1,17 @@
 # Changelog
 
+## v12.3.0.0 - 2026-09-14
+
+### Features
+
+- feat(theming): enhance theming capabilities with new CSS variables and documentation
+- feat(readme): add additional badges for license, release, Jellyfin version, and build status
+- feat: add feed preview functionality and better scheduling options for presets
+
+### Fixes
+
+- fix(styles): add border radius and clip-path to ec-slide for improved aesthetics
+- fix(preview): refine layout and error handling
 ## v12.2.2.0 - 2026-09-14
 
 ### Features
