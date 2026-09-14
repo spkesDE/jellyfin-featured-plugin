@@ -415,6 +415,13 @@ test('display settings use a responsive dashboard around the live preview', asyn
   assert.match(styles, /@media \(max-width: 800px\)[\s\S]*?"preview"\s*"layout"\s*"content"\s*"autoplay"/);
 });
 
+test('user personalization and server defaults share a responsive settings row', async () => {
+  const usersTab = await read('src/config/tabs/UserProfilesTab.vue');
+  assert.match(usersTab, /class="ec-userSettingsGrid"[\s\S]*?users\.personalizationTitle[\s\S]*?users\.defaultsTitle/);
+  assert.match(usersTab, /\.ec-userSettingsGrid\s*\{[^}]*display:\s*grid[^}]*grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\)[^}]*margin-bottom:\s*1rem/);
+  assert.match(usersTab, /@media \(max-width: 900px\)\s*\{[\s\S]*?\.ec-userSettingsGrid\s*\{[^}]*grid-template-columns:\s*1fr/);
+});
+
 test('frontend theming inherits Jellyfin palette tokens and exposes a Custom CSS API', async () => {
   const [tokens, main, configMain, devMain, render, runtimeStyles, configStyles, preview, guide, readme] = await Promise.all([
     read('src/styles/jellyfin-theme.ts'),
