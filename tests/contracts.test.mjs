@@ -362,6 +362,22 @@ test('frontend theming inherits Jellyfin palette tokens across runtime and confi
   assert.match(preview, /ec-configPreviewButton raised button-submit emby-button/);
 });
 
+test('localization falls back safely and documents the translation contribution workflow', async () => {
+  const [i18n, contributing, readme] = await Promise.all([
+    read('src/i18n/index.ts'),
+    read('CONTRIBUTING.md'),
+    read('README.md')
+  ]);
+  assert.match(i18n, /if \(locale in translations\) return locale;[\s\S]*?language in translations \? language : 'en'/);
+  assert.match(i18n, /value\.trim\(\)\.length > 0/);
+  assert.match(i18n, /const template = localized \?\? english \?\? key/);
+  assert.match(i18n, /reportedMissingTranslations\.has\(reportKey\)[\s\S]*?console\.warn/);
+  assert.match(contributing, /## Translation Workflow[\s\S]*?reference locale[\s\S]*?falls back to English/);
+  assert.match(contributing, /npm run i18n:status[\s\S]*?npm test[\s\S]*?npm run typecheck/);
+  assert.match(contributing, /preserve placeholders such as `\{count\}`, `\{name\}`, or `\{score\}` exactly/);
+  assert.match(readme, /CONTRIBUTING\.md#translation-workflow/);
+});
+
 test('frontend bootstrap can be disabled independently of frontend injection', async () => {
   const [configuration, defaults, advancedTab, bootstrap] = await Promise.all([
     read('Jellyfin.Plugin.Featured/Configuration/PluginConfiguration.cs'),

@@ -94,6 +94,21 @@ more changes
 - include English and German translations for new user-facing configuration text
 - target the `main` branch with pull requests
 
+## Translation Workflow
+
+English in [`src/i18n/locales/en.json`](./src/i18n/locales/en.json) is the reference locale. Other locale files may be partial: a missing or blank value falls back to English at runtime, while a key missing from English is shown as the key itself and reported once in the browser console.
+
+To add or update a translation:
+
+1. Use a short lowercase locale code for the JSON filename, for example `fr.json` or `pt-br.json`.
+2. For a new language, start with an empty JSON object and add only reviewed translations. Do not copy untranslated English values merely to increase completion status.
+3. Keep every key identical to the corresponding key in `en.json`, translate only its value, and preserve placeholders such as `{count}`, `{name}`, or `{score}` exactly.
+4. Import the locale and register its code in [`src/i18n/index.ts`](./src/i18n/index.ts).
+5. Run `npm run i18n:status` to regenerate [`docs/i18n-status.svg`](./docs/i18n-status.svg).
+6. Run `npm test` and `npm run typecheck` before opening the pull request.
+
+When introducing user-facing text, add the English reference string first and include German when possible. Translation-only pull requests may update one language at a time. Please mention whether a native speaker reviewed the wording and use the translation issue template for missing strings, wording questions, or requests for a new language.
+
 ## Manual Testing
 
 If possible, test at least:

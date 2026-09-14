@@ -134,6 +134,8 @@ The plugin interface currently includes English and German. It follows the Jelly
 
 [![Translation status](./docs/i18n-status.svg)](./src/i18n/locales)
 
+See the [translation contribution workflow](./CONTRIBUTING.md#translation-workflow) to add a language or improve existing strings.
+
 ## Caching and repeat protection
 
 Candidate Cache, Prepared Cache, and Repeat Cooldown solve different problems. In short, candidates avoid repeated library discovery, prepared entries make normal requests fast, and repeat cooldown records displayed titles so they can be excluded for longer. See [Cache behavior](./docs/cache-behavior.md) for the full distinction and cache diagnostics.
