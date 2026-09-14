@@ -5,7 +5,7 @@ import { heroImageUrl, logoUrl } from './slider/images';
 import { applyHeroLayoutVariables } from './slider/layout';
 import type { FeaturedResponse } from './types/featured';
 import { cancelAdminNavigationRefresh, isUserSettingsMenu, scheduleAdminNavigationRefresh, setUserSettingsMenuEnabled } from './admin/navigation';
-import { CONSOLE_PREFIX } from './constants';
+import { CONSOLE_PREFIX, USER_PREFERENCES_CHANGED_EVENT } from './constants';
 
 const HOME_SELECTOR = '#indexPage:not(.hide) #homeTab.is-active .homeSectionsContainer, #homeTab.is-active .homeSectionsContainer';
 const instances = new Map<Element, FeaturedCarousel>();
@@ -78,6 +78,16 @@ function refreshForPresetBoundary(): void {
   instances.clear();
   placeholders.forEach((placeholder) => placeholder.remove());
   placeholders.clear();
+  scheduleScan();
+}
+
+function refreshForPreferenceChange(): void {
+  lifecycleToken += 1;
+  instances.forEach((instance) => instance.destroy());
+  instances.clear();
+  placeholders.forEach((placeholder) => placeholder.remove());
+  placeholders.clear();
+  resetMountFailures();
   scheduleScan();
 }
 
@@ -217,6 +227,7 @@ async function mount(container: Element): Promise<void> {
     recordMountFailure();
     console.warn(`${CONSOLE_PREFIX} Could not load featured items.`, error);
   } finally {
+    const lifecycleChanged = mountToken !== lifecycleToken;
     if (!instances.has(container)) {
       if (
         mountToken === lifecycleToken
@@ -230,6 +241,7 @@ async function mount(container: Element): Promise<void> {
     }
     pendingContainers.delete(container);
     container.removeAttribute('data-featured-loading');
+    if (lifecycleChanged && container.isConnected && isActiveHomeContainer(container)) scheduleScan();
   }
 }
 
@@ -386,6 +398,7 @@ export function start(): void {
     subtree: true
   });
   bindRouteEvents();
+  document.addEventListener(USER_PREFERENCES_CHANGED_EVENT, refreshForPreferenceChange);
   scheduleFullRefresh();
 }
 
@@ -394,6 +407,7 @@ export function destroy(): void {
   observer?.disconnect();
   observer = null;
   unbindRouteEvents();
+  document.removeEventListener(USER_PREFERENCES_CHANGED_EVENT, refreshForPreferenceChange);
   cancelAdminNavigationRefresh();
   if (presetRefreshTimer !== null) window.clearTimeout(presetRefreshTimer);
   presetRefreshTimer = null;

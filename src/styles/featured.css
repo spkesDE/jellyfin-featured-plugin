@@ -30,6 +30,8 @@
 .ec-preferences-dialog h2 { font-size: 1.45rem; font-weight: 400; margin: 0; }
 .ec-preferences-content { flex: 1 1 auto; min-height: 0; overflow: auto; padding: .3rem 1.4rem 1.4rem; }
 .ec-preferences-help { line-height: 1.45; opacity: .75; }
+.ec-preference-display { display: grid; gap: .25rem 1rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.ec-preference-display legend, .ec-preference-display-help { grid-column: 1 / -1; }
 .ec-preference-display-help { line-height: 1.45; margin: 0 0 .75rem; opacity: .75; }
 .ec-preferences-dialog fieldset { border: 0; border-top: 1px solid var(--ec-theme-divider); margin: 1.25rem 0 0; padding: 1.1rem 0 0; }
 .ec-preferences-dialog legend { font-size: 1.1rem; font-weight: 500; padding: 0 .8rem 0 0; }
@@ -69,7 +71,7 @@
   .ec-preferences-dialog { border-radius: 0; height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom)); max-height: none; max-width: none; width: 100%; }
   .ec-preferences-content { padding-inline: 1rem; }
   .ec-preferences-header { padding-left: 1rem; }
-  .ec-preference-genres, .ec-preference-boosts { grid-template-columns: 1fr; }
+  .ec-preference-display, .ec-preference-genres, .ec-preference-boosts { grid-template-columns: 1fr; }
   .ec-preference-source { grid-template-columns: 1fr; }
   .ec-preference-number { max-width: 9rem; }
   .ec-preferences-actions { flex-wrap: wrap; padding: .75rem 1rem; }

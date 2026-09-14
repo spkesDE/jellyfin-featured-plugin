@@ -1,6 +1,7 @@
 import { requestJson } from './core/apiClient';
 import { t, type TranslationKey } from './i18n';
 import type { FeaturedEffectiveDisplayPreferences, FeaturedPreferencesBootstrapResponse, FeaturedUserDisplayPreferences, FeaturedUserPreferences } from './types/featured';
+import { USER_PREFERENCES_CHANGED_EVENT } from './constants';
 
 const bootstrapCacheLifetime = 30_000;
 let bootstrapCache: { value: FeaturedPreferencesBootstrapResponse; expiresAt: number } | null = null;
@@ -27,6 +28,10 @@ function loadPreferencesBootstrap(): Promise<FeaturedPreferencesBootstrapRespons
 
 function invalidatePreferencesBootstrap(): void {
   bootstrapCache = null;
+}
+
+function notifyPreferencesChanged(): void {
+  document.dispatchEvent(new CustomEvent(USER_PREFERENCES_CHANGED_EVENT));
 }
 
 function checkbox(label: string, checked: boolean, disabled: boolean): HTMLLabelElement {
@@ -247,6 +252,7 @@ export async function openPreferencesDialog(): Promise<void> {
         await requestJson('featured/preferences', { method: 'PUT', body: { reset: true } });
         invalidatePreferencesBootstrap();
         close();
+        notifyPreferencesChanged();
       } catch (error) {
         showSaveError(error);
         setBusy(false);
@@ -305,6 +311,7 @@ export async function openPreferencesDialog(): Promise<void> {
         await requestJson('featured/preferences', { method: 'PUT', body: { preferences } });
         invalidatePreferencesBootstrap();
         close();
+        notifyPreferencesChanged();
       } catch (error) {
         showSaveError(error);
         setBusy(false);

@@ -113,7 +113,7 @@ test('featured presets resolve schedules and override all roadmap sections', asy
 });
 
 test('personalization is authenticated, policy-bound, user scoped, and fast to reopen', async () => {
-  const [controller, service, store, response, itemFactory, frontend, navigation, carousel, slideRender, engine, optionsCache, services, styles, history] = await Promise.all([
+  const [controller, service, store, response, itemFactory, frontend, navigation, carousel, slideRender, runtime, constants, engine, optionsCache, services, styles, history] = await Promise.all([
     read('Jellyfin.Plugin.Featured/Api/FeaturedController.Preferences.cs'),
     read('Jellyfin.Plugin.Featured/Api/FeaturedPersonalizationService.cs'),
     read('Jellyfin.Plugin.Featured/Api/FeaturedPreferenceStore.cs'),
@@ -123,6 +123,8 @@ test('personalization is authenticated, policy-bound, user scoped, and fast to r
     read('src/admin/navigation.ts'),
     read('src/slider/carousel.ts'),
     read('src/slider/render.ts'),
+    read('src/runtime.ts'),
+    read('src/constants.ts'),
     read('Jellyfin.Plugin.Featured/Api/FeaturedRuleEngine.cs'),
     read('Jellyfin.Plugin.Featured/Api/FeaturedPreferenceOptionsCache.cs'),
     read('Jellyfin.Plugin.Featured/PluginServiceRegistrator.cs'),
@@ -177,6 +179,13 @@ test('personalization is authenticated, policy-bound, user scoped, and fast to r
   assert.match(frontend, /preferences\.repeatCooldownHours = value/);
   assert.match(frontend, /if \(!current\.defaults\.display\[key\]\) continue/);
   assert.match(frontend, /preferences\.display\[key\] = checked === current\.defaults\.display\[key\] \? null : checked/);
+  assert.match(constants, /USER_PREFERENCES_CHANGED_EVENT = 'jellyfin-featured:preferences-changed'/);
+  assert.match(frontend, /new CustomEvent\(USER_PREFERENCES_CHANGED_EVENT\)/);
+  assert.equal((frontend.match(/notifyPreferencesChanged\(\)/g) ?? []).length, 3);
+  assert.match(runtime, /addEventListener\(USER_PREFERENCES_CHANGED_EVENT, refreshForPreferenceChange\)/);
+  assert.match(runtime, /function refreshForPreferenceChange[\s\S]*?instance\.destroy\(\)[\s\S]*?resetMountFailures\(\)[\s\S]*?scheduleScan\(\)/);
+  assert.match(runtime, /const lifecycleChanged = mountToken !== lifecycleToken[\s\S]*?if \(lifecycleChanged[\s\S]*?scheduleScan\(\)/);
+  assert.match(runtime, /removeEventListener\(USER_PREFERENCES_CHANGED_EVENT, refreshForPreferenceChange\)/);
   assert.match(navigation, /USER_PREFERENCES_SELECTOR[\s\S]*?#\/mypreferencesmenu/);
   assert.match(navigation, /settingsEntry\.after\(entry\)/);
   assert.match(navigation, /#myPreferencesMenuPage/);
@@ -189,7 +198,9 @@ test('personalization is authenticated, policy-bound, user scoped, and fast to r
   assert.match(styles, /env\(safe-area-inset-top\)/);
   assert.match(styles, /\.ec-preferences-dialog[^}]*height: min\(52rem, calc\(100dvh - 2rem\)\)[^}]*width: 64rem/);
   assert.match(styles, /\.ec-preferences-content[^}]*flex: 1 1 auto/);
+  assert.match(styles, /\.ec-preference-display[^}]*grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\)/);
   assert.match(styles, /@media \(max-width: 600px\)[\s\S]*?\.ec-preferences-dialog[^}]*width: 100%/);
+  assert.match(styles, /@media \(max-width: 600px\)[\s\S]*?\.ec-preference-display,[\s\S]*?grid-template-columns:\s*1fr/);
   assert.doesNotMatch(carousel, /ec-personalize|openPreferencesDialog/);
 });
 
