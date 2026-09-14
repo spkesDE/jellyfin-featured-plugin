@@ -401,6 +401,20 @@ test('carousel controls can be hidden until hover without affecting touch input'
   assert.match(styles, /@media \(hover: hover\) and \(pointer: fine\)[\s\S]*?\.ec-root\.ec-controls-hover \.ec-controls[\s\S]*?opacity:\s*0[\s\S]*?:focus-within \.ec-controls[\s\S]*?opacity:\s*1/);
 });
 
+test('display settings use a responsive dashboard around the live preview', async () => {
+  const [displayTab, styles] = await Promise.all([
+    read('src/config/tabs/DisplayTab.vue'),
+    read('src/config/config.css')
+  ]);
+  assert.match(displayTab, /class="ec-displayGrid"/);
+  for (const className of ['ec-preview-section', 'ec-displayLayoutCard', 'ec-displayContentCard', 'ec-displayAutoplayCard']) {
+    assert.match(displayTab, new RegExp(`class="${className}"`));
+  }
+  assert.match(styles, /\.ec-displayGrid\s*\{[^}]*grid-template-areas:\s*"preview layout content"\s*"preview layout autoplay"[^}]*grid-template-columns:\s*minmax\(34rem, 1\.45fr\) minmax\(18rem, \.8fr\) minmax\(18rem, \.8fr\)/);
+  assert.match(styles, /@media \(max-width: 1450px\)[\s\S]*?"preview preview"\s*"layout content"\s*"layout autoplay"/);
+  assert.match(styles, /@media \(max-width: 800px\)[\s\S]*?"preview"\s*"layout"\s*"content"\s*"autoplay"/);
+});
+
 test('frontend theming inherits Jellyfin palette tokens and exposes a Custom CSS API', async () => {
   const [tokens, main, configMain, devMain, render, runtimeStyles, configStyles, preview, guide, readme] = await Promise.all([
     read('src/styles/jellyfin-theme.ts'),

@@ -36,12 +36,12 @@ const titleOptions: SelectOption[] = [
 
 <template>
   <section id="featuredPanel-display" class="jmp-section jmp-section-plain" role="tabpanel" aria-labelledby="featuredTab-display">
-    <div class="jmp-subgrid">
+    <div class="ec-displayGrid">
       <ConfigCard class="ec-preview-section" :title="t('display.livePreview')" :help="t('display.livePreviewHelp')">
         <BannerPreview />
       </ConfigCard>
 
-      <ConfigCard :title="t('display.layout')" :help="t('display.layoutHelp')">
+      <ConfigCard class="ec-displayLayoutCard" :title="t('display.layout')" :help="t('display.layoutHelp')">
         <ConfigCheckbox v-model="store.config.UseHeroLayout" :label="t('display.heroLayout')" />
         <ConfigSelect v-model="store.config.HeroHeightMode" :label="t('display.heightMode')" :options="heightModeOptions" />
         <ConfigNumber v-if="store.config.HeroHeightMode === 'custom'" v-model="store.config.BannerHeight" :label="t('display.desktopHeight')" :min="240" :max="900" :step="10" />
@@ -57,7 +57,7 @@ const titleOptions: SelectOption[] = [
         <ConfigNumber v-model="store.config.MediaPadding" :label="t('display.spaceBelow')" :help-text="store.config.UseHeroLayout ? t('display.heroMinimumGap') : undefined" :min="-240" :max="240" :step="4" />
       </ConfigCard>
 
-      <ConfigCard :title="t('display.content')" :help="t('display.contentHelp')">
+      <ConfigCard class="ec-displayContentCard" :title="t('display.content')" :help="t('display.contentHelp')">
         <ConfigCheckbox v-model="store.config.ShowRating" :label="t('display.showRatings')" />
         <ConfigCheckbox v-model="store.config.ShowDescription" :label="t('display.showDescription')" />
         <ConfigCheckbox v-model="store.config.ShowYear" :label="t('display.showYear')" />
@@ -74,7 +74,7 @@ const titleOptions: SelectOption[] = [
         <ConfigCheckbox v-model="store.config.HideOnTvLayout" :label="t('display.hideTv')" />
       </ConfigCard>
 
-      <ConfigCard :title="t('display.autoplay')">
+      <ConfigCard class="ec-displayAutoplayCard" :title="t('display.autoplay')">
         <ConfigCheckbox v-model="store.config.EnableAutoplay" :label="t('display.enableAutoplay')" :help-text="t('display.autoplayHelp')" />
         <ConfigNumber v-if="store.config.EnableAutoplay" v-model="store.config.AutoplayInterval" :label="t('display.intervalSeconds')" :min="1" :max="3600" :step="1" />
         <ConfigCheckbox v-if="store.config.EnableAutoplay" v-model="store.config.ShowAutoplayButton" :label="t('display.showAutoplayControl')" />

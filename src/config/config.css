@@ -167,8 +167,57 @@
                     margin: 0;
                 }
 
+                #FeaturedConfigPage .ec-displayGrid {
+                    align-items: start;
+                    display: grid;
+                    gap: 1.25rem;
+                    grid-template-areas:
+                        "preview layout content"
+                        "preview layout autoplay";
+                    grid-template-columns: minmax(34rem, 1.45fr) minmax(18rem, .8fr) minmax(18rem, .8fr);
+                }
+
                 #FeaturedConfigPage .ec-preview-section {
-                    grid-column: 1 / -1;
+                    grid-area: preview;
+                    position: sticky;
+                    top: 1rem;
+                }
+
+                #FeaturedConfigPage .ec-displayLayoutCard {
+                    grid-area: layout;
+                }
+
+                #FeaturedConfigPage .ec-displayContentCard {
+                    grid-area: content;
+                }
+
+                #FeaturedConfigPage .ec-displayAutoplayCard {
+                    grid-area: autoplay;
+                }
+
+                @media (max-width: 1450px) {
+                    #FeaturedConfigPage .ec-displayGrid {
+                        grid-template-areas:
+                            "preview preview"
+                            "layout content"
+                            "layout autoplay";
+                        grid-template-columns: repeat(2, minmax(0, 1fr));
+                    }
+
+                    #FeaturedConfigPage .ec-preview-section {
+                        position: static;
+                    }
+                }
+
+                @media (max-width: 800px) {
+                    #FeaturedConfigPage .ec-displayGrid {
+                        grid-template-areas:
+                            "preview"
+                            "layout"
+                            "content"
+                            "autoplay";
+                        grid-template-columns: minmax(0, 1fr);
+                    }
                 }
 
                 #FeaturedConfigPage .ec-jellyfinMockHeading {
