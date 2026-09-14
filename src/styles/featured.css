@@ -573,17 +573,17 @@
 
 .ec-root.ec-hero .ec-media {
   -webkit-mask-image: linear-gradient(to bottom,
-      #000 28%,
-      rgba(0, 0, 0, .92) 40%,
-      rgba(0, 0, 0, .58) 52%,
-      rgba(0, 0, 0, .22) 64%,
-      transparent 74%);
+      #000 18%,
+      rgba(0, 0, 0, .92) 36%,
+      rgba(0, 0, 0, .58) 53%,
+      rgba(0, 0, 0, .22) 70%,
+      transparent 85%);
   mask-image: linear-gradient(to bottom,
-      #000 28%,
-      rgba(0, 0, 0, .92) 40%,
-      rgba(0, 0, 0, .58) 52%,
-      rgba(0, 0, 0, .22) 64%,
-      transparent 74%);
+      #000 18%,
+      rgba(0, 0, 0, .92) 36%,
+      rgba(0, 0, 0, .58) 53%,
+      rgba(0, 0, 0, .22) 70%,
+      transparent 85%);
 }
 
 .ec-root.ec-hero .ec-slide::after {

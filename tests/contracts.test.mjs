@@ -247,7 +247,7 @@ test('proper trailer support keeps resolution and playback source independent', 
   assert.match(styles, /\.ec-trailer\s*\{[\s\S]*?pointer-events:\s*none/);
   assert.match(styles, /\.ec-root\.ec-hero \.ec-slide\s*\{[\s\S]*?linear-gradient\(to bottom,[\s\S]*?#000 54%[\s\S]*?transparent 80%/);
   assert.match(styles, /\.ec-media\s*\{[^}]*height:\s*var\(--ec-height\)[^}]*inset:\s*0[^}]*position:\s*absolute[^}]*width:\s*100%/);
-  assert.match(styles, /\.ec-root\.ec-hero \.ec-media\s*\{[\s\S]*?transparent 74%/);
+  assert.match(styles, /\.ec-root\.ec-hero \.ec-media\s*\{[\s\S]*?#000 18%[\s\S]*?transparent 85%/);
   assert.match(styles, /\.ec-root\.ec-hero \.ec-slide::after[\s\S]*?transparent 78%/);
   assert.match(styles, /\.ec-slide\.ec-trailer-active \.ec-backdrop\s*\{[\s\S]*?opacity:\s*0/);
   assert.match(styles, /@media \(max-width: 700px\)[\s\S]*?\.ec-root\.ec-hero \.ec-slide::after\s*\{[\s\S]*?linear-gradient\(0deg/);
