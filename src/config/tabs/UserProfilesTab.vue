@@ -94,12 +94,12 @@ function addProfile(): void {
 <style scoped>
 .ec-addSourceRow { align-items: end; display: grid; gap: 1rem; grid-template-columns: minmax(15rem, 1fr) auto; }
 .ec-addSourceRow > :deep(.selectContainer) { margin-bottom: 0; }
-.ec-userExplanation { background: rgba(0, 164, 220, .08); border: 1px solid rgba(0, 164, 220, .2); border-radius: .55rem; margin-bottom: 1rem; padding: .75rem .85rem; }
+.ec-userExplanation { background: var(--ec-theme-action-focus); border: 1px solid var(--ec-theme-primary); border-radius: var(--ec-theme-radius); margin-bottom: 1rem; padding: .75rem .85rem; }
 .ec-userExplanation strong { display: block; margin-bottom: .35rem; }
 .ec-userExplanation ol { display: grid; gap: .25rem; margin: 0; padding-left: 1.25rem; }
 .ec-userExplanation li { line-height: 1.35; opacity: .85; }
 .ec-userProfiles { display: grid; gap: 1rem; margin-top: 1rem; }
-.ec-userProfile { background: rgba(255, 255, 255, .035); border: 1px solid rgba(255, 255, 255, .09); border-radius: .9rem; padding: 1rem; }
+.ec-userProfile { background: var(--ec-theme-paper); border: 1px solid var(--ec-theme-divider); border-radius: var(--ec-theme-radius); padding: 1rem; }
 .ec-userProfileHeader { align-items: center; display: flex; gap: 1rem; justify-content: space-between; }
 .ec-userProfileHeader h3 { margin: .12rem 0 .25rem; }
 .ec-sourceRuleEyebrow { font-size: .7rem; letter-spacing: .08em; margin: 0; opacity: .58; text-transform: uppercase; }

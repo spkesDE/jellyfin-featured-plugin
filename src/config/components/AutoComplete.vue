@@ -145,16 +145,16 @@ onBeforeUnmount(clearSearchTimer);
 <style scoped>
 .ec-autocompleteField { position: relative; }
 .ec-autocompleteInputWrap { position: relative; }
-.ec-autocompleteInputWrap .emby-input { background: rgba(255, 255, 255, .075); border: 1px solid rgba(255, 255, 255, .18); border-radius: .25rem; box-sizing: border-box; color: inherit; padding: .6rem 2.6rem .6rem .75rem; width: 100%; }
+.ec-autocompleteInputWrap .emby-input { background: var(--jf-palette-FilledInput-bg, var(--ec-theme-action-hover)); border: 1px solid var(--jf-palette-FilledInput-borderColor, var(--ec-theme-divider)); border-radius: var(--ec-theme-radius); box-sizing: border-box; color: inherit; padding: .6rem 2.6rem .6rem .75rem; width: 100%; }
 .ec-autocompleteIcon { opacity: .58; pointer-events: none; position: absolute; right: .7rem; top: 50%; transform: translateY(-50%); }
 .ec-autocompleteIcon.is-loading { animation: ec-autocompleteSpin .8s linear infinite; }
 @keyframes ec-autocompleteSpin { to { transform: translateY(-50%) rotate(360deg); } }
-.ec-autocompleteResults { background: #202020; border: 1px solid rgba(255, 255, 255, .14); border-radius: .45rem; box-shadow: 0 .85rem 2.4rem rgba(0, 0, 0, .4); display: grid; left: 0; margin-top: .35rem; max-height: 18rem; overflow-y: auto; padding: .3rem; position: absolute; right: 0; top: 100%; z-index: 100; }
+.ec-autocompleteResults { background: var(--ec-theme-paper); border: 1px solid var(--ec-theme-divider); border-radius: var(--ec-theme-radius); box-shadow: 0 .85rem 2.4rem rgba(0, 0, 0, .4); color: var(--ec-theme-text-primary); display: grid; left: 0; margin-top: .35rem; max-height: 18rem; overflow-y: auto; padding: .3rem; position: absolute; right: 0; top: 100%; z-index: 100; }
 .ec-autocompleteOption { align-items: center; background: transparent; border: 0; border-radius: .3rem; color: inherit; cursor: pointer; display: flex; justify-content: space-between; padding: .6rem .7rem; text-align: left; }
 .ec-autocompleteOption:hover,
-.ec-autocompleteOption.is-active { background: rgba(255, 255, 255, .08); }
+.ec-autocompleteOption.is-active { background: var(--ec-theme-action-hover); }
 .ec-autocompleteOptionMain { display: grid; gap: .12rem; }
 .ec-autocompleteOptionMain small { opacity: .65; }
 .ec-autocompleteStatus { margin: 0; opacity: .7; padding: .7rem; }
-.ec-autocompleteStatus.is-error { color: #ffb4ab; font-size: .84rem; }
+.ec-autocompleteStatus.is-error { color: var(--ec-theme-error-light); font-size: .84rem; }
 </style>

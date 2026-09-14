@@ -328,6 +328,40 @@ test('carousel controls can be hidden until hover without affecting touch input'
   assert.match(styles, /@media \(hover: hover\) and \(pointer: fine\)[\s\S]*?\.ec-root\.ec-controls-hover \.ec-controls[\s\S]*?opacity:\s*0[\s\S]*?:focus-within \.ec-controls[\s\S]*?opacity:\s*1/);
 });
 
+test('frontend theming inherits Jellyfin palette tokens across runtime and configuration UI', async () => {
+  const [tokens, main, configMain, devMain, render, runtimeStyles, configStyles, preview] = await Promise.all([
+    read('src/styles/jellyfin-theme.ts'),
+    read('src/main.ts'),
+    read('src/config/main.ts'),
+    read('src/config/dev/main.ts'),
+    read('src/slider/render.ts'),
+    read('src/styles/featured.css'),
+    read('src/config/config.css'),
+    read('src/config/components/BannerPreview.vue')
+  ]);
+  for (const jellyfinToken of [
+    '--jf-palette-primary-main',
+    '--jf-palette-primary-contrastText',
+    '--jf-palette-background-default',
+    '--jf-palette-background-paper',
+    '--jf-palette-text-primary',
+    '--jf-palette-divider',
+    '--jf-palette-action-hover',
+    '--jf-card-borderRadius'
+  ]) assert.match(tokens, new RegExp(jellyfinToken));
+  assert.match(tokens, /--theme-primary-color[\s\S]*?--primary-accent-color[\s\S]*?--accent/);
+  assert.match(main, /injectJellyfinThemeTokens\(\)/);
+  assert.match(configMain, /injectJellyfinThemeTokens\(\)/);
+  assert.match(devMain, /injectJellyfinThemeTokens\(\)/);
+  assert.match(render, /ec-button raised button-submit emby-button/);
+  assert.match(render, /ec-button ec-button-secondary raised emby-button/);
+  assert.match(runtimeStyles, /\.ec-button\s*\{[^}]*background:\s*var\(--ec-theme-primary\)[^}]*color:\s*var\(--ec-theme-primary-contrast\)/);
+  assert.match(runtimeStyles, /\.ec-preferences-dialog\s*\{[^}]*background:\s*var\(--ec-theme-background\)[^}]*color:\s*var\(--ec-theme-text-primary\)/);
+  assert.match(configStyles, /\.ec-configPreviewButton\s*\{[^}]*background:\s*var\(--ec-theme-primary\)[^}]*color:\s*var\(--ec-theme-primary-contrast\)/);
+  assert.match(configStyles, /\.jmp-tabButton\.is-active\s*\{[^}]*background:\s*var\(--ec-theme-primary\)/);
+  assert.match(preview, /ec-configPreviewButton raised button-submit emby-button/);
+});
+
 test('frontend bootstrap can be disabled independently of frontend injection', async () => {
   const [configuration, defaults, advancedTab, bootstrap] = await Promise.all([
     read('Jellyfin.Plugin.Featured/Configuration/PluginConfiguration.cs'),

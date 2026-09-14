@@ -80,10 +80,10 @@ const mediaCards = [
               {{ item?.overview || t('preview.fallbackDescription') }}
             </div>
             <div v-if="store.config.ShowPlayButton || store.config.ShowSecondaryButton" class="ec-configPreviewActions">
-              <button v-if="store.config.ShowPlayButton" type="button" class="ec-configPreviewButton">
+              <button v-if="store.config.ShowPlayButton" type="button" class="ec-configPreviewButton raised button-submit emby-button">
                 {{ store.config.PlayButtonText || `▶ ${t('common.play')}` }}
               </button>
-              <button v-if="store.config.ShowSecondaryButton" type="button" class="ec-configPreviewButton is-secondary">
+              <button v-if="store.config.ShowSecondaryButton" type="button" class="ec-configPreviewButton is-secondary raised emby-button">
                 {{ store.config.SecondaryButtonText || t('display.moreInfo') }}
               </button>
             </div>

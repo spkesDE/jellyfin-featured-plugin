@@ -102,7 +102,7 @@ export function createSlide(item: FeaturedItem, response: FeaturedResponse): HTM
     if (response.showPlayButton) {
       const play = document.createElement('button');
       play.type = 'button';
-      play.className = 'ec-button';
+      play.className = 'ec-button raised button-submit emby-button';
       play.textContent = response.playButtonText || `▶ ${t('carousel.play')}`;
       play.addEventListener('click', () => window.Emby?.Page?.showItem?.(item.id));
       actions.appendChild(play);
@@ -110,7 +110,7 @@ export function createSlide(item: FeaturedItem, response: FeaturedResponse): HTM
     if (response.showSecondaryButton) {
       const details = document.createElement('button');
       details.type = 'button';
-      details.className = 'ec-button ec-button-secondary';
+      details.className = 'ec-button ec-button-secondary raised emby-button';
       details.textContent = response.secondaryButtonText || t('carousel.moreInfo');
       details.addEventListener('click', () => openItemDetails(item.id));
       actions.appendChild(details);
@@ -118,7 +118,7 @@ export function createSlide(item: FeaturedItem, response: FeaturedResponse): HTM
     if (item.trailer?.provider === 'external' && item.trailer.url) {
       const trailer = document.createElement('button');
       trailer.type = 'button';
-      trailer.className = 'ec-button ec-button-secondary';
+      trailer.className = 'ec-button ec-button-secondary raised emby-button';
       trailer.textContent = t('carousel.trailer');
       trailer.addEventListener('click', () => new ExternalPlayer(item.trailer!.url!).open());
       actions.appendChild(trailer);

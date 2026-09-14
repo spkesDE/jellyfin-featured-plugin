@@ -1,9 +1,12 @@
 import styles from './styles/featured.css';
+import { injectJellyfinThemeTokens } from './styles/jellyfin-theme';
 import { destroy, refresh, start } from './runtime';
 import { PLUGIN_VERSION } from './constants';
 
 const STYLE_ID = 'jellyfin-featured-styles';
 const existingApi = window.JellyfinFeatured;
+
+injectJellyfinThemeTokens();
 
 if (existingApi) {
   if (document.readyState === 'loading') {

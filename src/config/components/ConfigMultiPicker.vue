@@ -180,24 +180,24 @@ onBeforeUnmount(() => {
 .ec-multiPicker { margin-bottom: 1rem; min-width: 0; position: relative; }
 .ec-multiPickerLabelRow { align-items: center; display: flex; gap: .4rem; margin-bottom: .35rem; width: fit-content; }
 .ec-multiPickerLabelRow > .selectLabel { display: block; }
-.ec-multiPickerTrigger { align-items: center; background: rgba(255, 255, 255, .075); border: 1px solid rgba(255, 255, 255, .18); border-radius: .25rem; color: inherit; cursor: pointer; display: flex; gap: 1rem; justify-content: space-between; min-height: 2.7rem; padding: .6rem .75rem; text-align: left; width: 100%; }
+.ec-multiPickerTrigger { align-items: center; background: var(--jf-palette-FilledInput-bg, var(--ec-theme-action-hover)); border: 1px solid var(--jf-palette-FilledInput-borderColor, var(--ec-theme-divider)); border-radius: var(--ec-theme-radius); color: inherit; cursor: pointer; display: flex; gap: 1rem; justify-content: space-between; min-height: 2.7rem; padding: .6rem .75rem; text-align: left; width: 100%; }
 .ec-multiPickerTrigger:focus-visible,
-.ec-multiPicker.is-open .ec-multiPickerTrigger { border-color: #00a4dc; outline: 1px solid #00a4dc; }
+.ec-multiPicker.is-open .ec-multiPickerTrigger { border-color: var(--ec-theme-secondary); outline: 1px solid var(--ec-theme-secondary); }
 .ec-multiPickerTrigger .is-placeholder { opacity: .58; }
-.ec-multiPickerMenu { background: #202020; border: 1px solid rgba(255, 255, 255, .16); border-radius: .45rem; box-shadow: 0 .85rem 2.4rem rgba(0, 0, 0, .55); display: flex; flex-direction: column; min-width: min(22rem, calc(100vw - 1rem)); overflow: hidden; overscroll-behavior: contain; }
-.ec-multiPickerSearchWrap { align-items: center; border-bottom: 1px solid rgba(255, 255, 255, .1); display: flex; flex: 0 0 auto; gap: .45rem; padding: .65rem .75rem; }
+.ec-multiPickerMenu { background: var(--ec-theme-paper); border: 1px solid var(--ec-theme-divider); border-radius: var(--ec-theme-radius); box-shadow: 0 .85rem 2.4rem rgba(0, 0, 0, .55); color: var(--ec-theme-text-primary); display: flex; flex-direction: column; min-width: min(22rem, calc(100vw - 1rem)); overflow: hidden; overscroll-behavior: contain; }
+.ec-multiPickerSearchWrap { align-items: center; border-bottom: 1px solid var(--ec-theme-divider); display: flex; flex: 0 0 auto; gap: .45rem; padding: .65rem .75rem; }
 .ec-multiPickerSearchWrap .material-icons { font-size: 1.2rem; opacity: .55; }
 .ec-multiPickerSearch { background: transparent; border: 0; color: inherit; min-width: 0; outline: 0; padding: .25rem 0; width: 100%; }
 .ec-multiPickerOptions { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: .35rem; }
 .ec-multiPickerOption { align-items: center; background: transparent; border: 0; border-radius: .3rem; color: inherit; cursor: pointer; display: flex; gap: .55rem; padding: .55rem .6rem; text-align: left; width: 100%; }
 .ec-multiPickerOption:hover,
-.ec-multiPickerOption:focus-visible { background: rgba(255, 255, 255, .08); outline: 0; }
-.ec-multiPickerOption.is-selected { background: rgba(0, 164, 220, .12); }
-.ec-multiPickerCheck { color: #00a4dc; font-size: 1.25rem; }
+.ec-multiPickerOption:focus-visible { background: var(--ec-theme-action-hover); outline: 0; }
+.ec-multiPickerOption.is-selected { background: var(--ec-theme-action-focus); }
+.ec-multiPickerCheck { color: var(--ec-theme-primary); font-size: 1.25rem; }
 .ec-multiPickerEmpty { margin: 0; opacity: .68; padding: 1.1rem .9rem; }
-.ec-multiPickerFooter { align-items: center; border-top: 1px solid rgba(255, 255, 255, .1); display: flex; flex: 0 0 auto; font-size: .78rem; gap: .75rem; justify-content: space-between; padding: .55rem .7rem; }
+.ec-multiPickerFooter { align-items: center; border-top: 1px solid var(--ec-theme-divider); display: flex; flex: 0 0 auto; font-size: .78rem; gap: .75rem; justify-content: space-between; padding: .55rem .7rem; }
 .ec-multiPickerFooter > div { display: flex; gap: .35rem; }
 .ec-multiPickerFooterButton { background: transparent; border: 0; border-radius: .25rem; color: inherit; cursor: pointer; padding: .4rem .55rem; }
-.ec-multiPickerFooterButton:hover { background: rgba(255, 255, 255, .08); }
-.ec-multiPickerFooterButton.is-primary { color: #43c7f4; font-weight: 700; }
+.ec-multiPickerFooterButton:hover { background: var(--ec-theme-action-hover); }
+.ec-multiPickerFooterButton.is-primary { color: var(--ec-theme-primary); font-weight: 700; }
 </style>

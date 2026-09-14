@@ -185,7 +185,7 @@ function syncItemPositions(list: FeaturedManualList): void {
 }
 
 .ec-manualDragPreview {
-  border-color: rgba(0, 164, 220, .65);
+  border-color: var(--ec-theme-primary);
   box-shadow: 0 .8rem 2rem rgba(0, 0, 0, .45);
   opacity: .96;
   pointer-events: none;
@@ -214,9 +214,10 @@ function syncItemPositions(list: FeaturedManualList): void {
 }
 
 .ec-itemSchedulePanel {
-  background: #202020;
-  border: 1px solid rgba(255, 255, 255, .16);
-  border-radius: .45rem;
+  background: var(--ec-theme-paper);
+  border: 1px solid var(--ec-theme-divider);
+  border-radius: var(--ec-theme-radius);
+  color: var(--ec-theme-text-primary);
   box-shadow: 0 .85rem 2.4rem rgba(0, 0, 0, .55);
   display: grid;
   gap: .75rem;

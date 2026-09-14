@@ -140,16 +140,16 @@ onBeforeUnmount(hide);
 }
 
 .ec-helpTrigger:focus-visible {
-  box-shadow: 0 0 0 2px var(--theme-primary-color, #00a4dc);
+  box-shadow: 0 0 0 2px var(--ec-theme-secondary);
 }
 
 .ec-helpTooltip {
-  background: #202020;
-  border: 1px solid rgba(255, 255, 255, .16);
-  border-radius: .45rem;
+  background: var(--ec-theme-paper);
+  border: 1px solid var(--ec-theme-divider);
+  border-radius: var(--ec-theme-radius);
   box-sizing: border-box;
   box-shadow: 0 .45rem 1.3rem rgba(0, 0, 0, .4);
-  color: #fff;
+  color: var(--ec-theme-text-primary);
   font-size: .82rem;
   font-weight: 400;
   line-height: 1.35;
@@ -170,14 +170,14 @@ onBeforeUnmount(hide);
 .ec-helpTooltip.is-above::after {
   border-left: .35rem solid transparent;
   border-right: .35rem solid transparent;
-  border-top: .35rem solid #202020;
+  border-top: .35rem solid var(--ec-theme-paper);
   left: var(--ec-tooltip-arrow-left, 50%);
   top: 100%;
   transform: translateX(-50%);
 }
 
 .ec-helpTooltip.is-below::after {
-  border-bottom: .35rem solid #202020;
+  border-bottom: .35rem solid var(--ec-theme-paper);
   border-left: .35rem solid transparent;
   border-right: .35rem solid transparent;
   bottom: 100%;
@@ -187,7 +187,7 @@ onBeforeUnmount(hide);
 
 .ec-helpTooltip.is-left::after {
   border-bottom: .35rem solid transparent;
-  border-left: .35rem solid #202020;
+  border-left: .35rem solid var(--ec-theme-paper);
   border-top: .35rem solid transparent;
   left: 100%;
   top: var(--ec-tooltip-arrow-top, 50%);
@@ -196,7 +196,7 @@ onBeforeUnmount(hide);
 
 .ec-helpTooltip.is-right::after {
   border-bottom: .35rem solid transparent;
-  border-right: .35rem solid #202020;
+  border-right: .35rem solid var(--ec-theme-paper);
   border-top: .35rem solid transparent;
   right: 100%;
   top: var(--ec-tooltip-arrow-top, 50%);

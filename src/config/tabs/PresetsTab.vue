@@ -96,10 +96,10 @@ function stateLabel(preset: FeaturedPreset): string {
 .ec-presetList { display: grid; gap: 1rem; }
 .ec-presetGrid { display: grid; gap: 1rem; grid-template-columns: 2fr 1fr 1.5fr 1.5fr; }
 .ec-presetSummary { display: flex; flex-wrap: wrap; gap: .5rem; margin: .75rem 0; }
-.ec-presetSummary span { background: rgba(255, 255, 255, .07); border-radius: 999px; padding: .35rem .65rem; }
+.ec-presetSummary span { background: var(--ec-theme-action-hover); border-radius: 999px; padding: .35rem .65rem; }
 .ec-presetSnapshotHelp { margin: .25rem 0 .75rem; opacity: .7; }
 .ec-presetActions { display: flex; flex-wrap: wrap; gap: .65rem; }
-.ec-presetRemove { color: #ffb4ab; }
+.ec-presetRemove { color: var(--ec-theme-error-light); }
 @media (max-width: 900px) { .ec-presetGrid { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 600px) {
   .ec-presetIntro { align-items: stretch; flex-direction: column; }

@@ -1,4 +1,20 @@
 :root {
+  --jf-palette-primary-main: #e59a2f;
+  --jf-palette-primary-dark: #b96d12;
+  --jf-palette-primary-contrastText: #18120a;
+  --jf-palette-secondary-main: #ffc46b;
+  --jf-palette-secondary-contrastText: #18120a;
+  --jf-palette-background-default: #101820;
+  --jf-palette-background-paper: #18232e;
+  --jf-palette-AppBar-defaultBg: #17212b;
+  --jf-palette-text-primary: rgba(255, 255, 255, .92);
+  --jf-palette-text-secondary: rgba(255, 255, 255, .72);
+  --jf-palette-divider: rgba(255, 255, 255, .15);
+  --jf-palette-action-hover: rgba(255, 255, 255, .08);
+  --jf-palette-action-focus: rgba(229, 154, 47, .18);
+  --jf-palette-Button-inheritContainedBg: rgba(255, 255, 255, .18);
+  --jf-palette-Button-inheritContainedHoverBg: rgba(255, 255, 255, .28);
+  --jf-card-borderRadius: .45rem;
   color: rgba(255, 255, 255, 0.92);
   background: #101820;
   font-family: Arial, Helvetica, sans-serif;

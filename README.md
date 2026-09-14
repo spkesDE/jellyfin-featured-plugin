@@ -104,6 +104,8 @@ The default hero layout is designed to work without much tweaking. If you want a
 
 You can also choose which details and controls are shown, including the title or logo, description, rating, year, runtime, buttons, arrows, and page dots. Autoplay, background trailers, and the number of featured titles are optional.
 
+Featured automatically inherits Jellyfin's active theme palette. Primary and secondary buttons, focus states, dialogs, form surfaces, text, dividers, errors, and corner styling follow Jellyfin's `--jf-palette-*` and `--jf-card-borderRadius` variables. Common legacy accent variables are supported as fallbacks. Text and navigation drawn directly over artwork remain high-contrast so custom light themes do not make the hero unreadable.
+
 ## Trailer Support
 
 Jellyfin Featured can play local trailers and supported online trailers in the background. You can choose which type to prefer, start trailers muted, add a delay, adjust start and end points, and decide whether they should play on mobile devices.
