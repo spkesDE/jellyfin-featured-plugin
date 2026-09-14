@@ -136,6 +136,8 @@
 }
 
 .ec-slide {
+  border-radius: var(--ec-radius);
+  clip-path: inset(0 round var(--ec-radius));
   color: inherit;
   cursor: pointer;
   inset: 0;

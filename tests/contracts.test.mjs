@@ -307,6 +307,14 @@ test('touch layouts keep the first Jellyfin section below the hero', async () =>
   assert.match(bootstrap, /@media\(max-width:700px\),\(hover:none\) and \(pointer:coarse\)[\s\S]*?\.ec-bootstrap-placeholder\.ec-bootstrap-hero\{margin-bottom:calc\(1\.25rem \+ var\(--ec-media-padding,0px\)\)\}/);
 });
 
+test('border radius clips every composited slide with and without trailers', async () => {
+  const styles = await read('src/styles/featured.css');
+  assert.match(styles, /\.ec-viewport\s*\{[^}]*border-radius:\s*var\(--ec-radius\)[^}]*overflow:\s*hidden/);
+  assert.match(styles, /\.ec-slide\s*\{[^}]*border-radius:\s*var\(--ec-radius\)[^}]*clip-path:\s*inset\(0 round var\(--ec-radius\)\)[^}]*overflow:\s*hidden/);
+  assert.match(styles, /\.ec-trailer\s*\{[^}]*position:\s*absolute/);
+  assert.match(styles, /\.ec-slide::after\s*\{[^}]*position:\s*absolute/);
+});
+
 test('carousel controls can be hidden until hover without affecting touch input', async () => {
   const [configuration, resolver, response, defaults, displayTab, preview, carousel, styles] = await Promise.all([
     read('Jellyfin.Plugin.Featured/Configuration/PluginConfiguration.cs'),
