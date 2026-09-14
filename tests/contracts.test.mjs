@@ -93,7 +93,9 @@ test('featured presets resolve schedules and override all roadmap sections', asy
   }
   assert.match(normalizer, /NormalizePresets[\s\S]*?NormalizeSchedule[\s\S]*?DistinctBy\(preset => preset\.Id/);
   assert.match(resolver, /preset\.StartsAt\.Value <= now[\s\S]*?preset\.EndsAt\.Value > now/);
-  assert.match(resolver, /OrderByDescending\(candidate => candidate\.Preset\.Priority\)[\s\S]*?ThenByDescending\(candidate => candidate\.Preset\.StartsAt/);
+  assert.match(resolver, /OrderByDescending\(candidate => candidate\.Preset\.Priority\)[\s\S]*?ThenByDescending\(candidate => candidate\.Window!\.Start/);
+  assert.match(configuration, /FeaturedPresetScheduleTypes[\s\S]*?OneTime[\s\S]*?Weekly[\s\S]*?Annual/);
+  assert.match(resolver, /GetWeeklyWindows[\s\S]*?GetAnnualWindows[\s\S]*?GetNextBoundary/);
   assert.match(resolver, /config\.SourceRules = preset\.SourceRules[\s\S]*?config\.PersonalizationPolicy = preset\.PersonalizationPolicy/);
   assert.match(resolver, /config\.UseHeroLayout = preset\.Layout\.UseHeroLayout[\s\S]*?config\.TrailerSourcePriority = preset\.Trailers\.TrailerSourcePriority/);
   assert.match(resolver, /config\.EnableInfiniteLoading = preset\.Layout\.EnableInfiniteLoading/);
@@ -103,7 +105,7 @@ test('featured presets resolve schedules and override all roadmap sections', asy
   assert.match(response, /public DateTimeOffset\? NextPresetChange \{ get; \}/);
   assert.match(cache, /FeaturedPresetResolver\.Resolve\(baseConfig, DateTimeOffset\.UtcNow\)\.Configuration/);
   assert.match(defaults, /createPresetFromConfig[\s\S]*?SourceRules: structuredClone[\s\S]*?PersonalizationPolicy[\s\S]*?Mixer:[\s\S]*?Layout:[\s\S]*?Trailers:/);
-  assert.match(presetTab, /ConfigDateTime v-model="preset\.StartsAt"[\s\S]*?ConfigDateTime v-model="preset\.EndsAt"/);
+  assert.match(presetTab, /preset\.ScheduleType === 'one_time'[\s\S]*?ConfigDateTime v-model="preset\.StartsAt"[\s\S]*?ConfigDateTime v-model="preset\.EndsAt"/);
   assert.match(presetTab, /store\.updatePresetSnapshot\(index\)[\s\S]*?store\.duplicatePreset\(index\)/);
   assert.match(runtime, /schedulePresetRefresh\(response\.nextPresetChange\)/);
   assert.match(runtime, /Date\.now\(\) < boundary[\s\S]*?refreshForPresetBoundary\(\)/);
@@ -305,6 +307,28 @@ test('touch layouts keep the first Jellyfin section below the hero', async () =>
   ]);
   assert.match(styles, /@media \(max-width: 700px\), \(hover: none\) and \(pointer: coarse\)[\s\S]*?\.ec-root\.ec-ready\.ec-hero,[\s\S]*?\.ec-root\.ec-placeholder\.ec-hero[\s\S]*?margin-bottom:\s*calc\(1\.25rem \+ var\(--ec-media-padding, 0px\)\)/);
   assert.match(bootstrap, /@media\(max-width:700px\),\(hover:none\) and \(pointer:coarse\)[\s\S]*?\.ec-bootstrap-placeholder\.ec-bootstrap-hero\{margin-bottom:calc\(1\.25rem \+ var\(--ec-media-padding,0px\)\)\}/);
+});
+
+test('feed preview reuses mixer diagnostics for unsaved configs, users, and forced presets', async () => {
+  const [previewController, requests, responses, engine, allocation, store, modal, toolbar] = await Promise.all([
+    read('Jellyfin.Plugin.Featured/Api/FeaturedController.Preview.cs'),
+    read('Jellyfin.Plugin.Featured/Api/FeaturedController.Requests.cs'),
+    read('Jellyfin.Plugin.Featured/Api/FeaturedResponseDtos.cs'),
+    read('Jellyfin.Plugin.Featured/Api/FeaturedRuleEngine.cs'),
+    read('Jellyfin.Plugin.Featured/Api/FeaturedRuleEngine.Allocation.cs'),
+    read('src/config/libs/store.ts'),
+    read('src/config/components/FeedPreviewModal.vue'),
+    read('src/config/components/ConfigToolbar.vue')
+  ]);
+  assert.match(previewController, /HttpPost\("config\/preview"\)[\s\S]*?PermissionKind\.IsAdministrator/);
+  assert.match(previewController, /PluginConfigurationNormalizer\.Normalize\(request\.Configuration\)[\s\S]*?ResolvePreview/);
+  assert.match(previewController, /_personalization\.Resolve\(effective, previewUser\.Id\)[\s\S]*?SelectItems/);
+  assert.match(requests, /class FeaturedFeedPreviewRequest[\s\S]*?UserId[\s\S]*?PresetId[\s\S]*?UseDefaultConfiguration/);
+  assert.match(responses, /class FeaturedFeedPreviewResponse[\s\S]*?DuplicatesRemoved[\s\S]*?CooldownExcluded[\s\S]*?DiversitySkipped/);
+  assert.match(engine + allocation, /ItemReasons[\s\S]*?FeaturedItemSelectionReason|itemReasons\[item\.Id\]/);
+  assert.match(store, /featured\/config\/preview[\s\S]*?configuration: structuredClone\(config\)/);
+  assert.match(modal, /feedPreview\.value\.items[\s\S]*?feedPreview\.value\.rules[\s\S]*?duplicatesRemoved/);
+  assert.match(toolbar, /store\.openFeedPreview\(\)/);
 });
 
 test('border radius clips every composited slide with and without trailers', async () => {

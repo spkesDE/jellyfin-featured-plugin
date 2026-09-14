@@ -54,6 +54,7 @@ internal sealed partial class FeaturedRuleEngine
         List<BaseItem> result,
         HashSet<string> selectedKeys,
         FeaturedDiversityTracker diversity,
+        Dictionary<Guid, FeaturedItemSelectionReason> itemReasons,
         bool enforceDiversity,
         bool cooldownRelaxed = false)
     {
@@ -71,7 +72,7 @@ internal sealed partial class FeaturedRuleEngine
                     .ThenBy(candidate => candidate.Index)
                     .FirstOrDefault();
                 if (pool is null) break;
-                TryAddNext(pool, result, selectedKeys, diversity, enforceDiversity, cooldownRelaxed);
+                TryAddNext(pool, result, selectedKeys, diversity, itemReasons, enforceDiversity, cooldownRelaxed);
             }
 
             // Reallocate quota donated by exhausted or duplicate-heavy pools.
@@ -84,6 +85,7 @@ internal sealed partial class FeaturedRuleEngine
         List<BaseItem> result,
         HashSet<string> selectedKeys,
         FeaturedDiversityTracker diversity,
+        Dictionary<Guid, FeaturedItemSelectionReason> itemReasons,
         bool enforceDiversity,
         bool cooldownRelaxed)
     {
@@ -106,6 +108,7 @@ internal sealed partial class FeaturedRuleEngine
             selectedKeys.Add(identity);
             diversity.Record(item);
             result.Add(item);
+            itemReasons[item.Id] = new FeaturedItemSelectionReason(pool.Rule.Id, pool.Rule.Type);
             pool.Stats.Returned += 1;
             if (cooldownRelaxed) pool.Stats.CooldownRelaxed += 1;
             return true;

@@ -53,6 +53,11 @@ async function handleKeydown(event: KeyboardEvent, tab: ConfigTab): Promise<void
       </button>
     </div>
 
+    <button type="button" class="raised emby-button jmp-previewButton" @click="store.openFeedPreview()">
+      <span class="material-icons" aria-hidden="true">preview</span>
+      <span>{{ t('feedPreview.open') }}</span>
+    </button>
+
     <button
       type="submit"
       class="raised button-submit emby-button jmp-saveButton"

@@ -40,6 +40,7 @@ internal sealed partial class FeaturedRuleEngine
         long phaseStarted = totalStarted;
         List<FeaturedRuleDiagnostic> diagnostics = [];
         List<BaseItem> result = [];
+        Dictionary<Guid, FeaturedItemSelectionReason> itemReasons = [];
         HashSet<string> selectedKeys = new(StringComparer.OrdinalIgnoreCase);
         FeaturedDiversityTracker diversity = new(_config);
         FeaturedUserProfile? profile = personalization?.Profile ?? _config.UserProfiles.FirstOrDefault(candidate =>
@@ -141,25 +142,25 @@ internal sealed partial class FeaturedRuleEngine
         phaseStarted = Stopwatch.GetTimestamp();
         List<FeaturedRulePool> primaryPools = pools.Where(pool => !pool.Rule.IsFallback).ToList();
         List<FeaturedRulePool> fallbackPools = pools.Where(pool => pool.Rule.IsFallback).ToList();
-        FillFromPools(primaryPools, requestedCount, result, selectedKeys, diversity, enforceDiversity: true);
-        FillFromPools(fallbackPools, requestedCount, result, selectedKeys, diversity, enforceDiversity: true);
+        FillFromPools(primaryPools, requestedCount, result, selectedKeys, diversity, itemReasons, enforceDiversity: true);
+        FillFromPools(fallbackPools, requestedCount, result, selectedKeys, diversity, itemReasons, enforceDiversity: true);
 
         // Diversity is best-effort: never return an unnecessarily short feed.
         RestoreDeferred(primaryPools);
-        FillFromPools(primaryPools, requestedCount, result, selectedKeys, diversity, enforceDiversity: false);
+        FillFromPools(primaryPools, requestedCount, result, selectedKeys, diversity, itemReasons, enforceDiversity: false);
         RestoreDeferred(fallbackPools);
-        FillFromPools(fallbackPools, requestedCount, result, selectedKeys, diversity, enforceDiversity: false);
+        FillFromPools(fallbackPools, requestedCount, result, selectedKeys, diversity, itemReasons, enforceDiversity: false);
 
         if (_config.RelaxRepeatCooldownWhenNeeded && result.Count < requestedCount)
         {
             ActivateCooldownItems(primaryPools);
-            FillFromPools(primaryPools, requestedCount, result, selectedKeys, diversity, enforceDiversity: true, cooldownRelaxed: true);
+            FillFromPools(primaryPools, requestedCount, result, selectedKeys, diversity, itemReasons, enforceDiversity: true, cooldownRelaxed: true);
             ActivateCooldownItems(fallbackPools);
-            FillFromPools(fallbackPools, requestedCount, result, selectedKeys, diversity, enforceDiversity: true, cooldownRelaxed: true);
+            FillFromPools(fallbackPools, requestedCount, result, selectedKeys, diversity, itemReasons, enforceDiversity: true, cooldownRelaxed: true);
             RestoreDeferred(primaryPools);
-            FillFromPools(primaryPools, requestedCount, result, selectedKeys, diversity, enforceDiversity: false, cooldownRelaxed: true);
+            FillFromPools(primaryPools, requestedCount, result, selectedKeys, diversity, itemReasons, enforceDiversity: false, cooldownRelaxed: true);
             RestoreDeferred(fallbackPools);
-            FillFromPools(fallbackPools, requestedCount, result, selectedKeys, diversity, enforceDiversity: false, cooldownRelaxed: true);
+            FillFromPools(fallbackPools, requestedCount, result, selectedKeys, diversity, itemReasons, enforceDiversity: false, cooldownRelaxed: true);
         }
 
         diagnostics.AddRange(pools.Select(pool => pool.Stats));
@@ -173,7 +174,7 @@ internal sealed partial class FeaturedRuleEngine
             personalizationScoringMilliseconds,
             poolAllocationMilliseconds,
             ElapsedMilliseconds(totalStarted));
-        return new FeaturedSelection(result, diagnostics, profile is not null, timing);
+        return new FeaturedSelection(result, diagnostics, profile is not null, timing, itemReasons);
     }
 
     private static double ElapsedMilliseconds(long started)

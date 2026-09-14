@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Entities.Movies;
 
@@ -18,6 +19,7 @@ public sealed class FeaturedRuleDiagnostic
     public int DiversitySkipped { get; set; }
     public int CooldownRelaxed { get; set; }
     public int Returned { get; set; }
+    [JsonPropertyName("fallback")]
     public bool IsFallback { get; set; }
 }
 
@@ -25,7 +27,10 @@ internal sealed record FeaturedSelection(
     List<BaseItem> Items,
     List<FeaturedRuleDiagnostic> RuleStats,
     bool UserProfileApplied,
-    FeaturedRuleEngineTiming Timing);
+    FeaturedRuleEngineTiming Timing,
+    IReadOnlyDictionary<Guid, FeaturedItemSelectionReason> ItemReasons);
+
+internal sealed record FeaturedItemSelectionReason(string RuleId, string SourceType);
 
 internal sealed record FeaturedRuleEngineTiming(
     double SourceCandidatesMilliseconds,

@@ -150,6 +150,20 @@ public sealed class FeaturedPreset
 
     public DateTimeOffset? EndsAt { get; set; }
 
+    public string ScheduleType { get; set; } = FeaturedPresetScheduleTypes.OneTime;
+
+    public string TimeZoneId { get; set; } = "UTC";
+
+    public DayOfWeek[] DaysOfWeek { get; set; } = [];
+
+    public string StartTime { get; set; } = "18:00";
+
+    public string EndTime { get; set; } = "23:59";
+
+    public string AnnualStart { get; set; } = "12-01";
+
+    public string AnnualEnd { get; set; } = "12-31";
+
     public FeaturedSourceRule[] SourceRules { get; set; } = [];
 
     public FeaturedFilterRule[] GlobalFilters { get; set; } = [];
@@ -161,6 +175,13 @@ public sealed class FeaturedPreset
     public FeaturedPresetLayoutSettings Layout { get; set; } = new();
 
     public FeaturedPresetTrailerSettings Trailers { get; set; } = new();
+}
+
+public static class FeaturedPresetScheduleTypes
+{
+    public const string OneTime = "one_time";
+    public const string Weekly = "weekly";
+    public const string Annual = "annual";
 }
 
 public sealed class FeaturedPresetMixerSettings

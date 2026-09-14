@@ -2,7 +2,7 @@ import { computed, inject, reactive, ref, type ComputedRef, type InjectionKey, t
 import { getApiClient, requestJson } from '../../core/apiClient';
 import { t } from '../../i18n';
 import type { FeaturedFilterRule, FeaturedManualList, FeaturedPluginConfig, FeaturedPreset, SourceType } from '../../types/config';
-import type { FeaturedDiagnostics, FeaturedResponse, FeaturedSearchItem } from '../../types/featured';
+import type { FeaturedDiagnostics, FeaturedFeedPreview, FeaturedResponse, FeaturedSearchItem } from '../../types/featured';
 import { createDefaultConfig, createFilterRule, createManualList, createPresetFromConfig, createSourceRule, createUserProfile, normalizeConfig, refreshPresetFromConfig } from './defaults';
 import { loadLibrariesAndCollections, loadRatings, loadUsers } from './jellyfinApi';
 import type { ConfigCollection, ConfigLibrary, ConfigPlaylist, ConfigRating, ConfigTab, ConfigUser, SaveState } from './types';
@@ -23,6 +23,12 @@ export interface ConfigStore {
   diagnostics: Ref<FeaturedDiagnostics | null>;
   diagnosticsError: Ref<string | null>;
   diagnosticsLoading: Ref<boolean>;
+  feedPreview: Ref<FeaturedFeedPreview | null>;
+  feedPreviewOpen: Ref<boolean>;
+  feedPreviewLoading: Ref<boolean>;
+  feedPreviewError: Ref<string | null>;
+  feedPreviewPresetId: Ref<string>;
+  feedPreviewUserId: Ref<string>;
   activeTab: Ref<ConfigTab>;
   loading: Ref<boolean>;
   saveState: ComputedRef<SaveState>;
@@ -30,6 +36,9 @@ export interface ConfigStore {
   loadConfig(): Promise<void>;
   saveConfig(): Promise<void>;
   runDiagnostics(): Promise<void>;
+  openFeedPreview(presetId?: string): Promise<void>;
+  closeFeedPreview(): void;
+  runFeedPreview(userId?: string, presetId?: string): Promise<void>;
   selectTab(tab: ConfigTab): void;
   addSource(type: SourceType): void;
   removeSource(index: number): void;
@@ -63,6 +72,12 @@ export function createConfigStore(): ConfigStore {
   const diagnostics = ref<FeaturedDiagnostics | null>(null);
   const diagnosticsError = ref<string | null>(null);
   const diagnosticsLoading = ref(false);
+  const feedPreview = ref<FeaturedFeedPreview | null>(null);
+  const feedPreviewOpen = ref(false);
+  const feedPreviewLoading = ref(false);
+  const feedPreviewError = ref<string | null>(null);
+  const feedPreviewPresetId = ref('');
+  const feedPreviewUserId = ref('');
   const activeTab = ref<ConfigTab>('sources');
   const loading = ref(false);
   const lastSaved = ref(snapshot(config));
@@ -173,6 +188,39 @@ export function createConfigStore(): ConfigStore {
     }
   }
 
+  async function runFeedPreview(userId = '', presetId = feedPreviewPresetId.value): Promise<void> {
+    feedPreviewLoading.value = true;
+    feedPreviewError.value = null;
+    feedPreviewPresetId.value = presetId;
+    feedPreviewUserId.value = userId;
+    try {
+      feedPreview.value = await requestJson<FeaturedFeedPreview>('featured/config/preview', {
+        method: 'POST',
+        body: {
+          configuration: structuredClone(config),
+          userId: userId || null,
+          presetId: presetId && presetId !== '__default__' ? presetId : null,
+          useDefaultConfiguration: presetId === '__default__'
+        }
+      });
+    } catch (error) {
+      feedPreview.value = null;
+      feedPreviewError.value = error instanceof Error ? error.message : String(error);
+    } finally {
+      feedPreviewLoading.value = false;
+    }
+  }
+
+  async function openFeedPreview(presetId = ''): Promise<void> {
+    feedPreviewOpen.value = true;
+    feedPreviewPresetId.value = presetId;
+    await runFeedPreview(feedPreviewUserId.value, presetId);
+  }
+
+  function closeFeedPreview(): void {
+    feedPreviewOpen.value = false;
+  }
+
   function addSource(type: SourceType): void {
     config.SourceRules.push(createSourceRule(type));
   }
@@ -255,8 +303,9 @@ export function createConfigStore(): ConfigStore {
   }
   return {
     config, users, libraries, collections, playlists, genres, tags, ratings, preview, diagnostics, diagnosticsError, diagnosticsLoading,
+    feedPreview, feedPreviewOpen, feedPreviewLoading, feedPreviewError, feedPreviewPresetId, feedPreviewUserId,
     activeTab, loading, saveState, parentalRatingValue,
-    loadConfig, saveConfig, runDiagnostics, selectTab: (tab) => {
+    loadConfig, saveConfig, runDiagnostics, openFeedPreview, closeFeedPreview, runFeedPreview, selectTab: (tab) => {
       activeTab.value = tab;
       if (tab === 'display') void loadPreview();
     },

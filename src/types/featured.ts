@@ -134,6 +134,29 @@ export interface FeaturedRuleDiagnostics {
   returned: number;
 }
 
+export interface FeaturedFeedPreviewItem {
+  id: string;
+  name: string;
+  mediaType: string;
+  productionYear?: number | null;
+  sourceId: string;
+  sourceType: string;
+}
+
+export interface FeaturedFeedPreview {
+  userId: string;
+  userName: string;
+  activePresetId?: string | null;
+  activePresetName?: string | null;
+  nextPresetChange?: string | null;
+  items: FeaturedFeedPreviewItem[];
+  rules: FeaturedRuleDiagnostics[];
+  duplicatesRemoved: number;
+  cooldownExcluded: number;
+  diversitySkipped: number;
+  userProfileApplied: boolean;
+}
+
 export interface FeaturedSearchItem {
   id: string;
   name: string;

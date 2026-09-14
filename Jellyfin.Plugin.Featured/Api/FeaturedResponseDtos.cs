@@ -316,6 +316,31 @@ public sealed class FeaturedItemDto
     public int? RuntimeMinutes { get; init; }
 }
 
+public sealed class FeaturedFeedPreviewResponse
+{
+    public string UserId { get; init; } = string.Empty;
+    public string UserName { get; init; } = string.Empty;
+    public string? ActivePresetId { get; init; }
+    public string? ActivePresetName { get; init; }
+    public DateTimeOffset? NextPresetChange { get; init; }
+    public IReadOnlyList<FeaturedFeedPreviewItem> Items { get; init; } = [];
+    public IReadOnlyList<FeaturedRuleDiagnostic> Rules { get; init; } = [];
+    public int DuplicatesRemoved { get; init; }
+    public int CooldownExcluded { get; init; }
+    public int DiversitySkipped { get; init; }
+    public bool UserProfileApplied { get; init; }
+}
+
+public sealed class FeaturedFeedPreviewItem
+{
+    public string Id { get; init; } = string.Empty;
+    public string Name { get; init; } = string.Empty;
+    public string MediaType { get; init; } = string.Empty;
+    public int? ProductionYear { get; init; }
+    public string SourceId { get; init; } = string.Empty;
+    public string SourceType { get; init; } = string.Empty;
+}
+
 public sealed class FeaturedTrailerDto
 {
     public required string Type { get; init; }

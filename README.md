@@ -1,12 +1,14 @@
 # Jellyfin Featured
 
-[![License](https://img.shields.io/github/license/spkesDE/jellyfin-featured-plugin?style=flat-square)](./LICENSE)
-[![Release](https://img.shields.io/github/v/release/spkesDE/jellyfin-featured-plugin?style=flat-square)](https://github.com/spkesDE/jellyfin-featured-plugin/releases/latest)
-[![Jellyfin](https://img.shields.io/badge/Jellyfin-12.x-00A4DC?style=flat-square&logo=jellyfin&logoColor=white)](https://jellyfin.org/)
-[![Build](https://img.shields.io/github/actions/workflow/status/spkesDE/jellyfin-featured-plugin/ci.yml?branch=main&style=flat-square&label=build)](https://github.com/spkesDE/jellyfin-featured-plugin/actions/workflows/ci.yml)
-[![Downloads](https://img.shields.io/github/downloads/spkesDE/jellyfin-featured-plugin/total?style=flat-square)](https://github.com/spkesDE/jellyfin-featured-plugin/releases)
-
 ![Jellyfin Featured banner](./banner.png)
+
+<p align="center">
+  <a href="./LICENSE"><img alt="License" src="https://img.shields.io/github/license/spkesDE/jellyfin-featured-plugin?color=00A4DC&amp;cacheSeconds=3600" /></a>
+  <a href="https://github.com/spkesDE/jellyfin-featured-plugin/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/spkesDE/jellyfin-featured-plugin?color=AA5CC3&amp;cacheSeconds=3600" /></a>
+  <img alt="Jellyfin version" src="https://img.shields.io/badge/Jellyfin-12.x-AA5CC3?labelColor=555&amp;logo=jellyfin&amp;logoColor=00A4DC&amp;cacheSeconds=3600" />
+  <a href="https://github.com/spkesDE/jellyfin-featured-plugin/actions/workflows/ci.yml"><img alt="Build" src="https://img.shields.io/github/actions/workflow/status/spkesDE/jellyfin-featured-plugin/ci.yml?branch=main&amp;color=00A4DC&amp;cacheSeconds=3600" /></a>
+  <img alt="Downloads" src="https://img.shields.io/github/downloads/spkesDE/jellyfin-featured-plugin/total?color=AA5CC3&amp;cacheSeconds=3600" />
+</p>
 
 Jellyfin Featured adds a large, rotating banner to your Jellyfin home page. Use it to highlight favourites, new additions, collections, playlists, or anything else you want people on your server to discover.
 
@@ -19,6 +21,8 @@ Jellyfin Featured adds a large, rotating banner to your Jellyfin home page. Use 
 - Let users personalize their own source mix while the administrator keeps control of which settings may be changed.
 - Choose between a classic banner and a larger hero layout, then adjust the height, artwork, text, buttons and transitions.
 - Rotate titles automatically, load more while browsing, or play local, direct-video, and YouTube trailers in the background.
+- Schedule complete presets once, on selected weekdays, or as annual seasonal ranges in an explicit time zone.
+- Preview the generated feed and mixer diagnostics as any Jellyfin user before saving or enabling a preset.
 - Fast by design, prepared per-user caches and background warm-up keep normal page loads near-instant while avoiding repeated heavy library queries.
 
 Jellyfin Featured works in Jellyfin Web and clients that display the Jellyfin Web interface. Some native TV apps use their own home screen and cannot show the banner.
@@ -89,7 +93,7 @@ A random selection is enabled by default, so you should see the banner without h
 ## Content Sources
 
 | Source | Best for |
-|---|---|
+| --- | --- |
 | Libraries | Titles from selected Jellyfin libraries |
 | Collections | Curated groups and franchises |
 | Favourites | Items marked as favourites |
@@ -131,11 +135,11 @@ When personalization is enabled, users can open `Featured settings` from Jellyfi
 
 ## Presets and Scheduling
 
-Presets let you prepare a complete Featured experience for a specific occasion such as this year's Christmas period, a particular weekend, or a planned movie night.
+Presets let you prepare a complete Featured experience for an occasion such as a Christmas season, recurring weekend mornings, Friday movie nights, or a one-off event.
 
-First configure the sources, filters, layout, personalization, and trailers you want. Then open `Presets & Schedule`, capture the current settings, choose a name and one-time start/end period, and enable the preset. Outside that absolute period, Jellyfin Featured automatically returns to your normal settings. Weekly or annual recurrence is not currently supported.
+First configure the sources, filters, layout, personalization, and trailers you want. Then open `Presets & Schedule`, capture the current settings, choose a one-time, weekly, or annual schedule, and enable the preset. Recurring schedules use an explicit IANA time zone, follow daylight-saving changes, and may cross midnight or the end of the year. Outside every active period, Jellyfin Featured automatically returns to your normal settings.
 
-If two presets overlap, use the priority setting to choose which one should be shown. `Update from current settings` refreshes an existing preset without changing its name or schedule.
+If two presets overlap, use the priority setting to choose which one should be shown. `Update from current settings` refreshes an existing preset without changing its name or schedule. Use `Preview feed` to inspect the exact item order, per-source contribution, duplicate removal, cooldown exclusions, and diversity decisions. The preview can run as another Jellyfin user or force any preset without saving or enabling it first.
 
 ## Languages
 

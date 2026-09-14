@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, provide } from 'vue';
 import ConfigToolbar from './components/ConfigToolbar.vue';
+import FeedPreviewModal from './components/FeedPreviewModal.vue';
 import { t } from '../i18n';
 import { configStoreKey, createConfigStore } from './libs/store';
 import AdvancedTab from './tabs/AdvancedTab.vue';
@@ -48,5 +49,6 @@ onBeforeUnmount(() => {
         <AdvancedTab v-show="store.activeTab.value === 'advanced'" />
       </div>
     </form>
+    <FeedPreviewModal />
   </div>
 </template>

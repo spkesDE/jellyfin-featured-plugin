@@ -188,7 +188,8 @@ public sealed partial class FeaturedController
         }
     }
 
-    private FeaturedRuleEngine CreateEngine() => new(_config, _userManager, _libraryManager, _userDataManager, _candidateCache);
+    private FeaturedRuleEngine CreateEngine(PluginConfiguration? config = null)
+        => new(config ?? _config, _userManager, _libraryManager, _userDataManager, _candidateCache);
 
     internal static void WarmItemsResponseSerialization(
         PluginConfiguration config,

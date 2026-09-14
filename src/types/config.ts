@@ -8,6 +8,7 @@ export type HeroHeightMode = 'auto' | 'compact' | 'standard' | 'cinematic' | 'cu
 export type HeroTextPosition = 'left' | 'center' | 'right';
 export type TrailerSourcePriority = 'prefer_local' | 'prefer_remote' | 'local_only' | 'remote_only' | 'automatic';
 export type MultipleTrailerMode = 'first' | 'random';
+export type PresetScheduleType = 'one_time' | 'weekly' | 'annual';
 
 import type { FeaturedDisplaySettings } from './display';
 
@@ -107,6 +108,13 @@ export interface FeaturedPreset {
   Priority: number;
   StartsAt: string | null;
   EndsAt: string | null;
+  ScheduleType: PresetScheduleType;
+  TimeZoneId: string;
+  DaysOfWeek: number[];
+  StartTime: string;
+  EndTime: string;
+  AnnualStart: string;
+  AnnualEnd: string;
   SourceRules: FeaturedSourceRule[];
   GlobalFilters: FeaturedFilterRule[];
   PersonalizationPolicy: FeaturedPersonalizationPolicy;

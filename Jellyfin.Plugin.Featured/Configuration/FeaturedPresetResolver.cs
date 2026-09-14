@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json;
 
 namespace Jellyfin.Plugin.Featured;
@@ -15,22 +16,19 @@ internal static class FeaturedPresetResolver
     internal static FeaturedPresetResolution Resolve(PluginConfiguration source, DateTimeOffset now)
     {
         FeaturedPreset[] presets = source.Presets ?? [];
-        FeaturedPreset? active = presets
-            .Select((preset, index) => new { Preset = preset, Index = index })
-            .Where(candidate => IsActive(candidate.Preset, now))
+        PresetCandidate? active = presets
+            .Select((preset, index) => new PresetCandidate(preset, index, GetActiveWindow(preset, now)))
+            .Where(candidate => candidate.Window is not null)
             .OrderByDescending(candidate => candidate.Preset.Priority)
-            .ThenByDescending(candidate => candidate.Preset.StartsAt ?? DateTimeOffset.MinValue)
+            .ThenByDescending(candidate => candidate.Window!.Start)
             .ThenBy(candidate => candidate.Index)
-            .Select(candidate => candidate.Preset)
             .FirstOrDefault();
 
         DateTimeOffset? nextChange = presets
             .Where(preset => preset.Enabled)
-            .SelectMany(preset => new[] { preset.StartsAt, preset.EndsAt })
-            .Where(boundary => boundary.HasValue && boundary.Value > now)
-            .Select(boundary => boundary!.Value)
+            .Select(preset => GetNextBoundary(preset, now))
+            .Where(boundary => boundary.HasValue)
             .OrderBy(boundary => boundary)
-            .Cast<DateTimeOffset?>()
             .FirstOrDefault();
 
         if (active is null)
@@ -39,14 +37,152 @@ internal static class FeaturedPresetResolver
         }
 
         PluginConfiguration effective = Clone(source);
-        Apply(effective, active);
-        return new FeaturedPresetResolution(effective, active.Id, active.Name, nextChange);
+        Apply(effective, active.Preset);
+        return new FeaturedPresetResolution(effective, active.Preset.Id, active.Preset.Name, nextChange);
     }
 
-    private static bool IsActive(FeaturedPreset preset, DateTimeOffset now)
-        => preset.Enabled
-            && (!preset.StartsAt.HasValue || preset.StartsAt.Value <= now)
+    internal static FeaturedPresetResolution ResolvePreview(
+        PluginConfiguration source,
+        DateTimeOffset now,
+        string? presetId,
+        bool useDefaultConfiguration)
+    {
+        if (useDefaultConfiguration)
+        {
+            return new FeaturedPresetResolution(source, null, null, Resolve(source, now).NextScheduleChange);
+        }
+
+        if (string.IsNullOrWhiteSpace(presetId)) return Resolve(source, now);
+        FeaturedPreset? preset = (source.Presets ?? [])
+            .FirstOrDefault(candidate => string.Equals(candidate.Id, presetId, StringComparison.OrdinalIgnoreCase));
+        if (preset is null) throw new ArgumentException("The requested preset does not exist.", nameof(presetId));
+
+        PluginConfiguration effective = Clone(source);
+        Apply(effective, preset);
+        return new FeaturedPresetResolution(effective, preset.Id, preset.Name, null);
+    }
+
+    private static ScheduleWindow? GetActiveWindow(FeaturedPreset preset, DateTimeOffset now)
+    {
+        if (!preset.Enabled) return null;
+        return preset.ScheduleType switch
+        {
+            FeaturedPresetScheduleTypes.Weekly => GetWeeklyWindows(preset, now)
+                .Where(window => window.Start <= now && window.End > now)
+                .OrderByDescending(window => window.Start)
+                .FirstOrDefault(),
+            FeaturedPresetScheduleTypes.Annual => GetAnnualWindows(preset, now)
+                .Where(window => window.Start <= now && window.End > now)
+                .OrderByDescending(window => window.Start)
+                .FirstOrDefault(),
+            _ => IsOneTimeActive(preset, now)
+                ? new ScheduleWindow(preset.StartsAt ?? DateTimeOffset.MinValue, preset.EndsAt ?? DateTimeOffset.MaxValue)
+                : null
+        };
+    }
+
+    private static DateTimeOffset? GetNextBoundary(FeaturedPreset preset, DateTimeOffset now)
+    {
+        IEnumerable<DateTimeOffset> boundaries = preset.ScheduleType switch
+        {
+            FeaturedPresetScheduleTypes.Weekly => GetWeeklyWindows(preset, now)
+                .SelectMany(window => new[] { window.Start, window.End }),
+            FeaturedPresetScheduleTypes.Annual => GetAnnualWindows(preset, now)
+                .SelectMany(window => new[] { window.Start, window.End }),
+            _ => new[] { preset.StartsAt, preset.EndsAt }
+                .Where(boundary => boundary.HasValue)
+                .Select(boundary => boundary!.Value)
+        };
+        return boundaries.Where(boundary => boundary > now).OrderBy(boundary => boundary).Cast<DateTimeOffset?>().FirstOrDefault();
+    }
+
+    private static bool IsOneTimeActive(FeaturedPreset preset, DateTimeOffset now)
+        => (!preset.StartsAt.HasValue || preset.StartsAt.Value <= now)
             && (!preset.EndsAt.HasValue || preset.EndsAt.Value > now);
+
+    private static IEnumerable<ScheduleWindow> GetWeeklyWindows(FeaturedPreset preset, DateTimeOffset now)
+    {
+        DayOfWeek[] selectedDays = preset.DaysOfWeek ?? [];
+        if (selectedDays.Length == 0) yield break;
+
+        TimeZoneInfo zone = FindTimeZone(preset.TimeZoneId);
+        DateTime localDate = TimeZoneInfo.ConvertTime(now, zone).Date;
+        TimeOnly startTime = ParseTime(preset.StartTime, new TimeOnly(18, 0));
+        TimeOnly endTime = ParseTime(preset.EndTime, new TimeOnly(23, 59));
+        for (int dayOffset = -1; dayOffset <= 8; dayOffset++)
+        {
+            DateTime date = localDate.AddDays(dayOffset);
+            if (!selectedDays.Contains(date.DayOfWeek)) continue;
+            DateTime localStart = date.Add(startTime.ToTimeSpan());
+            DateTime localEnd = date.Add(endTime.ToTimeSpan());
+            if (localEnd <= localStart) localEnd = localEnd.AddDays(1);
+            yield return new ScheduleWindow(ToUtc(localStart, zone), ToUtc(localEnd, zone));
+        }
+    }
+
+    private static IEnumerable<ScheduleWindow> GetAnnualWindows(FeaturedPreset preset, DateTimeOffset now)
+    {
+        TimeZoneInfo zone = FindTimeZone(preset.TimeZoneId);
+        int localYear = TimeZoneInfo.ConvertTime(now, zone).Year;
+        TimeOnly startTime = ParseTime(preset.StartTime, TimeOnly.MinValue);
+        TimeOnly endTime = ParseTime(preset.EndTime, new TimeOnly(23, 59));
+        for (int year = localYear - 1; year <= localYear + 2; year++)
+        {
+            DateTime localStart = CreateAnnualBoundary(year, preset.AnnualStart, startTime, 12, 1);
+            DateTime localEnd = CreateAnnualBoundary(year, preset.AnnualEnd, endTime, 12, 31);
+            if (localEnd <= localStart)
+            {
+                localEnd = CreateAnnualBoundary(year + 1, preset.AnnualEnd, endTime, 12, 31);
+            }
+
+            yield return new ScheduleWindow(ToUtc(localStart, zone), ToUtc(localEnd, zone));
+        }
+    }
+
+    private static DateTime CreateAnnualBoundary(
+        int year,
+        string? monthDay,
+        TimeOnly time,
+        int fallbackMonth,
+        int fallbackDay)
+    {
+        string[] parts = (monthDay ?? string.Empty).Split('-');
+        int month = parts.Length == 2 && int.TryParse(parts[0], NumberStyles.None, CultureInfo.InvariantCulture, out int parsedMonth)
+            ? Math.Clamp(parsedMonth, 1, 12)
+            : fallbackMonth;
+        int day = parts.Length == 2 && int.TryParse(parts[1], NumberStyles.None, CultureInfo.InvariantCulture, out int parsedDay)
+            ? Math.Clamp(parsedDay, 1, DateTime.DaysInMonth(year, month))
+            : fallbackDay;
+        return new DateTime(year, month, day, time.Hour, time.Minute, 0, DateTimeKind.Unspecified);
+    }
+
+    private static TimeOnly ParseTime(string? value, TimeOnly fallback)
+        => TimeOnly.TryParseExact(value, "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out TimeOnly parsed)
+            ? parsed
+            : fallback;
+
+    private static TimeZoneInfo FindTimeZone(string? id)
+    {
+        try
+        {
+            return TimeZoneInfo.FindSystemTimeZoneById(string.IsNullOrWhiteSpace(id) ? "UTC" : id);
+        }
+        catch (TimeZoneNotFoundException)
+        {
+            return TimeZoneInfo.Utc;
+        }
+        catch (InvalidTimeZoneException)
+        {
+            return TimeZoneInfo.Utc;
+        }
+    }
+
+    private static DateTimeOffset ToUtc(DateTime local, TimeZoneInfo zone)
+    {
+        DateTime boundary = DateTime.SpecifyKind(local, DateTimeKind.Unspecified);
+        while (zone.IsInvalidTime(boundary)) boundary = boundary.AddMinutes(1);
+        return new DateTimeOffset(TimeZoneInfo.ConvertTimeToUtc(boundary, zone), TimeSpan.Zero);
+    }
 
     private static PluginConfiguration Clone(PluginConfiguration source)
         => JsonSerializer.Deserialize<PluginConfiguration>(JsonSerializer.Serialize(source, CloneOptions), CloneOptions)
@@ -108,4 +244,7 @@ internal static class FeaturedPresetResolver
         config.AllowTrailersOnMobile = preset.Trailers.AllowTrailersOnMobile;
         config.TrailerOverrides = preset.Trailers.Overrides;
     }
+
+    private sealed record PresetCandidate(FeaturedPreset Preset, int Index, ScheduleWindow? Window);
+    private sealed record ScheduleWindow(DateTimeOffset Start, DateTimeOffset End);
 }

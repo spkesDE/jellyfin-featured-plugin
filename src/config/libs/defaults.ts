@@ -30,8 +30,11 @@ export function createUserProfile(userId = ''): FeaturedUserProfile {
 }
 
 export function createPresetFromConfig(config: FeaturedPluginConfig, name = 'Featured preset'): FeaturedPreset {
+  const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
   return {
     Id: createId(), Name: name, Enabled: false, Priority: 0, StartsAt: null, EndsAt: null,
+    ScheduleType: 'one_time', TimeZoneId: timeZone, DaysOfWeek: [],
+    StartTime: '18:00', EndTime: '23:59', AnnualStart: '12-01', AnnualEnd: '12-31',
     SourceRules: structuredClone(config.SourceRules),
     GlobalFilters: structuredClone(config.GlobalFilters),
     PersonalizationPolicy: structuredClone(config.PersonalizationPolicy),
@@ -85,7 +88,14 @@ export function refreshPresetFromConfig(preset: FeaturedPreset, config: Featured
     Enabled: preset.Enabled,
     Priority: preset.Priority,
     StartsAt: preset.StartsAt,
-    EndsAt: preset.EndsAt
+    EndsAt: preset.EndsAt,
+    ScheduleType: preset.ScheduleType,
+    TimeZoneId: preset.TimeZoneId,
+    DaysOfWeek: structuredClone(preset.DaysOfWeek),
+    StartTime: preset.StartTime,
+    EndTime: preset.EndTime,
+    AnnualStart: preset.AnnualStart,
+    AnnualEnd: preset.AnnualEnd
   };
 }
 
@@ -278,6 +288,13 @@ export function normalizeConfig(value: unknown): FeaturedPluginConfig {
           Name: preset.Name || fallback.Name,
           StartsAt: preset.StartsAt ?? null,
           EndsAt: preset.EndsAt ?? null,
+          ScheduleType: ['weekly', 'annual'].includes(String(preset.ScheduleType)) ? preset.ScheduleType : 'one_time',
+          TimeZoneId: preset.TimeZoneId || fallback.TimeZoneId,
+          DaysOfWeek: Array.isArray(preset.DaysOfWeek) ? preset.DaysOfWeek : [],
+          StartTime: preset.StartTime || fallback.StartTime,
+          EndTime: preset.EndTime || fallback.EndTime,
+          AnnualStart: preset.AnnualStart || fallback.AnnualStart,
+          AnnualEnd: preset.AnnualEnd || fallback.AnnualEnd,
           SourceRules: Array.isArray(preset.SourceRules) ? structuredClone(preset.SourceRules) : fallback.SourceRules,
           GlobalFilters: normalizeFilters(preset.GlobalFilters),
           PersonalizationPolicy: { ...fallback.PersonalizationPolicy, ...(preset.PersonalizationPolicy ?? {}) },

@@ -691,6 +691,25 @@
                     transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
                 }
 
+                #FeaturedConfigPage .jmp-previewButton {
+                    align-items: center;
+                    background: var(--ec-theme-contained);
+                    border: 1px solid var(--ec-theme-divider);
+                    border-radius: 999px;
+                    color: var(--ec-theme-text-primary);
+                    cursor: pointer;
+                    display: inline-flex;
+                    gap: .4rem;
+                    margin: 0;
+                    padding: .55rem .9rem;
+                    text-transform: none;
+                }
+
+                #FeaturedConfigPage .jmp-previewButton:hover,
+                #FeaturedConfigPage .jmp-previewButton:focus {
+                    background: var(--ec-theme-action-focus);
+                }
+
                 #FeaturedConfigPage .jmp-saveButton span {
                     display: inline-flex;
                     align-items: center;
@@ -1005,6 +1024,10 @@
                     #FeaturedConfigPage .jmp-saveButton {
                         width: 100%;
                         margin-left: 0;
+                    }
+
+                    #FeaturedConfigPage .jmp-previewButton {
+                        flex: 1 1 auto;
                     }
 
                     #FeaturedConfigPage .jmp-compactGrid {

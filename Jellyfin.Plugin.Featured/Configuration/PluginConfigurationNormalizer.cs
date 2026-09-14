@@ -111,6 +111,22 @@ internal static class PluginConfigurationNormalizer
                 preset.Name = string.IsNullOrWhiteSpace(preset.Name) ? "Featured preset" : preset.Name.Trim();
                 preset.Priority = Math.Clamp(preset.Priority, -1000, 1000);
                 (preset.StartsAt, preset.EndsAt) = NormalizeSchedule(preset.StartsAt, preset.EndsAt);
+                preset.ScheduleType = preset.ScheduleType?.Trim().ToLowerInvariant() switch
+                {
+                    FeaturedPresetScheduleTypes.Weekly => FeaturedPresetScheduleTypes.Weekly,
+                    FeaturedPresetScheduleTypes.Annual => FeaturedPresetScheduleTypes.Annual,
+                    _ => FeaturedPresetScheduleTypes.OneTime
+                };
+                preset.TimeZoneId = NormalizeTimeZoneId(preset.TimeZoneId);
+                preset.DaysOfWeek = (preset.DaysOfWeek ?? [])
+                    .Where(day => Enum.IsDefined(day))
+                    .Distinct()
+                    .OrderBy(day => (int)day)
+                    .ToArray();
+                preset.StartTime = NormalizeTime(preset.StartTime, "18:00");
+                preset.EndTime = NormalizeTime(preset.EndTime, "23:59");
+                preset.AnnualStart = NormalizeMonthDay(preset.AnnualStart, "12-01");
+                preset.AnnualEnd = NormalizeMonthDay(preset.AnnualEnd, "12-31");
                 preset.SourceRules = (preset.SourceRules ?? [])
                     .Where(rule => rule is not null && ValidSourceTypes.Contains(rule.Type))
                     .Select(NormalizeSourceRule)
@@ -309,6 +325,36 @@ internal static class PluginConfigurationNormalizer
         if (startsAt.HasValue && endsAt.HasValue && endsAt <= startsAt) endsAt = null;
         return (startsAt, endsAt);
     }
+
+    private static string NormalizeTimeZoneId(string? value)
+    {
+        string candidate = string.IsNullOrWhiteSpace(value) ? "UTC" : value.Trim();
+        try
+        {
+            _ = TimeZoneInfo.FindSystemTimeZoneById(candidate);
+            return candidate;
+        }
+        catch (TimeZoneNotFoundException)
+        {
+            return "UTC";
+        }
+        catch (InvalidTimeZoneException)
+        {
+            return "UTC";
+        }
+    }
+
+    private static string NormalizeTime(string? value, string fallback)
+        => TimeOnly.TryParseExact(value?.Trim(), "HH:mm", System.Globalization.CultureInfo.InvariantCulture,
+            System.Globalization.DateTimeStyles.None, out TimeOnly parsed)
+            ? parsed.ToString("HH:mm", System.Globalization.CultureInfo.InvariantCulture)
+            : fallback;
+
+    private static string NormalizeMonthDay(string? value, string fallback)
+        => DateOnly.TryParseExact($"2000-{value?.Trim()}", "yyyy-MM-dd",
+            System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out DateOnly parsed)
+            ? parsed.ToString("MM-dd", System.Globalization.CultureInfo.InvariantCulture)
+            : fallback;
 
     private static string NormalizeOperator(string field, string filterOperator)
     {

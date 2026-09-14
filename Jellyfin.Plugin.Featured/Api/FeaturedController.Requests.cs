@@ -14,3 +14,14 @@ public sealed class FeaturedClearHistoryRequest
 {
     public Guid[] UserIds { get; set; } = [];
 }
+
+public sealed class FeaturedFeedPreviewRequest
+{
+    public PluginConfiguration? Configuration { get; set; }
+
+    public Guid? UserId { get; set; }
+
+    public string? PresetId { get; set; }
+
+    public bool UseDefaultConfiguration { get; set; }
+}
