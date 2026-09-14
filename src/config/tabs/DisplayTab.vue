@@ -53,7 +53,7 @@ const titleOptions: SelectOption[] = [
         <ConfigSelect v-model="store.config.HeroBackdropPosition" :label="t('display.backdropPosition')" :options="positionOptions" />
         <ConfigSelect v-model="store.config.TransitionEffect" :label="t('display.transitionEffect')" :options="transitionOptions" />
         <ConfigSelect v-model="store.config.TitleDisplayMode" :label="t('display.titleDisplay')" :options="titleOptions" />
-        <ConfigText v-model="store.config.Heading" :label="t('display.bannerHeading')" :placeholder="t('common.optional')" />
+        <ConfigText v-if="!store.config.UseHeroLayout" v-model="store.config.Heading" :label="t('display.bannerHeading')" :placeholder="t('common.optional')" />
         <ConfigNumber v-model="store.config.MediaPadding" :label="t('display.spaceBelow')" :help-text="store.config.UseHeroLayout ? t('display.heroMinimumGap') : undefined" :min="-240" :max="240" :step="4" />
       </ConfigCard>
 
