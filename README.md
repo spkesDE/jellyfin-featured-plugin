@@ -132,6 +132,8 @@ If two presets overlap, use the priority setting to choose which one should be s
 
 The plugin interface currently includes English and German. It follows the Jellyfin/browser language automatically and falls back to English when the selected language or an individual translation is unavailable.
 
+[![Translation status](./docs/i18n-status.svg)](./src/i18n/locales)
+
 ## Caching and repeat protection
 
 Candidate Cache, Prepared Cache, and Repeat Cooldown solve different problems. In short, candidates avoid repeated library discovery, prepared entries make normal requests fast, and repeat cooldown records displayed titles so they can be excluded for longer. See [Cache behavior](./docs/cache-behavior.md) for the full distinction and cache diagnostics.
