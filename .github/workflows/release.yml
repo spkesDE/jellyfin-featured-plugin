@@ -6,7 +6,10 @@ on:
       - "v*"
 
 permissions:
+  artifact-metadata: write
+  attestations: write
   contents: read
+  id-token: write
 
 concurrency:
   group: release-${{ github.ref_name }}
@@ -105,6 +108,11 @@ jobs:
 
           "checksum=$checksum" >> $env:GITHUB_OUTPUT
           "timestamp=$timestamp" >> $env:GITHUB_OUTPUT
+
+      - name: Attest release artifact
+        uses: actions/attest@v4
+        with:
+          subject-path: release/Featured.zip
 
       - name: Create GitHub release
         env:

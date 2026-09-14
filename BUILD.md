@@ -126,6 +126,12 @@ For a release package with release notes:
 
 The release pipeline validates synchronized project and frontend versions, verifies the generated JavaScript bundles and their embedded copies, writes the release metadata, and creates `release\Featured.zip`.
 
+Tagged GitHub releases also publish a signed build-provenance attestation for `Featured.zip`. Verify a downloaded release with:
+
+```powershell
+gh attestation verify .\Featured.zip --repo spkesDE/jellyfin-featured-plugin
+```
+
 To prepare and push a tagged release from a clean `main` branch:
 
 ```powershell
