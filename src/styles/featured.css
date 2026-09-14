@@ -170,6 +170,15 @@
   z-index: 0;
 }
 
+.ec-media {
+  height: var(--ec-height);
+  inset: 0;
+  overflow: hidden;
+  position: absolute;
+  width: 100%;
+  z-index: 0;
+}
+
 .ec-backdrop {
   background-position: center;
   background-repeat: no-repeat;
@@ -215,8 +224,8 @@
   width: 100%;
 }
 
-.ec-slide.ec-youtube-trailer-concealed > .ec-trailer,
-.ec-slide.ec-youtube-trailer-concealed > iframe {
+.ec-slide.ec-youtube-trailer-concealed .ec-trailer,
+.ec-slide.ec-youtube-trailer-concealed .ec-trailer iframe {
   opacity: 0;
 }
 
@@ -548,7 +557,7 @@
   height: var(--ec-height);
 }
 
-.ec-root.ec-hero .ec-slide.ec-trailer-active {
+.ec-root.ec-hero .ec-slide {
   background: linear-gradient(to bottom,
       #000 0%,
       #000 54%,
@@ -562,8 +571,7 @@
   opacity: 0;
 }
 
-.ec-root.ec-hero .ec-backdrop,
-.ec-root.ec-hero .ec-trailer {
+.ec-root.ec-hero .ec-media {
   -webkit-mask-image: linear-gradient(to bottom,
       #000 28%,
       rgba(0, 0, 0, .92) 40%,

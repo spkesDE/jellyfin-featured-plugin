@@ -70,11 +70,15 @@ export function createSlide(item: FeaturedItem, response: FeaturedResponse): HTM
     slide.setAttribute('aria-label', item.name);
   }
 
+  const media = document.createElement('div');
+  media.className = 'ec-media';
+
   const backdrop = document.createElement('div');
   backdrop.className = 'ec-backdrop';
   backdrop.dataset.ecImageUrl = heroImageUrl(item.id, item.imageType, response.reduceImageSizes);
   backdrop.style.backgroundPosition = response.heroBackdropPosition;
-  slide.appendChild(backdrop);
+  media.appendChild(backdrop);
+  slide.appendChild(media);
 
   const hitbox = document.createElement('div');
   hitbox.className = 'ec-slide-hitbox';

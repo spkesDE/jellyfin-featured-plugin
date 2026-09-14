@@ -183,13 +183,14 @@ test('personalization is authenticated, policy-bound, user scoped, and fast to r
 });
 
 test('proper trailer support keeps resolution and playback source independent', async () => {
-  const [configuration, normalizer, resolver, response, player, carousel, trailerTab, styles] = await Promise.all([
+  const [configuration, normalizer, resolver, response, player, carousel, render, trailerTab, styles] = await Promise.all([
     read('Jellyfin.Plugin.Featured/Configuration/PluginConfiguration.cs'),
     read('Jellyfin.Plugin.Featured/Configuration/PluginConfigurationNormalizer.cs'),
     read('Jellyfin.Plugin.Featured/Api/TrailerResolver.cs'),
     read('Jellyfin.Plugin.Featured/Api/FeaturedResponseDtos.cs'),
     read('src/slider/trailer.ts'),
     read('src/slider/carousel.ts'),
+    read('src/slider/render.ts'),
     read('src/config/tabs/TrailersTab.vue'),
     read('src/styles/featured.css')
   ]);
@@ -239,12 +240,14 @@ test('proper trailer support keeps resolution and playback source independent', 
   assert.doesNotMatch(carousel, /trailerCountdownLabel|Math\.ceil\(remaining \/ 1000\)/);
   assert.doesNotMatch(styles, /ec-trailer-countdown/);
   assert.match(styles, /\.ec-youtube-trailer-concealed[\s\S]*?opacity:\s*0/);
-  assert.match(carousel, /querySelectorAll\(':scope > \.ec-trailer'\)/);
+  assert.match(render, /className = 'ec-media'[\s\S]*?media\.appendChild\(backdrop\)[\s\S]*?slide\.appendChild\(media\)/);
+  assert.match(carousel, /querySelectorAll\('\.ec-media > \.ec-trailer'\)/);
   assert.match(carousel, /classList\.add\('ec-trailer-active'\)[\s\S]*?classList\.remove\('ec-trailer-active'\)/);
   assert.match(styles, /\.ec-trailer\s*\{[\s\S]*?height:\s*max\(100%, 56\.25vw\)[\s\S]*?min-width:\s*100vw[\s\S]*?translate\(-50%, -50%\)/);
   assert.match(styles, /\.ec-trailer\s*\{[\s\S]*?pointer-events:\s*none/);
-  assert.match(styles, /\.ec-slide\.ec-trailer-active\s*\{[\s\S]*?linear-gradient\(to bottom,[\s\S]*?#000 54%[\s\S]*?transparent 80%/);
-  assert.match(styles, /\.ec-root\.ec-hero \.ec-backdrop,[\s\S]*?transparent 74%/);
+  assert.match(styles, /\.ec-root\.ec-hero \.ec-slide\s*\{[\s\S]*?linear-gradient\(to bottom,[\s\S]*?#000 54%[\s\S]*?transparent 80%/);
+  assert.match(styles, /\.ec-media\s*\{[^}]*height:\s*var\(--ec-height\)[^}]*inset:\s*0[^}]*position:\s*absolute[^}]*width:\s*100%/);
+  assert.match(styles, /\.ec-root\.ec-hero \.ec-media\s*\{[\s\S]*?transparent 74%/);
   assert.match(styles, /\.ec-root\.ec-hero \.ec-slide::after[\s\S]*?transparent 78%/);
   assert.match(styles, /\.ec-slide\.ec-trailer-active \.ec-backdrop\s*\{[\s\S]*?opacity:\s*0/);
   assert.match(styles, /@media \(max-width: 700px\)[\s\S]*?\.ec-root\.ec-hero \.ec-slide::after\s*\{[\s\S]*?linear-gradient\(0deg/);

@@ -455,7 +455,7 @@ export class FeaturedCarousel {
       this.trailerSlide = slide;
       slide.classList.toggle('ec-trailer-active', !concealYouTube);
       slide.classList.toggle('ec-youtube-trailer-concealed', concealYouTube);
-      slide.querySelectorAll(':scope > .ec-trailer').forEach((element) => element.remove());
+      slide.querySelectorAll('.ec-media > .ec-trailer').forEach((element) => element.remove());
       slide.querySelector('.ec-backdrop')?.after(player.element);
       if (this.response.waitForTrailerToFinish) this.pauseTimer();
       void player.play().catch(recover);
