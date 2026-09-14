@@ -13,6 +13,7 @@ export interface FeaturedDisplaySettings {
   showPlayButton: boolean;
   showNavigationArrows: boolean;
   showControlsOnHoverOnly: boolean;
+  interactOnWholeBanner: boolean;
   showSlidePosition: boolean;
   mediaPadding: number;
   titleDisplayMode: 'logo' | 'title';

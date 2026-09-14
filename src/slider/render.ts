@@ -64,15 +64,22 @@ function createMetadata(item: FeaturedItem, response: FeaturedResponse): HTMLEle
 export function createSlide(item: FeaturedItem, response: FeaturedResponse): HTMLElement {
   const slide = document.createElement('article');
   slide.className = 'ec-slide';
-  slide.setAttribute('role', 'link');
-  slide.setAttribute('aria-label', item.name);
   slide.tabIndex = -1;
+  if (response.interactOnWholeBanner) {
+    slide.setAttribute('role', 'link');
+    slide.setAttribute('aria-label', item.name);
+  }
 
   const backdrop = document.createElement('div');
   backdrop.className = 'ec-backdrop';
   backdrop.dataset.ecImageUrl = heroImageUrl(item.id, item.imageType, response.reduceImageSizes);
   backdrop.style.backgroundPosition = response.heroBackdropPosition;
   slide.appendChild(backdrop);
+
+  const hitbox = document.createElement('div');
+  hitbox.className = 'ec-slide-hitbox';
+  hitbox.setAttribute('aria-hidden', 'true');
+  slide.appendChild(hitbox);
 
   const content = document.createElement('div');
   content.className = 'ec-content';
@@ -126,17 +133,19 @@ export function createSlide(item: FeaturedItem, response: FeaturedResponse): HTM
     content.appendChild(actions);
   }
 
-  slide.addEventListener('click', (event) => {
-    if ((event.target as Element).closest('button')) return;
-    openItemDetails(item.id);
-  });
-  slide.addEventListener('keydown', (event) => {
-    const target = event.target instanceof Element ? event.target : null;
-    if (target?.closest('button')) return;
-    if (event.key !== 'Enter' && event.key !== ' ') return;
-    event.preventDefault();
-    openItemDetails(item.id);
-  });
+  if (response.interactOnWholeBanner) {
+    slide.addEventListener('click', (event) => {
+      if ((event.target as Element).closest('button')) return;
+      openItemDetails(item.id);
+    });
+    slide.addEventListener('keydown', (event) => {
+      const target = event.target instanceof Element ? event.target : null;
+      if (target?.closest('button')) return;
+      if (event.key !== 'Enter' && event.key !== ' ') return;
+      event.preventDefault();
+      openItemDetails(item.id);
+    });
+  }
   slide.appendChild(content);
   return slide;
 }

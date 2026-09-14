@@ -309,6 +309,38 @@ test('touch layouts keep the first Jellyfin section below the hero', async () =>
   assert.match(bootstrap, /@media\(max-width:700px\),\(hover:none\) and \(pointer:coarse\)[\s\S]*?\.ec-bootstrap-placeholder\.ec-bootstrap-hero\{margin-bottom:calc\(1\.25rem \+ var\(--ec-media-padding,0px\)\)\}/);
 });
 
+test('hero hit-testing ends at the first Jellyfin section without clipping the visual fade', async () => {
+  const [render, styles] = await Promise.all([
+    read('src/slider/render.ts'),
+    read('src/styles/featured.css')
+  ]);
+  assert.match(render, /className = 'ec-slide-hitbox'/);
+  assert.match(styles, /\.ec-root\.ec-ready\.ec-hero\s*\{[^}]*pointer-events:\s*none/);
+  assert.match(styles, /\.ec-slide-hitbox\s*\{[^}]*height:\s*clamp\(0px, calc\(var\(--ec-height\) - var\(--ec-hero-overlap, 150px\) \+ 52px \+ var\(--ec-media-padding, 0px\)\), var\(--ec-height\)\)[^}]*pointer-events:\s*none/);
+  assert.match(styles, /\.ec-whole-banner-interactive \.ec-slide-hitbox\s*\{[^}]*pointer-events:\s*auto/);
+  assert.doesNotMatch(styles, /\.ec-root\.ec-ready\.ec-hero \+ \.verticalSection/);
+});
+
+test('whole-banner interaction is configurable while buttons remain independent', async () => {
+  const [configuration, resolver, response, defaults, displayTab, carousel, render] = await Promise.all([
+    read('Jellyfin.Plugin.Featured/Configuration/PluginConfiguration.cs'),
+    read('Jellyfin.Plugin.Featured/Configuration/FeaturedPresetResolver.cs'),
+    read('Jellyfin.Plugin.Featured/Api/FeaturedResponseDtos.cs'),
+    read('src/config/libs/defaults.ts'),
+    read('src/config/tabs/DisplayTab.vue'),
+    read('src/slider/carousel.ts'),
+    read('src/slider/render.ts')
+  ]);
+  assert.match(configuration, /InteractOnWholeBanner\s*\{\s*get;\s*set;\s*\}\s*=\s*true/);
+  assert.match(resolver, /config\.InteractOnWholeBanner = preset\.Layout\.InteractOnWholeBanner/);
+  assert.match(response, /InteractOnWholeBanner = config\.InteractOnWholeBanner/);
+  assert.match(defaults, /InteractOnWholeBanner:\s*true/);
+  assert.match(displayTab, /v-model="store\.config\.InteractOnWholeBanner"/);
+  assert.match(carousel, /response\.interactOnWholeBanner \? ' ec-whole-banner-interactive'/);
+  assert.match(carousel, /isActive && this\.response\.interactOnWholeBanner \? 0 : -1/);
+  assert.match(render, /if \(response\.interactOnWholeBanner\)[\s\S]*?slide\.addEventListener\('click'/);
+});
+
 test('feed preview reuses mixer diagnostics for unsaved configs, users, and forced presets', async () => {
   const [previewController, requests, responses, engine, allocation, store, modal, sources] = await Promise.all([
     read('Jellyfin.Plugin.Featured/Api/FeaturedController.Preview.cs'),

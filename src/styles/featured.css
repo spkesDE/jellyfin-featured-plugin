@@ -154,6 +154,10 @@
   transition: none !important;
 }
 
+.ec-root:not(.ec-whole-banner-interactive) .ec-slide {
+  cursor: default;
+}
+
 .ec-root.ec-effect-fade .ec-slide {
   opacity: 0;
   pointer-events: none;
@@ -496,11 +500,39 @@
 
 .ec-root.ec-ready.ec-hero {
   margin-bottom: calc((var(--ec-hero-overlap, 150px) * -1) + 52px + var(--ec-media-padding, 0px));
+  pointer-events: none;
 }
 
 .ec-root.ec-placeholder.ec-hero {
   margin-bottom: calc((var(--ec-hero-overlap, 150px) * -1) + 52px + var(--ec-media-padding, 0px));
   margin-top: 0;
+}
+
+/* The artwork keeps its full height for the fade, while this transparent
+   surface ends exactly where the following Jellyfin section starts. */
+.ec-root.ec-ready.ec-hero .ec-slide {
+  pointer-events: none;
+}
+
+.ec-root.ec-ready.ec-hero .ec-slide-hitbox {
+  height: clamp(0px, calc(var(--ec-height) - var(--ec-hero-overlap, 150px) + 52px + var(--ec-media-padding, 0px)), var(--ec-height));
+  inset: 0 0 auto;
+  pointer-events: none;
+  position: absolute;
+  z-index: 2;
+}
+
+.ec-root.ec-ready.ec-hero.ec-whole-banner-interactive .ec-slide-hitbox {
+  pointer-events: auto;
+}
+
+.ec-root.ec-ready.ec-hero .ec-content {
+  z-index: 3;
+}
+
+.ec-root.ec-ready.ec-hero .ec-button,
+.ec-root.ec-ready.ec-hero .ec-navigation {
+  pointer-events: auto;
 }
 
 .ec-root.ec-hero .ec-navigation {
@@ -636,6 +668,10 @@
   .ec-root.ec-ready.ec-hero,
   .ec-root.ec-placeholder.ec-hero {
     margin-bottom: calc(1.25rem + var(--ec-media-padding, 0px));
+  }
+
+  .ec-root.ec-ready.ec-hero .ec-slide-hitbox {
+    height: clamp(0px, calc(var(--ec-height) + 1.25rem + var(--ec-media-padding, 0px)), var(--ec-height));
   }
 }
 

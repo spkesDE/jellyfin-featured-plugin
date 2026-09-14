@@ -207,6 +207,7 @@ internal static class FeaturedPresetResolver
         config.ShowPlayButton = preset.Layout.ShowPlayButton;
         config.ShowNavigationArrows = preset.Layout.ShowNavigationArrows;
         config.ShowControlsOnHoverOnly = preset.Layout.ShowControlsOnHoverOnly;
+        config.InteractOnWholeBanner = preset.Layout.InteractOnWholeBanner;
         config.ShowSlidePosition = preset.Layout.ShowSlidePosition;
         config.MediaPadding = preset.Layout.MediaPadding;
         config.TitleDisplayMode = preset.Layout.TitleDisplayMode;

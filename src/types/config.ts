@@ -73,6 +73,7 @@ export interface FeaturedPluginConfig {
   ShowPlayButton: boolean;
   ShowNavigationArrows: boolean;
   ShowControlsOnHoverOnly: boolean;
+  InteractOnWholeBanner: boolean;
   ShowSlidePosition: boolean;
   MediaPadding: number;
   TitleDisplayMode: 'logo' | 'title';
@@ -139,6 +140,7 @@ export interface FeaturedPresetLayoutSettings {
   ShowPlayButton: boolean;
   ShowNavigationArrows: boolean;
   ShowControlsOnHoverOnly: boolean;
+  InteractOnWholeBanner: boolean;
   ShowSlidePosition: boolean;
   MediaPadding: number;
   TitleDisplayMode: 'logo' | 'title';

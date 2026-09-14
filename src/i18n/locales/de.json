@@ -325,6 +325,8 @@
   "display.showNavigation": "Navigationspfeile anzeigen",
   "display.showControlsOnHoverOnly": "Steuerung nur bei Hover anzeigen",
   "display.showControlsOnHoverOnlyHelp": "Auf Touch-Geräten und bei Tastaturfokus bleibt die Steuerung sichtbar.",
+  "display.interactOnWholeBanner": "Gesamten Banner interaktiv machen",
+  "display.interactOnWholeBannerHelp": "Öffnet die Details beim Klicken oder Tippen auf den sichtbaren Bannerbereich. Schaltflächen und Navigation bleiben auch bei deaktivierter Option bedienbar.",
   "display.showPosition": "Slide-Position anzeigen (zum Beispiel 3 / 5)",
   "display.showPaginationDots": "Seitennavigationspunkte anzeigen",
   "display.hideTv": "In TV-Layouts ausblenden",

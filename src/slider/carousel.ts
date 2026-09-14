@@ -83,7 +83,7 @@ export class FeaturedCarousel {
     // Safari only permits unattended inline playback when the media starts muted.
     this.trailerMuted = response.startTrailersMuted || isIosTrailerClient() || this.trailerVolume === 0;
     this.root = document.createElement('section');
-    this.root.className = `ec-root ec-ready ec-effect-${response.transitionEffect} ec-height-${response.heroHeightMode} ec-text-${response.heroTextPosition}${response.useHeroLayout ? ' ec-hero' : ''}${response.showControlsOnHoverOnly ? ' ec-controls-hover' : ''}`;
+    this.root.className = `ec-root ec-ready ec-effect-${response.transitionEffect} ec-height-${response.heroHeightMode} ec-text-${response.heroTextPosition}${response.useHeroLayout ? ' ec-hero' : ''}${response.showControlsOnHoverOnly ? ' ec-controls-hover' : ''}${response.interactOnWholeBanner ? ' ec-whole-banner-interactive' : ''}`;
     this.root.dataset.featuredVersion = PLUGIN_VERSION;
     applyHeroLayoutVariables(this.root, response);
     this.root.setAttribute('aria-roledescription', 'carousel');
@@ -251,7 +251,7 @@ export class FeaturedCarousel {
       if (slide.classList.contains('is-active') !== isActive) slide.classList.toggle('is-active', isActive);
       const ariaHidden = isActive ? 'false' : 'true';
       if (slide.getAttribute('aria-hidden') !== ariaHidden) slide.setAttribute('aria-hidden', ariaHidden);
-      const tabIndex = isActive ? 0 : -1;
+      const tabIndex = isActive && this.response.interactOnWholeBanner ? 0 : -1;
       if (slide.tabIndex !== tabIndex) slide.tabIndex = tabIndex;
     });
     if (wrappedSlides.length) {

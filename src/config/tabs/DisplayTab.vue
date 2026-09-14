@@ -68,6 +68,7 @@ const titleOptions: SelectOption[] = [
         <ConfigText v-if="store.config.ShowSecondaryButton" v-model="store.config.SecondaryButtonText" :label="t('display.secondaryButtonText')" :placeholder="t('display.moreInfo')" />
         <ConfigCheckbox v-model="store.config.ShowNavigationArrows" :label="t('display.showNavigation')" />
         <ConfigCheckbox v-model="store.config.ShowControlsOnHoverOnly" :label="t('display.showControlsOnHoverOnly')" :help-text="t('display.showControlsOnHoverOnlyHelp')" />
+        <ConfigCheckbox v-model="store.config.InteractOnWholeBanner" :label="t('display.interactOnWholeBanner')" :help-text="t('display.interactOnWholeBannerHelp')" />
         <ConfigCheckbox v-if="!store.config.EnableInfiniteLoading && !store.config.ShowPaginationDots" v-model="store.config.ShowSlidePosition" :label="t('display.showPosition')" />
         <ConfigCheckbox v-if="!store.config.EnableInfiniteLoading" v-model="store.config.ShowPaginationDots" :label="t('display.showPaginationDots')" />
         <ConfigCheckbox v-model="store.config.HideOnTvLayout" :label="t('display.hideTv')" />
