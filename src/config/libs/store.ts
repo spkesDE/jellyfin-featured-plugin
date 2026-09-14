@@ -9,6 +9,7 @@ import type { ConfigCollection, ConfigLibrary, ConfigPlaylist, ConfigRating, Con
 
 const PLUGIN_ID = '08880a95-8467-4538-bab9-da69c7f4793f';
 const snapshot = (value: FeaturedPluginConfig): string => JSON.stringify(value);
+const cloneConfig = (value: FeaturedPluginConfig): FeaturedPluginConfig => JSON.parse(snapshot(value)) as FeaturedPluginConfig;
 
 export interface ConfigStore {
   config: FeaturedPluginConfig;
@@ -162,7 +163,7 @@ export function createConfigStore(): ConfigStore {
     loading.value = true;
     window.Dashboard?.showLoadingMsg();
     try {
-      const result = await api.updatePluginConfiguration(PLUGIN_ID, structuredClone(config));
+      const result = await api.updatePluginConfiguration(PLUGIN_ID, cloneConfig(config));
       lastSaved.value = snapshot(config);
       savedFeedback.value = true;
       if (feedbackTimer) window.clearTimeout(feedbackTimer);
@@ -197,7 +198,7 @@ export function createConfigStore(): ConfigStore {
       feedPreview.value = await requestJson<FeaturedFeedPreview>('featured/config/preview', {
         method: 'POST',
         body: {
-          configuration: structuredClone(config),
+          configuration: cloneConfig(config),
           userId: userId || null,
           presetId: presetId && presetId !== '__default__' ? presetId : null,
           useDefaultConfiguration: presetId === '__default__'

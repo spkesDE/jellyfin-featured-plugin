@@ -26,6 +26,12 @@ const sourceOptions: SelectOption[] = [
 <template>
   <section id="featuredPanel-sources" class="jmp-section jmp-section-plain" role="tabpanel" aria-labelledby="featuredTab-sources">
     <ConfigCard :title="t('source.title')" :help="t('source.help')">
+      <template #actions>
+        <button type="button" class="raised emby-button ec-secondaryAction ec-feedPreviewAction" @click="store.openFeedPreview()">
+          <span class="material-icons" aria-hidden="true">preview</span>
+          {{ t('feedPreview.open') }}
+        </button>
+      </template>
       <div class="ec-addSourceRow">
         <ConfigSelect v-model="selectedType" :label="t('source.newType')" :help-text="t('source.orderHelp')" :options="sourceOptions" />
         <button type="button" class="raised button-submit emby-button ec-addSourceButton" @click="store.addSource(selectedType)">
@@ -56,8 +62,10 @@ const sourceOptions: SelectOption[] = [
 .ec-addSourceRow { align-items: end; display: grid; gap: 1rem; grid-template-columns: minmax(15rem, 1fr) auto; }
 .ec-addSourceRow > :deep(.selectContainer) { margin-bottom: 0; }
 .ec-sourceRules { display: grid; gap: 1rem; margin-top: 1rem; }
+.ec-feedPreviewAction { min-height: 2.35rem; padding: .45rem .75rem; white-space: nowrap; }
 
 @media (max-width: 600px) {
   .ec-addSourceRow { grid-template-columns: 1fr; }
+  .ec-feedPreviewAction { width: 100%; }
 }
 </style>

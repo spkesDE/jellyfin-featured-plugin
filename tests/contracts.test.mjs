@@ -310,7 +310,7 @@ test('touch layouts keep the first Jellyfin section below the hero', async () =>
 });
 
 test('feed preview reuses mixer diagnostics for unsaved configs, users, and forced presets', async () => {
-  const [previewController, requests, responses, engine, allocation, store, modal, toolbar] = await Promise.all([
+  const [previewController, requests, responses, engine, allocation, store, modal, sources] = await Promise.all([
     read('Jellyfin.Plugin.Featured/Api/FeaturedController.Preview.cs'),
     read('Jellyfin.Plugin.Featured/Api/FeaturedController.Requests.cs'),
     read('Jellyfin.Plugin.Featured/Api/FeaturedResponseDtos.cs'),
@@ -318,17 +318,26 @@ test('feed preview reuses mixer diagnostics for unsaved configs, users, and forc
     read('Jellyfin.Plugin.Featured/Api/FeaturedRuleEngine.Allocation.cs'),
     read('src/config/libs/store.ts'),
     read('src/config/components/FeedPreviewModal.vue'),
-    read('src/config/components/ConfigToolbar.vue')
+    read('src/config/tabs/SourcesTab.vue')
   ]);
   assert.match(previewController, /HttpPost\("config\/preview"\)[\s\S]*?PermissionKind\.IsAdministrator/);
   assert.match(previewController, /PluginConfigurationNormalizer\.Normalize\(request\.Configuration\)[\s\S]*?ResolvePreview/);
   assert.match(previewController, /_personalization\.Resolve\(effective, previewUser\.Id\)[\s\S]*?SelectItems/);
+  assert.match(previewController, /JsonSerializer\.Serialize\(payload, RuntimeConfigJsonOptions\)/);
   assert.match(requests, /class FeaturedFeedPreviewRequest[\s\S]*?UserId[\s\S]*?PresetId[\s\S]*?UseDefaultConfiguration/);
   assert.match(responses, /class FeaturedFeedPreviewResponse[\s\S]*?DuplicatesRemoved[\s\S]*?CooldownExcluded[\s\S]*?DiversitySkipped/);
   assert.match(engine + allocation, /ItemReasons[\s\S]*?FeaturedItemSelectionReason|itemReasons\[item\.Id\]/);
-  assert.match(store, /featured\/config\/preview[\s\S]*?configuration: structuredClone\(config\)/);
+  assert.match(store, /cloneConfig[\s\S]*?JSON\.parse\(snapshot\(value\)\)/);
+  assert.match(store, /featured\/config\/preview[\s\S]*?configuration: cloneConfig\(config\)/);
   assert.match(modal, /feedPreview\.value\.items[\s\S]*?feedPreview\.value\.rules[\s\S]*?duplicatesRemoved/);
-  assert.match(toolbar, /store\.openFeedPreview\(\)/);
+  assert.match(sources, /#actions[\s\S]*?ec-feedPreviewAction[\s\S]*?store\.openFeedPreview\(\)/);
+});
+
+test('API failures expose HTTP status instead of object stringification', async () => {
+  const apiClient = await read('src/core/apiClient.ts');
+  assert.match(apiClient, /catch \(error\)[\s\S]*?createRequestError\(path, error\)/);
+  assert.match(apiClient, /statusPart[\s\S]*?HTTP \$\{status\}/);
+  assert.match(apiClient, /parseErrorDetail\(body\)/);
 });
 
 test('border radius clips every composited slide with and without trailers', async () => {

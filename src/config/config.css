@@ -551,6 +551,24 @@
                     line-height: 1.35;
                 }
 
+                #FeaturedConfigPage .jmp-cardHeader-actions {
+                    display: grid;
+                    align-items: start;
+                    grid-template-columns: minmax(0, 1fr) auto;
+                    gap: 0.75rem;
+                    margin-bottom: 1rem;
+                }
+
+                #FeaturedConfigPage .jmp-cardHeader-actions .jmp-subsectionHelp {
+                    margin-bottom: 0;
+                }
+
+                @media (max-width: 600px) {
+                    #FeaturedConfigPage .jmp-cardHeader-actions {
+                        grid-template-columns: 1fr;
+                    }
+                }
+
                 #FeaturedConfigPage .jmp-help {
                     margin: 0 0 1rem;
                     opacity: 0.8;
@@ -689,25 +707,6 @@
                     text-transform: none;
                     text-decoration: none;
                     transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
-                }
-
-                #FeaturedConfigPage .jmp-previewButton {
-                    align-items: center;
-                    background: var(--ec-theme-contained);
-                    border: 1px solid var(--ec-theme-divider);
-                    border-radius: 999px;
-                    color: var(--ec-theme-text-primary);
-                    cursor: pointer;
-                    display: inline-flex;
-                    gap: .4rem;
-                    margin: 0;
-                    padding: .55rem .9rem;
-                    text-transform: none;
-                }
-
-                #FeaturedConfigPage .jmp-previewButton:hover,
-                #FeaturedConfigPage .jmp-previewButton:focus {
-                    background: var(--ec-theme-action-focus);
                 }
 
                 #FeaturedConfigPage .jmp-saveButton span {
@@ -1024,10 +1023,6 @@
                     #FeaturedConfigPage .jmp-saveButton {
                         width: 100%;
                         margin-left: 0;
-                    }
-
-                    #FeaturedConfigPage .jmp-previewButton {
-                        flex: 1 1 auto;
                     }
 
                     #FeaturedConfigPage .jmp-compactGrid {

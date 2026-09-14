@@ -70,6 +70,31 @@ export function installMockJellyfin(): void {
           rules: []
         };
       }
+      if (url.includes('featured/config/preview')) {
+        return {
+          userId: 'editor-1',
+          userName: 'Editorial Team',
+          activePresetId: null,
+          activePresetName: null,
+          nextPresetChange: null,
+          items: [
+            { id: 'preview-1', name: 'The Winter Archive', mediaType: 'Movie', productionYear: 2025, sourceId: 'default-random', sourceType: 'RANDOM' },
+            { id: 'preview-2', name: 'Northern Lights', mediaType: 'Series', productionYear: 2024, sourceId: 'default-random', sourceType: 'RANDOM' },
+            { id: 'preview-3', name: 'Friday Feature', mediaType: 'Movie', productionYear: 2026, sourceId: 'default-random', sourceType: 'RANDOM' },
+            { id: 'preview-4', name: 'Beyond the Horizon', mediaType: 'Movie', productionYear: 2023, sourceId: 'default-random', sourceType: 'RANDOM' },
+            { id: 'preview-5', name: 'Cinema Club', mediaType: 'Series', productionYear: 2025, sourceId: 'default-random', sourceType: 'RANDOM' }
+          ],
+          rules: [{
+            id: 'default-random', type: 'RANDOM', candidateItems: 42, filteredOut: 4, afterFilters: 38,
+            ineligible: 2, cooldownExcluded: 3, eligible: 33, allocated: 5, duplicates: 1,
+            diversitySkipped: 2, cooldownRelaxed: 0, fallback: false, returned: 5
+          }],
+          duplicatesRemoved: 1,
+          cooldownExcluded: 3,
+          diversitySkipped: 2,
+          userProfileApplied: true
+        };
+      }
       if (url.includes('featured/items')) {
         return {
           ...createFeaturedResponseDefaults(),

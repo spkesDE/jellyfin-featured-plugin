@@ -1,4 +1,5 @@
 using System.Net.Mime;
+using System.Text.Json;
 using Jellyfin.Data;
 using Jellyfin.Database.Implementations.Enums;
 using Microsoft.AspNetCore.Authorization;
@@ -70,7 +71,7 @@ public sealed partial class FeaturedController
                 };
             }).ToArray();
 
-            return Ok(new FeaturedFeedPreviewResponse
+            FeaturedFeedPreviewResponse payload = new()
             {
                 UserId = previewUser.Id.ToString(),
                 UserName = previewUser.Username,
@@ -83,7 +84,10 @@ public sealed partial class FeaturedController
                 CooldownExcluded = selection.RuleStats.Sum(rule => rule.CooldownExcluded),
                 DiversitySkipped = selection.RuleStats.Sum(rule => rule.DiversitySkipped),
                 UserProfileApplied = selection.UserProfileApplied
-            });
+            };
+            return Content(
+                JsonSerializer.Serialize(payload, RuntimeConfigJsonOptions),
+                MediaTypeNames.Application.Json);
         }
         catch (Exception ex)
         {
