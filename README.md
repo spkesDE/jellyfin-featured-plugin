@@ -13,6 +13,7 @@ Jellyfin Featured adds a large, rotating banner to your Jellyfin home page. Use 
 - Let users personalize their own source mix while the administrator keeps control of which settings may be changed.
 - Choose between a classic banner and a larger hero layout, then adjust the height, artwork, text, buttons and transitions.
 - Rotate titles automatically, load more while browsing, or play local, direct-video, and YouTube trailers in the background.
+- Fast by design, prepared per-user caches and background warm-up keep normal page loads near-instant while avoiding repeated heavy library queries.
 
 Jellyfin Featured works in Jellyfin Web and clients that display the Jellyfin Web interface. Some native TV apps use their own home screen and cannot show the banner.
 
