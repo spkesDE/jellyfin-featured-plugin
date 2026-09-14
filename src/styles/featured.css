@@ -25,8 +25,8 @@
 }
 
 .ec-preferences-backdrop { align-items: center; background: rgb(0 0 0 / .72); box-sizing: border-box; display: flex; inset: 0; justify-content: center; overflow: auto; padding: max(1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) max(1rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left)); position: fixed; z-index: 99999; }
-.ec-preferences-dialog { background: var(--ec-theme-background); border: 1px solid var(--ec-theme-divider); border-radius: var(--ec-theme-radius); box-shadow: 0 1rem 3rem rgb(0 0 0 / .55); box-sizing: border-box; color: var(--ec-theme-text-primary); display: flex; flex-direction: column; height: min(52rem, calc(100dvh - 2rem)); margin: auto; max-height: calc(100dvh - 2rem); max-width: calc(100vw - 2rem); overflow: hidden; width: 64rem; }
-.ec-preferences-header { align-items: center; background: var(--ec-theme-appbar); display: flex; flex: 0 0 auto; justify-content: space-between; min-height: 3.6rem; padding: .45rem .65rem .45rem 1.4rem; }
+.ec-preferences-dialog { background: var(--ec-dialog-background, var(--ec-theme-background)); border: var(--ec-dialog-border, 1px solid var(--ec-theme-divider)); border-radius: var(--ec-dialog-radius, var(--ec-theme-radius)); box-shadow: var(--ec-dialog-shadow, 0 1rem 3rem rgb(0 0 0 / .55)); box-sizing: border-box; color: var(--ec-dialog-color, var(--ec-theme-text-primary)); display: flex; flex-direction: column; height: min(52rem, calc(100dvh - 2rem)); margin: auto; max-height: calc(100dvh - 2rem); max-width: calc(100vw - 2rem); overflow: hidden; width: 64rem; }
+.ec-preferences-header { align-items: center; background: var(--ec-dialog-header-background, var(--ec-theme-appbar)); display: flex; flex: 0 0 auto; justify-content: space-between; min-height: 3.6rem; padding: .45rem .65rem .45rem 1.4rem; }
 .ec-preferences-dialog h2 { font-size: 1.45rem; font-weight: 400; margin: 0; }
 .ec-preferences-content { flex: 1 1 auto; min-height: 0; overflow: auto; padding: .3rem 1.4rem 1.4rem; }
 .ec-preferences-help { line-height: 1.45; opacity: .75; }
@@ -54,7 +54,7 @@
 .ec-preference-genre:focus-visible { outline: 2px solid var(--ec-theme-secondary); outline-offset: .15rem; }
 .ec-preference-boosts { display: grid; gap: .7rem 1rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .ec-preference-boosts legend { grid-column: 1 / -1; }
-.ec-preferences-actions { align-items: center; background: var(--ec-theme-paper); border-top: 1px solid var(--ec-theme-divider); display: flex; flex: 0 0 auto; gap: .75rem; justify-content: flex-end; padding: .8rem 1.4rem; }
+.ec-preferences-actions { align-items: center; background: var(--ec-dialog-footer-background, var(--ec-theme-paper)); border-top: 1px solid var(--ec-theme-divider); display: flex; flex: 0 0 auto; gap: .75rem; justify-content: flex-end; padding: .8rem 1.4rem; }
 .ec-preferences-status { align-self: center; color: var(--ec-theme-error-light); flex: 1; }
 .ec-preferences-actions button { margin: 0; }
 .ec-preferences-loading-shell { min-height: 12rem; }
@@ -93,13 +93,13 @@
 }
 
 .ec-root:not(.ec-hero) .ec-viewport {
-  border-radius: var(--ec-radius);
+  border-radius: var(--ec-banner-radius, var(--ec-radius));
   box-shadow: 0 .35rem 1.2rem rgba(0, 0, 0, .28);
 }
 
 .ec-viewport {
   background: #111;
-  border-radius: var(--ec-radius);
+  border-radius: var(--ec-banner-radius, var(--ec-radius));
   height: var(--ec-height);
   min-height: 240px;
   overflow: hidden;
@@ -136,8 +136,8 @@
 }
 
 .ec-slide {
-  border-radius: var(--ec-radius);
-  clip-path: inset(0 round var(--ec-radius));
+  border-radius: var(--ec-banner-radius, var(--ec-radius));
+  clip-path: inset(0 round var(--ec-banner-radius, var(--ec-radius)));
   color: inherit;
   cursor: pointer;
   inset: 0;
@@ -311,10 +311,11 @@
 
 .ec-button {
   align-items: center;
-  background: var(--ec-theme-primary);
-  border: 0;
-  border-radius: var(--ec-theme-radius);
-  color: var(--ec-theme-primary-contrast);
+  background: var(--ec-button-primary-background, var(--ec-theme-primary));
+  border: var(--ec-button-border, 0);
+  border-radius: var(--ec-button-radius, var(--ec-theme-radius));
+  box-shadow: var(--ec-button-shadow, none);
+  color: var(--ec-button-primary-color, var(--ec-theme-primary-contrast));
   cursor: pointer;
   display: inline-flex;
   font: inherit;
@@ -326,7 +327,7 @@
 
 .ec-button:hover,
 .ec-button:focus-visible {
-  background: var(--ec-theme-primary-dark);
+  background: var(--ec-button-primary-hover-background, var(--ec-theme-primary-dark));
 }
 
 .ec-button:focus-visible {
@@ -335,13 +336,13 @@
 }
 
 .ec-button-secondary {
-  background: var(--ec-theme-contained);
-  color: var(--ec-theme-text-primary);
+  background: var(--ec-button-secondary-background, var(--ec-theme-contained));
+  color: var(--ec-button-secondary-color, var(--ec-theme-text-primary));
 }
 
 .ec-button-secondary:hover,
 .ec-button-secondary:focus-visible {
-  background: var(--ec-theme-contained-hover);
+  background: var(--ec-button-secondary-hover-background, var(--ec-theme-contained-hover));
 }
 
 .ec-navigation {

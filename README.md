@@ -107,6 +107,8 @@ You can also choose which details and controls are shown, including the title or
 
 Featured automatically inherits Jellyfin's active theme palette. Primary and secondary buttons, focus states, dialogs, form surfaces, text, dividers, errors, and corner styling follow Jellyfin's `--jf-palette-*` and `--jf-card-borderRadius` variables. Common legacy accent variables are supported as fallbacks. Text and navigation drawn directly over artwork remain high-contrast so custom light themes do not make the hero unreadable.
 
+Want to go further? Every part of the 12.3 theming update can be changed with `--ec-*` variables and direct `.ec-*` selectors, including both button styles, banner corners, and the preferences dialog. See [Custom CSS and theming](./docs/custom-css.md) for the full list and ready-to-use examples.
+
 ## Trailer Support
 
 Jellyfin Featured can play local trailers and supported online trailers in the background. You can choose which type to prefer, start trailers muted, add a delay, adjust start and end points, and decide whether they should play on mobile devices.

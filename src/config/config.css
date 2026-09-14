@@ -260,10 +260,11 @@
                 }
 
                 #FeaturedConfigPage .ec-configPreviewButton {
-                    background: var(--ec-theme-primary);
-                    border: 0;
-                    border-radius: var(--ec-theme-radius);
-                    color: var(--ec-theme-primary-contrast);
+                    background: var(--ec-button-primary-background, var(--ec-theme-primary));
+                    border: var(--ec-button-border, 0);
+                    border-radius: var(--ec-button-radius, var(--ec-theme-radius));
+                    box-shadow: var(--ec-button-shadow, none);
+                    color: var(--ec-button-primary-color, var(--ec-theme-primary-contrast));
                     font-weight: 700;
                     margin-top: .65rem;
                     padding: .45rem .8rem;
@@ -273,13 +274,23 @@
                     margin-left: .4rem;
                 }
 
+                #FeaturedConfigPage .ec-configPreviewButton:hover,
+                #FeaturedConfigPage .ec-configPreviewButton:focus-visible {
+                    background: var(--ec-button-primary-hover-background, var(--ec-theme-primary-dark));
+                }
+
                 #FeaturedConfigPage .ec-configPreviewActions {
                     white-space: nowrap;
                 }
 
                 #FeaturedConfigPage .ec-configPreviewButton.is-secondary {
-                    background: var(--ec-theme-contained);
-                    color: var(--ec-theme-text-primary);
+                    background: var(--ec-button-secondary-background, var(--ec-theme-contained));
+                    color: var(--ec-button-secondary-color, var(--ec-theme-text-primary));
+                }
+
+                #FeaturedConfigPage .ec-configPreviewButton.is-secondary:hover,
+                #FeaturedConfigPage .ec-configPreviewButton.is-secondary:focus-visible {
+                    background: var(--ec-button-secondary-hover-background, var(--ec-theme-contained-hover));
                 }
 
                 #FeaturedConfigPage .ec-configPreviewDots {

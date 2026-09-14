@@ -309,8 +309,8 @@ test('touch layouts keep the first Jellyfin section below the hero', async () =>
 
 test('border radius clips every composited slide with and without trailers', async () => {
   const styles = await read('src/styles/featured.css');
-  assert.match(styles, /\.ec-viewport\s*\{[^}]*border-radius:\s*var\(--ec-radius\)[^}]*overflow:\s*hidden/);
-  assert.match(styles, /\.ec-slide\s*\{[^}]*border-radius:\s*var\(--ec-radius\)[^}]*clip-path:\s*inset\(0 round var\(--ec-radius\)\)[^}]*overflow:\s*hidden/);
+  assert.match(styles, /\.ec-viewport\s*\{[^}]*border-radius:\s*var\(--ec-banner-radius, var\(--ec-radius\)\)[^}]*overflow:\s*hidden/);
+  assert.match(styles, /\.ec-slide\s*\{[^}]*border-radius:\s*var\(--ec-banner-radius, var\(--ec-radius\)\)[^}]*clip-path:\s*inset\(0 round var\(--ec-banner-radius, var\(--ec-radius\)\)\)[^}]*overflow:\s*hidden/);
   assert.match(styles, /\.ec-trailer\s*\{[^}]*position:\s*absolute/);
   assert.match(styles, /\.ec-slide::after\s*\{[^}]*position:\s*absolute/);
 });
@@ -336,8 +336,8 @@ test('carousel controls can be hidden until hover without affecting touch input'
   assert.match(styles, /@media \(hover: hover\) and \(pointer: fine\)[\s\S]*?\.ec-root\.ec-controls-hover \.ec-controls[\s\S]*?opacity:\s*0[\s\S]*?:focus-within \.ec-controls[\s\S]*?opacity:\s*1/);
 });
 
-test('frontend theming inherits Jellyfin palette tokens across runtime and configuration UI', async () => {
-  const [tokens, main, configMain, devMain, render, runtimeStyles, configStyles, preview] = await Promise.all([
+test('frontend theming inherits Jellyfin palette tokens and exposes a Custom CSS API', async () => {
+  const [tokens, main, configMain, devMain, render, runtimeStyles, configStyles, preview, guide, readme] = await Promise.all([
     read('src/styles/jellyfin-theme.ts'),
     read('src/main.ts'),
     read('src/config/main.ts'),
@@ -345,7 +345,9 @@ test('frontend theming inherits Jellyfin palette tokens across runtime and confi
     read('src/slider/render.ts'),
     read('src/styles/featured.css'),
     read('src/config/config.css'),
-    read('src/config/components/BannerPreview.vue')
+    read('src/config/components/BannerPreview.vue'),
+    read('docs/custom-css.md'),
+    read('README.md')
   ]);
   for (const jellyfinToken of [
     '--jf-palette-primary-main',
@@ -358,16 +360,29 @@ test('frontend theming inherits Jellyfin palette tokens across runtime and confi
     '--jf-card-borderRadius'
   ]) assert.match(tokens, new RegExp(jellyfinToken));
   assert.match(tokens, /--theme-primary-color[\s\S]*?--primary-accent-color[\s\S]*?--accent/);
+  assert.match(tokens, /getComputedStyle\(document\.documentElement\)/);
+  assert.match(tokens, /computed\.getPropertyValue\(name\)\.trim\(\)\.length === 0/);
   assert.match(main, /injectJellyfinThemeTokens\(\)/);
   assert.match(configMain, /injectJellyfinThemeTokens\(\)/);
   assert.match(devMain, /injectJellyfinThemeTokens\(\)/);
   assert.match(render, /ec-button raised button-submit emby-button/);
   assert.match(render, /ec-button ec-button-secondary raised emby-button/);
-  assert.match(runtimeStyles, /\.ec-button\s*\{[^}]*background:\s*var\(--ec-theme-primary\)[^}]*color:\s*var\(--ec-theme-primary-contrast\)/);
-  assert.match(runtimeStyles, /\.ec-preferences-dialog\s*\{[^}]*background:\s*var\(--ec-theme-background\)[^}]*color:\s*var\(--ec-theme-text-primary\)/);
-  assert.match(configStyles, /\.ec-configPreviewButton\s*\{[^}]*background:\s*var\(--ec-theme-primary\)[^}]*color:\s*var\(--ec-theme-primary-contrast\)/);
+  assert.match(runtimeStyles, /\.ec-button\s*\{[^}]*background:\s*var\(--ec-button-primary-background, var\(--ec-theme-primary\)\)[^}]*color:\s*var\(--ec-button-primary-color, var\(--ec-theme-primary-contrast\)\)/);
+  assert.match(runtimeStyles, /\.ec-preferences-dialog\s*\{[^}]*background:\s*var\(--ec-dialog-background, var\(--ec-theme-background\)\)[^}]*color:\s*var\(--ec-dialog-color, var\(--ec-theme-text-primary\)\)/);
+  assert.match(configStyles, /\.ec-configPreviewButton\s*\{[^}]*background:\s*var\(--ec-button-primary-background, var\(--ec-theme-primary\)\)[^}]*color:\s*var\(--ec-button-primary-color, var\(--ec-theme-primary-contrast\)\)/);
   assert.match(configStyles, /\.jmp-tabButton\.is-active\s*\{[^}]*background:\s*var\(--ec-theme-primary\)/);
   assert.match(preview, /ec-configPreviewButton raised button-submit emby-button/);
+  for (const publicHook of [
+    '--ec-banner-radius',
+    '--ec-button-primary-background',
+    '--ec-button-primary-hover-background',
+    '--ec-button-secondary-background',
+    '--ec-button-secondary-hover-background',
+    '--ec-dialog-background',
+    '.ec-button-secondary',
+    '.ec-preferences-dialog'
+  ]) assert.match(guide, new RegExp(publicHook.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  assert.match(readme, /docs\/custom-css\.md/);
 });
 
 test('localization falls back safely and documents the translation contribution workflow', async () => {
