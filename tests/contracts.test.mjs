@@ -113,14 +113,16 @@ test('featured presets resolve schedules and override all roadmap sections', asy
 });
 
 test('personalization is authenticated, policy-bound, user scoped, and fast to reopen', async () => {
-  const [controller, service, store, response, frontend, navigation, carousel, engine, optionsCache, services, styles, history] = await Promise.all([
+  const [controller, service, store, response, itemFactory, frontend, navigation, carousel, slideRender, engine, optionsCache, services, styles, history] = await Promise.all([
     read('Jellyfin.Plugin.Featured/Api/FeaturedController.Preferences.cs'),
     read('Jellyfin.Plugin.Featured/Api/FeaturedPersonalizationService.cs'),
     read('Jellyfin.Plugin.Featured/Api/FeaturedPreferenceStore.cs'),
     read('Jellyfin.Plugin.Featured/Api/FeaturedResponseDtos.cs'),
+    read('Jellyfin.Plugin.Featured/Api/FeaturedItemDtoFactory.cs'),
     read('src/preferences.ts'),
     read('src/admin/navigation.ts'),
     read('src/slider/carousel.ts'),
+    read('src/slider/render.ts'),
     read('Jellyfin.Plugin.Featured/Api/FeaturedRuleEngine.cs'),
     read('Jellyfin.Plugin.Featured/Api/FeaturedPreferenceOptionsCache.cs'),
     read('Jellyfin.Plugin.Featured/PluginServiceRegistrator.cs'),
@@ -147,11 +149,18 @@ test('personalization is authenticated, policy-bound, user scoped, and fast to r
   assert.match(service, /if \(IsEmpty\(normalized\)\) _store\.Remove\(userId\)/);
   assert.match(service, /config\.RepeatCooldownDays \* 24[\s\S]*?saved\?\.RepeatCooldownHours[\s\S]*?saved\?\.RepeatCooldownDays/);
   assert.match(service, /submitted\.RepeatCooldownHours[\s\S]*?3650 \* 24/);
+  assert.match(service, /config\.EnableBackgroundTrailers && display\?\.EnableBackgroundTrailers is not false/);
+  assert.match(service, /config\.ShowRating && display\?\.ShowRating is not false/);
+  assert.match(service, /submittedDisplay\.ShowDescription is false \? false : null/);
   assert.match(store, /userId\.ToString\("N"\)/);
   assert.match(store, /public int\? RepeatCooldownHours/);
+  assert.match(store, /class FeaturedUserDisplayPreferences[\s\S]*?bool\? EnableBackgroundTrailers[\s\S]*?bool\? ShowRuntime/);
   assert.match(history, /GetRecentItems\(Guid userId, int cooldownHours\)[\s\S]*?AddHours\(-cooldownHours\)/);
   assert.match(response, /public bool PersonalizationEnabled \{ get; \}/);
   assert.match(response, /public int RepeatCooldownHours/);
+  assert.match(response, /base\(config, personalization\)/);
+  assert.match(itemFactory, /personalization\.Display\.EnableBackgroundTrailers[\s\S]*?Tagline = personalization\.Display\.ShowDescription[\s\S]*?OfficialRating = personalization\.Display\.ShowRating[\s\S]*?Overview = personalization\.Display\.ShowDescription[\s\S]*?CriticRating = personalization\.Display\.ShowRating/);
+  assert.match(slideRender, /if \(response\.showDescription\)[\s\S]*?appendText\(content, 'ec-tagline'[\s\S]*?appendText\(content, 'ec-overview'/);
   assert.match(frontend, /body: \{ reset: true \}/);
   assert.match(frontend, /body: \{ preferences \}/);
   assert.match(frontend, /GenrePreferenceState = 'neutral' \| 'preferred' \| 'excluded'/);
@@ -166,6 +175,8 @@ test('personalization is authenticated, policy-bound, user scoped, and fast to r
   assert.match(frontend, /\[24, 'preferences\.cooldown\.24h'\]/);
   assert.match(frontend, /dataset\.cooldownHours = 'true'/);
   assert.match(frontend, /preferences\.repeatCooldownHours = value/);
+  assert.match(frontend, /if \(!current\.defaults\.display\[key\]\) continue/);
+  assert.match(frontend, /preferences\.display\[key\] = checked === current\.defaults\.display\[key\] \? null : checked/);
   assert.match(navigation, /USER_PREFERENCES_SELECTOR[\s\S]*?#\/mypreferencesmenu/);
   assert.match(navigation, /settingsEntry\.after\(entry\)/);
   assert.match(navigation, /#myPreferencesMenuPage/);
@@ -536,6 +547,7 @@ test('prepared cache fingerprint includes excluded genres', async () => {
   assert.match(fingerprint, /Profile/);
   assert.match(fingerprint, /ExcludedGenres/);
   assert.match(fingerprint, /RepeatCooldownHours/);
+  assert.match(fingerprint, /Display/);
 });
 
 test('warm prepared responses reuse prebuilt DTOs and expose bypass diagnostics', async () => {
@@ -544,7 +556,7 @@ test('warm prepared responses reuse prebuilt DTOs and expose bypass diagnostics'
     read('Jellyfin.Plugin.Featured/Api/FeaturedController.Items.cs'),
     read('Jellyfin.Plugin.Featured/Api/FeaturedItemDtoFactory.cs')
   ]);
-  assert.match(preparedCache, /new Lazy<FeaturedItemDto>[\s\S]*?_itemDtoFactory\.Create\(item, user, config\)/);
+  assert.match(preparedCache, /new Lazy<FeaturedItemDto>[\s\S]*?_itemDtoFactory\.Create\(item, user, config, personalization\)/);
   assert.match(preparedCache, /out string status/);
   for (const status of ['bypass (disabled)', 'bypass (live mixing required)', 'miss (no entry)', 'miss (fingerprint mismatch)', 'refreshing', 'hit']) {
     assert.equal(preparedCache.includes(`\"${status}\"`), true, `missing prepared-cache status ${status}`);

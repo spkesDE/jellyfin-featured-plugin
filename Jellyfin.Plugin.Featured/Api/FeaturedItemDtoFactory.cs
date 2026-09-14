@@ -14,9 +14,10 @@ public sealed class FeaturedItemDtoFactory
     internal FeaturedItemDto Create(
         BaseItem item,
         Jellyfin.Database.Implementations.Entities.User activeUser,
-        PluginConfiguration config)
+        PluginConfiguration config,
+        FeaturedPersonalizationContext personalization)
     {
-        IReadOnlyList<FeaturedTrailerDto> trailers = config.EnableBackgroundTrailers
+        IReadOnlyList<FeaturedTrailerDto> trailers = personalization.Display.EnableBackgroundTrailers
             ? _trailerResolver.ResolveCandidates(item, activeUser, config)
             : [];
         return new FeaturedItemDto
@@ -25,18 +26,18 @@ public sealed class FeaturedItemDtoFactory
             Name = item.Name,
             MediaType = item.GetBaseItemKind().ToString(),
             ImageType = item.HasImage(MediaBrowser.Model.Entities.ImageType.Backdrop) ? "Backdrop" : "Primary",
-            Tagline = item.Tagline,
-            OfficialRating = item.OfficialRating,
+            Tagline = personalization.Display.ShowDescription ? item.Tagline : null,
+            OfficialRating = personalization.Display.ShowRating ? item.OfficialRating : null,
             HasLogo = item.HasImage(MediaBrowser.Model.Entities.ImageType.Logo),
-            ProductionYear = config.ShowYear ? item.ProductionYear : null,
-            RuntimeMinutes = config.ShowRuntime && item.RunTimeTicks.HasValue
+            ProductionYear = personalization.Display.ShowYear ? item.ProductionYear : null,
+            RuntimeMinutes = personalization.Display.ShowRuntime && item.RunTimeTicks.HasValue
                 ? (int)Math.Round(TimeSpan.FromTicks(item.RunTimeTicks.Value).TotalMinutes)
                 : null,
             Trailer = trailers.FirstOrDefault(),
             Trailers = trailers.Count > 0 ? trailers : null,
-            Overview = config.ShowDescription ? item.Overview : null,
-            CriticRating = config.ShowRating ? item.CriticRating : null,
-            CommunityRating = config.ShowRating && item.CommunityRating.HasValue
+            Overview = personalization.Display.ShowDescription ? item.Overview : null,
+            CriticRating = personalization.Display.ShowRating ? item.CriticRating : null,
+            CommunityRating = personalization.Display.ShowRating && item.CommunityRating.HasValue
                 ? Math.Round(Convert.ToDecimal(item.CommunityRating), 2)
                 : null
         };

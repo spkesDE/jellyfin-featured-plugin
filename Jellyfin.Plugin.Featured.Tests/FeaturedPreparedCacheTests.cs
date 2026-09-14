@@ -114,6 +114,56 @@ public sealed class FeaturedPreparedCacheTests : IDisposable
     }
 
     [Fact]
+    public void UserDisplayPreferencesOnlyDisableAdminEnabledFeatures()
+    {
+        PluginConfiguration config = new()
+        {
+            EnableBackgroundTrailers = true,
+            ShowRating = true,
+            ShowDescription = true,
+            ShowYear = true,
+            ShowRuntime = true
+        };
+        _personalization.NormalizeAndSave(
+            config,
+            _user.Id,
+            new FeaturedUserPreferences
+            {
+                Display = new FeaturedUserDisplayPreferences
+                {
+                    EnableBackgroundTrailers = false,
+                    ShowRating = false,
+                    ShowDescription = true,
+                    ShowYear = false,
+                    ShowRuntime = true
+                }
+            },
+            new HashSet<string>());
+
+        FeaturedPersonalizationContext effective = _personalization.Resolve(config, _user.Id);
+
+        Assert.False(effective.Display.EnableBackgroundTrailers);
+        Assert.False(effective.Display.ShowRating);
+        Assert.True(effective.Display.ShowDescription);
+        Assert.False(effective.Display.ShowYear);
+        Assert.True(effective.Display.ShowRuntime);
+
+        FeaturedItemsResponseDto response = new(config, [], 5, 5, effective, null, null, null);
+        Assert.False(response.EnableBackgroundTrailers);
+        Assert.False(response.ShowRating);
+        Assert.True(response.ShowDescription);
+        Assert.False(response.ShowYear);
+        Assert.True(response.ShowRuntime);
+
+        config.ShowDescription = false;
+        config.ShowRuntime = false;
+        effective = _personalization.Resolve(config, _user.Id);
+
+        Assert.False(effective.Display.ShowDescription);
+        Assert.False(effective.Display.ShowRuntime);
+    }
+
+    [Fact]
     public void ExcludedItemsAreNotReturned()
     {
         PluginConfiguration config = new();
@@ -191,6 +241,7 @@ public sealed class FeaturedPreparedCacheTests : IDisposable
             },
             [],
             0,
+            new FeaturedDisplayPreferences(false, true, true, true, true),
             false);
 
     private List<BaseItem> CreateItems(int count)

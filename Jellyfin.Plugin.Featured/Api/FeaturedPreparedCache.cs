@@ -246,7 +246,7 @@ public sealed class FeaturedPreparedCache
             .Select(item => new PreparedItem(
                 item.Id,
                 new Lazy<FeaturedItemDto>(
-                    () => _itemDtoFactory.Create(item, user, config),
+                    () => _itemDtoFactory.Create(item, user, config, personalization),
                     LazyThreadSafetyMode.ExecutionAndPublication)))
             .ToArray();
         if (eagerlyBuildDtos)

@@ -104,8 +104,10 @@ export function createSlide(item: FeaturedItem, response: FeaturedResponse): HTM
 
   const metadata = createMetadata(item, response);
   if (metadata) content.appendChild(metadata);
-  appendText(content, 'ec-tagline', item.tagline);
-  appendText(content, 'ec-overview', item.overview);
+  if (response.showDescription) {
+    appendText(content, 'ec-tagline', item.tagline);
+    appendText(content, 'ec-overview', item.overview);
+  }
 
   if (response.showPlayButton || response.showSecondaryButton || (item.trailer?.provider === 'external' && item.trailer.url)) {
     const actions = document.createElement('div');

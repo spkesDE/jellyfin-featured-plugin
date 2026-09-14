@@ -137,7 +137,7 @@ public sealed partial class FeaturedController
                     ruleEngineMilliseconds += GetElapsedMilliseconds(ref checkpoint);
                 }
 
-                items = selectedItems.Select(item => _itemDtoFactory.Create(item, activeUser, _config)).ToList();
+                items = selectedItems.Select(item => _itemDtoFactory.Create(item, activeUser, _config, personalization)).ToList();
                 dtoMilliseconds += GetElapsedMilliseconds(ref checkpoint);
                 if (_config.EnablePreparedCache) _preparedCache.QueueUserRefresh(activeUser.Id);
             }

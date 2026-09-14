@@ -92,6 +92,7 @@ public sealed class FeaturedUserPreferences
 {
     public Dictionary<string, bool> SourceEnabled { get; set; } = new(StringComparer.OrdinalIgnoreCase);
     public Dictionary<string, int> SourceWeights { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+    public FeaturedUserDisplayPreferences Display { get; set; } = new();
     public string[]? PreferredGenres { get; set; }
     public string[]? ExcludedGenres { get; set; }
     public int? UnplayedBoost { get; set; }
@@ -104,6 +105,7 @@ public sealed class FeaturedUserPreferences
     {
         SourceEnabled = new Dictionary<string, bool>(SourceEnabled ?? [], StringComparer.OrdinalIgnoreCase),
         SourceWeights = new Dictionary<string, int>(SourceWeights ?? [], StringComparer.OrdinalIgnoreCase),
+        Display = Display?.Copy() ?? new FeaturedUserDisplayPreferences(),
         PreferredGenres = PreferredGenres?.ToArray(),
         ExcludedGenres = ExcludedGenres?.ToArray(),
         UnplayedBoost = UnplayedBoost,
@@ -112,4 +114,29 @@ public sealed class FeaturedUserPreferences
         RepeatCooldownDays = RepeatCooldownDays,
         RepeatCooldownHours = RepeatCooldownHours
     };
+}
+
+public sealed class FeaturedUserDisplayPreferences
+{
+    public bool? EnableBackgroundTrailers { get; set; }
+    public bool? ShowRating { get; set; }
+    public bool? ShowDescription { get; set; }
+    public bool? ShowYear { get; set; }
+    public bool? ShowRuntime { get; set; }
+
+    internal FeaturedUserDisplayPreferences Copy() => new()
+    {
+        EnableBackgroundTrailers = EnableBackgroundTrailers,
+        ShowRating = ShowRating,
+        ShowDescription = ShowDescription,
+        ShowYear = ShowYear,
+        ShowRuntime = ShowRuntime
+    };
+
+    internal bool IsEmpty()
+        => !EnableBackgroundTrailers.HasValue
+            && !ShowRating.HasValue
+            && !ShowDescription.HasValue
+            && !ShowYear.HasValue
+            && !ShowRuntime.HasValue;
 }

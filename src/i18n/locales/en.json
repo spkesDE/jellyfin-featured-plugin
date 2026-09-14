@@ -469,6 +469,8 @@
   "preferences.loading": "Loading personalization …",
   "preferences.disabled": "Personalization is disabled by the server administrator.",
   "preferences.close": "Close personalization",
+  "preferences.display": "Display",
+  "preferences.displayHelp": "You can hide content enabled by the administrator for your user account.",
   "preferences.sources": "Sources",
   "preferences.weight": "Weight",
   "preferences.genres": "Preferred genres",

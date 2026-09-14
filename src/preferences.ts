@@ -1,6 +1,6 @@
 import { requestJson } from './core/apiClient';
 import { t, type TranslationKey } from './i18n';
-import type { FeaturedPreferencesBootstrapResponse, FeaturedUserPreferences } from './types/featured';
+import type { FeaturedEffectiveDisplayPreferences, FeaturedPreferencesBootstrapResponse, FeaturedUserDisplayPreferences, FeaturedUserPreferences } from './types/featured';
 
 const bootstrapCacheLifetime = 30_000;
 let bootstrapCache: { value: FeaturedPreferencesBootstrapResponse; expiresAt: number } | null = null;
@@ -159,7 +159,27 @@ export async function openPreferencesDialog(): Promise<void> {
     const hotkeys = document.createElement('aside');
     hotkeys.className = 'ec-preferences-hotkeys';
     hotkeys.innerHTML = `<strong>${t('preferences.hotkeys')}</strong><span><kbd>M</kbd> ${t('preferences.hotkeyMute')}</span><span><kbd>+ / −</kbd> ${t('preferences.hotkeyVolume')}</span><span><kbd>${t('preferences.hotkeySpace')}</kbd> ${t('preferences.hotkeyPause')}</span>`;
-    content.appendChild(hotkeys);
+    if (effective.display.enableBackgroundTrailers) content.appendChild(hotkeys);
+
+    const displayFields: Array<[keyof FeaturedEffectiveDisplayPreferences, TranslationKey]> = [
+      ['enableBackgroundTrailers', 'trailers.enabled'],
+      ['showDescription', 'display.showDescription'],
+      ['showRating', 'display.showRatings'],
+      ['showYear', 'display.showYear'],
+      ['showRuntime', 'display.showRuntime']
+    ];
+    const display = document.createElement('fieldset');
+    display.className = 'ec-preference-display';
+    display.innerHTML = `<legend>${t('preferences.display')}</legend><p class="ec-preference-display-help">${t('preferences.displayHelp')}</p>`;
+    let displayOptionCount = 0;
+    for (const [key, label] of displayFields) {
+      if (!current.defaults.display[key]) continue;
+      const field = checkbox(t(label), effective.display[key], false);
+      field.dataset.displayPreferenceKey = key;
+      display.appendChild(field);
+      displayOptionCount += 1;
+    }
+    if (displayOptionCount > 0) content.appendChild(display);
 
     const sources = document.createElement('fieldset');
     sources.innerHTML = `<legend>${t('preferences.sources')}</legend>`;
@@ -235,10 +255,17 @@ export async function openPreferencesDialog(): Promise<void> {
     dialog.addEventListener('submit', async (event) => {
       event.preventDefault();
       const preferences: FeaturedUserPreferences = {
-        sourceEnabled: {}, sourceWeights: {}, preferredGenres: null, excludedGenres: null,
+        sourceEnabled: {}, sourceWeights: {},
+        display: { ...current.preferences.display },
+        preferredGenres: null, excludedGenres: null,
         unplayedBoost: null, favouriteBoost: null, inProgressSeriesBoost: null,
         repeatCooldownDays: null, repeatCooldownHours: null
       };
+      dialog.querySelectorAll<HTMLElement>('[data-display-preference-key]').forEach((field) => {
+        const key = field.dataset.displayPreferenceKey as keyof FeaturedUserDisplayPreferences;
+        const checked = field.querySelector<HTMLInputElement>('input')!.checked;
+        preferences.display[key] = checked === current.defaults.display[key] ? null : checked;
+      });
       dialog.querySelectorAll<HTMLElement>('[data-source-id]').forEach((field) => {
         const id = field.dataset.sourceId!;
         const input = field.querySelector<HTMLInputElement>('input')!;

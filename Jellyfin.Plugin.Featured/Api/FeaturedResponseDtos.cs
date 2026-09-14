@@ -4,10 +4,12 @@ namespace Jellyfin.Plugin.Featured.Api;
 
 public abstract class FeaturedDisplaySettingsDto
 {
-    protected FeaturedDisplaySettingsDto(PluginConfiguration config)
+    protected FeaturedDisplaySettingsDto(
+        PluginConfiguration config,
+        FeaturedPersonalizationContext? personalization = null)
     {
         ShowAutoplayButton = config.ShowAutoplayButton;
-        EnableBackgroundTrailers = config.EnableBackgroundTrailers;
+        EnableBackgroundTrailers = personalization?.Display.EnableBackgroundTrailers ?? config.EnableBackgroundTrailers;
         StartTrailersMuted = config.StartTrailersMuted;
         HideYouTubeTrailerUntilControlsFade = config.HideYouTubeTrailerUntilControlsFade;
         WaitForTrailerToFinish = config.WaitForTrailerToFinish;
@@ -22,8 +24,8 @@ public abstract class FeaturedDisplaySettingsDto
         ShowSlidePosition = config.ShowSlidePosition;
         MediaPadding = config.MediaPadding;
         TitleDisplayMode = config.TitleDisplayMode;
-        ShowRating = config.ShowRating;
-        ShowDescription = config.ShowDescription;
+        ShowRating = personalization?.Display.ShowRating ?? config.ShowRating;
+        ShowDescription = personalization?.Display.ShowDescription ?? config.ShowDescription;
         HideOnTvLayout = config.HideOnTvLayout;
         UseHeroLayout = config.UseHeroLayout;
         HeroHeightMode = config.HeroHeightMode;
@@ -35,8 +37,8 @@ public abstract class FeaturedDisplaySettingsDto
         TransitionEffect = config.TransitionEffect;
         HeroBackdropPosition = config.HeroBackdropPosition;
         BannerHeight = config.BannerHeight;
-        ShowYear = config.ShowYear;
-        ShowRuntime = config.ShowRuntime;
+        ShowYear = personalization?.Display.ShowYear ?? config.ShowYear;
+        ShowRuntime = personalization?.Display.ShowRuntime ?? config.ShowRuntime;
         ShowSecondaryButton = config.ShowSecondaryButton;
         SecondaryButtonText = NullIfEmpty(config.SecondaryButtonText);
         ShowPaginationDots = config.ShowPaginationDots;
@@ -147,7 +149,7 @@ public sealed class FeaturedItemsResponseDto : FeaturedDisplaySettingsDto
         string? activePresetId,
         string? activePresetName,
         DateTimeOffset? nextPresetChange)
-        : base(config)
+        : base(config, personalization)
     {
         Items = items;
         InfiniteLoading = config.EnableInfiniteLoading;
@@ -202,7 +204,8 @@ public sealed class FeaturedPreferencesResponse
             FavouriteBoost = effective.Profile.FavouriteBoost,
             InProgressSeriesBoost = effective.Profile.InProgressSeriesBoost,
             RepeatCooldownDays = (int)Math.Ceiling(effective.RepeatCooldownHours / 24d),
-            RepeatCooldownHours = effective.RepeatCooldownHours
+            RepeatCooldownHours = effective.RepeatCooldownHours,
+            Display = effective.Display
         };
         Defaults = new FeaturedEffectivePreferences
         {
@@ -214,7 +217,8 @@ public sealed class FeaturedPreferencesResponse
             FavouriteBoost = defaults.Profile.FavouriteBoost,
             InProgressSeriesBoost = defaults.Profile.InProgressSeriesBoost,
             RepeatCooldownDays = (int)Math.Ceiling(defaults.RepeatCooldownHours / 24d),
-            RepeatCooldownHours = defaults.RepeatCooldownHours
+            RepeatCooldownHours = defaults.RepeatCooldownHours,
+            Display = defaults.Display
         };
     }
 
@@ -235,6 +239,7 @@ public sealed class FeaturedEffectivePreferences
     public int InProgressSeriesBoost { get; set; }
     public int RepeatCooldownDays { get; set; }
     public int RepeatCooldownHours { get; set; }
+    public FeaturedDisplayPreferences Display { get; set; } = new(false, false, false, false, false);
 }
 
 public sealed class FeaturedPreferencesUpdate

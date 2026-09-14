@@ -7,6 +7,7 @@ public sealed record FeaturedPersonalizationContext(
     FeaturedUserProfile Profile,
     string[] ExcludedGenres,
     int RepeatCooldownHours,
+    FeaturedDisplayPreferences Display,
     bool HasOverrides)
 {
     // Profile.Id is deliberately excluded: effective profiles are synthesized for
@@ -25,9 +26,17 @@ public sealed record FeaturedPersonalizationContext(
             Profile.PreferredGenres
         },
         ExcludedGenres,
-        RepeatCooldownHours
+        RepeatCooldownHours,
+        Display
     });
 }
+
+public sealed record FeaturedDisplayPreferences(
+    bool EnableBackgroundTrailers,
+    bool ShowRating,
+    bool ShowDescription,
+    bool ShowYear,
+    bool ShowRuntime);
 
 public sealed class FeaturedPersonalizationService
 {
@@ -97,7 +106,14 @@ public sealed class FeaturedPersonalizationService
                     ? Math.Clamp(legacyDays, 0, 3650) * 24
                     : defaultCooldownHours
             : defaultCooldownHours;
-        return new FeaturedPersonalizationContext(sources, effectiveProfile, excludedGenres, cooldown, saved is not null);
+        FeaturedUserDisplayPreferences? display = policy.Enabled ? saved?.Display : null;
+        FeaturedDisplayPreferences effectiveDisplay = new(
+            config.EnableBackgroundTrailers && display?.EnableBackgroundTrailers is not false,
+            config.ShowRating && display?.ShowRating is not false,
+            config.ShowDescription && display?.ShowDescription is not false,
+            config.ShowYear && display?.ShowYear is not false,
+            config.ShowRuntime && display?.ShowRuntime is not false);
+        return new FeaturedPersonalizationContext(sources, effectiveProfile, excludedGenres, cooldown, effectiveDisplay, saved is not null);
     }
 
     internal FeaturedUserPreferences? Get(Guid userId) => _store.Get(userId);
@@ -112,6 +128,15 @@ public sealed class FeaturedPersonalizationService
         FeaturedPersonalizationPolicy policy = config.PersonalizationPolicy;
         HashSet<string> sourceIds = config.SourceRules.Select(rule => rule.Id).ToHashSet(StringComparer.OrdinalIgnoreCase);
         FeaturedUserPreferences normalized = new();
+        FeaturedUserDisplayPreferences submittedDisplay = submitted.Display ?? new FeaturedUserDisplayPreferences();
+        normalized.Display = new FeaturedUserDisplayPreferences
+        {
+            EnableBackgroundTrailers = submittedDisplay.EnableBackgroundTrailers is false ? false : null,
+            ShowRating = submittedDisplay.ShowRating is false ? false : null,
+            ShowDescription = submittedDisplay.ShowDescription is false ? false : null,
+            ShowYear = submittedDisplay.ShowYear is false ? false : null,
+            ShowRuntime = submittedDisplay.ShowRuntime is false ? false : null
+        };
         if (policy.AllowSourceSelection)
         {
             normalized.SourceEnabled = (submitted.SourceEnabled ?? [])
@@ -164,6 +189,7 @@ public sealed class FeaturedPersonalizationService
     private static bool IsEmpty(FeaturedUserPreferences preferences)
         => preferences.SourceEnabled.Count == 0
             && preferences.SourceWeights.Count == 0
+            && (preferences.Display?.IsEmpty() ?? true)
             && preferences.PreferredGenres is null
             && preferences.ExcludedGenres is null
             && !preferences.UnplayedBoost.HasValue

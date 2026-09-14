@@ -44,6 +44,7 @@ export interface FeaturedResponse extends FeaturedDisplaySettings {
 export interface FeaturedUserPreferences {
   sourceEnabled: Record<string, boolean>;
   sourceWeights: Record<string, number>;
+  display: FeaturedUserDisplayPreferences;
   preferredGenres: string[] | null;
   excludedGenres: string[] | null;
   unplayedBoost: number | null;
@@ -53,9 +54,18 @@ export interface FeaturedUserPreferences {
   repeatCooldownHours: number | null;
 }
 
+export interface FeaturedUserDisplayPreferences {
+  enableBackgroundTrailers: boolean | null;
+  showRating: boolean | null;
+  showDescription: boolean | null;
+  showYear: boolean | null;
+  showRuntime: boolean | null;
+}
+
 export interface FeaturedEffectivePreferences {
   sourceEnabled: Record<string, boolean>;
   sourceWeights: Record<string, number>;
+  display: FeaturedEffectiveDisplayPreferences;
   preferredGenres: string[];
   excludedGenres: string[];
   unplayedBoost: number;
@@ -63,6 +73,14 @@ export interface FeaturedEffectivePreferences {
   inProgressSeriesBoost: number;
   repeatCooldownDays: number;
   repeatCooldownHours: number;
+}
+
+export interface FeaturedEffectiveDisplayPreferences {
+  enableBackgroundTrailers: boolean;
+  showRating: boolean;
+  showDescription: boolean;
+  showYear: boolean;
+  showRuntime: boolean;
 }
 
 export interface FeaturedPreferencesResponse {

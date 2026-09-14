@@ -469,6 +469,8 @@
   "preferences.loading": "Personalisierung wird geladen …",
   "preferences.disabled": "Die Personalisierung wurde vom Serveradministrator deaktiviert.",
   "preferences.close": "Personalisierung schließen",
+  "preferences.display": "Anzeige",
+  "preferences.displayHelp": "Vom Administrator aktivierte Inhalte kannst du für dein Benutzerkonto ausblenden.",
   "preferences.sources": "Quellen",
   "preferences.weight": "Gewichtung",
   "preferences.genres": "Genre-Auswahl",
