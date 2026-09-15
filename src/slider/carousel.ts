@@ -4,6 +4,7 @@ import { CONSOLE_PREFIX, PLUGIN_VERSION } from '../constants';
 import { createSlide, loadSlideArtwork } from './render';
 import { createTrailerPlayer, isMobileTrailerClient, type TrailerPlayer } from './trailer';
 import { applyHeroLayoutVariables } from './layout';
+import { replaceElementChildren } from '../core/dom';
 
 export type FeaturedItemLoader = (excludedItemIds: readonly string[]) => Promise<FeaturedResponse>;
 export type FeaturedItemDisplayReporter = (itemId: string) => Promise<unknown>;
@@ -323,7 +324,7 @@ export class FeaturedCarousel {
 
   private renderWindow(start: number): void {
     this.stopTrailer(this.slides[this.index - this.windowStart]);
-    this.track.replaceChildren();
+    replaceElementChildren(this.track);
     this.windowStart = start;
     this.slides = this.items
       .slice(start, start + MAX_DOM_SLIDES)

@@ -2,6 +2,7 @@ import type { FeaturedFilterRule, FeaturedManualList, FeaturedPluginConfig, Feat
 import type { RuntimeConfig } from '../../types/config';
 import type { FeaturedDisplaySettings } from '../../types/display';
 import type { FeaturedResponse } from '../../types/featured';
+import { cloneJsonValue } from '../../core/clone';
 
 const createId = (): string => globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
@@ -35,9 +36,9 @@ export function createPresetFromConfig(config: FeaturedPluginConfig, name = 'Fea
     Id: createId(), Name: name, Enabled: false, Priority: 0, StartsAt: null, EndsAt: null,
     ScheduleType: 'one_time', TimeZoneId: timeZone, DaysOfWeek: [],
     StartTime: '18:00', EndTime: '23:59', AnnualStart: '12-01', AnnualEnd: '12-31',
-    SourceRules: structuredClone(config.SourceRules),
-    GlobalFilters: structuredClone(config.GlobalFilters),
-    PersonalizationPolicy: structuredClone(config.PersonalizationPolicy),
+    SourceRules: cloneJsonValue(config.SourceRules),
+    GlobalFilters: cloneJsonValue(config.GlobalFilters),
+    PersonalizationPolicy: cloneJsonValue(config.PersonalizationPolicy),
     Mixer: {
       RepeatCooldownDays: config.RepeatCooldownDays,
       RelaxRepeatCooldownWhenNeeded: config.RelaxRepeatCooldownWhenNeeded,
@@ -75,7 +76,7 @@ export function createPresetFromConfig(config: FeaturedPluginConfig, name = 'Fea
       TrailerEndOffsetSeconds: config.TrailerEndOffsetSeconds,
       MultipleTrailerMode: config.MultipleTrailerMode,
       AllowTrailersOnMobile: config.AllowTrailersOnMobile,
-      Overrides: structuredClone(config.TrailerOverrides)
+      Overrides: cloneJsonValue(config.TrailerOverrides)
     }
   };
 }
@@ -91,7 +92,7 @@ export function refreshPresetFromConfig(preset: FeaturedPreset, config: Featured
     EndsAt: preset.EndsAt,
     ScheduleType: preset.ScheduleType,
     TimeZoneId: preset.TimeZoneId,
-    DaysOfWeek: structuredClone(preset.DaysOfWeek),
+    DaysOfWeek: cloneJsonValue(preset.DaysOfWeek),
     StartTime: preset.StartTime,
     EndTime: preset.EndTime,
     AnnualStart: preset.AnnualStart,
@@ -171,7 +172,7 @@ export const CONFIG_DEFAULTS: FeaturedPluginConfig = {
 };
 
 export function createDefaultConfig(): FeaturedPluginConfig {
-  return structuredClone(CONFIG_DEFAULTS);
+  return cloneJsonValue(CONFIG_DEFAULTS);
 }
 
 export function createDisplaySettings(config: FeaturedPluginConfig): FeaturedDisplaySettings {
@@ -309,7 +310,7 @@ export function normalizeConfig(value: unknown): FeaturedPluginConfig {
           EndTime: preset.EndTime || fallback.EndTime,
           AnnualStart: preset.AnnualStart || fallback.AnnualStart,
           AnnualEnd: preset.AnnualEnd || fallback.AnnualEnd,
-          SourceRules: Array.isArray(preset.SourceRules) ? structuredClone(preset.SourceRules) : fallback.SourceRules,
+          SourceRules: Array.isArray(preset.SourceRules) ? cloneJsonValue(preset.SourceRules) : fallback.SourceRules,
           GlobalFilters: normalizeFilters(preset.GlobalFilters),
           PersonalizationPolicy: { ...fallback.PersonalizationPolicy, ...(preset.PersonalizationPolicy ?? {}) },
           Mixer: { ...fallback.Mixer, ...(preset.Mixer ?? {}) },

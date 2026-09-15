@@ -1,4 +1,5 @@
 import { requestJson } from './core/apiClient';
+import { replaceElementChildren } from './core/dom';
 import { t, type TranslationKey } from './i18n';
 import type { FeaturedEffectiveDisplayPreferences, FeaturedPreferencesBootstrapResponse, FeaturedUserDisplayPreferences, FeaturedUserPreferences } from './types/featured';
 import { USER_PREFERENCES_CHANGED_EVENT } from './constants';
@@ -237,7 +238,7 @@ export async function openPreferencesDialog(): Promise<void> {
     actions.className = 'ec-preferences-actions';
     actions.innerHTML = `<span class="ec-preferences-status" aria-live="polite"></span><button type="button" class="raised emby-button ec-preferences-reset">${t('preferences.reset')}</button><button type="submit" class="raised button-submit emby-button ec-preferences-save">${t('preferences.save')}</button>`;
     dialog.appendChild(actions);
-    backdrop.replaceChildren(dialog);
+    replaceElementChildren(backdrop, dialog);
     dialog.querySelector('.ec-preferences-close')?.addEventListener('click', close);
     const status = dialog.querySelector<HTMLElement>('.ec-preferences-status')!;
     const setBusy = (busy: boolean): void => {
@@ -323,7 +324,7 @@ export async function openPreferencesDialog(): Promise<void> {
     const loading = backdrop.querySelector<HTMLElement>('.ec-preferences-loading');
     if (loading) {
       loading.setAttribute('role', 'alert');
-      loading.replaceChildren(document.createTextNode(error instanceof Error ? error.message : String(error)));
+      replaceElementChildren(loading, document.createTextNode(error instanceof Error ? error.message : String(error)));
     }
     window.setTimeout(() => backdrop.remove(), 3500);
   }

@@ -103,7 +103,7 @@ test('featured presets resolve schedules and override all roadmap sections', asy
   assert.match(response, /public string\? ActivePresetName \{ get; \}/);
   assert.match(response, /public DateTimeOffset\? NextPresetChange \{ get; \}/);
   assert.match(cache, /FeaturedPresetResolver\.Resolve\(baseConfig, DateTimeOffset\.UtcNow\)\.Configuration/);
-  assert.match(defaults, /createPresetFromConfig[\s\S]*?SourceRules: structuredClone[\s\S]*?PersonalizationPolicy[\s\S]*?Mixer:[\s\S]*?Layout:[\s\S]*?Trailers:/);
+  assert.match(defaults, /createPresetFromConfig[\s\S]*?SourceRules: cloneJsonValue[\s\S]*?PersonalizationPolicy[\s\S]*?Mixer:[\s\S]*?Layout:[\s\S]*?Trailers:/);
   assert.match(presetTab, /preset\.ScheduleType === 'one_time'[\s\S]*?ConfigDateTime v-model="preset\.StartsAt"[\s\S]*?ConfigDateTime v-model="preset\.EndsAt"/);
   assert.match(presetTab, /store\.updatePresetSnapshot\(index\)[\s\S]*?store\.duplicatePreset\(index\)/);
   assert.match(runtime, /schedulePresetRefresh\(response\.nextPresetChange\)/);

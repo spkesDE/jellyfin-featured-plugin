@@ -5,6 +5,7 @@ import {
   PLUGIN_DISPLAY_NAME
 } from '../constants';
 import { config } from '../config';
+import { replaceElementChildren } from '../core/dom';
 import { t } from '../i18n';
 import { openPreferencesDialog } from '../preferences';
 
@@ -36,7 +37,8 @@ export function ensureUserSettingsMenuEntry(): void {
     entry.setAttribute(USER_SETTINGS_LINK_ATTR, 'true');
     entry.href = '#';
     entry.removeAttribute('id');
-    entry.querySelector('.MuiListItemIcon-root')?.replaceChildren(createUserSettingsIcon());
+    const icon = entry.querySelector('.MuiListItemIcon-root');
+    if (icon) replaceElementChildren(icon, createUserSettingsIcon());
     const label = entry.querySelector('.MuiListItemText-primary') ?? entry.querySelector('.MuiTypography-root');
     if (label) label.textContent = t('preferences.menuEntry');
     else entry.textContent = t('preferences.menuEntry');

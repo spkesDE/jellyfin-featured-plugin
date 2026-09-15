@@ -6,13 +6,14 @@ import { compileScript, compileStyle, compileTemplate, parse } from '@vue/compil
 
 const isWatch = process.argv.includes('--watch');
 const isProduction = !isWatch;
+const browserTarget = 'chrome79';
 
 const cssTextPlugin = {
   name: 'css-text',
   setup(build) {
     build.onLoad({ filter: /\.css$/ }, async (args) => {
       const source = await readFile(args.path, 'utf8');
-      const result = await esbuild.transform(source, { loader: 'css', minify: isProduction });
+      const result = await esbuild.transform(source, { loader: 'css', minify: isProduction, target: browserTarget });
       return { contents: `export default ${JSON.stringify(result.code.trim())};`, loader: 'js' };
     });
   }
@@ -44,7 +45,7 @@ const vueSfcPlugin = {
           return { errors: styleErrors.map((error) => ({ text: error.message })) };
         }
         const transformedCss = compiledStyles.length
-          ? await esbuild.transform(compiledStyles.map((style) => style.code).join('\n'), { loader: 'css', minify: isProduction })
+          ? await esbuild.transform(compiledStyles.map((style) => style.code).join('\n'), { loader: 'css', minify: isProduction, target: browserTarget })
           : null;
         const styleCode = transformedCss?.code.trim()
           ? [
@@ -109,7 +110,7 @@ const vueSfcPlugin = {
 const sharedOptions = {
   bundle: true,
   format: 'iife',
-  target: 'es2020',
+  target: browserTarget,
   minify: isProduction,
   sourcemap: !isProduction,
   legalComments: 'inline'

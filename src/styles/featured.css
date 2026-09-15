@@ -25,7 +25,7 @@
 }
 
 .ec-preferences-backdrop { align-items: center; background: rgb(0 0 0 / .72); box-sizing: border-box; display: flex; inset: 0; justify-content: center; overflow: auto; padding: max(1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) max(1rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left)); position: fixed; z-index: 99999; }
-.ec-preferences-dialog { background: var(--ec-dialog-background, var(--ec-theme-background)); border: var(--ec-dialog-border, 1px solid var(--ec-theme-divider)); border-radius: var(--ec-dialog-radius, var(--ec-theme-radius)); box-shadow: var(--ec-dialog-shadow, 0 1rem 3rem rgb(0 0 0 / .55)); box-sizing: border-box; color: var(--ec-dialog-color, var(--ec-theme-text-primary)); display: flex; flex-direction: column; height: min(52rem, calc(100dvh - 2rem)); margin: auto; max-height: calc(100dvh - 2rem); max-width: calc(100vw - 2rem); overflow: hidden; width: 64rem; }
+.ec-preferences-dialog { background: var(--ec-dialog-background, var(--ec-theme-background)); border: var(--ec-dialog-border, 1px solid var(--ec-theme-divider)); border-radius: var(--ec-dialog-radius, var(--ec-theme-radius)); box-shadow: var(--ec-dialog-shadow, 0 1rem 3rem rgb(0 0 0 / .55)); box-sizing: border-box; color: var(--ec-dialog-color, var(--ec-theme-text-primary)); display: flex; flex-direction: column; height: min(52rem, calc(100vh - 2rem)); height: min(52rem, calc(100dvh - 2rem)); margin: auto; max-height: calc(100vh - 2rem); max-height: calc(100dvh - 2rem); max-width: calc(100vw - 2rem); overflow: hidden; width: 64rem; }
 .ec-preferences-header { align-items: center; background: var(--ec-dialog-header-background, var(--ec-theme-appbar)); display: flex; flex: 0 0 auto; justify-content: space-between; min-height: 3.6rem; padding: .45rem .65rem .45rem 1.4rem; }
 .ec-preferences-dialog h2 { font-size: 1.45rem; font-weight: 400; margin: 0; }
 .ec-preferences-content { flex: 1 1 auto; min-height: 0; overflow: auto; padding: .3rem 1.4rem 1.4rem; }
@@ -68,7 +68,7 @@
 
 @media (max-width: 600px) {
   .ec-preferences-backdrop { align-items: stretch; padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom); }
-  .ec-preferences-dialog { border-radius: 0; height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom)); max-height: none; max-width: none; width: 100%; }
+  .ec-preferences-dialog { border-radius: 0; height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom)); height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom)); max-height: none; max-width: none; width: 100%; }
   .ec-preferences-content { padding-inline: 1rem; }
   .ec-preferences-header { padding-left: 1rem; }
   .ec-preference-display, .ec-preference-genres, .ec-preference-boosts { grid-template-columns: 1fr; }
