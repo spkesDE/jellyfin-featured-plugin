@@ -2,7 +2,7 @@
   "name": "jellyfin-featured-plugin",
   "private": true,
   "type": "module",
-  "version": "12.3.1.1",
+  "version": "12.4.0.0",
   "description": "TypeScript and Vue frontend for the Jellyfin Featured plugin.",
   "scripts": {
     "typecheck": "tsc --noEmit && vue-tsc --noEmit",
