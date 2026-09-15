@@ -285,8 +285,9 @@ test('proper trailer support keeps resolution and playback source independent', 
   assert.match(player, /hostIndex \+ 1 < YOUTUBE_HOSTS\.length[\s\S]*?startPlayer\(api, videoId, options, hostIndex \+ 1\)/);
   assert.match(player, /defaultMuted = options\.muted[\s\S]*?setAttribute\('webkit-playsinline', ''\)/);
   assert.match(player, /setAttribute\('allow', 'autoplay; encrypted-media; picture-in-picture'\)/);
-  assert.match(player, /isIosTrailerClient[\s\S]*?navigator\.platform === 'MacIntel'[\s\S]*?navigator\.maxTouchPoints > 1/);
-  assert.match(carousel, /startTrailersMuted \|\| isIosTrailerClient\(\)/);
+  assert.match(carousel, /this\.trailerMuted = response\.startTrailersMuted \|\| this\.trailerVolume === 0/);
+  assert.doesNotMatch(carousel, /isIosTrailerClient\(\)/);
+  assert.match(carousel, /onReveal:[\s\S]*?player\.setMuted\(this\.trailerMuted\)/);
   assert.match(player, /YOUTUBE_API_TIMEOUT_MS = 8_000[\s\S]*?YouTube player API timed out[\s\S]*?YOUTUBE_API_TIMEOUT_MS/);
   assert.match(player, /onError: \(\{ data \}\)[\s\S]*?YouTube trailer failed with player error/);
   assert.match(carousel, /item\.trailers\?\.length[\s\S]*?candidateIndex \+ 1 < candidates\.length[\s\S]*?startTrailer\(slide, item, candidateIndex \+ 1\)/);

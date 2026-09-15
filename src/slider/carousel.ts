@@ -2,7 +2,7 @@ import type { FeaturedItem, FeaturedResponse } from '../types/featured';
 import { t } from '../i18n';
 import { CONSOLE_PREFIX, PLUGIN_VERSION } from '../constants';
 import { createSlide, loadSlideArtwork } from './render';
-import { createTrailerPlayer, isIosTrailerClient, isMobileTrailerClient, type TrailerPlayer } from './trailer';
+import { createTrailerPlayer, isMobileTrailerClient, type TrailerPlayer } from './trailer';
 import { applyHeroLayoutVariables } from './layout';
 
 export type FeaturedItemLoader = (excludedItemIds: readonly string[]) => Promise<FeaturedResponse>;
@@ -80,8 +80,9 @@ export class FeaturedCarousel {
     this.hasMore = response.infiniteLoading && response.hasMore;
     this.autoplayEnabled = response.autoplay;
     this.trailerVolume = readTrailerVolume();
-    // Safari only permits unattended inline playback when the media starts muted.
-    this.trailerMuted = response.startTrailersMuted || isIosTrailerClient() || this.trailerVolume === 0;
+    // Honor the configured start state on every client. Browser autoplay policy
+    // may still block unattended playback with sound until the user interacts.
+    this.trailerMuted = response.startTrailersMuted || this.trailerVolume === 0;
     this.root = document.createElement('section');
     this.root.className = `ec-root ec-ready ec-effect-${response.transitionEffect} ec-height-${response.heroHeightMode} ec-text-${response.heroTextPosition}${response.useHeroLayout ? ' ec-hero' : ''}${response.showControlsOnHoverOnly ? ' ec-controls-hover' : ''}${response.interactOnWholeBanner ? ' ec-whole-banner-interactive' : ''}`;
     this.root.dataset.featuredVersion = PLUGIN_VERSION;

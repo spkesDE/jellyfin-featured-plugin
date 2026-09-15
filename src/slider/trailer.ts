@@ -669,8 +669,3 @@ export function isMobileTrailerClient(): boolean {
     || window.matchMedia?.('(pointer: coarse)').matches
     || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 }
-
-export function isIosTrailerClient(): boolean {
-  return /iPhone|iPad|iPod/i.test(navigator.userAgent)
-    || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-}
