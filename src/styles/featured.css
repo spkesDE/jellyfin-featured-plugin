@@ -651,7 +651,6 @@
   flex-direction: column;
   gap: .25rem;
   left: 50%;
-  margin-top: 8px;
   position: absolute;
   transform: translateX(-50%);
   z-index: 4;
