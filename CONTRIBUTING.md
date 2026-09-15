@@ -53,7 +53,11 @@ For configuration UI work with hot reloading:
 npm run dev
 ```
 
-See [BUILD.md](./BUILD.md) for the full development and release workflow.
+See [BUILD.md](./BUILD.md) for local build and test commands.
+
+## Adding Configuration Fields
+
+When adding a setting, update `Jellyfin.Plugin.Featured/Configuration/PluginConfiguration.cs` and add validation or migration in `PluginConfigurationNormalizer.cs` if needed. Keep `src/types/config.ts` and the relevant Vue configuration component in sync. Add a fallback in `src/config/libs/defaults.ts` if the UI needs the value before the server configuration loads, and add English and German strings in `src/i18n/locales/` for user-facing text.
 
 ## Versioning
 
