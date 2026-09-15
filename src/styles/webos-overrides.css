@@ -2,6 +2,17 @@
    Keep the following Jellyfin sections at a fixed position; if a hero has more
    copy, the overview gives up lines before the logo or metadata do. */
 
+/* Keep Featured's internal z-index layers local to the viewport instead of
+   making the whole root a stacking context over following Jellyfin sections. */
+.ec-root {
+  isolation: auto;
+  z-index: auto;
+}
+
+.ec-viewport {
+  isolation: isolate;
+}
+
 .ec-preferences-dialog {
   height: min(52rem, calc(100vh - 2rem));
   height: min(52rem, calc(100dvh - 2rem));
