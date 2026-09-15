@@ -1,0 +1,42 @@
+/* webOS 6 / Chromium 79 fallbacks and stable hero fitting.
+   Keep the following Jellyfin sections at a fixed position; if a desktop hero
+   has more copy, the hero content itself gives up space instead. */
+
+.ec-preferences-dialog {
+  height: min(52rem, calc(100vh - 2rem));
+  height: min(52rem, calc(100dvh - 2rem));
+  max-height: calc(100vh - 2rem);
+  max-height: calc(100dvh - 2rem);
+}
+
+@media (max-width: 600px) {
+  .ec-preferences-dialog {
+    height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  }
+}
+
+@media (min-width: 701px) and (hover: hover) and (pointer: fine) {
+  .ec-root.ec-ready.ec-hero .ec-content {
+    height: clamp(0px, calc(var(--ec-height) - var(--ec-hero-overlap, 150px) + 52px + var(--ec-media-padding, 0px)), var(--ec-height));
+    overflow: hidden;
+    padding-top: clamp(4.5rem, 7vw, 7rem);
+    padding-bottom: clamp(1.5rem, 3vw, 3rem);
+  }
+
+  /* The logo is the flexible part of the stack. Long metadata/overview text
+     can therefore shrink it without changing the position of the next row. */
+  .ec-root.ec-ready.ec-hero .ec-logo {
+    flex: 0 1 7rem;
+    max-height: min(30%, 7rem);
+    min-height: 0;
+  }
+
+  .ec-root.ec-ready.ec-hero .ec-title,
+  .ec-root.ec-ready.ec-hero .ec-meta,
+  .ec-root.ec-ready.ec-hero .ec-tagline,
+  .ec-root.ec-ready.ec-hero .ec-overview,
+  .ec-root.ec-ready.ec-hero .ec-actions {
+    flex-shrink: 0;
+  }
+}

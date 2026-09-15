@@ -1,4 +1,5 @@
 import styles from './styles/featured.css';
+import webosOverrides from './styles/webos-overrides.css';
 import { injectJellyfinThemeTokens } from './styles/jellyfin-theme';
 import { destroy, refresh, start } from './runtime';
 import { PLUGIN_VERSION } from './constants';
@@ -18,7 +19,7 @@ if (existingApi) {
   if (!document.getElementById(STYLE_ID)) {
     const style = document.createElement('style');
     style.id = STYLE_ID;
-    style.textContent = styles;
+    style.textContent = `${styles}\n${webosOverrides}`;
     document.head.appendChild(style);
   }
 
