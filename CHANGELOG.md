@@ -1,5 +1,49 @@
 # Changelog
 
+## v12.3.1.1 - 2026-09-15
+
+### Fixes
+
+- fix(release): commit synchronized frontend version
+
+### Other
+
+- chore: update plugin version to 12.3.1.0
+## v12.3.1.0 - 2026-09-15
+
+### Features
+
+- feat(dependabot): add configuration for npm, nuget, and GitHub Actions updates
+- feat: add CodeQL analysis and Dependency Review workflows
+- feat(hero): bound whole-banner interactions
+- feat(display): implement responsive layout for display settings
+- feat(userProfiles): enhance user settings layout with responsive design
+- feat(display): conditionally render banner heading based on hero layout setting
+- feat(preferences): add user display opt-outs
+- feat(preferences): apply changes without page reload
+- feat(logo): add new beta logo image
+- feat(beta): prepare standalone beta release infrastructure (#10)
+
+### Fixes
+
+- fix(ci): remove push trigger from CI workflow
+- fix(carousel): update trailer handling and media structure in slides
+- fix(hero): soften shared media fade
+- fix(carousel): restrict hero hitbox to active slide
+- fix(trailers): make source priority own remote fallback
+- fix(trailers): honor start-muted setting on iOS
+
+### Documentation
+
+- docs: update build guide and contributing documentation for clarity and workflow improvements
+
+### Other
+
+- deps(deps-dev): bump vite in the npm-minor-and-patch group (#2)
+- deps: Bump the nuget-minor-and-patch group with 1 update (#4)
+- deps: Bump Microsoft.NET.Test.Sdk from 17.14.1 to 18.10.0 (#5)
+- deps: Bump xunit.runner.visualstudio from 3.1.5 to 4.0.0 (#7)
+- Update beta manifest and logo for 12.3.0.1
 ## v12.3.0.0 - 2026-09-14
 
 ### Features
