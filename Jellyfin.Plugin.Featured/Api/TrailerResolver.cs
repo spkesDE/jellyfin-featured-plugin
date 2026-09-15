@@ -53,7 +53,7 @@ public sealed class TrailerResolver
                     break;
                 default:
                     candidates.AddRange(local);
-                    if (config.FallBackToRemoteTrailers) candidates.AddRange(remote);
+                    candidates.AddRange(remote);
                     break;
             }
         }

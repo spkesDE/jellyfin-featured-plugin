@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using MediaBrowser.Model.Plugins;
 
 namespace Jellyfin.Plugin.Featured;
@@ -55,7 +56,9 @@ public sealed class PluginConfiguration : BasePluginConfiguration
 
     public string TrailerSourcePriority { get; set; } = FeaturedTrailerSourcePriorities.PreferLocal;
 
-    public bool FallBackToRemoteTrailers { get; set; } = true;
+    // Read only for migration of configurations saved before trailer source owned the fallback.
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public bool? FallBackToRemoteTrailers { get; set; }
 
     public bool StartTrailersMuted { get; set; } = true;
 
@@ -234,7 +237,9 @@ public sealed class FeaturedPresetTrailerSettings
 {
     public bool EnableBackgroundTrailers { get; set; }
     public string TrailerSourcePriority { get; set; } = FeaturedTrailerSourcePriorities.PreferLocal;
-    public bool FallBackToRemoteTrailers { get; set; } = true;
+    // Read only for migration of presets saved before trailer source owned the fallback.
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public bool? FallBackToRemoteTrailers { get; set; }
     public bool StartTrailersMuted { get; set; } = true;
     public bool HideYouTubeTrailerUntilControlsFade { get; set; } = true;
     public bool WaitForTrailerToFinish { get; set; }

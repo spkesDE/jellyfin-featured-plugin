@@ -59,7 +59,6 @@ export interface FeaturedPluginConfig {
   ShowAutoplayButton: boolean;
   EnableBackgroundTrailers: boolean;
   TrailerSourcePriority: TrailerSourcePriority;
-  FallBackToRemoteTrailers: boolean;
   StartTrailersMuted: boolean;
   HideYouTubeTrailerUntilControlsFade: boolean;
   WaitForTrailerToFinish: boolean;
@@ -169,7 +168,6 @@ export interface FeaturedPresetLayoutSettings {
 export interface FeaturedPresetTrailerSettings {
   EnableBackgroundTrailers: boolean;
   TrailerSourcePriority: TrailerSourcePriority;
-  FallBackToRemoteTrailers: boolean;
   StartTrailersMuted: boolean;
   HideYouTubeTrailerUntilControlsFade: boolean;
   WaitForTrailerToFinish: boolean;

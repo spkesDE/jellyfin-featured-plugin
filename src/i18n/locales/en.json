@@ -346,7 +346,6 @@
   "trailers.source.localOnly": "Local only",
   "trailers.source.remoteOnly": "Remote only",
   "trailers.source.automatic": "Automatic",
-  "trailers.remoteFallback": "Fall back to remote trailers",
   "trailers.startMuted": "Start muted",
   "trailers.hideYouTubeControls": "Hide YouTube trailer until controls disappear (5 seconds)",
   "trailers.hideYouTubeControlsHelp": "Starts YouTube trailers invisibly and muted. They fade in after five seconds, or after the configured trailer delay when it is longer.",

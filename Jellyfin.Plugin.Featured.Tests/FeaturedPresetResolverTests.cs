@@ -134,6 +134,25 @@ public sealed class FeaturedPresetResolverTests
         Assert.Equal("12-01", normalized.AnnualStart);
     }
 
+    [Fact]
+    public void LegacyDisabledRemoteFallbackBecomesLocalOnly()
+    {
+        FeaturedPreset preset = CreatePreset("local-trailers");
+        preset.Trailers.FallBackToRemoteTrailers = false;
+        PluginConfiguration config = new()
+        {
+            FallBackToRemoteTrailers = false,
+            Presets = [preset]
+        };
+
+        PluginConfiguration normalized = PluginConfigurationNormalizer.Normalize(config);
+
+        Assert.Equal(FeaturedTrailerSourcePriorities.LocalOnly, normalized.TrailerSourcePriority);
+        Assert.Null(normalized.FallBackToRemoteTrailers);
+        Assert.Equal(FeaturedTrailerSourcePriorities.LocalOnly, normalized.Presets.Single().Trailers.TrailerSourcePriority);
+        Assert.Null(normalized.Presets.Single().Trailers.FallBackToRemoteTrailers);
+    }
+
     private static FeaturedPreset CreatePreset(string name) => new()
     {
         Id = name,

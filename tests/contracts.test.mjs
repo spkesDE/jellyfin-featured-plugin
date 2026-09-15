@@ -44,7 +44,6 @@ test('critical C# and TypeScript defaults stay in parity', async () => {
     EnableBackgroundTrailers: 'false',
     StartTrailersMuted: 'true',
     HideYouTubeTrailerUntilControlsFade: 'true',
-    FallBackToRemoteTrailers: 'true',
     AllowTrailersOnMobile: 'false',
     AllowSourceSelection: 'false',
     AllowSourceWeights: 'false',
@@ -217,7 +216,7 @@ test('proper trailer support keeps resolution and playback source independent', 
     read('src/styles/featured.css')
   ]);
   for (const setting of [
-    'TrailerSourcePriority', 'FallBackToRemoteTrailers', 'StartTrailersMuted',
+    'TrailerSourcePriority', 'StartTrailersMuted',
     'HideYouTubeTrailerUntilControlsFade',
     'WaitForTrailerToFinish', 'TrailerDelayMilliseconds', 'TrailerStartOffsetSeconds',
     'TrailerEndOffsetSeconds', 'MultipleTrailerMode', 'AllowTrailersOnMobile', 'TrailerOverrides'
@@ -233,6 +232,11 @@ test('proper trailer support keeps resolution and playback source independent', 
   assert.match(response, /IReadOnlyList<FeaturedTrailerDto>\? Trailers \{ get; init; \}/);
   assert.match(resolver, /ResolveCandidates[\s\S]*?DistinctBy\(GetCandidateKey/);
   assert.match(resolver, /PreferRemote[\s\S]*?candidates\.AddRange\(remote\)[\s\S]*?candidates\.AddRange\(local\)/);
+  assert.match(resolver, /default:\s*candidates\.AddRange\(local\);\s*candidates\.AddRange\(remote\);/);
+  assert.doesNotMatch(resolver, /config\.FallBackToRemoteTrailers/);
+  assert.doesNotMatch(trailerTab, /FallBackToRemoteTrailers|trailers\.remoteFallback/);
+  assert.match(normalizer, /config\.FallBackToRemoteTrailers == false[\s\S]*?config\.TrailerSourcePriority = FeaturedTrailerSourcePriorities\.LocalOnly/);
+  assert.match(normalizer, /trailers\.FallBackToRemoteTrailers == false[\s\S]*?trailers\.TrailerSourcePriority = FeaturedTrailerSourcePriorities\.LocalOnly/);
   assert.doesNotMatch(response, /LocalTrailerId/);
   for (const adapter of ['JellyfinLocalPlayer', 'YouTubePlayer', 'DirectVideoPlayer', 'ExternalPlayer']) {
     assert.match(player, new RegExp(`class ${adapter}`));

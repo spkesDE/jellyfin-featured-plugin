@@ -67,7 +67,6 @@ export function createPresetFromConfig(config: FeaturedPluginConfig, name = 'Fea
     Trailers: {
       EnableBackgroundTrailers: config.EnableBackgroundTrailers,
       TrailerSourcePriority: config.TrailerSourcePriority,
-      FallBackToRemoteTrailers: config.FallBackToRemoteTrailers,
       StartTrailersMuted: config.StartTrailersMuted,
       HideYouTubeTrailerUntilControlsFade: config.HideYouTubeTrailerUntilControlsFade,
       WaitForTrailerToFinish: config.WaitForTrailerToFinish,
@@ -129,7 +128,6 @@ export const CONFIG_DEFAULTS: FeaturedPluginConfig = {
   ShowAutoplayButton: true,
   EnableBackgroundTrailers: false,
   TrailerSourcePriority: 'prefer_local',
-  FallBackToRemoteTrailers: true,
   StartTrailersMuted: true,
   HideYouTubeTrailerUntilControlsFade: true,
   WaitForTrailerToFinish: false,
@@ -253,8 +251,15 @@ export function createFeaturedResponseDefaults(): Omit<FeaturedResponse, 'items'
 }
 
 export function normalizeConfig(value: unknown): FeaturedPluginConfig {
-  const source = value && typeof value === 'object' ? value as Partial<FeaturedPluginConfig> : {};
+  type LegacyTrailerFallback = { FallBackToRemoteTrailers?: boolean };
+  const source = value && typeof value === 'object'
+    ? value as Partial<FeaturedPluginConfig> & LegacyTrailerFallback
+    : {};
   const config = { ...createDefaultConfig(), ...source };
+  if (config.TrailerSourcePriority === 'prefer_local' && source.FallBackToRemoteTrailers === false) {
+    config.TrailerSourcePriority = 'local_only';
+  }
+  delete config.FallBackToRemoteTrailers;
   config.SourceRules = Array.isArray(source.SourceRules)
     ? source.SourceRules.map((rule) => ({
         ...createSourceRule(rule.Type), ...rule,
@@ -285,6 +290,12 @@ export function normalizeConfig(value: unknown): FeaturedPluginConfig {
   config.Presets = Array.isArray(source.Presets)
     ? source.Presets.map((preset) => {
         const fallback = createPresetFromConfig(config);
+        const legacyTrailers = preset.Trailers as typeof preset.Trailers & LegacyTrailerFallback | undefined;
+        const trailers = { ...fallback.Trailers, ...(legacyTrailers ?? {}) };
+        if (trailers.TrailerSourcePriority === 'prefer_local' && legacyTrailers?.FallBackToRemoteTrailers === false) {
+          trailers.TrailerSourcePriority = 'local_only';
+        }
+        delete (trailers as typeof trailers & LegacyTrailerFallback).FallBackToRemoteTrailers;
         return {
           ...fallback, ...preset,
           Id: preset.Id || fallback.Id,
@@ -303,7 +314,7 @@ export function normalizeConfig(value: unknown): FeaturedPluginConfig {
           PersonalizationPolicy: { ...fallback.PersonalizationPolicy, ...(preset.PersonalizationPolicy ?? {}) },
           Mixer: { ...fallback.Mixer, ...(preset.Mixer ?? {}) },
           Layout: { ...fallback.Layout, ...(preset.Layout ?? {}) },
-          Trailers: { ...fallback.Trailers, ...(preset.Trailers ?? {}) }
+          Trailers: trailers
         };
       })
     : [];

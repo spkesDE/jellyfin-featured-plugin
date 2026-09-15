@@ -346,7 +346,6 @@
   "trailers.source.localOnly": "Nur lokal",
   "trailers.source.remoteOnly": "Nur remote",
   "trailers.source.automatic": "Automatisch",
-  "trailers.remoteFallback": "Auf Remote-Trailer zurückfallen",
   "trailers.startMuted": "Stumm starten",
   "trailers.hideYouTubeControls": "YouTube-Trailer ausblenden, bis die Bedienelemente verschwunden sind (5 Sekunden)",
   "trailers.hideYouTubeControlsHelp": "Startet YouTube-Trailer unsichtbar und stumm. Die Einblendung erfolgt nach fünf Sekunden oder, falls länger, nach der eingestellten Trailer-Verzögerung.",

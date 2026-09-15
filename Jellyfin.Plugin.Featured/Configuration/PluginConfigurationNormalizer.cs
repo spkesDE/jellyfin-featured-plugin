@@ -80,6 +80,12 @@ internal static class PluginConfigurationNormalizer
             FeaturedTrailerSourcePriorities.Automatic => FeaturedTrailerSourcePriorities.Automatic,
             _ => FeaturedTrailerSourcePriorities.PreferLocal
         };
+        if (config.TrailerSourcePriority == FeaturedTrailerSourcePriorities.PreferLocal
+            && config.FallBackToRemoteTrailers == false)
+        {
+            config.TrailerSourcePriority = FeaturedTrailerSourcePriorities.LocalOnly;
+        }
+        config.FallBackToRemoteTrailers = null;
         config.TrailerDelayMilliseconds = Math.Clamp(config.TrailerDelayMilliseconds, 0, 30000);
         config.TrailerStartOffsetSeconds = Math.Clamp(config.TrailerStartOffsetSeconds, 0, 3600);
         config.TrailerEndOffsetSeconds = Math.Clamp(config.TrailerEndOffsetSeconds, 0, 3600);
@@ -179,6 +185,12 @@ internal static class PluginConfigurationNormalizer
             FeaturedTrailerSourcePriorities.Automatic => FeaturedTrailerSourcePriorities.Automatic,
             _ => FeaturedTrailerSourcePriorities.PreferLocal
         };
+        if (trailers.TrailerSourcePriority == FeaturedTrailerSourcePriorities.PreferLocal
+            && trailers.FallBackToRemoteTrailers == false)
+        {
+            trailers.TrailerSourcePriority = FeaturedTrailerSourcePriorities.LocalOnly;
+        }
+        trailers.FallBackToRemoteTrailers = null;
         trailers.TrailerDelayMilliseconds = Math.Clamp(trailers.TrailerDelayMilliseconds, 0, 30000);
         trailers.TrailerStartOffsetSeconds = Math.Clamp(trailers.TrailerStartOffsetSeconds, 0, 3600);
         trailers.TrailerEndOffsetSeconds = Math.Clamp(trailers.TrailerEndOffsetSeconds, 0, 3600);
