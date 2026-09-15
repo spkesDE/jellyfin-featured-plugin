@@ -141,10 +141,12 @@ export function createSlide(item: FeaturedItem, response: FeaturedResponse): HTM
 
   if (response.interactOnWholeBanner) {
     slide.addEventListener('click', (event) => {
+      if (!slide.classList.contains('is-active')) return;
       if ((event.target as Element).closest('button')) return;
       openItemDetails(item.id);
     });
     slide.addEventListener('keydown', (event) => {
+      if (!slide.classList.contains('is-active')) return;
       const target = event.target instanceof Element ? event.target : null;
       if (target?.closest('button')) return;
       if (event.key !== 'Enter' && event.key !== ' ') return;

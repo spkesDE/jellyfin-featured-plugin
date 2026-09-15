@@ -534,7 +534,7 @@
   z-index: 2;
 }
 
-.ec-root.ec-ready.ec-hero.ec-whole-banner-interactive .ec-slide-hitbox {
+.ec-root.ec-ready.ec-hero.ec-whole-banner-interactive .ec-slide.is-active .ec-slide-hitbox {
   pointer-events: auto;
 }
 
@@ -542,7 +542,7 @@
   z-index: 3;
 }
 
-.ec-root.ec-ready.ec-hero .ec-button,
+.ec-root.ec-ready.ec-hero .ec-slide.is-active .ec-button,
 .ec-root.ec-ready.ec-hero .ec-navigation {
   pointer-events: auto;
 }

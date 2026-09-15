@@ -342,7 +342,10 @@ test('hero hit-testing ends at the first Jellyfin section without clipping the v
   assert.match(render, /className = 'ec-slide-hitbox'/);
   assert.match(styles, /\.ec-root\.ec-ready\.ec-hero\s*\{[^}]*pointer-events:\s*none/);
   assert.match(styles, /\.ec-slide-hitbox\s*\{[^}]*height:\s*clamp\(0px, calc\(var\(--ec-height\) - var\(--ec-hero-overlap, 150px\) \+ 52px \+ var\(--ec-media-padding, 0px\)\), var\(--ec-height\)\)[^}]*pointer-events:\s*none/);
-  assert.match(styles, /\.ec-whole-banner-interactive \.ec-slide-hitbox\s*\{[^}]*pointer-events:\s*auto/);
+  assert.match(styles, /\.ec-whole-banner-interactive \.ec-slide\.is-active \.ec-slide-hitbox\s*\{[^}]*pointer-events:\s*auto/);
+  assert.doesNotMatch(styles, /\.ec-whole-banner-interactive \.ec-slide-hitbox\s*\{[^}]*pointer-events:\s*auto/);
+  assert.match(styles, /\.ec-root\.ec-ready\.ec-hero \.ec-slide\.is-active \.ec-button,[\s\S]*?pointer-events:\s*auto/);
+  assert.match(render, /slide\.addEventListener\('click', \(event\) => \{\s*if \(!slide\.classList\.contains\('is-active'\)\) return/);
   assert.doesNotMatch(styles, /\.ec-root\.ec-ready\.ec-hero \+ \.verticalSection/);
 });
 
