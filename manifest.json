@@ -9,6 +9,14 @@
   "imageUrl": "https://raw.githubusercontent.com/spkesDE/jellyfin-featured-plugin/main/logo.png",
   "versions": [
     {
+      "version": "12.4.0.0",
+      "changelog": "- fix(webos): support Chromium 79 and safe hero spacing\n- fix(style): adjust spacing for meta elements in featured.css\n- fix(hero): keep overlap layout stable with adaptive content\n- fix(hero): preserve logos and align layout tests\n- fix(hero): prioritize logos and align webOS tests\n- fix(style): remove margin-top from config and featured sections for better alignment\n- fix(hero): adapt overview lines to available space\n- fix(hero): scope stacking context to viewport\n",
+      "targetAbi": "12.0.0.0",
+      "sourceUrl": "https://github.com/spkesDE/jellyfin-featured-plugin/releases/download/v12.4.0.0/Featured.zip",
+      "checksum": "58cfd6b85d3b747f5d0ace9b048fbec0",
+      "timestamp": "2026-09-15 09:28:36"
+    },
+    {
       "version": "12.3.1.1",
       "changelog": "- fix(release): commit synchronized frontend version\n- chore: update plugin version to 12.3.1.0\n",
       "targetAbi": "12.0.0.0",

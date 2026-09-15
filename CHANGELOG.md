@@ -1,5 +1,17 @@
 # Changelog
 
+## v12.4.0.0 - 2026-09-15
+
+### Fixes
+
+- fix(webos): support Chromium 79 and safe hero spacing
+- fix(style): adjust spacing for meta elements in featured.css
+- fix(hero): keep overlap layout stable with adaptive content
+- fix(hero): preserve logos and align layout tests
+- fix(hero): prioritize logos and align webOS tests
+- fix(style): remove margin-top from config and featured sections for better alignment
+- fix(hero): adapt overview lines to available space
+- fix(hero): scope stacking context to viewport
 ## v12.3.1.1 - 2026-09-15
 
 ### Fixes
