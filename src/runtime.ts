@@ -218,6 +218,7 @@ async function mount(container: Element): Promise<void> {
     );
     if (placeholder.isConnected) placeholder.replaceWith(carousel.root);
     else container.prepend(carousel.root);
+    carousel.startHeroLayoutGuard();
     placeholders.delete(container);
     instances.set(container, carousel);
     resetMountFailures();

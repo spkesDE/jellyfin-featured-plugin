@@ -25,6 +25,11 @@ export function getHeroOverlap(height: number): number {
   return 280;
 }
 
+/** Keep the next Jellyfin section below the visible content, not below all artwork. */
+export function calculateHeroClearance(currentClearance: number, contentBottom: number, sectionTop: number, gap = 12): number {
+  return Math.max(0, Math.ceil(currentClearance + contentBottom + gap - sectionTop));
+}
+
 export function applyHeroLayoutVariables(element: HTMLElement, settings: HeroLayoutSettings): void {
   if (settings.heroHeightMode === 'custom') {
     element.style.setProperty('--ec-height', `${settings.bannerHeight}px`);

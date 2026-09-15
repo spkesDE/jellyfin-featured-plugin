@@ -1,4 +1,5 @@
 import type { FeaturedPluginConfig } from '../../types/config';
+import { cloneJsonValue } from '../../core/clone';
 import { createDefaultConfig, createFeaturedResponseDefaults } from '../libs/defaults';
 
 let config: FeaturedPluginConfig = createDefaultConfig();
@@ -6,8 +7,8 @@ let config: FeaturedPluginConfig = createDefaultConfig();
 export function installMockJellyfin(): void {
   window.ApiClient = {
     getCurrentUserId: () => 'editor-1',
-    getPluginConfiguration: async () => structuredClone(config),
-    updatePluginConfiguration: async (_id, value) => { config = structuredClone(value as FeaturedPluginConfig); return {}; },
+    getPluginConfiguration: async () => cloneJsonValue(config),
+    updatePluginConfiguration: async (_id, value) => { config = cloneJsonValue(value as FeaturedPluginConfig); return {}; },
     getUsers: async () => [
       { Id: 'editor-1', Name: 'Editorial Team', Policy: { IsDisabled: false } },
       { Id: 'editor-2', Name: 'Cinema Club', Policy: { IsDisabled: false } }

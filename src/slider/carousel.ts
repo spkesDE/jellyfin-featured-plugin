@@ -3,7 +3,8 @@ import { t } from '../i18n';
 import { CONSOLE_PREFIX, PLUGIN_VERSION } from '../constants';
 import { createSlide, loadSlideArtwork } from './render';
 import { createTrailerPlayer, isMobileTrailerClient, type TrailerPlayer } from './trailer';
-import { applyHeroLayoutVariables } from './layout';
+import { applyHeroLayoutVariables, calculateHeroClearance } from './layout';
+import { replaceElementChildren } from '../core/dom';
 
 export type FeaturedItemLoader = (excludedItemIds: readonly string[]) => Promise<FeaturedResponse>;
 export type FeaturedItemDisplayReporter = (itemId: string) => Promise<unknown>;
@@ -70,6 +71,11 @@ export class FeaturedCarousel {
   private trailerVolume: number;
   private trailerPaused = false;
   private trailerConcealed = false;
+  private heroLayoutGuardStarted = false;
+  private heroLayoutFrame: number | null = null;
+  private heroLayoutVerificationPasses = 0;
+  private heroContentObserver: ResizeObserver | null = null;
+  private heroParentObserver: MutationObserver | null = null;
 
   constructor(response: FeaturedResponse, loadItems?: FeaturedItemLoader, reportDisplayed?: FeaturedItemDisplayReporter) {
     this.response = response;
@@ -191,10 +197,74 @@ export class FeaturedCarousel {
     if (this.destroyed) return;
     this.destroyed = true;
     this.pauseTimer();
+    window.removeEventListener('resize', this.scheduleHeroClearance);
+    this.root.removeEventListener('load', this.scheduleHeroClearance, true);
+    this.heroContentObserver?.disconnect();
+    this.heroParentObserver?.disconnect();
+    if (this.heroLayoutFrame !== null) cancelAnimationFrame(this.heroLayoutFrame);
     document.removeEventListener('keydown', this.onTrailerHotkey, true);
     document.removeEventListener('visibilitychange', this.onVisibilityChange);
     this.stopTrailer(this.slides[this.index - this.windowStart]);
     this.root.remove();
+  }
+
+  /** Start after insertion so the following Jellyfin section can be measured. */
+  startHeroLayoutGuard(): void {
+    if (!this.response.useHeroLayout || this.heroLayoutGuardStarted) return;
+    this.heroLayoutGuardStarted = true;
+    window.addEventListener('resize', this.scheduleHeroClearance);
+    this.root.addEventListener('load', this.scheduleHeroClearance, true);
+    if (typeof ResizeObserver !== 'undefined') {
+      this.heroContentObserver = new ResizeObserver(this.scheduleHeroClearance);
+      this.observeActiveHeroContent();
+    }
+    if (this.root.parentElement) {
+      this.heroParentObserver = new MutationObserver(this.scheduleHeroClearance);
+      this.heroParentObserver.observe(this.root.parentElement, { childList: true });
+    }
+    this.scheduleHeroClearance();
+  }
+
+  private scheduleHeroClearance = (): void => {
+    this.heroLayoutVerificationPasses = 0;
+    this.queueHeroClearance();
+  };
+
+  private queueHeroClearance(): void {
+    if (!this.heroLayoutGuardStarted || this.destroyed || this.heroLayoutFrame !== null) return;
+    this.heroLayoutFrame = requestAnimationFrame(() => {
+      this.heroLayoutFrame = null;
+      this.updateHeroClearance();
+    });
+  }
+
+  private observeActiveHeroContent(): void {
+    this.heroContentObserver?.disconnect();
+    const content = this.slides[this.index - this.windowStart]?.querySelector('.ec-content');
+    if (!content) return;
+    this.heroContentObserver?.observe(content);
+    Array.from(content.children).forEach((child) => this.heroContentObserver?.observe(child));
+  }
+
+  private updateHeroClearance(): void {
+    if (!this.root.isConnected) return;
+    const section = this.root.nextElementSibling;
+    const content = this.slides[this.index - this.windowStart]?.querySelector('.ec-content');
+    if (!section || !content) return;
+    const visibleChildren = Array.from(content.children).filter((child) => child.getClientRects().length);
+    if (!visibleChildren.length) return;
+
+    const contentBottom = Math.max(...visibleChildren.map((child) => child.getBoundingClientRect().bottom));
+    const sectionTop = section.getBoundingClientRect().top;
+    const current = Number.parseFloat(this.root.style.getPropertyValue('--ec-content-clearance')) || 0;
+    const clearance = calculateHeroClearance(current, contentBottom, sectionTop);
+    if (Math.abs(clearance - current) < 1) return;
+    if (clearance) this.root.style.setProperty('--ec-content-clearance', `${clearance}px`);
+    else this.root.style.removeProperty('--ec-content-clearance');
+    if (this.heroLayoutVerificationPasses < 2) {
+      this.heroLayoutVerificationPasses += 1;
+      this.queueHeroClearance();
+    }
   }
 
   private createArrow(direction: 'prev' | 'next'): HTMLButtonElement {
@@ -271,6 +341,10 @@ export class FeaturedCarousel {
       this.dots[this.index]?.classList.add('is-active');
     }
     this.loadNearbyArtwork(localIndex);
+    if (this.heroLayoutGuardStarted) {
+      this.observeActiveHeroContent();
+      this.scheduleHeroClearance();
+    }
     this.startTrailer(this.slides[localIndex], this.items[this.index]);
     this.reportActiveItem();
     if (this.shouldPrefetchNextBatch()) void this.loadMore();
@@ -323,7 +397,7 @@ export class FeaturedCarousel {
 
   private renderWindow(start: number): void {
     this.stopTrailer(this.slides[this.index - this.windowStart]);
-    this.track.replaceChildren();
+    replaceElementChildren(this.track);
     this.windowStart = start;
     this.slides = this.items
       .slice(start, start + MAX_DOM_SLIDES)

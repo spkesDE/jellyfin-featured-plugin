@@ -1,4 +1,5 @@
 import { getAccessToken, getApiClient } from '../core/apiClient';
+import { replaceElementChildren } from '../core/dom';
 import type { FeaturedTrailer } from '../types/featured';
 
 export interface TrailerPlaybackOptions {
@@ -266,7 +267,7 @@ export class YouTubePlayer implements TrailerPlayer {
     }
 
     this.player = null;
-    this.element.replaceChildren();
+    replaceElementChildren(this.element);
     this.element.remove();
     this.resolveReadyOnce();
   }
@@ -311,7 +312,7 @@ export class YouTubePlayer implements TrailerPlayer {
       // Ignore stale-player teardown errors.
     }
     this.player = null;
-    this.element.replaceChildren();
+    replaceElementChildren(this.element);
 
     const iframe = document.createElement('iframe');
     iframe.id = `ec-youtube-player-${++youtubePlayerSequence}`;

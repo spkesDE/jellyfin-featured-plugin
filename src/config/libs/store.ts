@@ -1,4 +1,5 @@
 import { computed, inject, reactive, ref, type ComputedRef, type InjectionKey, type Ref, type WritableComputedRef } from 'vue';
+import { cloneJsonValue } from '../../core/clone';
 import { getApiClient, requestJson } from '../../core/apiClient';
 import { t } from '../../i18n';
 import type { FeaturedFilterRule, FeaturedManualList, FeaturedPluginConfig, FeaturedPreset, SourceType } from '../../types/config';
@@ -286,7 +287,7 @@ export function createConfigStore(): ConfigStore {
   function duplicatePreset(index: number): void {
     const preset = config.Presets[index];
     if (!preset) return;
-    const copy = structuredClone(preset) as FeaturedPreset;
+    const copy = cloneJsonValue(preset) as FeaturedPreset;
     copy.Id = globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(16).slice(2)}`;
     copy.Name = t('preset.copyName', { name: preset.Name });
     copy.Enabled = false;
