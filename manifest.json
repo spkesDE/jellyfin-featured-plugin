@@ -9,6 +9,14 @@
   "imageUrl": "https://raw.githubusercontent.com/spkesDE/jellyfin-featured-plugin/main/logo.png",
   "versions": [
     {
+      "version": "12.3.1.1",
+      "changelog": "- fix(release): commit synchronized frontend version\n- chore: update plugin version to 12.3.1.0\n",
+      "targetAbi": "12.0.0.0",
+      "sourceUrl": "https://github.com/spkesDE/jellyfin-featured-plugin/releases/download/v12.3.1.1/Featured.zip",
+      "checksum": "dda5bc98cd2f9804a28ce77564f5d8cc",
+      "timestamp": "2026-09-15 07:55:02"
+    },
+    {
       "version": "12.3.0.0",
       "changelog": "- feat(theming): enhance theming capabilities with new CSS variables and documentation\n- feat(readme): add additional badges for license, release, Jellyfin version, and build status\n- feat: add feed preview functionality and better scheduling options for presets\n- fix(styles): add border radius and clip-path to ec-slide for improved aesthetics\n- fix(preview): refine layout and error handling\n",
       "targetAbi": "12.0.0.0",
