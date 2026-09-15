@@ -9,7 +9,14 @@ $repoRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $projectFile = Join-Path $repoRoot "Jellyfin.Plugin.Featured\Jellyfin.Plugin.Featured.csproj"
 $packageJsonFile = Join-Path $repoRoot "package.json"
 $packageLockFile = Join-Path $repoRoot "package-lock.json"
+$constantsFile = Join-Path $repoRoot "src\constants.ts"
 $syncFrontendVersionScript = Join-Path $repoRoot "scripts\sync-frontend-version.mjs"
+$releasePaths = @(
+    "Jellyfin.Plugin.Featured/Jellyfin.Plugin.Featured.csproj",
+    "package.json",
+    "package-lock.json",
+    "src/constants.ts"
+)
 
 Set-Location $repoRoot
 
@@ -82,7 +89,7 @@ function Sync-FrontendVersion {
         throw "Failed to synchronize frontend package version to $NewVersion."
     }
 
-    git add $packageJsonFile $packageLockFile
+    git add $packageJsonFile $packageLockFile $constantsFile
     if ($LASTEXITCODE -ne 0) {
         throw "Failed to stage synchronized frontend package versions."
     }
@@ -222,11 +229,11 @@ if ($confirmation -notin @('Y', 'y')) {
     throw "Release cancelled."
 }
 
-git diff --cached --quiet
+git diff --cached --quiet -- $releasePaths
 $hasStagedChanges = $LASTEXITCODE -ne 0
 
 if ($hasStagedChanges) {
-    git commit -m "Prepare release $Tag"
+    git commit -m "Prepare release $Tag" -- $releasePaths
     if ($LASTEXITCODE -ne 0) {
         throw "Failed to commit release preparation changes."
     }
