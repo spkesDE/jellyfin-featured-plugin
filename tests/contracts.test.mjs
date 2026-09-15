@@ -103,7 +103,7 @@ test('featured presets resolve schedules and override all roadmap sections', asy
   assert.match(response, /public string\? ActivePresetName \{ get; \}/);
   assert.match(response, /public DateTimeOffset\? NextPresetChange \{ get; \}/);
   assert.match(cache, /FeaturedPresetResolver\.Resolve\(baseConfig, DateTimeOffset\.UtcNow\)\.Configuration/);
-  assert.match(defaults, /createPresetFromConfig[\s\S]*?SourceRules: cloneJsonValue[\s\S]*?PersonalizationPolicy[\s\S]*?Mixer:[\s\S]*?Layout:[\s\S]*?Trailers:/);
+  assert.match(defaults, /createPresetFromConfig[\s\S]*?SourceRules: structuredClone[\s\S]*?PersonalizationPolicy[\s\S]*?Mixer:[\s\S]*?Layout:[\s\S]*?Trailers:/);
   assert.match(presetTab, /preset\.ScheduleType === 'one_time'[\s\S]*?ConfigDateTime v-model="preset\.StartsAt"[\s\S]*?ConfigDateTime v-model="preset\.EndsAt"/);
   assert.match(presetTab, /store\.updatePresetSnapshot\(index\)[\s\S]*?store\.duplicatePreset\(index\)/);
   assert.match(runtime, /schedulePresetRefresh\(response\.nextPresetChange\)/);
@@ -335,7 +335,7 @@ test('touch layouts keep the first Jellyfin section below the hero', async () =>
     read('src/styles/featured.css'),
     read('Jellyfin.Plugin.Featured/Integrations/FrontendBootstrap.cs')
   ]);
-  assert.match(styles, /@media \(max-width: 700px\), \(hover: none\) and \(pointer: coarse\)[\s\S]*?\.ec-root\.ec-ready\.ec-hero,[\s\S]*?\.ec-root\.ec-placeholder\.ec-hero[\s\S]*?margin-bottom:\s*calc\(1\.25rem \+ var\(--ec-media-padding, 0px\) \+ var\(--ec-content-clearance, 0px\)\)/);
+  assert.match(styles, /@media \(max-width: 700px\), \(hover: none\) and \(pointer: coarse\)[\s\S]*?\.ec-root\.ec-ready\.ec-hero,[\s\S]*?\.ec-root\.ec-placeholder\.ec-hero[\s\S]*?margin-bottom:\s*calc\(1\.25rem \+ var\(--ec-media-padding, 0px\)\)/);
   assert.match(bootstrap, /@media\(max-width:700px\),\(hover:none\) and \(pointer:coarse\)[\s\S]*?\.ec-bootstrap-placeholder\.ec-bootstrap-hero\{margin-bottom:calc\(1\.25rem \+ var\(--ec-media-padding,0px\)\)\}/);
 });
 
@@ -346,7 +346,7 @@ test('hero hit-testing ends at the first Jellyfin section without clipping the v
   ]);
   assert.match(render, /className = 'ec-slide-hitbox'/);
   assert.match(styles, /\.ec-root\.ec-ready\.ec-hero\s*\{[^}]*pointer-events:\s*none/);
-  assert.match(styles, /\.ec-slide-hitbox\s*\{[^}]*height:\s*clamp\(0px, calc\(var\(--ec-height\) - var\(--ec-hero-overlap, 150px\) \+ 52px \+ var\(--ec-media-padding, 0px\) \+ var\(--ec-content-clearance, 0px\)\), var\(--ec-height\)\)[^}]*pointer-events:\s*none/);
+  assert.match(styles, /\.ec-slide-hitbox\s*\{[^}]*height:\s*clamp\(0px, calc\(var\(--ec-height\) - var\(--ec-hero-overlap, 150px\) \+ 52px \+ var\(--ec-media-padding, 0px\)\), var\(--ec-height\)\)[^}]*pointer-events:\s*none/);
   assert.match(styles, /\.ec-whole-banner-interactive \.ec-slide\.is-active \.ec-slide-hitbox\s*\{[^}]*pointer-events:\s*auto/);
   assert.doesNotMatch(styles, /\.ec-whole-banner-interactive \.ec-slide-hitbox\s*\{[^}]*pointer-events:\s*auto/);
   assert.match(styles, /\.ec-root\.ec-ready\.ec-hero \.ec-slide\.is-active \.ec-button,[\s\S]*?pointer-events:\s*auto/);

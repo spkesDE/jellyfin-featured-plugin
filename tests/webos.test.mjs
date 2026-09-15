@@ -46,5 +46,6 @@ test('hero content fits inside the fixed overlap without moving following sectio
   assert.match(styles, /\.ec-root\.ec-ready\.ec-hero\s*\{[\s\S]*?margin-bottom:\s*calc\(\(var\(--ec-hero-overlap, 150px\) \* -1\) \+ 52px \+ var\(--ec-media-padding, 0px\)\);/);
   assert.doesNotMatch(`${styles}\n${webosOverrides}`, /margin-bottom:[^;]+var\(--ec-content-clearance/);
   assert.match(webosOverrides, /\.ec-root\.ec-ready\.ec-hero \.ec-content\s*\{[\s\S]*?height:\s*clamp\(0px, calc\(var\(--ec-height\) - var\(--ec-hero-overlap, 150px\) \+ 52px \+ var\(--ec-media-padding, 0px\)\), var\(--ec-height\)\);[\s\S]*?overflow:\s*hidden;/);
-  assert.match(webosOverrides, /\.ec-root\.ec-ready\.ec-hero \.ec-logo\s*\{[\s\S]*?flex:\s*0 1 7rem;[\s\S]*?max-height:\s*min\(30%, 7rem\);[\s\S]*?min-height:\s*0;/);
+  assert.match(webosOverrides, /\.ec-root\.ec-ready\.ec-hero \.ec-logo\s*\{[\s\S]*?flex:\s*0 0 auto;[\s\S]*?flex-shrink:\s*0;[\s\S]*?max-height:\s*min\(30%, 7rem\);/);
+  assert.match(webosOverrides, /\.ec-root\.ec-ready\.ec-hero \.ec-overview\s*\{[\s\S]*?-webkit-line-clamp:\s*2;[\s\S]*?flex:\s*0 1 auto;[\s\S]*?min-height:\s*0;[\s\S]*?overflow:\s*hidden;/);
 });

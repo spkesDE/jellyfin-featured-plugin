@@ -27,7 +27,9 @@ test('beta manifest and package image are separate from the stable release', asy
   assert.equal(betaManifest[0].guid, stableManifest[0].guid);
   assert.equal(betaManifest[0].imageUrl.endsWith('/logo-beta.png'), true);
   assert.equal(stableManifest[0].imageUrl.endsWith('/logo.png'), true);
-  assert.deepEqual(betaManifest[0].versions, []);
+  assert.equal(Array.isArray(betaManifest[0].versions), true);
+  assert.equal(betaManifest[0].versions.every((version) => version.sourceUrl.endsWith('/releases/download/beta/Featured.zip')), true);
+  assert.equal(stableManifest[0].versions.every((version) => !version.sourceUrl.includes('/releases/download/beta/')), true);
   assert.match(buildScript, /\[switch\]\$Beta/);
   assert.match(buildScript, /if \(\$Beta\)[\s\S]*?logo-beta\.png[\s\S]*?else[\s\S]*?logo\.png/);
   assert.match(updateScript, /\[switch\]\$LatestOnly/);
