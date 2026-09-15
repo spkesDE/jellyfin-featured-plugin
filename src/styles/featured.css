@@ -960,8 +960,7 @@
   }
 }
 
-@media (max-width: 700px),
-(hover: none) and (pointer: coarse) {
+@media (max-width: 700px), (hover: none) and (pointer: coarse) {
 
   .ec-root.ec-ready.ec-hero,
   .ec-root.ec-placeholder.ec-hero {
