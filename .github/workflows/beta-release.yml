@@ -1,0 +1,220 @@
+name: Publish Beta
+
+on:
+  workflow_dispatch:
+    inputs:
+      notes:
+        description: Optional note shown on the beta release
+        required: false
+        type: string
+
+permissions:
+  artifact-metadata: write
+  attestations: write
+  contents: read
+  id-token: write
+
+concurrency:
+  group: beta-release
+  cancel-in-progress: false
+
+jobs:
+  beta:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Create release app token
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.RELEASE_APP_CLIENT_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          permission-contents: write
+
+      - name: Check out selected revision
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          token: ${{ steps.app-token.outputs.token }}
+          persist-credentials: true
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Determine beta version
+        id: version
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          git fetch origin main --tags
+          $mainProjectSource = git show origin/main:Jellyfin.Plugin.Featured/Jellyfin.Plugin.Featured.csproj
+          if ($LASTEXITCODE -ne 0) {
+            throw "Could not read the plugin version from origin/main."
+          }
+
+          [xml]$mainProject = $mainProjectSource -join "`n"
+          $stableVersion = [string]($mainProject.Project.PropertyGroup | Select-Object -First 1).Version
+          if ($stableVersion -notmatch '^\d+\.\d+\.\d+\.\d+$') {
+            throw "The stable version on main is not a four-part numeric version: $stableVersion"
+          }
+
+          $parts = @($stableVersion.Split('.') | ForEach-Object { [int]$_ })
+          $baseVersion = "$($parts[0]).$($parts[1]).$($parts[2])"
+          $nextBuild = 1
+          $stateDirectory = Join-Path $PWD ".beta-state"
+          New-Item -ItemType Directory -Path $stateDirectory -Force | Out-Null
+
+          $previousManifests = @()
+          gh release download beta --pattern manifest-beta.json --dir $stateDirectory --clobber 2>$null
+          if ($LASTEXITCODE -eq 0) {
+            $previousManifests += Get-Content -LiteralPath (Join-Path $stateDirectory "manifest-beta.json") -Raw
+          }
+          $mainManifestSource = git show origin/main:manifest-beta.json 2>$null
+          if ($LASTEXITCODE -eq 0) {
+            $previousManifests += ($mainManifestSource -join "`n")
+          }
+
+          foreach ($manifestSource in $previousManifests) {
+            $previousManifest = $manifestSource | ConvertFrom-Json
+            $previousVersion = [string]$previousManifest[0].versions[0].version
+            if ($previousVersion -match '^\d+\.\d+\.\d+\.\d+$') {
+              $previousParts = @($previousVersion.Split('.') | ForEach-Object { [int]$_ })
+              $previousBase = "$($previousParts[0]).$($previousParts[1]).$($previousParts[2])"
+              if ($previousBase -eq $baseVersion) {
+                $nextBuild = [Math]::Max($nextBuild, $previousParts[3] + 1)
+              }
+            }
+          }
+
+          $betaVersion = "$baseVersion.$nextBuild"
+          "stable_version=$stableVersion" >> $env:GITHUB_OUTPUT
+          "beta_version=$betaVersion" >> $env:GITHUB_OUTPUT
+          "Beta version: $betaVersion (stable base: $stableVersion)"
+
+      - name: Apply beta build version
+        shell: pwsh
+        run: ./scripts/set-build-version.ps1 -Version "${{ steps.version.outputs.beta_version }}"
+
+      - name: Create beta notes
+        shell: pwsh
+        env:
+          REQUESTED_NOTES: ${{ inputs.notes }}
+        run: |
+          $betaVersion = "${{ steps.version.outputs.beta_version }}"
+          $stableVersion = "${{ steps.version.outputs.stable_version }}"
+          $shortSha = "${{ github.sha }}".Substring(0, 7)
+          $manifestChangelog = "Beta $betaVersion from ${{ github.ref_name }}@$shortSha."
+          Set-Content -LiteralPath manifest-changelog.md -Value $manifestChangelog -Encoding utf8
+
+          $lines = @(
+            "# Jellyfin Featured $betaVersion beta",
+            "",
+            "> This is a test build based on stable version $stableVersion.",
+            "",
+            "Source: ``${{ github.ref_name }}@$shortSha``"
+          )
+          if (-not [string]::IsNullOrWhiteSpace($env:REQUESTED_NOTES)) {
+            $lines += ""
+            $lines += $env:REQUESTED_NOTES.Trim()
+          }
+          Set-Content -LiteralPath release-notes.md -Value $lines -Encoding utf8
+
+      - name: Build beta ZIP
+        shell: pwsh
+        run: |
+          $manifestChangelog = Get-Content manifest-changelog.md -Raw
+          ./build-release.ps1 -Beta -Changelog $manifestChangelog
+
+      - name: Compute checksum and beta manifest
+        id: artifact
+        shell: pwsh
+        run: |
+          $zipPath = Join-Path $PWD "release/Featured.zip"
+          if (-not (Test-Path -LiteralPath $zipPath)) {
+            throw "Beta ZIP not found at $zipPath"
+          }
+
+          $checksum = (Get-FileHash -LiteralPath $zipPath -Algorithm MD5).Hash.ToLowerInvariant()
+          $timestamp = (Get-Date).ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")
+          ./scripts/update-manifest.ps1 `
+            -ManifestPath "manifest-beta.json" `
+            -LatestOnly `
+            -SourceUrl "https://github.com/${{ github.repository }}/releases/download/beta/Featured.zip" `
+            -Checksum $checksum `
+            -Timestamp $timestamp
+
+          "checksum=$checksum" >> $env:GITHUB_OUTPUT
+
+      - name: Verify beta manifest
+        shell: pwsh
+        run: |
+          $manifest = Get-Content -LiteralPath manifest-beta.json -Raw | ConvertFrom-Json
+          $versions = @($manifest[0].versions)
+          if ($versions.Count -ne 1) {
+            throw "The beta manifest must contain exactly one version."
+          }
+          if ([string]$versions[0].version -ne "${{ steps.version.outputs.beta_version }}") {
+            throw "The beta manifest version does not match the beta build."
+          }
+
+      - name: Attest beta artifact
+        uses: actions/attest@v4
+        with:
+          subject-path: release/Featured.zip
+
+      - name: Replace GitHub beta prerelease
+        shell: bash
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          if gh release view beta >/dev/null 2>&1; then
+            gh release delete beta --yes --cleanup-tag
+          elif git ls-remote --exit-code --tags origin refs/tags/beta >/dev/null 2>&1; then
+            git push origin :refs/tags/beta
+          fi
+
+          gh release create beta \
+            release/Featured.zip \
+            manifest-beta.json \
+            --target "${{ github.sha }}" \
+            --title "Beta ${{ steps.version.outputs.beta_version }}" \
+            --notes-file release-notes.md \
+            --prerelease
+
+      - name: Get release app bot user id
+        id: app-user
+        shell: bash
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          echo "user-id=$(gh api "/users/${{ steps.app-token.outputs.app-slug }}[bot]" --jq .id)" >> "$GITHUB_OUTPUT"
+
+      - name: Publish beta manifest and logo to main
+        shell: bash
+        run: |
+          cp manifest-beta.json "$RUNNER_TEMP/manifest-beta.json"
+          cp logo-beta.png "$RUNNER_TEMP/logo-beta.png"
+          git fetch origin main
+          git checkout -f -B main origin/main
+          cp "$RUNNER_TEMP/manifest-beta.json" manifest-beta.json
+          cp "$RUNNER_TEMP/logo-beta.png" logo-beta.png
+          git add manifest-beta.json logo-beta.png
+
+          if git diff --cached --quiet -- manifest-beta.json logo-beta.png; then
+            echo "Beta manifest and logo are already current."
+            exit 0
+          fi
+
+          git config user.name "${{ steps.app-token.outputs.app-slug }}[bot]"
+          git config user.email "${{ steps.app-user.outputs.user-id }}+${{ steps.app-token.outputs.app-slug }}[bot]@users.noreply.github.com"
+          git commit -m "Update beta manifest and logo for ${{ steps.version.outputs.beta_version }}"
+          git push origin main
