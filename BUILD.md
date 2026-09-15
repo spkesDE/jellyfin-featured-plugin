@@ -139,3 +139,19 @@ To prepare and push a tagged release from a clean `main` branch:
 ```
 
 GitHub Actions requires the repository variable `RELEASE_APP_CLIENT_ID` and secret `RELEASE_APP_PRIVATE_KEY` for the release GitHub App.
+
+## Beta Releases
+
+The `Publish Beta` workflow creates a disposable prerelease from the branch or revision selected in GitHub Actions. It uses one moving `beta` tag and replaces the previous beta release, so only the newest test build remains available. Beta package metadata and the dedicated manifest use `logo-beta.png`; stable packages and `manifest.json` continue to use `logo.png`.
+
+Beta versions use the stable version currently stored on `main` as their base. For example, stable `12.3.0.0` produces `12.3.0.1`, then `12.3.0.2`. When the stable version on `main` changes to `12.3.1.0`, the next beta starts at `12.3.1.1`.
+
+Testers can add this dedicated plugin repository URL to Jellyfin:
+
+```text
+https://raw.githubusercontent.com/spkesDE/jellyfin-featured-plugin/main/manifest-beta.json
+```
+
+The `workflow_dispatch` workflow file must already be present on GitHub's default branch (`main`) before the first manual run. Keep the webOS fix on `fix/webos` if it still needs testing: publish only the beta workflow infrastructure to `main`, push `fix/webos`, then choose `fix/webos` in the GitHub Actions branch dropdown when running `Publish Beta`.
+
+After publishing the prerelease, the workflow commits the beta manifest and beta logo to `main`. The manifest contains exactly one version and points to the ZIP attached to the same prerelease. Publish the eventual stable fix with a higher version base (for example `12.3.1.0` after the `12.3.0.x` beta series) so Jellyfin sees it as newer than every beta based on `12.3.0.0`.

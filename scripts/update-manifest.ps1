@@ -9,7 +9,9 @@ param(
     [string]$Timestamp,
 
     [string]$ManifestPath = "manifest.json",
-    [string]$MetaPath = "release/Featured/meta.json"
+    [string]$MetaPath = "release/Featured/meta.json",
+
+    [switch]$LatestOnly
 )
 
 $ErrorActionPreference = "Stop"
@@ -72,7 +74,11 @@ if ($meta.imageUrl) {
     }
 }
 
-$existingVersions = @($pluginEntry.versions | Where-Object { $_.version -ne $meta.version })
+$existingVersions = if ($LatestOnly) {
+    @()
+} else {
+    @($pluginEntry.versions | Where-Object { $_.version -ne $meta.version })
+}
 $pluginEntry.versions = @($versionEntry) + $existingVersions
 
 $jsonBody = $manifest | ConvertTo-Json -Depth 10

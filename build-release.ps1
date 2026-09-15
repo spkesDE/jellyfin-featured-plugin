@@ -1,6 +1,7 @@
 param(
     [string]$Configuration = "Release",
-    [string]$Changelog
+    [string]$Changelog,
+    [switch]$Beta
 )
 
 $ErrorActionPreference = "Stop"
@@ -155,7 +156,15 @@ $pluginOwner = "spkesDE"
 $pluginCategory = "General"
 $pluginOverview = "A Netflix-style featured-content carousel for the Jellyfin Web home page."
 $pluginDescription = "Adds a configurable featured-content carousel with curated favourites, collections, recent releases, random picks, hero layouts, and local background trailers to Jellyfin Web."
-$pluginImageUrl = "https://raw.githubusercontent.com/spkesDE/jellyfin-featured-plugin/main/logo.png"
+$pluginImageUrl = if ($Beta) {
+    "https://raw.githubusercontent.com/spkesDE/jellyfin-featured-plugin/main/logo-beta.png"
+} else {
+    "https://raw.githubusercontent.com/spkesDE/jellyfin-featured-plugin/main/logo.png"
+}
+
+if ($Beta -and -not (Test-Path -LiteralPath (Join-RepoPath @($repoRoot, "logo-beta.png")))) {
+    throw "Beta logo not found: $(Join-RepoPath @($repoRoot, 'logo-beta.png'))"
+}
 
 $releaseRoot = Join-RepoPath @($repoRoot, "release")
 $buildOutput = Join-RepoPath @($releaseRoot, ".build-$([Guid]::NewGuid().ToString("N"))")
