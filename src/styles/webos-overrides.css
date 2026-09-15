@@ -1,6 +1,6 @@
 /* webOS 6 / Chromium 79 fallbacks and stable hero fitting.
-   Keep the following Jellyfin sections at a fixed position; if a desktop hero
-   has more copy, the overview gives up space before the logo does. */
+   Keep the following Jellyfin sections at a fixed position; if a hero has more
+   copy, the overview gives up lines before the logo or metadata do. */
 
 .ec-preferences-dialog {
   height: min(52rem, calc(100vh - 2rem));
@@ -16,7 +16,20 @@
   }
 }
 
-@media (min-width: 701px) and (hover: hover) and (pointer: fine) {
+/* Large touch devices (iPad, Nest Hub, touch displays) should keep the same
+   overlap as desktop. Pointer type must not create a full hero-height gap. */
+@media (min-width: 701px) and (hover: none) and (pointer: coarse) {
+  .ec-root.ec-ready.ec-hero,
+  .ec-root.ec-placeholder.ec-hero {
+    margin-bottom: calc((var(--ec-hero-overlap, 150px) * -1) + 52px + var(--ec-media-padding, 0px));
+  }
+
+  .ec-root.ec-ready.ec-hero .ec-slide-hitbox {
+    height: clamp(0px, calc(var(--ec-height) - var(--ec-hero-overlap, 150px) + 52px + var(--ec-media-padding, 0px)), var(--ec-height));
+  }
+}
+
+@media (min-width: 701px) {
   .ec-root.ec-ready.ec-hero .ec-content {
     height: clamp(0px, calc(var(--ec-height) - var(--ec-hero-overlap, 150px) + 52px + var(--ec-media-padding, 0px)), var(--ec-height));
     overflow: hidden;
@@ -53,12 +66,27 @@
   }
 
   .ec-root.ec-ready.ec-hero .ec-overview {
-    -webkit-line-clamp: 2;
-    flex: 0 1 auto;
+    -webkit-line-clamp: 4;
+    flex: 0 0 auto;
     font-size: .9rem;
     line-height: 1.38;
     margin-top: .6rem;
-    min-height: 0;
     overflow: hidden;
+  }
+
+  .ec-root.ec-ready.ec-hero .ec-content.ec-overview-lines-3 .ec-overview {
+    -webkit-line-clamp: 3;
+  }
+
+  .ec-root.ec-ready.ec-hero .ec-content.ec-overview-lines-2 .ec-overview {
+    -webkit-line-clamp: 2;
+  }
+
+  .ec-root.ec-ready.ec-hero .ec-content.ec-overview-lines-1 .ec-overview {
+    -webkit-line-clamp: 1;
+  }
+
+  .ec-root.ec-ready.ec-hero .ec-content.ec-overview-hidden .ec-overview {
+    display: none;
   }
 }
