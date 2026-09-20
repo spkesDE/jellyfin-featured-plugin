@@ -72,10 +72,10 @@ const mediaCards = [
             <img v-if="logoSource" class="ec-configPreviewImageLogo" :src="logoSource" :alt="item?.name || ''">
             <div v-else class="ec-configPreviewLogo">{{ item?.name || t('preview.fallbackTitle') }}</div>
             <div v-if="store.config.ShowRating || store.config.ShowYear || store.config.ShowRuntime" class="ec-configPreviewMeta">
-              <template v-if="store.config.ShowRating">★ {{ item?.community_rating?.toFixed(1) || '8.7' }}</template>
-              <template v-if="store.config.ShowRating && item?.critic_rating"> &nbsp; {{ t('preview.critics', { score: Math.round(item.critic_rating) }) }}</template>
-              <template v-if="store.config.ShowYear"> &nbsp; {{ item?.productionYear || 2026 }}</template>
-              <template v-if="store.config.ShowRuntime"> &nbsp; {{ item?.runtimeMinutes || 124 }} min</template>
+              <span v-if="store.config.ShowRating">★ {{ item?.community_rating?.toFixed(1) || '8.7' }}</span>
+              <span v-if="store.config.ShowRating && item?.critic_rating" class="mediaInfoCriticRating mediaInfoCriticRatingRotten">{{ Math.round(item.critic_rating) }}%</span>
+              <span v-if="store.config.ShowYear">{{ item?.productionYear || 2026 }}</span>
+              <span v-if="store.config.ShowRuntime">{{ item?.runtimeMinutes || 124 }} min</span>
             </div>
             <div v-if="store.config.ShowDescription" class="ec-configPreviewText">
               {{ item?.overview || t('preview.fallbackDescription') }}

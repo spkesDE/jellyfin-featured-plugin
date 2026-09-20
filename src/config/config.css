@@ -294,8 +294,12 @@
                 }
 
                 #FeaturedConfigPage .ec-configPreviewMeta {
+                    align-items: center;
+                    display: flex;
+                    flex-wrap: wrap;
                     font-size: .78rem;
                     font-weight: 700;
+                    gap: .7rem;
                     margin-top: .7rem;
                 }
 
