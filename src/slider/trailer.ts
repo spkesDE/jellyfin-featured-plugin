@@ -48,7 +48,11 @@ abstract class HtmlVideoPlayer implements TrailerPlayer {
   private ended = false;
   private failed = false;
 
-  protected constructor(url: string, options: TrailerPlaybackOptions) {
+  protected constructor(
+    url: string,
+    options: TrailerPlaybackOptions,
+    disableSubtitles = false
+  ) {
     this.startOffsetSeconds = options.startOffsetSeconds;
     this.endOffsetSeconds = options.endOffsetSeconds;
     this.loop = options.loop;
@@ -82,6 +86,10 @@ abstract class HtmlVideoPlayer implements TrailerPlayer {
     this.element.addEventListener('stalled', this.armPlaybackWatchdog);
     this.element.addEventListener('error', this.handleMediaError);
     this.element.addEventListener('abort', this.handleMediaError);
+    if (disableSubtitles) {
+      this.element.textTracks.addEventListener('addtrack', this.disableTextTracks);
+      this.disableTextTracks();
+    }
     this.armPlaybackWatchdog();
   }
 
@@ -115,6 +123,7 @@ abstract class HtmlVideoPlayer implements TrailerPlayer {
     this.element.removeEventListener('stalled', this.armPlaybackWatchdog);
     this.element.removeEventListener('error', this.handleMediaError);
     this.element.removeEventListener('abort', this.handleMediaError);
+    this.element.textTracks.removeEventListener('addtrack', this.disableTextTracks);
 
     this.element.pause();
     this.element.removeAttribute('src');
@@ -128,6 +137,12 @@ abstract class HtmlVideoPlayer implements TrailerPlayer {
       && this.startOffsetSeconds < this.element.duration
     ) {
       this.element.currentTime = this.startOffsetSeconds;
+    }
+  };
+
+  private disableTextTracks = (): void => {
+    for (let index = 0; index < this.element.textTracks.length; index++) {
+      this.element.textTracks[index].mode = 'disabled';
     }
   };
 
@@ -186,7 +201,7 @@ export class JellyfinLocalPlayer extends HtmlVideoPlayer {
 
 export class DirectVideoPlayer extends HtmlVideoPlayer {
   constructor(url: string, options: TrailerPlaybackOptions) {
-    super(url, options);
+    super(url, options, true);
   }
 }
 
@@ -377,6 +392,7 @@ export class YouTubePlayer implements TrailerPlayer {
                   'autoplay; encrypted-media; picture-in-picture'
                 );
                 playerIframe.setAttribute('aria-hidden', 'true');
+                disableYouTubeCaptions(target);
 
                 if (options.muted) target.mute();
                 else target.unMute();
@@ -392,6 +408,7 @@ export class YouTubePlayer implements TrailerPlayer {
               },
               onStateChange: ({ data }) => {
                 if (!isCurrent()) return;
+                if (data === 1 || data === 3) disableYouTubeCaptions(this.player);
                 if (data === 1 || data === 3) confirmPlayback();
                 if (data === 0 && !options.loop) options.onEnded();
               },
@@ -527,6 +544,7 @@ function createYouTubeEmbedUrl(
   const url = new URL(`/embed/${encodeURIComponent(videoId)}`, `${host}/`);
   const params: Record<string, string | number | undefined> = {
     autoplay: 1,
+    cc_load_policy: 0,
     controls: 0,
     disablekb: 1,
     enablejsapi: 1,
@@ -613,8 +631,18 @@ interface YouTubePlayerInstance {
   pauseVideo(): void;
   playVideo(): void;
   seekTo(seconds: number, allowSeekAhead: boolean): void;
+  setOption(module: string, option: string, value: unknown): void;
   setVolume(volume: number): void;
   unMute(): void;
+}
+
+function disableYouTubeCaptions(player: YouTubePlayerInstance | null): void {
+  try {
+    // An empty caption track explicitly overrides YouTube account preferences.
+    player?.setOption('captions', 'track', {});
+  } catch {
+    // Some embedded-player versions do not expose the captions module.
+  }
 }
 
 interface YouTubeApi {

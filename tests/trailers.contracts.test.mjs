@@ -17,7 +17,7 @@ test('proper trailer support keeps resolution and playback source independent', 
     read('src/styles/featured.css')
   ]);
   for (const setting of [
-    'TrailerSourcePriority', 'StartTrailersMuted', 'ShowTrailerControls',
+    'TrailerSourcePriority', 'StartTrailersMuted', 'ShowTrailerControls', 'TrailerVolumeSliderDirection',
     'HideYouTubeTrailerUntilControlsFade',
     'WaitForTrailerToFinish', 'TrailerDelayMilliseconds', 'TrailerStartOffsetSeconds',
     'TrailerEndOffsetSeconds', 'MultipleTrailerMode', 'AllowTrailersOnMobile', 'TrailerOverrides'
@@ -55,11 +55,14 @@ test('proper trailer support keeps resolution and playback source independent', 
   assert.match(carousel, /toggleTrailerPaused[\s\S]*?trailerPlayer\.pause\(\)[\s\S]*?trailerPlayer\.play\(\)/);
   assert.match(carousel, /event\.code !== 'Space'[\s\S]*?toggleTrailerPaused\(\)/);
   assert.match(carousel, /type = 'range'[\s\S]*?min = '0'[\s\S]*?max = '100'[\s\S]*?setTrailerVolume/);
-  assert.match(carousel, /ec-trailer-volume-control[\s\S]*?appendChild\(this\.trailerMuteButton\)[\s\S]*?appendChild\(this\.trailerVolumeInput\)/);
+  assert.match(carousel, /ec-trailer-volume-control ec-volume-[\s\S]*?appendChild\(this\.trailerMuteButton\)[\s\S]*?ec-trailer-volume-popover[\s\S]*?appendChild\(this\.trailerVolumeInput\)/);
   assert.match(carousel, /if \(controls\.childElementCount\) navigation\.appendChild\(controls\);[\s\S]*?navigation\.appendChild\(dots\);[\s\S]*?if \(this\.trailerControls\) navigation\.appendChild\(this\.trailerControls\)/);
   assert.match(styles, /\.ec-trailer-controls\[hidden\][^}]*display:\s*none/);
-  assert.match(styles, /\.ec-trailer-volume\s*\{[^}]*width:\s*0/);
-  assert.match(styles, /\.ec-trailer-volume-control:hover \.ec-trailer-volume,[\s\S]*?width:\s*7rem/);
+  assert.match(styles, /\.ec-trailer-volume-popover\s*\{[^}]*position:\s*absolute/);
+  assert.match(styles, /\.ec-volume-side \.ec-trailer-volume-popover[\s\S]*?\.ec-volume-up \.ec-trailer-volume-popover[\s\S]*?\.ec-volume-down \.ec-trailer-volume-popover/);
+  assert.match(styles, /\.ec-trailer-volume-control:hover \.ec-trailer-volume-popover,[\s\S]*?pointer-events:\s*auto/);
+  assert.match(styles, /\.ec-trailer-volume\s*\{[^}]*width:\s*7rem/);
+  assert.match(normalizer, /NormalizeTrailerVolumeSliderDirection[\s\S]*?value is "up" or "down" \? value : "side"/);
   assert.match(carousel, /event\.key === '\+' \|\| event\.code === 'NumpadAdd'[\s\S]*?event\.key === '-' \|\| event\.code === 'NumpadSubtract'[\s\S]*?setTrailerVolume\(this\.trailerVolume \+ \(direction \* 10\)\)/);
   assert.match(carousel, /private setTrailerVolume[\s\S]*?setVolume\(this\.trailerVolume\)/);
   assert.match(carousel, /closest\('input, textarea, select, button,[\s\S]*?\[role="dialog"\]'/);
@@ -96,6 +99,10 @@ test('proper trailer support keeps resolution and playback source independent', 
   assert.match(player, /target\.getIframe\(\)[\s\S]*?tabIndex = -1[\s\S]*?aria-hidden/);
   assert.match(player, /youtube-nocookie\.com'[\s\S]*?youtube\.com'/);
   assert.match(player, /origin: window\.location\.origin/);
+  assert.match(player, /cc_load_policy:\s*0/);
+  assert.match(player, /setOption\('captions', 'track', \{\}\)/);
+  assert.match(player, /class DirectVideoPlayer[\s\S]*?super\(url, options, true\)/);
+  assert.match(player, /textTracks\.addEventListener\('addtrack', this\.disableTextTracks\)/);
   assert.match(player, /hostIndex === 0 \? 2500 : 8000/);
   assert.match(player, /hostIndex \+ 1 < YOUTUBE_HOSTS\.length[\s\S]*?startPlayer\(api, videoId, options, hostIndex \+ 1\)/);
   assert.match(player, /defaultMuted = options\.muted[\s\S]*?setAttribute\('webkit-playsinline', ''\)/);
