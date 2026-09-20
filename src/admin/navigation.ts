@@ -7,7 +7,7 @@ import {
 import { config } from '../config';
 import { replaceElementChildren } from '../core/dom';
 import { t } from '../i18n';
-import { openPreferencesDialog } from '../preferences';
+import { openPreferencesDialog, preloadPreferencesDialog } from '../preferences';
 
 const USER_SETTINGS_LINK_ATTR = 'data-featured-user-settings-link';
 const USER_SETTINGS_PAGE_LINK_ATTR = 'data-featured-user-settings-page-link';
@@ -48,6 +48,8 @@ export function ensureUserSettingsMenuEntry(): void {
       document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', bubbles: true }));
       window.setTimeout(() => void openPreferencesDialog(), 0);
     });
+    entry.addEventListener('pointerenter', preloadPreferencesDialog, { once: true });
+    entry.addEventListener('focus', preloadPreferencesDialog, { once: true });
     settingsEntry.after(entry);
   });
 }
@@ -88,6 +90,8 @@ export function ensureUserSettingsPageEntry(): void {
     event.stopPropagation();
     void openPreferencesDialog();
   });
+  entry.addEventListener('pointerenter', preloadPreferencesDialog, { once: true });
+  entry.addEventListener('focus', preloadPreferencesDialog, { once: true });
   section.appendChild(entry);
 }
 

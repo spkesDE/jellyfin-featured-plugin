@@ -5,8 +5,9 @@ import test from 'node:test';
 const read = async (path) => await readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 
 test('personalization is authenticated, policy-bound, user scoped, and fast to reopen', async () => {
-  const [controller, service, store, response, itemFactory, frontend, navigation, carousel, slideRender, runtime, constants, engine, optionsCache, services, styles, history] = await Promise.all([
+  const [controller, itemsController, service, store, response, itemFactory, frontend, navigation, carousel, slideRender, runtime, constants, engine, optionsCache, warmupTask, services, styles, history] = await Promise.all([
     read('Jellyfin.Plugin.Featured/Api/FeaturedController.Preferences.cs'),
+    read('Jellyfin.Plugin.Featured/Api/FeaturedController.Items.cs'),
     read('Jellyfin.Plugin.Featured/Api/FeaturedPersonalizationService.cs'),
     read('Jellyfin.Plugin.Featured/Api/FeaturedPreferenceStore.cs'),
     read('Jellyfin.Plugin.Featured/Api/FeaturedResponseDtos.cs'),
@@ -19,6 +20,7 @@ test('personalization is authenticated, policy-bound, user scoped, and fast to r
     read('src/constants.ts'),
     read('Jellyfin.Plugin.Featured/Api/FeaturedRuleEngine.cs'),
     read('Jellyfin.Plugin.Featured/Api/FeaturedPreferenceOptionsCache.cs'),
+    read('Jellyfin.Plugin.Featured/ScheduledTasks/WarmUserSettingsCacheTask.cs'),
     read('Jellyfin.Plugin.Featured/PluginServiceRegistrator.cs'),
     read('src/styles/featured.css'),
     read('Jellyfin.Plugin.Featured/Api/FeaturedDisplayHistoryStore.cs')
@@ -32,12 +34,19 @@ test('personalization is authenticated, policy-bound, user scoped, and fast to r
   assert.match(controller, /new JsonResult\(CreatePreferencesResponse\(activeUser\), RuntimeConfigJsonOptions\)/);
   assert.match(controller, /CreatePreferenceOptionsResponse\(activeUser, effective\)/);
   assert.match(optionsCache, /ConcurrentDictionary<Guid, Lazy<CacheEntry>>/);
-  assert.match(optionsCache, /TimeSpan\.FromMinutes\(2\)/);
+  assert.match(optionsCache, /TimeSpan\.FromMinutes\(10\)/);
   assert.match(optionsCache, /LazyThreadSafetyMode\.ExecutionAndPublication/);
   assert.match(optionsCache, /genre cache hit:[\s\S]*?genre cache miss:/);
+  assert.match(optionsCache, /QueueWarmup[\s\S]*?HasFreshOrPendingEntry[\s\S]*?_queuedUsers\.TryAdd[\s\S]*?Task\.Run/);
+  assert.match(itemsController, /Response\.OnCompleted[\s\S]*?_preferenceOptionsCache\.QueueWarmup/);
   assert.match(controller, /user-settings bootstrap resolved preferences[\s\S]*?user-settings bootstrap built options[\s\S]*?user-settings bootstrap completed/);
   assert.match(controller, /genre scan inspected[\s\S]*?library query/);
   assert.match(services, /AddSingleton<FeaturedPreferenceOptionsCache>/);
+  assert.match(services, /AddSingleton<IScheduledTask, WarmUserSettingsCacheTask>/);
+  assert.match(warmupTask, /IScheduledTask, IConfigurableScheduledTask/);
+  assert.match(warmupTask, /Name => "Warm user settings cache"/);
+  assert.match(warmupTask, /GetDefaultTriggers\(\) => \[\]/);
+  assert.match(warmupTask, /GetUsers\(\)[\s\S]*?GetOrCreate[\s\S]*?progress\.Report/);
   assert.match(service, /policy\.AllowSourceSelection[\s\S]*?sourceIds\.Contains/);
   assert.match(service, /policy\.AllowPreferredGenres[\s\S]*?allowedGenres\.Contains/);
   assert.match(service, /submitted\.ExcludedGenres[\s\S]*?allowedGenres\.Contains[\s\S]*?!preferredGenres\.Contains/);

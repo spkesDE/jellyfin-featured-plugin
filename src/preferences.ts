@@ -1,12 +1,12 @@
-import { requestJson } from './core/apiClient';
+import { getApiClient, requestJson } from './core/apiClient';
 import { replaceElementChildren } from './core/dom';
 import { t, type TranslationKey } from './i18n';
 import type { FeaturedEffectiveDisplayPreferences, FeaturedPreferencesBootstrapResponse, FeaturedUserDisplayPreferences, FeaturedUserPreferences } from './types/featured';
 import { USER_PREFERENCES_CHANGED_EVENT } from './constants';
 
-const bootstrapCacheLifetime = 30_000;
-let bootstrapCache: { value: FeaturedPreferencesBootstrapResponse; expiresAt: number } | null = null;
-let bootstrapRequest: Promise<FeaturedPreferencesBootstrapResponse> | null = null;
+const bootstrapCacheLifetime = 5 * 60_000;
+let bootstrapCache: { userId: string; value: FeaturedPreferencesBootstrapResponse; expiresAt: number } | null = null;
+let bootstrapRequest: { userId: string; promise: Promise<FeaturedPreferencesBootstrapResponse> } | null = null;
 
 const sourceKeys: Record<string, TranslationKey> = {
   LIBRARIES: 'source.type.libraries', COLLECTIONS: 'source.type.collections', FAVOURITES: 'source.type.favourites',
@@ -16,15 +16,25 @@ const sourceKeys: Record<string, TranslationKey> = {
 };
 
 function loadPreferencesBootstrap(): Promise<FeaturedPreferencesBootstrapResponse> {
-  if (bootstrapCache && bootstrapCache.expiresAt > Date.now()) return Promise.resolve(bootstrapCache.value);
-  if (bootstrapRequest) return bootstrapRequest;
-  bootstrapRequest = requestJson<FeaturedPreferencesBootstrapResponse>('featured/preferences/bootstrap')
+  const userId = getApiClient()?.getCurrentUserId?.() ?? '';
+  if (bootstrapCache?.userId === userId && bootstrapCache.expiresAt > Date.now()) {
+    return Promise.resolve(bootstrapCache.value);
+  }
+  if (bootstrapRequest?.userId === userId) return bootstrapRequest.promise;
+  const promise = requestJson<FeaturedPreferencesBootstrapResponse>('featured/preferences/bootstrap')
     .then((value) => {
-      bootstrapCache = { value, expiresAt: Date.now() + bootstrapCacheLifetime };
+      bootstrapCache = { userId, value, expiresAt: Date.now() + bootstrapCacheLifetime };
       return value;
     })
-    .finally(() => { bootstrapRequest = null; });
-  return bootstrapRequest;
+    .finally(() => {
+      if (bootstrapRequest?.promise === promise) bootstrapRequest = null;
+    });
+  bootstrapRequest = { userId, promise };
+  return promise;
+}
+
+export function preloadPreferencesDialog(): void {
+  void loadPreferencesBootstrap().catch(() => undefined);
 }
 
 function invalidatePreferencesBootstrap(): void {

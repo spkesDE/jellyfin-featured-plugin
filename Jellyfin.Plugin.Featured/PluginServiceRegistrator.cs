@@ -21,6 +21,7 @@ public sealed class PluginServiceRegistrator : IPluginServiceRegistrator
         serviceCollection.AddSingleton<FeaturedRecommendationCandidates>();
         serviceCollection.AddSingleton<FeaturedPreparedCache>();
         serviceCollection.AddSingleton<IScheduledTask, RefreshFeaturedCacheTask>();
+        serviceCollection.AddSingleton<IScheduledTask, WarmUserSettingsCacheTask>();
         serviceCollection.AddHostedService<FrontendRegistrationHostedService>();
         serviceCollection.AddHostedService<FeaturedCacheConfigurationObserver>();
     }

@@ -198,6 +198,15 @@ public sealed partial class FeaturedController
                     totalMilliseconds);
             }
 
+            if (_config.PersonalizationPolicy.Enabled && _config.PersonalizationPolicy.AllowPreferredGenres)
+            {
+                Response.OnCompleted(() =>
+                {
+                    _preferenceOptionsCache.QueueWarmup(activeUser.Id, () => QueryVisibleGenres(activeUser));
+                    return Task.CompletedTask;
+                });
+            }
+
             return Content(json, MediaTypeNames.Application.Json);
         }
         catch (Exception ex)
