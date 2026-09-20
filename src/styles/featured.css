@@ -967,6 +967,7 @@
 }
 
 .ec-root.ec-ready.ec-hero .ec-slide.is-active .ec-button,
+.ec-root.ec-ready.ec-hero .ec-slide.is-active .ec-favorite-button-meta,
 .ec-root.ec-ready.ec-hero .ec-navigation {
   pointer-events: auto;
 }
