@@ -60,8 +60,8 @@ public sealed partial class FeaturedController
         if (request is null || request.ItemId == Guid.Empty) return BadRequest();
         BaseItem? item = _libraryManager.GetItemById(request.ItemId);
         if (item is null || !item.IsVisible(activeUser)) return NotFound();
-        _candidateCache.Clear();
-        _preparedCache.Clear();
+        _candidateCache.RemoveUser(activeUser.Id);
+        _preparedCache.RemoveUser(activeUser.Id);
         return Ok(new { ok = true });
     }
 

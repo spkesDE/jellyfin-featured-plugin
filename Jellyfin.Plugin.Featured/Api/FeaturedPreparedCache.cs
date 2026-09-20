@@ -188,6 +188,11 @@ public sealed class FeaturedPreparedCache
         _entries.Clear();
     }
 
+    internal void RemoveUser(Guid userId)
+    {
+        _entries.TryRemove(userId, out _);
+    }
+
     internal string GetStatus()
     {
         int items = _entries.Values.Sum(entry => entry.Count);

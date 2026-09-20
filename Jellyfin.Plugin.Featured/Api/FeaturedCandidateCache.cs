@@ -56,6 +56,15 @@ public sealed class FeaturedCandidateCache
 
     internal void Clear() => _entries.Clear();
 
+    internal void RemoveUser(Guid userId)
+    {
+        string scope = $"\"Scope\":\"{userId:N}\"";
+        foreach (string key in _entries.Keys.Where(key => key.Contains(scope, StringComparison.OrdinalIgnoreCase)))
+        {
+            _entries.TryRemove(key, out _);
+        }
+    }
+
     private void TrimIfNeeded()
     {
         if (_entries.Count <= MaximumEntries) return;

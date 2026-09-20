@@ -1,5 +1,4 @@
 import { requestJson } from '../core/apiClient';
-import { USER_PREFERENCES_CHANGED_EVENT } from '../constants';
 import { t } from '../i18n';
 import type { FeaturedItem } from '../types/featured';
 
@@ -36,7 +35,6 @@ export function createFavoriteButton(item: FeaturedItem): HTMLButtonElement {
       updateButton(button, item.isFavorite);
       try {
         await requestJson('featured/favorites/changed', { method: 'POST', body: { itemId: item.id } });
-        document.dispatchEvent(new Event(USER_PREFERENCES_CHANGED_EVENT));
       } catch (error) {
         console.warn('Jellyfin Featured: could not refresh favorite-dependent feeds.', error);
       }
