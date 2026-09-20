@@ -437,6 +437,16 @@
   transition: none !important;
 }
 
+.ec-slide.is-active:focus::before {
+  border: 3px solid var(--ec-theme-secondary);
+  border-radius: var(--ec-banner-radius, var(--ec-radius));
+  content: '';
+  inset: 3px;
+  pointer-events: none;
+  position: absolute;
+  z-index: 4;
+}
+
 .ec-root:not(.ec-whole-banner-interactive) .ec-slide {
   cursor: default;
 }
@@ -625,10 +635,12 @@
 }
 
 .ec-button:hover,
+.ec-button:focus,
 .ec-button:focus-visible {
   background: var(--ec-button-primary-hover-background, var(--ec-theme-primary-dark));
 }
 
+.ec-button:focus,
 .ec-button:focus-visible {
   outline: 2px solid var(--ec-theme-secondary);
   outline-offset: 2px;
@@ -640,6 +652,7 @@
 }
 
 .ec-button-secondary:hover,
+.ec-button-secondary:focus,
 .ec-button-secondary:focus-visible {
   background: var(--ec-button-secondary-hover-background, var(--ec-theme-contained-hover));
 }
@@ -675,6 +688,11 @@
 .ec-dot.is-active {
   background: #fff;
   transform: scale(1.25);
+}
+
+.ec-dot:focus {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
 }
 
 .ec-controls {
@@ -718,9 +736,12 @@
 }
 
 .ec-control:hover,
+.ec-control:focus,
 .ec-control:focus-visible {
   background: rgba(255, 255, 255, .08);
   opacity: .95;
+  outline: 2px solid #fff;
+  outline-offset: 2px;
 }
 
 .ec-control .material-icons {

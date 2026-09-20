@@ -283,6 +283,12 @@ export class FeaturedCarousel {
   private show(nextIndex: number, restart = true): void {
     if (!this.slides.length) return;
     const previous = this.index;
+    const activeSlide = this.slides[previous - this.windowStart];
+    const focusedElement = document.activeElement;
+    const focusedActionIndex = activeSlide && focusedElement instanceof HTMLButtonElement
+      ? Array.from(activeSlide.querySelectorAll<HTMLButtonElement>('.ec-actions button')).indexOf(focusedElement)
+      : -1;
+    const focusedBanner = focusedElement === activeSlide;
 
     if (this.response.infiniteLoading) {
       if (nextIndex < 0) nextIndex = 0;
@@ -324,7 +330,20 @@ export class FeaturedCarousel {
       if (slide.getAttribute('aria-hidden') !== ariaHidden) slide.setAttribute('aria-hidden', ariaHidden);
       const tabIndex = isActive && this.response.interactOnWholeBanner ? 0 : -1;
       if (slide.tabIndex !== tabIndex) slide.tabIndex = tabIndex;
+      slide.querySelectorAll<HTMLButtonElement>('.ec-actions button').forEach((button) => {
+        const actionTabIndex = isActive ? 0 : -1;
+        if (button.tabIndex !== actionTabIndex) button.tabIndex = actionTabIndex;
+      });
     });
+    if (previous !== this.index && (focusedBanner || focusedActionIndex >= 0)) {
+      const nextSlide = this.slides[localIndex];
+      const nextAction = focusedActionIndex >= 0
+        ? nextSlide?.querySelectorAll<HTMLButtonElement>('.ec-actions button')[focusedActionIndex]
+        : null;
+      if (nextAction) nextAction.focus();
+      else if (this.response.interactOnWholeBanner) nextSlide?.focus();
+      else nextSlide?.querySelector<HTMLButtonElement>('.ec-actions button')?.focus();
+    }
     if (wrappedSlides.length) {
       void this.root.offsetWidth;
       wrappedSlides.forEach((slide) => slide.classList.remove('ec-no-transition'));
@@ -589,7 +608,8 @@ export class FeaturedCarousel {
 
   private restartTimer = (): void => {
     this.pauseTimer();
-    if (!this.autoplayEnabled || this.slides.length < 2 || document.hidden || this.destroyed || this.trailerPaused) return;
+    if (!this.autoplayEnabled || this.slides.length < 2 || document.hidden || this.destroyed || this.trailerPaused
+      || this.root.contains(document.activeElement)) return;
     this.timer = window.setInterval(() => this.show(this.index + 1, false), Math.max(1000, this.response.autoplayInterval));
   };
 
@@ -611,6 +631,7 @@ export class FeaturedCarousel {
 
   private onKeyDown = (event: KeyboardEvent): void => {
     if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+    if (event.target !== this.slides[this.index - this.windowStart] || event.altKey || event.ctrlKey || event.metaKey) return;
     event.preventDefault();
     this.show(this.index + (event.key === 'ArrowLeft' ? -1 : 1));
   };
