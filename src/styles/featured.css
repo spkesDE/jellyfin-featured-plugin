@@ -739,22 +739,28 @@
 
 .ec-trailer-volume-control {
   align-items: center;
+  background: rgba(0, 0, 0, .72);
   border-radius: 999px;
   display: flex;
+  flex: 0 0 2.15rem;
   height: 2.15rem;
   position: relative;
   width: 2.15rem;
 }
 
 .ec-trailer-mute {
+  box-sizing: border-box;
+  flex: 0 0 2.15rem;
   z-index: 3;
 }
 
 .ec-trailer-volume-popover {
   align-items: center;
-  background: rgba(0, 0, 0, .72);
+  background: inherit;
   border-radius: 999px;
+  box-sizing: border-box;
   display: flex;
+  justify-content: center;
   opacity: 0;
   padding: .25rem .65rem;
   pointer-events: none;
@@ -821,27 +827,50 @@
   width: 7rem;
 }
 
-.ec-volume-side .ec-trailer-volume-popover {
-  left: calc(100% - .35rem);
-  padding-left: .7rem;
+.ec-volume-side .ec-trailer-volume-popover,
+.ec-volume-right .ec-trailer-volume-popover {
+  height: 100%;
+  left: 0;
+  padding: .25rem .65rem .25rem calc(2.15rem + .35rem);
   top: 50%;
   transform: translate(-.3rem, -50%);
+}
+
+.ec-volume-left .ec-trailer-volume-popover {
+  height: 100%;
+  padding: .25rem calc(2.15rem + .35rem) .25rem .65rem;
+  right: 0;
+  top: 50%;
+  transform: translate(.3rem, -50%);
 }
 
 .ec-volume-up .ec-trailer-volume-popover,
 .ec-volume-down .ec-trailer-volume-popover {
   left: 50%;
+  min-width: 2.15rem;
   transform: translate(-50%, 0);
 }
 
 .ec-volume-up .ec-trailer-volume-popover {
-  bottom: calc(100% + .15rem);
+  bottom: 0;
+  padding: .65rem .25rem calc(2.15rem + .35rem);
   transform: translate(-50%, .3rem);
 }
 
 .ec-volume-down .ec-trailer-volume-popover {
-  top: calc(100% + .15rem);
+  padding: calc(2.15rem + .35rem) .25rem .65rem;
+  top: 0;
   transform: translate(-50%, -.3rem);
+}
+
+.ec-volume-up .ec-trailer-volume,
+.ec-volume-down .ec-trailer-volume {
+  -webkit-appearance: slider-vertical;
+  appearance: slider-vertical;
+  direction: rtl;
+  height: 7rem;
+  width: 1.5rem;
+  writing-mode: vertical-lr;
 }
 
 .ec-trailer-volume-control:hover .ec-trailer-volume-popover,
@@ -851,7 +880,11 @@
 }
 
 .ec-volume-side:hover .ec-trailer-volume-popover,
-.ec-volume-side:focus-within .ec-trailer-volume-popover {
+.ec-volume-side:focus-within .ec-trailer-volume-popover,
+.ec-volume-right:hover .ec-trailer-volume-popover,
+.ec-volume-right:focus-within .ec-trailer-volume-popover,
+.ec-volume-left:hover .ec-trailer-volume-popover,
+.ec-volume-left:focus-within .ec-trailer-volume-popover {
   transform: translate(0, -50%);
 }
 

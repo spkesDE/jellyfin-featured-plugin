@@ -62,6 +62,11 @@ test('proper trailer support keeps resolution and playback source independent', 
   assert.match(styles, /\.ec-volume-side \.ec-trailer-volume-popover[\s\S]*?\.ec-volume-up \.ec-trailer-volume-popover[\s\S]*?\.ec-volume-down \.ec-trailer-volume-popover/);
   assert.match(styles, /\.ec-trailer-volume-control:hover \.ec-trailer-volume-popover,[\s\S]*?pointer-events:\s*auto/);
   assert.match(styles, /\.ec-trailer-volume\s*\{[^}]*width:\s*7rem/);
+  assert.match(styles, /\.ec-volume-up \.ec-trailer-volume,[\s\S]*?\.ec-volume-down \.ec-trailer-volume\s*\{[^}]*height:\s*7rem[^}]*width:\s*1\.5rem[^}]*writing-mode:\s*vertical-lr/);
+  assert.match(styles, /\.ec-trailer-volume-popover\s*\{[^}]*background:\s*inherit/);
+  assert.match(styles, /\.ec-volume-down \.ec-trailer-volume-popover\s*\{[^}]*padding:\s*calc\(2\.15rem \+ \.35rem\)[^}]*top:\s*0/);
+  assert.match(carousel, /placeTrailerVolumePopover[\s\S]*?\['right', 'left', 'down', 'up'\][\s\S]*?getBoundingClientRect\(\)[\s\S]*?lowestOverflow/);
+  assert.match(carousel, /addEventListener\('pointerenter', this\.placeTrailerVolumePopover\)[\s\S]*?addEventListener\('focusin', this\.placeTrailerVolumePopover\)/);
   assert.match(normalizer, /NormalizeTrailerVolumeSliderDirection[\s\S]*?value is "up" or "down" \? value : "side"/);
   assert.match(carousel, /event\.key === '\+' \|\| event\.code === 'NumpadAdd'[\s\S]*?event\.key === '-' \|\| event\.code === 'NumpadSubtract'[\s\S]*?setTrailerVolume\(this\.trailerVolume \+ \(direction \* 10\)\)/);
   assert.match(carousel, /private setTrailerVolume[\s\S]*?setVolume\(this\.trailerVolume\)/);

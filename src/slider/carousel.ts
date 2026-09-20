@@ -15,6 +15,9 @@ const MAX_SEEN_ITEM_IDS = 500;
 const YOUTUBE_CONTROL_CONCEALMENT_MS = 5000;
 const TRAILER_VOLUME_STORAGE_KEY = 'jellyfin-featured.trailer-volume';
 const DEFAULT_TRAILER_VOLUME = 100;
+const TRAILER_VOLUME_PLACEMENTS = ['right', 'left', 'up', 'down'] as const;
+
+type TrailerVolumePlacement = typeof TRAILER_VOLUME_PLACEMENTS[number];
 
 function readTrailerVolume(): number {
   try {
@@ -60,6 +63,8 @@ export class FeaturedCarousel {
   private trailerControls: HTMLDivElement | null = null;
   private trailerPauseButton: HTMLButtonElement | null = null;
   private trailerMuteButton: HTMLButtonElement | null = null;
+  private trailerVolumeControl: HTMLDivElement | null = null;
+  private trailerVolumePopover: HTMLDivElement | null = null;
   private trailerVolumeInput: HTMLInputElement | null = null;
   private trailerCountdownProgress: SVGCircleElement | null = null;
   private trailerCountdownTimer: number | null = null;
@@ -179,6 +184,9 @@ export class FeaturedCarousel {
 
       const volumeControl = document.createElement('div');
       volumeControl.className = 'ec-trailer-volume-control ec-volume-' + response.trailerVolumeSliderDirection;
+      this.trailerVolumeControl = volumeControl;
+      volumeControl.addEventListener('pointerenter', this.placeTrailerVolumePopover);
+      volumeControl.addEventListener('focusin', this.placeTrailerVolumePopover);
       this.trailerMuteButton = document.createElement('button');
       this.trailerMuteButton.type = 'button';
       this.trailerMuteButton.className = 'ec-control ec-trailer-mute emby-scrollbuttons-button paper-icon-button-light';
@@ -196,6 +204,7 @@ export class FeaturedCarousel {
       });
       const volumePopover = document.createElement('div');
       volumePopover.className = 'ec-trailer-volume-popover';
+      this.trailerVolumePopover = volumePopover;
       volumePopover.appendChild(this.trailerVolumeInput);
       volumeControl.appendChild(volumePopover);
       this.trailerControls.appendChild(volumeControl);
@@ -230,6 +239,7 @@ export class FeaturedCarousel {
     this.root.addEventListener('click', this.onClickAfterSwipe, true);
     document.addEventListener('keydown', this.onTrailerHotkey, true);
     document.addEventListener('visibilitychange', this.onVisibilityChange);
+    window.addEventListener('resize', this.placeTrailerVolumePopover);
     this.show(0, false);
     this.updateAutoplayButton();
     this.restartTimer();
@@ -240,6 +250,7 @@ export class FeaturedCarousel {
     this.destroyed = true;
     this.pauseTimer();
     window.removeEventListener('resize', this.scheduleHeroClearance);
+    window.removeEventListener('resize', this.placeTrailerVolumePopover);
     this.root.removeEventListener('load', this.scheduleHeroClearance, true);
     this.heroContentObserver?.disconnect();
     this.heroParentObserver?.disconnect();
@@ -675,7 +686,10 @@ export class FeaturedCarousel {
   }
 
   private updateTrailerControls(): void {
-    if (this.trailerControls) this.trailerControls.hidden = !this.trailerPlayer || this.trailerConcealed;
+    if (this.trailerControls) {
+      this.trailerControls.hidden = !this.trailerPlayer || this.trailerConcealed;
+      if (!this.trailerControls.hidden) window.requestAnimationFrame(this.placeTrailerVolumePopover);
+    }
     if (this.trailerPauseButton) {
       let icon = this.trailerPauseButton.querySelector<HTMLElement>('.material-icons');
       if (!icon) {
@@ -708,6 +722,49 @@ export class FeaturedCarousel {
       this.trailerVolumeInput.title = `${t('carousel.trailerVolume')}: ${this.trailerVolume}%`;
     }
   }
+
+  private placeTrailerVolumePopover = (): void => {
+    const control = this.trailerVolumeControl;
+    const popover = this.trailerVolumePopover;
+    if (!control || !popover || !control.offsetParent) return;
+
+    const preferred = this.response.trailerVolumeSliderDirection;
+    const candidates: TrailerVolumePlacement[] = preferred === 'side'
+      ? ['right', 'left', 'down', 'up']
+      : preferred === 'down'
+        ? ['down', 'up', 'left', 'right']
+        : ['up', 'down', 'left', 'right'];
+    const viewportWidth = document.documentElement.clientWidth;
+    const viewportHeight = window.innerHeight;
+    const edgeMargin = 8;
+    let bestPlacement = candidates[0];
+    let lowestOverflow = Number.POSITIVE_INFINITY;
+
+    const applyPlacement = (placement: TrailerVolumePlacement): void => {
+      control.classList.remove('ec-volume-side', ...TRAILER_VOLUME_PLACEMENTS.map((item) => `ec-volume-${item}`));
+      control.classList.add(`ec-volume-${placement}`);
+      this.trailerVolumeInput?.setAttribute(
+        'aria-orientation',
+        placement === 'up' || placement === 'down' ? 'vertical' : 'horizontal'
+      );
+    };
+
+    for (const placement of candidates) {
+      applyPlacement(placement);
+      const rect = popover.getBoundingClientRect();
+      const overflow = Math.max(0, edgeMargin - rect.left)
+        + Math.max(0, rect.right + edgeMargin - viewportWidth)
+        + Math.max(0, edgeMargin - rect.top)
+        + Math.max(0, rect.bottom + edgeMargin - viewportHeight);
+      if (overflow < lowestOverflow) {
+        bestPlacement = placement;
+        lowestOverflow = overflow;
+      }
+      if (overflow === 0) break;
+    }
+
+    applyPlacement(bestPlacement);
+  };
 
   private toggleTrailerMuted(): void {
     if (!this.trailerPlayer) return;
