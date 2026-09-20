@@ -57,6 +57,10 @@ export class FeaturedCarousel {
   private hasLeftInitialSlide = false;
   private status: HTMLElement | null = null;
   private autoplayButton: HTMLButtonElement | null = null;
+  private trailerControls: HTMLDivElement | null = null;
+  private trailerPauseButton: HTMLButtonElement | null = null;
+  private trailerMuteButton: HTMLButtonElement | null = null;
+  private trailerVolumeInput: HTMLInputElement | null = null;
   private trailerCountdownProgress: SVGCircleElement | null = null;
   private trailerCountdownTimer: number | null = null;
   private dots: HTMLButtonElement[] = [];
@@ -161,6 +165,43 @@ export class FeaturedCarousel {
     }
     if (controls.childElementCount) navigation.appendChild(controls);
 
+    if (response.showTrailerControls && response.enableBackgroundTrailers
+      && this.items.some((item) => item.trailer || item.trailers?.length)) {
+      this.trailerControls = document.createElement('div');
+      this.trailerControls.className = 'ec-trailer-controls';
+      this.trailerControls.hidden = true;
+
+      this.trailerPauseButton = document.createElement('button');
+      this.trailerPauseButton.type = 'button';
+      this.trailerPauseButton.className = 'ec-control ec-trailer-pause emby-scrollbuttons-button paper-icon-button-light';
+      this.trailerPauseButton.addEventListener('click', () => this.toggleTrailerPaused());
+      this.trailerControls.appendChild(this.trailerPauseButton);
+
+      const volumeControl = document.createElement('div');
+      volumeControl.className = 'ec-trailer-volume-control ec-volume-' + response.trailerVolumeSliderDirection;
+      this.trailerMuteButton = document.createElement('button');
+      this.trailerMuteButton.type = 'button';
+      this.trailerMuteButton.className = 'ec-control ec-trailer-mute emby-scrollbuttons-button paper-icon-button-light';
+      this.trailerMuteButton.addEventListener('click', () => this.toggleTrailerMuted());
+      volumeControl.appendChild(this.trailerMuteButton);
+
+      this.trailerVolumeInput = document.createElement('input');
+      this.trailerVolumeInput.type = 'range';
+      this.trailerVolumeInput.className = 'ec-trailer-volume';
+      this.trailerVolumeInput.min = '0';
+      this.trailerVolumeInput.max = '100';
+      this.trailerVolumeInput.step = '1';
+      this.trailerVolumeInput.addEventListener('input', () => {
+        this.setTrailerVolume(Number(this.trailerVolumeInput?.value ?? this.trailerVolume));
+      });
+      const volumePopover = document.createElement('div');
+      volumePopover.className = 'ec-trailer-volume-popover';
+      volumePopover.appendChild(this.trailerVolumeInput);
+      volumeControl.appendChild(volumePopover);
+      this.trailerControls.appendChild(volumeControl);
+      this.updateTrailerControls();
+    }
+
     if (response.showPaginationDots && !response.infiniteLoading && this.slides.length > 1) {
       const dots = document.createElement('div');
       dots.className = 'ec-dots';
@@ -175,6 +216,7 @@ export class FeaturedCarousel {
       });
       navigation.appendChild(dots);
     }
+    if (this.trailerControls) navigation.appendChild(this.trailerControls);
     if (navigation.childElementCount) this.root.appendChild(navigation);
 
     this.root.addEventListener('mouseenter', this.pauseTimer);
@@ -531,6 +573,7 @@ export class FeaturedCarousel {
           slide.classList.remove('ec-youtube-trailer-concealed');
           slide.classList.add('ec-trailer-active');
           void player.setMuted(this.trailerMuted);
+          this.updateTrailerControls();
         },
         onEnded: () => {
           if (this.response.waitForTrailerToFinish && this.autoplayEnabled && this.index === expectedIndex) {
@@ -551,6 +594,7 @@ export class FeaturedCarousel {
       slide.classList.toggle('ec-youtube-trailer-concealed', concealYouTube);
       slide.querySelectorAll('.ec-media > .ec-trailer').forEach((element) => element.remove());
       slide.querySelector('.ec-backdrop')?.after(player.element);
+      this.updateTrailerControls();
       if (this.response.waitForTrailerToFinish) this.pauseTimer();
       void player.play().catch(recover);
     }, launchDelayMilliseconds);
@@ -569,6 +613,7 @@ export class FeaturedCarousel {
     this.trailerCandidateIndex = -1;
     this.trailerPaused = false;
     this.trailerConcealed = false;
+    this.updateTrailerControls();
   }
 
   private startTrailerCountdown(durationMilliseconds?: number): void {
@@ -629,6 +674,76 @@ export class FeaturedCarousel {
     );
   }
 
+  private updateTrailerControls(): void {
+    if (this.trailerControls) this.trailerControls.hidden = !this.trailerPlayer || this.trailerConcealed;
+    if (this.trailerPauseButton) {
+      let icon = this.trailerPauseButton.querySelector<HTMLElement>('.material-icons');
+      if (!icon) {
+        icon = document.createElement('span');
+        icon.setAttribute('aria-hidden', 'true');
+        this.trailerPauseButton.appendChild(icon);
+      }
+      icon.className = `material-icons ${this.trailerPaused ? 'play_arrow' : 'pause'}`;
+      const label = this.trailerPaused ? t('carousel.resumeTrailer') : t('carousel.pauseTrailer');
+      this.trailerPauseButton.setAttribute('aria-label', label);
+      this.trailerPauseButton.setAttribute('aria-pressed', String(this.trailerPaused));
+      this.trailerPauseButton.title = label;
+    }
+    if (!this.trailerMuteButton) return;
+    let icon = this.trailerMuteButton.querySelector<HTMLElement>('.material-icons');
+    if (!icon) {
+      icon = document.createElement('span');
+      icon.setAttribute('aria-hidden', 'true');
+      this.trailerMuteButton.appendChild(icon);
+    }
+    icon.className = `material-icons ${this.trailerMuted ? 'volume_off' : 'volume_up'}`;
+    const label = this.trailerMuted ? t('carousel.unmuteTrailer') : t('carousel.muteTrailer');
+    this.trailerMuteButton.setAttribute('aria-label', label);
+    this.trailerMuteButton.setAttribute('aria-pressed', String(this.trailerMuted));
+    this.trailerMuteButton.title = label;
+    if (this.trailerVolumeInput) {
+      this.trailerVolumeInput.value = String(this.trailerVolume);
+      this.trailerVolumeInput.setAttribute('aria-label', t('carousel.trailerVolume'));
+      this.trailerVolumeInput.setAttribute('aria-valuetext', `${this.trailerVolume}%`);
+      this.trailerVolumeInput.title = `${t('carousel.trailerVolume')}: ${this.trailerVolume}%`;
+    }
+  }
+
+  private toggleTrailerMuted(): void {
+    if (!this.trailerPlayer) return;
+    this.trailerMuted = !this.trailerMuted;
+    if (!this.trailerMuted && this.trailerVolume === 0) {
+      this.trailerVolume = 10;
+      saveTrailerVolume(this.trailerVolume);
+      void this.trailerPlayer.setVolume(this.trailerVolume);
+    }
+    if (!this.trailerConcealed) void this.trailerPlayer.setMuted(this.trailerMuted);
+    this.updateTrailerControls();
+  }
+
+  private setTrailerVolume(volume: number): void {
+    if (!this.trailerPlayer || !Number.isFinite(volume)) return;
+    this.trailerVolume = Math.max(0, Math.min(100, volume));
+    saveTrailerVolume(this.trailerVolume);
+    this.trailerMuted = this.trailerVolume === 0;
+    void this.trailerPlayer.setVolume(this.trailerVolume);
+    if (!this.trailerConcealed) void this.trailerPlayer.setMuted(this.trailerMuted);
+    this.updateTrailerControls();
+  }
+
+  private toggleTrailerPaused(): void {
+    if (!this.trailerPlayer) return;
+    this.trailerPaused = !this.trailerPaused;
+    if (this.trailerPaused) {
+      void this.trailerPlayer.pause();
+      this.pauseTimer();
+    } else {
+      void this.trailerPlayer.play();
+      if (!this.response.waitForTrailerToFinish) this.restartTimer();
+    }
+    this.updateTrailerControls();
+  }
+
   private onKeyDown = (event: KeyboardEvent): void => {
     if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
     if (event.target !== this.slides[this.index - this.windowStart] || event.altKey || event.ctrlKey || event.metaKey) return;
@@ -643,13 +758,7 @@ export class FeaturedCarousel {
     if (event.key.toLowerCase() === 'm') {
       event.preventDefault();
       event.stopPropagation();
-      this.trailerMuted = !this.trailerMuted;
-      if (!this.trailerMuted && this.trailerVolume === 0) {
-        this.trailerVolume = 10;
-        saveTrailerVolume(this.trailerVolume);
-        void this.trailerPlayer.setVolume(this.trailerVolume);
-      }
-      if (!this.trailerConcealed) void this.trailerPlayer.setMuted(this.trailerMuted);
+      this.toggleTrailerMuted();
       return;
     }
     const volumeUp = event.key === '+' || event.code === 'NumpadAdd';
@@ -658,24 +767,13 @@ export class FeaturedCarousel {
       event.preventDefault();
       event.stopPropagation();
       const direction = volumeUp ? 1 : -1;
-      this.trailerVolume = Math.max(0, Math.min(100, this.trailerVolume + (direction * 10)));
-      saveTrailerVolume(this.trailerVolume);
-      this.trailerMuted = this.trailerVolume === 0;
-      void this.trailerPlayer.setVolume(this.trailerVolume);
-      if (!this.trailerConcealed) void this.trailerPlayer.setMuted(this.trailerMuted);
+      this.setTrailerVolume(this.trailerVolume + (direction * 10));
       return;
     }
     if (event.code !== 'Space' && event.key !== ' ') return;
     event.preventDefault();
     event.stopPropagation();
-    this.trailerPaused = !this.trailerPaused;
-    if (this.trailerPaused) {
-      void this.trailerPlayer.pause();
-      this.pauseTimer();
-    } else {
-      void this.trailerPlayer.play();
-      if (!this.response.waitForTrailerToFinish) this.restartTimer();
-    }
+    this.toggleTrailerPaused();
   };
 
   private onTouchStart = (event: TouchEvent): void => {

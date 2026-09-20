@@ -236,6 +236,8 @@ internal static class FeaturedPresetResolver
         config.EnableBackgroundTrailers = preset.Trailers.EnableBackgroundTrailers;
         config.TrailerSourcePriority = preset.Trailers.TrailerSourcePriority;
         config.StartTrailersMuted = preset.Trailers.StartTrailersMuted;
+        config.ShowTrailerControls = preset.Trailers.ShowTrailerControls;
+        config.TrailerVolumeSliderDirection = preset.Trailers.TrailerVolumeSliderDirection;
         config.HideYouTubeTrailerUntilControlsFade = preset.Trailers.HideYouTubeTrailerUntilControlsFade;
         config.WaitForTrailerToFinish = preset.Trailers.WaitForTrailerToFinish;
         config.TrailerDelayMilliseconds = preset.Trailers.TrailerDelayMilliseconds;

@@ -8,6 +8,7 @@ export type HeroHeightMode = 'auto' | 'compact' | 'standard' | 'cinematic' | 'cu
 export type HeroTextPosition = 'left' | 'center' | 'right';
 export type TrailerSourcePriority = 'prefer_local' | 'prefer_remote' | 'local_only' | 'remote_only' | 'automatic';
 export type MultipleTrailerMode = 'first' | 'random';
+export type TrailerVolumeSliderDirection = 'side' | 'up' | 'down';
 export type PresetScheduleType = 'one_time' | 'weekly' | 'annual';
 
 import type { FeaturedDisplaySettings } from './display';
@@ -61,6 +62,8 @@ export interface FeaturedPluginConfig {
   EnableBackgroundTrailers: boolean;
   TrailerSourcePriority: TrailerSourcePriority;
   StartTrailersMuted: boolean;
+  ShowTrailerControls: boolean;
+  TrailerVolumeSliderDirection: TrailerVolumeSliderDirection;
   HideYouTubeTrailerUntilControlsFade: boolean;
   WaitForTrailerToFinish: boolean;
   TrailerDelayMilliseconds: number;
@@ -172,6 +175,8 @@ export interface FeaturedPresetTrailerSettings {
   EnableBackgroundTrailers: boolean;
   TrailerSourcePriority: TrailerSourcePriority;
   StartTrailersMuted: boolean;
+  ShowTrailerControls: boolean;
+  TrailerVolumeSliderDirection: TrailerVolumeSliderDirection;
   HideYouTubeTrailerUntilControlsFade: boolean;
   WaitForTrailerToFinish: boolean;
   TrailerDelayMilliseconds: number;

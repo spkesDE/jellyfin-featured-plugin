@@ -11,6 +11,8 @@ public abstract class FeaturedDisplaySettingsDto
         ShowAutoplayButton = config.ShowAutoplayButton;
         EnableBackgroundTrailers = personalization?.Display.EnableBackgroundTrailers ?? config.EnableBackgroundTrailers;
         StartTrailersMuted = config.StartTrailersMuted;
+        ShowTrailerControls = config.ShowTrailerControls;
+        TrailerVolumeSliderDirection = config.TrailerVolumeSliderDirection;
         HideYouTubeTrailerUntilControlsFade = config.HideYouTubeTrailerUntilControlsFade;
         WaitForTrailerToFinish = config.WaitForTrailerToFinish;
         TrailerDelayMilliseconds = config.TrailerDelayMilliseconds;
@@ -50,6 +52,8 @@ public abstract class FeaturedDisplaySettingsDto
     public bool ShowAutoplayButton { get; }
     public bool EnableBackgroundTrailers { get; }
     public bool StartTrailersMuted { get; }
+    public bool ShowTrailerControls { get; }
+    public string TrailerVolumeSliderDirection { get; }
     public bool HideYouTubeTrailerUntilControlsFade { get; }
     public bool WaitForTrailerToFinish { get; }
     public int TrailerDelayMilliseconds { get; }

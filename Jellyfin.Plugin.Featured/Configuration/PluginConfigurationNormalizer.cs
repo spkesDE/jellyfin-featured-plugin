@@ -93,6 +93,7 @@ internal static class PluginConfigurationNormalizer
         config.MultipleTrailerMode = config.MultipleTrailerMode == FeaturedMultipleTrailerModes.Random
             ? FeaturedMultipleTrailerModes.Random
             : FeaturedMultipleTrailerModes.First;
+        config.TrailerVolumeSliderDirection = NormalizeTrailerVolumeSliderDirection(config.TrailerVolumeSliderDirection);
         config.TrailerOverrides = NormalizeTrailerOverrides(config.TrailerOverrides);
         config.BannerHeight = Math.Clamp(config.BannerHeight, 240, 900);
         config.TabletBannerHeight = Math.Clamp(config.TabletBannerHeight, 240, 700);
@@ -198,6 +199,7 @@ internal static class PluginConfigurationNormalizer
         trailers.MultipleTrailerMode = trailers.MultipleTrailerMode == FeaturedMultipleTrailerModes.Random
             ? FeaturedMultipleTrailerModes.Random
             : FeaturedMultipleTrailerModes.First;
+        trailers.TrailerVolumeSliderDirection = NormalizeTrailerVolumeSliderDirection(trailers.TrailerVolumeSliderDirection);
         trailers.Overrides = NormalizeTrailerOverrides(trailers.Overrides);
     }
 
@@ -402,4 +404,7 @@ internal static class PluginConfigurationNormalizer
             .Take(100)
             .ToArray();
     }
+
+    private static string NormalizeTrailerVolumeSliderDirection(string? value)
+        => value is "up" or "down" ? value : "side";
 }

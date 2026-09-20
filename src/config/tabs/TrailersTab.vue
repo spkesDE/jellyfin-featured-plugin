@@ -22,6 +22,11 @@ const multipleOptions: SelectOption[] = [
   { value: 'first', label: t('trailers.multiple.first') },
   { value: 'random', label: t('trailers.multiple.random') }
 ];
+const volumeSliderDirectionOptions: SelectOption[] = [
+  { value: 'side', label: t('trailers.volumeDirection.side') },
+  { value: 'up', label: t('trailers.volumeDirection.up') },
+  { value: 'down', label: t('trailers.volumeDirection.down') }
+];
 
 function addOverride(item: FeaturedSearchItem): void {
   const entry: FeaturedTrailerOverride = {
@@ -44,6 +49,10 @@ function addOverride(item: FeaturedSearchItem): void {
           <ConfigSelect v-model="store.config.TrailerSourcePriority" :label="t('trailers.sourceLabel')"
             :options="sourceOptions" />
           <ConfigCheckbox v-model="store.config.StartTrailersMuted" :label="t('trailers.startMuted')" />
+          <ConfigCheckbox v-model="store.config.ShowTrailerControls" :label="t('trailers.showControls')"
+            :help-text="t('trailers.showControlsHelp')" />
+          <ConfigSelect v-if="store.config.ShowTrailerControls" v-model="store.config.TrailerVolumeSliderDirection"
+            :label="t('trailers.volumeDirection')" :options="volumeSliderDirectionOptions" />
           <ConfigCheckbox v-model="store.config.HideYouTubeTrailerUntilControlsFade"
             :label="t('trailers.hideYouTubeControls')" :help-text="t('trailers.hideYouTubeControlsHelp')" />
           <ConfigCheckbox v-model="store.config.WaitForTrailerToFinish" :label="t('trailers.waitForFinish')"

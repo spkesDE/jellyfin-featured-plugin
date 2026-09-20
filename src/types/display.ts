@@ -1,9 +1,11 @@
-import type { HeroBackdropPosition, HeroHeightMode, HeroTextPosition, TransitionEffect } from './config';
+import type { HeroBackdropPosition, HeroHeightMode, HeroTextPosition, TrailerVolumeSliderDirection, TransitionEffect } from './config';
 
 export interface FeaturedDisplaySettings {
   showAutoplayButton: boolean;
   enableBackgroundTrailers: boolean;
   startTrailersMuted: boolean;
+  showTrailerControls: boolean;
+  trailerVolumeSliderDirection: TrailerVolumeSliderDirection;
   hideYouTubeTrailerUntilControlsFade: boolean;
   waitForTrailerToFinish: boolean;
   trailerDelayMilliseconds: number;
