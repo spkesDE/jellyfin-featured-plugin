@@ -41,7 +41,6 @@ function createMetadata(item: FeaturedItem, response: FeaturedResponse): HTMLEle
   }
   if (response.showRating && item.critic_rating !== undefined) {
     const critic = document.createElement('span');
-    critic.className = 'mediaInfoCriticRating mediaInfoCriticRatingRotten';
     critic.textContent = `${Math.round(item.critic_rating)}%`;
     metadata.appendChild(critic);
   }

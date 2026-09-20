@@ -73,7 +73,7 @@ const mediaCards = [
             <div v-else class="ec-configPreviewLogo">{{ item?.name || t('preview.fallbackTitle') }}</div>
             <div v-if="store.config.ShowRating || store.config.ShowYear || store.config.ShowRuntime" class="ec-configPreviewMeta">
               <span v-if="store.config.ShowRating">★ {{ item?.community_rating?.toFixed(1) || '8.7' }}</span>
-              <span v-if="store.config.ShowRating && item?.critic_rating" class="mediaInfoCriticRating mediaInfoCriticRatingRotten">{{ Math.round(item.critic_rating) }}%</span>
+              <span v-if="store.config.ShowRating && item?.critic_rating">{{ Math.round(item.critic_rating) }}%</span>
               <span v-if="store.config.ShowYear">{{ item?.productionYear || 2026 }}</span>
               <span v-if="store.config.ShowRuntime">{{ item?.runtimeMinutes || 124 }} min</span>
             </div>

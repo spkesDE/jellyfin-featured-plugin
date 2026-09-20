@@ -16,13 +16,13 @@ test('all details interactions use the shared navigation helper', async () => {
   assert.match(navigation, /#\/details\?id=/);
 });
 
-test('critic ratings use Jellyfin rotten icon markup and percentage-only text', async () => {
+test('critic ratings render as percentages without item-page-only icon classes', async () => {
   const [render, preview] = await Promise.all([
     read('src/slider/render.ts'),
     read('src/config/components/BannerPreview.vue')
   ]);
   for (const source of [render, preview]) {
-    assert.match(source, /mediaInfoCriticRating mediaInfoCriticRatingRotten/);
+    assert.doesNotMatch(source, /mediaInfoCriticRating/);
     assert.doesNotMatch(source, /(?:carousel|preview)\.critics/);
   }
   assert.match(render, /critic\.textContent = `\$\{Math\.round\(item\.critic_rating\)\}%`/);
