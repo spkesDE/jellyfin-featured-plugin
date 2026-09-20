@@ -9,7 +9,7 @@ const createId = (): string => globalThis.crypto?.randomUUID?.() ?? `${Date.now(
 export function createSourceRule(type: SourceType = 'RANDOM'): FeaturedSourceRule {
   return {
     Id: createId(), Type: type, Enabled: true, Weight: 100,
-    MinimumItems: 0, MaximumItems: 0, IsFallback: false, EditorUserId: null,
+    MinimumItems: 0, MaximumItems: 0, IsFallback: false, AllowBackgroundTrailers: true, EditorUserId: null,
     LibraryIds: [], CollectionIds: [], PlaylistIds: [], ManualListIds: [], Tags: [],
     RecentDays: type === 'LATEST_RELEASES' ? 365 : 30, Filters: []
   };

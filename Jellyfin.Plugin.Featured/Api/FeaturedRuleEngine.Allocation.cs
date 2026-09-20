@@ -108,7 +108,7 @@ internal sealed partial class FeaturedRuleEngine
             selectedKeys.Add(identity);
             diversity.Record(item);
             result.Add(item);
-            itemReasons[item.Id] = new FeaturedItemSelectionReason(pool.Rule.Id, pool.Rule.Type);
+            itemReasons[item.Id] = new FeaturedItemSelectionReason(pool.Rule.Id, pool.Rule.Type, pool.Rule.AllowBackgroundTrailers);
             pool.Stats.Returned += 1;
             if (cooldownRelaxed) pool.Stats.CooldownRelaxed += 1;
             return true;

@@ -88,19 +88,18 @@ public sealed partial class FeaturedController
 
             double ruleEngineMilliseconds = 0;
             double dtoMilliseconds = cachedDtoMilliseconds;
-            IReadOnlyList<BaseItem>? coldPoolItems = null;
+            FeaturedSelection? coldPool = null;
             if (!preparedCacheHit && FeaturedPreparedCache.CanPopulateFromRequest(preparedCacheStatus))
             {
-                FeaturedSelection coldPool = CreateEngine().SelectItems(
+                coldPool = CreateEngine().SelectItems(
                     activeUser,
                     [],
                     recentHistory,
                     FeaturedPreparedCache.GetRequestedPoolSize(_config),
                     personalization);
                 LogRuleEngineTiming(coldPool.Timing);
-                coldPoolItems = coldPool.Items;
                 ruleEngineMilliseconds += GetElapsedMilliseconds(ref checkpoint);
-                _preparedCache.StoreRequestPool(activeUser, _config, personalization, coldPool.Items);
+                _preparedCache.StoreRequestPool(activeUser, _config, personalization, coldPool);
 
                 preparedCacheHit = _preparedCache.TryGetItems(
                     activeUser,
@@ -120,24 +119,26 @@ public sealed partial class FeaturedController
 
             if (!preparedCacheHit)
             {
-                List<BaseItem> selectedItems;
-                if (coldPoolItems is not null)
+                FeaturedSelection selection;
+                if (coldPool is not null)
                 {
-                    selectedItems = coldPoolItems
-                        .Where(item => !allExcludedIds.Contains(item.Id))
-                        .Take(requestedCount)
-                        .ToList();
+                    selection = coldPool;
                 }
                 else
                 {
-                    FeaturedSelection liveSelection = CreateEngine()
+                    selection = CreateEngine()
                         .SelectItems(activeUser, excludedIds, recentHistory, requestedCount, personalization);
-                    LogRuleEngineTiming(liveSelection.Timing);
-                    selectedItems = liveSelection.Items;
+                    LogRuleEngineTiming(selection.Timing);
                     ruleEngineMilliseconds += GetElapsedMilliseconds(ref checkpoint);
                 }
 
-                items = selectedItems.Select(item => _itemDtoFactory.Create(item, activeUser, _config, personalization)).ToList();
+                items = selection.Items
+                    .Where(item => !allExcludedIds.Contains(item.Id))
+                    .Take(requestedCount)
+                    .Select(item => _itemDtoFactory.Create(item, activeUser, _config, personalization,
+                        !selection.ItemReasons.TryGetValue(item.Id, out FeaturedItemSelectionReason? reason)
+                        || reason.AllowBackgroundTrailers))
+                    .ToList();
                 dtoMilliseconds += GetElapsedMilliseconds(ref checkpoint);
                 if (_config.EnablePreparedCache) _preparedCache.QueueUserRefresh(activeUser.Id);
             }

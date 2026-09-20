@@ -87,6 +87,7 @@ public sealed class FeaturedPersonalizationService
             MinimumItems = rule.MinimumItems,
             MaximumItems = rule.MaximumItems,
             IsFallback = rule.IsFallback,
+            AllowBackgroundTrailers = rule.AllowBackgroundTrailers,
             EditorUserId = rule.EditorUserId,
             LibraryIds = rule.LibraryIds,
             CollectionIds = rule.CollectionIds,

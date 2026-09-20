@@ -99,8 +99,8 @@ public sealed class FeaturedPreparedCache
         Jellyfin.Database.Implementations.Entities.User user,
         PluginConfiguration config,
         FeaturedPersonalizationContext personalization,
-        IReadOnlyList<BaseItem> selectedItems)
-        => StorePreparedItems(user, config, personalization, selectedItems, eagerlyBuildDtos: false, replaceExisting: false);
+        FeaturedSelection selection)
+        => StorePreparedItems(user, config, personalization, selection, eagerlyBuildDtos: false, replaceExisting: false);
 
     internal void RemoveDisplayedItem(Guid userId, Guid itemId)
     {
@@ -230,23 +230,25 @@ public sealed class FeaturedPreparedCache
         FeaturedRuleEngine engine = new(config, _userManager, _libraryManager, _userDataManager, _candidateCache);
         FeaturedSelection selection = engine.SelectItems(user, [], recentHistory, GetPoolSize(config), personalization);
         if (config.Debug) _logger.LogInformation("{RuleEngineTiming}", selection.Timing.FormatReport());
-        StorePreparedItems(user, config, personalization, selection.Items, eagerlyBuildDtos: true, replaceExisting: true);
+        StorePreparedItems(user, config, personalization, selection, eagerlyBuildDtos: true, replaceExisting: true);
     }
 
     private void StorePreparedItems(
         Jellyfin.Database.Implementations.Entities.User user,
         PluginConfiguration config,
         FeaturedPersonalizationContext personalization,
-        IReadOnlyList<BaseItem> selectedItems,
+        FeaturedSelection selection,
         bool eagerlyBuildDtos,
         bool replaceExisting)
     {
         string fingerprint = GetConfigurationFingerprint(config, personalization);
-        PreparedItem[] items = selectedItems
+        PreparedItem[] items = selection.Items
             .Select(item => new PreparedItem(
                 item.Id,
                 new Lazy<FeaturedItemDto>(
-                    () => _itemDtoFactory.Create(item, user, config, personalization),
+                    () => _itemDtoFactory.Create(item, user, config, personalization,
+                        !selection.ItemReasons.TryGetValue(item.Id, out FeaturedItemSelectionReason? reason)
+                        || reason.AllowBackgroundTrailers),
                     LazyThreadSafetyMode.ExecutionAndPublication)))
             .ToArray();
         if (eagerlyBuildDtos)

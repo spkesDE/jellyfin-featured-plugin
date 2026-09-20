@@ -115,6 +115,8 @@
   "source.maximumItemsHelp": "Begrenzt, wie viele Einträge diese Quelle zu einem Feed beitragen darf. 0 bedeutet unbegrenzt.",
   "source.fallback": "Fallback-Quelle",
   "source.fallbackHelp": "Verwendet diese Quelle erst, wenn die aktivierten Primärquellen den angeforderten Feed nicht füllen können.",
+  "source.allowBackgroundTrailers": "Hintergrund-Trailer automatisch abspielen",
+  "source.allowBackgroundTrailersHelp": "Gilt, wenn diese Quelle einen Titel zum Feed beiträgt. Hintergrund-Trailer müssen global aktiviert sein.",
   "filter.diversityTitle": "Feed-Vielfalt",
   "filter.diversityHelp": "Globale Begrenzungen für eine breitere Mischung im gesamten Feed. Sie werden automatisch gelockert, statt zu wenige Einträge zurückzugeben.",
   "filter.maximumPerGenre": "Maximum pro Hauptgenre",

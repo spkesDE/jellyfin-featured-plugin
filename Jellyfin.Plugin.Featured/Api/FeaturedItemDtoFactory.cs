@@ -15,9 +15,10 @@ public sealed class FeaturedItemDtoFactory
         BaseItem item,
         Jellyfin.Database.Implementations.Entities.User activeUser,
         PluginConfiguration config,
-        FeaturedPersonalizationContext personalization)
+        FeaturedPersonalizationContext personalization,
+        bool allowBackgroundTrailers = true)
     {
-        IReadOnlyList<FeaturedTrailerDto> trailers = personalization.Display.EnableBackgroundTrailers
+        IReadOnlyList<FeaturedTrailerDto> trailers = personalization.Display.EnableBackgroundTrailers && allowBackgroundTrailers
             ? _trailerResolver.ResolveCandidates(item, activeUser, config)
             : [];
         return new FeaturedItemDto

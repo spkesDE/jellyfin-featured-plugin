@@ -267,6 +267,8 @@ public sealed class FeaturedSourceRule
 
     public bool IsFallback { get; set; }
 
+    public bool AllowBackgroundTrailers { get; set; } = true;
+
     public string? EditorUserId { get; set; }
 
     public string[] LibraryIds { get; set; } = [];

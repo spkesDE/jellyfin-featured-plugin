@@ -115,6 +115,8 @@
   "source.maximumItemsHelp": "Limits how many items this source may contribute to one feed. 0 means unlimited.",
   "source.fallback": "Fallback source",
   "source.fallbackHelp": "Uses this source only when enabled primary sources cannot fill the requested feed.",
+  "source.allowBackgroundTrailers": "Autoplay background trailers",
+  "source.allowBackgroundTrailersHelp": "Applies when this source contributes a title to the feed. Requires background trailers to be enabled globally.",
   "filter.diversityTitle": "Feed diversity",
   "filter.diversityHelp": "Global limits for a broader mix across the complete feed. They relax automatically rather than returning too few items.",
   "filter.maximumPerGenre": "Maximum per primary genre",

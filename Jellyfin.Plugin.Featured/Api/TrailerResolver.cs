@@ -33,8 +33,10 @@ public sealed class TrailerResolver
 
         if (item is IHasTrailers trailers)
         {
-            IReadOnlyList<FeaturedTrailerDto> local = ResolveLocal(trailers, activeUser, config.MultipleTrailerMode);
-            IReadOnlyList<FeaturedTrailerDto> remote = ResolveRemote(trailers, config.MultipleTrailerMode);
+            IReadOnlyList<FeaturedTrailerDto> local = config.TrailerSourcePriority == FeaturedTrailerSourcePriorities.RemoteOnly
+                ? [] : ResolveLocal(trailers, activeUser, config.MultipleTrailerMode);
+            IReadOnlyList<FeaturedTrailerDto> remote = config.TrailerSourcePriority == FeaturedTrailerSourcePriorities.LocalOnly
+                ? [] : ResolveRemote(trailers, config.MultipleTrailerMode);
             switch (config.TrailerSourcePriority)
             {
                 case FeaturedTrailerSourcePriorities.LocalOnly:

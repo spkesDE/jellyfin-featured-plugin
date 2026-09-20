@@ -201,6 +201,38 @@ public sealed class FeaturedPreparedCacheTests : IDisposable
         Assert.Equal("bypass (live mixing required)", status);
     }
 
+    [Fact]
+    public void PreparedItemsRespectContributingSourceTrailerSetting()
+    {
+        List<BaseItem> source = CreateItems(2);
+        PluginConfiguration config = new()
+        {
+            EnableBackgroundTrailers = true,
+            TrailerSourcePriority = FeaturedTrailerSourcePriorities.RemoteOnly,
+            TrailerOverrides = source.Select(item => new FeaturedTrailerOverride
+            {
+                ItemId = item.Id.ToString(),
+                Url = "https://www.youtube.com/watch?v=example12345"
+            }).ToArray()
+        };
+        FeaturedPersonalizationContext personalization = new(
+            [new FeaturedSourceRule { Id = "source", Type = FeaturedSourceTypes.Random }],
+            new FeaturedUserProfile { UserId = _user.Id.ToString("N") },
+            [], 0, new FeaturedDisplayPreferences(true, true, true, true, true), false);
+        Dictionary<Guid, FeaturedItemSelectionReason> reasons = new()
+        {
+            [source[0].Id] = new("source", FeaturedSourceTypes.Random, false),
+            [source[1].Id] = new("source", FeaturedSourceTypes.Random, true)
+        };
+        _cache.StoreRequestPool(_user, config, personalization,
+            new FeaturedSelection(source, [], false,
+                new FeaturedRuleEngineTiming(0, 0, 0, 0, 0, 0, 0, 0), reasons));
+
+        Assert.True(TryGet(config, personalization, [], 2, out List<FeaturedItemDto> items, out _));
+        Assert.Null(items.Single(item => item.Id == source[0].Id.ToString()).Trailer);
+        Assert.NotNull(items.Single(item => item.Id == source[1].Id.ToString()).Trailer);
+    }
+
     public void Dispose()
     {
         BaseItem.LibraryManager = _previousLibraryManager;
@@ -212,7 +244,10 @@ public sealed class FeaturedPreparedCacheTests : IDisposable
         PluginConfiguration config,
         FeaturedPersonalizationContext personalization,
         IReadOnlyList<BaseItem> items)
-        => _cache.StoreRequestPool(_user, config, personalization, items);
+        => _cache.StoreRequestPool(_user, config, personalization,
+            new FeaturedSelection(items.ToList(), [], false,
+                new FeaturedRuleEngineTiming(0, 0, 0, 0, 0, 0, 0, 0),
+                new Dictionary<Guid, FeaturedItemSelectionReason>()));
 
     private bool TryGet(
         PluginConfiguration config,

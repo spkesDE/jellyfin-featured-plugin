@@ -575,7 +575,7 @@ test('warm prepared responses reuse prebuilt DTOs and expose bypass diagnostics'
     read('Jellyfin.Plugin.Featured/Api/FeaturedController.Items.cs'),
     read('Jellyfin.Plugin.Featured/Api/FeaturedItemDtoFactory.cs')
   ]);
-  assert.match(preparedCache, /new Lazy<FeaturedItemDto>[\s\S]*?_itemDtoFactory\.Create\(item, user, config, personalization\)/);
+  assert.match(preparedCache, /new Lazy<FeaturedItemDto>[\s\S]*?_itemDtoFactory\.Create\(item, user, config, personalization,/);
   assert.match(preparedCache, /out string status/);
   for (const status of ['bypass (disabled)', 'bypass (live mixing required)', 'miss (no entry)', 'miss (fingerprint mismatch)', 'refreshing', 'hit']) {
     assert.equal(preparedCache.includes(`\"${status}\"`), true, `missing prepared-cache status ${status}`);
@@ -611,7 +611,7 @@ test('rule engine debug timing separates query, filtering, scoring, and allocati
   assert.match(engine, /OrderForProfile[\s\S]*?personalizationScoringMilliseconds/);
   assert.match(engine, /FillFromPools[\s\S]*?poolAllocationMilliseconds/);
   assert.match(controller, /LogRuleEngineTiming\(coldPool\.Timing\)/);
-  assert.match(controller, /LogRuleEngineTiming\(liveSelection\.Timing\)/);
+  assert.match(controller, /LogRuleEngineTiming\(selection\.Timing\)/);
   assert.match(diagnostics, /LogRuleEngineTiming\(selection\.Timing\)/);
   assert.match(preparedCache, /config\.Debug[\s\S]*?selection\.Timing\.FormatReport\(\)/);
 });

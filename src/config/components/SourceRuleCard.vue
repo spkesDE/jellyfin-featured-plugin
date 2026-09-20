@@ -64,6 +64,7 @@ const tagOptions = (): SelectOption[] => valueOptions(store.tags.value);
       <ConfigNumber v-model="rule.MinimumItems" :label="t('source.minimumItems')" :help-text="t('source.minimumItemsHelp')" :min="0" :max="100" :step="1" />
       <ConfigNumber v-model="rule.MaximumItems" :label="t('source.maximumItems')" :help-text="t('source.maximumItemsHelp')" :min="0" :max="100" :step="1" />
       <ConfigCheckbox v-model="rule.IsFallback" :label="t('source.fallback')" :help-text="t('source.fallbackHelp')" />
+      <ConfigCheckbox v-model="rule.AllowBackgroundTrailers" :label="t('source.allowBackgroundTrailers')" :help-text="t('source.allowBackgroundTrailersHelp')" />
     </div>
 
     <div v-if="rule.Enabled" class="ec-sourceSettings">

@@ -27,6 +27,7 @@ export interface FeaturedSourceRule {
   MinimumItems: number;
   MaximumItems: number;
   IsFallback: boolean;
+  AllowBackgroundTrailers: boolean;
   EditorUserId: string | null;
   LibraryIds: string[];
   CollectionIds: string[];
