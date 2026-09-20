@@ -16,13 +16,13 @@ const labelKeys: Record<SourceType, TranslationKey> = {
   LIBRARIES: 'source.type.libraries', COLLECTIONS: 'source.type.collections', FAVOURITES: 'source.type.favourites',
   TAGS: 'source.type.tags', PLAYLISTS: 'source.type.playlists', RECENTLY_ADDED: 'source.type.recently_added',
   LATEST_RELEASES: 'source.type.latest_releases', RANDOM: 'source.type.random', UNPLAYED: 'source.type.unplayed',
-  MANUAL_LISTS: 'source.type.manual_lists'
+  MANUAL_LISTS: 'source.type.manual_lists', RECOMMENDATIONS: 'source.type.recommendations'
 };
 const helpKeys: Record<SourceType, TranslationKey> = {
   LIBRARIES: 'source.help.libraries', COLLECTIONS: 'source.help.collections', FAVOURITES: 'source.help.favourites',
   TAGS: 'source.help.tags', PLAYLISTS: 'source.help.playlists', RECENTLY_ADDED: 'source.help.recently_added',
   LATEST_RELEASES: 'source.help.latest_releases', RANDOM: 'source.help.random', UNPLAYED: 'source.help.unplayed',
-  MANUAL_LISTS: 'source.help.manual_lists'
+  MANUAL_LISTS: 'source.help.manual_lists', RECOMMENDATIONS: 'source.help.recommendations'
 };
 const sourceLabel = (type: SourceType): string => t(labelKeys[type]);
 const sourceHelp = (type: SourceType): string => t(helpKeys[type]);

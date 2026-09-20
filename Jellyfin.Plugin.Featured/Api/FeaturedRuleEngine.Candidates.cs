@@ -35,10 +35,12 @@ internal sealed partial class FeaturedRuleEngine
             FeaturedSourceTypes.Favourites => GetFavouriteCandidates(rule, candidateLimit),
             FeaturedSourceTypes.Collections => GetFolderCandidates(rule.CollectionIds),
             FeaturedSourceTypes.Playlists => GetFolderCandidates(rule.PlaylistIds),
+            FeaturedSourceTypes.Recommendations => _recommendations.GetMovieRecommendations(activeUser, candidateLimit),
             _ => QueryStandardCandidates(rule, userScoped ? activeUser : null, candidateLimit)
         };
 
-        List<BaseItem> normalized = NormalizeAndRequery(candidates, userScoped ? activeUser : null, candidateLimit);
+        List<BaseItem> sourceOrder = candidates.ToList();
+        List<BaseItem> normalized = NormalizeAndRequery(sourceOrder, userScoped ? activeUser : null, candidateLimit);
         return rule.Type switch
         {
             FeaturedSourceTypes.Libraries => normalized
@@ -56,6 +58,9 @@ internal sealed partial class FeaturedRuleEngine
                     && item.PremiereDate.Value <= DateTime.UtcNow
                     && item.PremiereDate.Value >= DateTime.UtcNow.AddDays(-rule.RecentDays))
                 .OrderByDescending(item => item.PremiereDate)
+                .ToList(),
+            FeaturedSourceTypes.Recommendations => normalized
+                .OrderBy(item => sourceOrder.FindIndex(candidate => candidate.Id == item.Id))
                 .ToList(),
             _ => normalized
         };
@@ -202,5 +207,5 @@ internal sealed partial class FeaturedRuleEngine
     }
 
     private static bool IsUserScopedSource(FeaturedSourceRule rule)
-        => rule.Type == FeaturedSourceTypes.Unplayed;
+        => rule.Type is FeaturedSourceTypes.Unplayed or FeaturedSourceTypes.Recommendations;
 }

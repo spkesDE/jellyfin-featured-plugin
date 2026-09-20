@@ -13,7 +13,8 @@ internal static class PluginConfigurationNormalizer
         FeaturedSourceTypes.LatestReleases,
         FeaturedSourceTypes.Random,
         FeaturedSourceTypes.Unplayed,
-        FeaturedSourceTypes.ManualLists
+        FeaturedSourceTypes.ManualLists,
+        FeaturedSourceTypes.Recommendations
     };
 
     private static readonly HashSet<string> ValidFilterFields = new(StringComparer.OrdinalIgnoreCase)

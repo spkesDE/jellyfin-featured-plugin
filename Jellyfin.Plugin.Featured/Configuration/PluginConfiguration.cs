@@ -422,6 +422,7 @@ public static class FeaturedSourceTypes
     public const string Random = "RANDOM";
     public const string Unplayed = "UNPLAYED";
     public const string ManualLists = "MANUAL_LISTS";
+    public const string Recommendations = "RECOMMENDATIONS";
 }
 
 public static class FeaturedFilterFields

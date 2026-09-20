@@ -17,6 +17,7 @@ public sealed partial class FeaturedController : ControllerBase
     private readonly IUserDataManager _userDataManager;
     private readonly FeaturedDisplayHistoryStore _historyStore;
     private readonly FeaturedCandidateCache _candidateCache;
+    private readonly FeaturedRecommendationCandidates _recommendations;
     private readonly FeaturedPreparedCache _preparedCache;
     private readonly FeaturedPersonalizationService _personalization;
     private readonly FeaturedPreferenceOptionsCache _preferenceOptionsCache;
@@ -29,6 +30,7 @@ public sealed partial class FeaturedController : ControllerBase
         IUserDataManager userDataManager,
         FeaturedDisplayHistoryStore historyStore,
         FeaturedCandidateCache candidateCache,
+        FeaturedRecommendationCandidates recommendations,
         FeaturedPreparedCache preparedCache,
         FeaturedPersonalizationService personalization,
         FeaturedPreferenceOptionsCache preferenceOptionsCache,
@@ -40,6 +42,7 @@ public sealed partial class FeaturedController : ControllerBase
         _userDataManager = userDataManager;
         _historyStore = historyStore;
         _candidateCache = candidateCache;
+        _recommendations = recommendations;
         _preparedCache = preparedCache;
         _personalization = personalization;
         _preferenceOptionsCache = preferenceOptionsCache;

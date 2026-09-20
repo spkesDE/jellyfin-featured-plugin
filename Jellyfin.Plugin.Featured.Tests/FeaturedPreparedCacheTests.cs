@@ -54,6 +54,9 @@ public sealed class FeaturedPreparedCacheTests : IDisposable
             userDataManager,
             _historyStore,
             new FeaturedCandidateCache(),
+            new FeaturedRecommendationCandidates(
+                DispatchProxy.Create<ISimilarItemsManager, SimilarItemsManagerStub>(),
+                NullLogger<FeaturedRecommendationCandidates>.Instance),
             _personalization,
             dtoFactory,
             NullLogger<FeaturedPreparedCache>.Instance);
@@ -233,6 +236,27 @@ public sealed class FeaturedPreparedCacheTests : IDisposable
         Assert.NotNull(items.Single(item => item.Id == source[1].Id.ToString()).Trailer);
     }
 
+    [Fact]
+    public void MovieRecommendationCandidatesKeepProviderOrderAndRemoveDuplicates()
+    {
+        List<BaseItem> movies = CreateItems(2);
+        ISimilarItemsManager manager = DispatchProxy.Create<ISimilarItemsManager, SimilarItemsManagerStub>();
+        ((SimilarItemsManagerStub)manager).Recommendations =
+        [
+            new MediaBrowser.Controller.Library.SimilarItemsRecommendation
+            {
+                BaselineItemName = "Watched movie",
+                CategoryId = Guid.NewGuid(),
+                RecommendationType = MediaBrowser.Model.Dto.RecommendationType.SimilarToRecentlyPlayed,
+                Items = [movies[0], movies[1], movies[0]]
+            }
+        ];
+        FeaturedRecommendationCandidates candidates = new(manager, NullLogger<FeaturedRecommendationCandidates>.Instance);
+
+        Assert.Equal(movies.Select(movie => movie.Id),
+            candidates.GetMovieRecommendations(_user, 10).Select(movie => movie.Id));
+    }
+
     public void Dispose()
     {
         BaseItem.LibraryManager = _previousLibraryManager;
@@ -306,6 +330,16 @@ public sealed class FeaturedPreparedCacheTests : IDisposable
                 nameof(IUserManager.GetUserById) => Users.FirstOrDefault(user => args is [{ } id] && user.Id == (Guid)id),
                 _ => GetDefaultValue(targetMethod?.ReturnType)
             };
+    }
+
+    public class SimilarItemsManagerStub : DispatchProxy
+    {
+        public IReadOnlyList<SimilarItemsRecommendation> Recommendations { get; set; } = [];
+
+        protected override object? Invoke(MethodInfo? targetMethod, object?[]? args)
+            => targetMethod?.Name == nameof(ISimilarItemsManager.GetMovieRecommendationsAsync)
+                ? Task.FromResult(Recommendations)
+                : GetDefaultValue(targetMethod?.ReturnType);
     }
 
     public class LibraryManagerStub : DispatchProxy

@@ -14,19 +14,22 @@ internal sealed partial class FeaturedRuleEngine
     private readonly ILibraryManager _libraryManager;
     private readonly IUserDataManager _userDataManager;
     private readonly FeaturedCandidateCache _candidateCache;
+    private readonly FeaturedRecommendationCandidates _recommendations;
 
     internal FeaturedRuleEngine(
         PluginConfiguration config,
         IUserManager userManager,
         ILibraryManager libraryManager,
         IUserDataManager userDataManager,
-        FeaturedCandidateCache candidateCache)
+        FeaturedCandidateCache candidateCache,
+        FeaturedRecommendationCandidates recommendations)
     {
         _config = config;
         _userManager = userManager;
         _libraryManager = libraryManager;
         _userDataManager = userDataManager;
         _candidateCache = candidateCache;
+        _recommendations = recommendations;
     }
 
     internal FeaturedSelection SelectItems(
@@ -113,7 +116,7 @@ internal sealed partial class FeaturedRuleEngine
             ruleFiltersMilliseconds += ElapsedMilliseconds(phaseStarted);
 
             phaseStarted = Stopwatch.GetTimestamp();
-            if (rule.Type != FeaturedSourceTypes.ManualLists)
+            if (rule.Type is not (FeaturedSourceTypes.ManualLists or FeaturedSourceTypes.Recommendations))
             {
                 eligible = OrderForProfile(eligible, profile, selectionUserData);
                 cooldownEligible = OrderForProfile(cooldownEligible, profile, selectionUserData)

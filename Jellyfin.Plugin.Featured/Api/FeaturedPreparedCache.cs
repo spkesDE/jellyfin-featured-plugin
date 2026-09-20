@@ -19,6 +19,7 @@ public sealed class FeaturedPreparedCache
     private readonly IUserDataManager _userDataManager;
     private readonly FeaturedDisplayHistoryStore _historyStore;
     private readonly FeaturedCandidateCache _candidateCache;
+    private readonly FeaturedRecommendationCandidates _recommendations;
     private readonly FeaturedPersonalizationService _personalization;
     private readonly FeaturedItemDtoFactory _itemDtoFactory;
     private readonly ILogger<FeaturedPreparedCache> _logger;
@@ -29,6 +30,7 @@ public sealed class FeaturedPreparedCache
         IUserDataManager userDataManager,
         FeaturedDisplayHistoryStore historyStore,
         FeaturedCandidateCache candidateCache,
+        FeaturedRecommendationCandidates recommendations,
         FeaturedPersonalizationService personalization,
         FeaturedItemDtoFactory itemDtoFactory,
         ILogger<FeaturedPreparedCache> logger)
@@ -38,6 +40,7 @@ public sealed class FeaturedPreparedCache
         _userDataManager = userDataManager;
         _historyStore = historyStore;
         _candidateCache = candidateCache;
+        _recommendations = recommendations;
         _personalization = personalization;
         _itemDtoFactory = itemDtoFactory;
         _logger = logger;
@@ -227,7 +230,7 @@ public sealed class FeaturedPreparedCache
 
         FeaturedPersonalizationContext personalization = _personalization.Resolve(config, user.Id);
         IReadOnlyDictionary<Guid, DateTimeOffset> recentHistory = _historyStore.GetRecentItems(user.Id, personalization.RepeatCooldownHours);
-        FeaturedRuleEngine engine = new(config, _userManager, _libraryManager, _userDataManager, _candidateCache);
+        FeaturedRuleEngine engine = new(config, _userManager, _libraryManager, _userDataManager, _candidateCache, _recommendations);
         FeaturedSelection selection = engine.SelectItems(user, [], recentHistory, GetPoolSize(config), personalization);
         if (config.Debug) _logger.LogInformation("{RuleEngineTiming}", selection.Timing.FormatReport());
         StorePreparedItems(user, config, personalization, selection, eagerlyBuildDtos: true, replaceExisting: true);

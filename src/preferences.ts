@@ -12,7 +12,7 @@ const sourceKeys: Record<string, TranslationKey> = {
   LIBRARIES: 'source.type.libraries', COLLECTIONS: 'source.type.collections', FAVOURITES: 'source.type.favourites',
   TAGS: 'source.type.tags', PLAYLISTS: 'source.type.playlists', RECENTLY_ADDED: 'source.type.recently_added',
   LATEST_RELEASES: 'source.type.latest_releases', RANDOM: 'source.type.random', UNPLAYED: 'source.type.unplayed',
-  MANUAL_LISTS: 'source.type.manual_lists'
+  MANUAL_LISTS: 'source.type.manual_lists', RECOMMENDATIONS: 'source.type.recommendations'
 };
 
 function loadPreferencesBootstrap(): Promise<FeaturedPreferencesBootstrapResponse> {
