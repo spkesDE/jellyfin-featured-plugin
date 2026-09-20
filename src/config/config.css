@@ -238,8 +238,8 @@
 
                 #FeaturedConfigPage .ec-configPreview.is-hero .ec-configPreviewBackdrop,
                 #FeaturedConfigPage .ec-configPreview.is-hero .ec-configPreviewShade {
-                    -webkit-mask-image: linear-gradient(to bottom, #000 40%, rgba(0, 0, 0, .9) 55%, rgba(0, 0, 0, .4) 72%, transparent 100%);
-                    mask-image: linear-gradient(to bottom, #000 40%, rgba(0, 0, 0, .9) 55%, rgba(0, 0, 0, .4) 72%, transparent 100%);
+                    -webkit-mask-image: var(--ec-preview-fade);
+                    mask-image: var(--ec-preview-fade);
                 }
 
                 #FeaturedConfigPage .ec-configPreviewShade {

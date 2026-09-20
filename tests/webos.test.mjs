@@ -5,7 +5,7 @@ import test from 'node:test';
 const read = async (path) => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 
 test('webOS 6 gets Chromium 79 compatible output and runtime fallbacks', async () => {
-  const [build, clone, dom, defaults, store, preferences, carousel, trailer, navigation, styles, webosOverrides] = await Promise.all([
+  const [build, clone, dom, defaults, store, preferences, carousel, trailer, navigation, styles, webosOverrides, layout, bootstrap] = await Promise.all([
     read('scripts/build.mjs'),
     read('src/core/clone.ts'),
     read('src/core/dom.ts'),
@@ -16,7 +16,9 @@ test('webOS 6 gets Chromium 79 compatible output and runtime fallbacks', async (
     read('src/slider/trailer.ts'),
     read('src/admin/navigation.ts'),
     read('src/styles/featured.css'),
-    read('src/styles/webos-overrides.css')
+    read('src/styles/webos-overrides.css'),
+    read('src/slider/layout.ts'),
+    read('Jellyfin.Plugin.Featured/Integrations/FrontendBootstrap.cs')
   ]);
   assert.match(build, /const browserTarget = 'chrome79'/);
   assert.match(build, /target: browserTarget/);
@@ -34,6 +36,11 @@ test('webOS 6 gets Chromium 79 compatible output and runtime fallbacks', async (
     loader: 'css', target: 'chrome79', minify: true
   });
   assert.match(transformed.code, /top:0;right:0;bottom:0;left:0/);
+  assert.match(styles, /\.ec-root\.ec-height-fullscreen\s*\{[\s\S]*?--ec-height:\s*100vh !important;[\s\S]*?@supports \(height: 100dvh\)[\s\S]*?--ec-height:\s*100dvh !important;/);
+  assert.match(bootstrap, /ec-bootstrap-height-fullscreen\{--ec-height:100vh\}/);
+  assert.match(bootstrap, /@supports\(height:100dvh\)\{\.ec-bootstrap-placeholder\.ec-bootstrap-height-fullscreen\{--ec-height:100dvh!important\}\}/);
+  assert.match(styles, /-webkit-mask-image:\s*var\(--ec-hero-media-mask\)/);
+  assert.doesNotMatch(layout, /(?<!-)maskImage\s*=/);
 });
 
 test('hero content adapts overview lines without moving following sections', async () => {

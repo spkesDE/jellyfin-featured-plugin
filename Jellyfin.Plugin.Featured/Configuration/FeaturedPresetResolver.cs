@@ -221,6 +221,9 @@ internal static class FeaturedPresetResolver
         config.MobileBannerHeight = preset.Layout.MobileBannerHeight;
         config.HeroBorderRadius = preset.Layout.HeroBorderRadius;
         config.HeroGradientStrength = preset.Layout.HeroGradientStrength;
+        config.HeroFadeStart = preset.Layout.HeroFadeStart;
+        config.HeroFadeEnd = preset.Layout.HeroFadeEnd;
+        config.HeroFadeCurve = preset.Layout.HeroFadeCurve;
         config.HeroTextPosition = preset.Layout.HeroTextPosition;
         config.TransitionEffect = preset.Layout.TransitionEffect;
         config.HeroBackdropPosition = preset.Layout.HeroBackdropPosition;

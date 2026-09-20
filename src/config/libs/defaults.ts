@@ -59,7 +59,9 @@ export function createPresetFromConfig(config: FeaturedPluginConfig, name = 'Fea
       HideOnTvLayout: config.HideOnTvLayout, UseHeroLayout: config.UseHeroLayout,
       HeroHeightMode: config.HeroHeightMode, TabletBannerHeight: config.TabletBannerHeight,
       MobileBannerHeight: config.MobileBannerHeight, HeroBorderRadius: config.HeroBorderRadius,
-      HeroGradientStrength: config.HeroGradientStrength, HeroTextPosition: config.HeroTextPosition,
+      HeroGradientStrength: config.HeroGradientStrength, HeroFadeStart: config.HeroFadeStart,
+      HeroFadeEnd: config.HeroFadeEnd, HeroFadeCurve: config.HeroFadeCurve,
+      HeroTextPosition: config.HeroTextPosition,
       TransitionEffect: config.TransitionEffect, HeroBackdropPosition: config.HeroBackdropPosition,
       BannerHeight: config.BannerHeight, ShowYear: config.ShowYear, ShowRuntime: config.ShowRuntime,
       ShowSecondaryButton: config.ShowSecondaryButton, SecondaryButtonText: config.SecondaryButtonText || null,
@@ -161,6 +163,9 @@ export const CONFIG_DEFAULTS: FeaturedPluginConfig = {
   MobileBannerHeight: 340,
   HeroBorderRadius: 0,
   HeroGradientStrength: 85,
+  HeroFadeStart: 40,
+  HeroFadeEnd: 90,
+  HeroFadeCurve: 'balanced',
   HeroTextPosition: 'left',
   TransitionEffect: 'slide',
   HeroBackdropPosition: 'center',
@@ -211,6 +216,9 @@ export function createDisplaySettings(config: FeaturedPluginConfig): FeaturedDis
     mobileBannerHeight: config.MobileBannerHeight,
     heroBorderRadius: config.HeroBorderRadius,
     heroGradientStrength: config.HeroGradientStrength,
+    heroFadeStart: config.HeroFadeStart,
+    heroFadeEnd: config.HeroFadeEnd,
+    heroFadeCurve: config.HeroFadeCurve,
     heroTextPosition: config.HeroTextPosition,
     transitionEffect: config.TransitionEffect,
     heroBackdropPosition: config.HeroBackdropPosition,
@@ -266,6 +274,12 @@ export function normalizeConfig(value: unknown): FeaturedPluginConfig {
     ? value as Partial<FeaturedPluginConfig> & LegacyTrailerFallback
     : {};
   const config = { ...createDefaultConfig(), ...source };
+  const fade = normalizeHeroFade(config.HeroFadeStart, config.HeroFadeEnd, config.HeroFadeCurve);
+  config.HeroFadeStart = fade.start;
+  config.HeroFadeEnd = fade.end;
+  config.HeroFadeCurve = fade.curve;
+  config.HeroHeightMode = ['auto', 'compact', 'standard', 'cinematic', 'fullscreen', 'custom'].includes(String(config.HeroHeightMode))
+    ? config.HeroHeightMode : 'standard';
   if (config.TrailerSourcePriority === 'prefer_local' && source.FallBackToRemoteTrailers === false) {
     config.TrailerSourcePriority = 'local_only';
   }
@@ -306,7 +320,7 @@ export function normalizeConfig(value: unknown): FeaturedPluginConfig {
           trailers.TrailerSourcePriority = 'local_only';
         }
         delete (trailers as typeof trailers & LegacyTrailerFallback).FallBackToRemoteTrailers;
-        return {
+        const normalized = {
           ...fallback, ...preset,
           Id: preset.Id || fallback.Id,
           Name: preset.Name || fallback.Name,
@@ -326,6 +340,17 @@ export function normalizeConfig(value: unknown): FeaturedPluginConfig {
           Layout: { ...fallback.Layout, ...(preset.Layout ?? {}) },
           Trailers: trailers
         };
+        const layoutFade = normalizeHeroFade(
+          normalized.Layout.HeroFadeStart,
+          normalized.Layout.HeroFadeEnd,
+          normalized.Layout.HeroFadeCurve
+        );
+        normalized.Layout.HeroFadeStart = layoutFade.start;
+        normalized.Layout.HeroFadeEnd = layoutFade.end;
+        normalized.Layout.HeroFadeCurve = layoutFade.curve;
+        normalized.Layout.HeroHeightMode = ['auto', 'compact', 'standard', 'cinematic', 'fullscreen', 'custom']
+          .includes(String(normalized.Layout.HeroHeightMode)) ? normalized.Layout.HeroHeightMode : 'standard';
+        return normalized;
       })
     : [];
   config.PersonalizationDefaults = {
@@ -348,6 +373,21 @@ export function normalizeConfig(value: unknown): FeaturedPluginConfig {
   config.PlayButtonText ??= '';
   config.SecondaryButtonText ??= '';
   return config;
+}
+
+function normalizeHeroFade(startValue: unknown, endValue: unknown, curveValue: unknown): {
+  start: number; end: number; curve: 'soft' | 'balanced' | 'strong'
+} {
+  const startNumber = typeof startValue === 'number' && Number.isFinite(startValue) ? startValue : 40;
+  const endNumber = typeof endValue === 'number' && Number.isFinite(endValue) ? endValue : 90;
+  const start = Math.max(0, Math.min(100, startNumber));
+  const end = Math.max(0, Math.min(100, endNumber));
+  if (end <= start) return { start: 40, end: 90, curve: normalizeHeroFadeCurve(curveValue) };
+  return { start, end, curve: normalizeHeroFadeCurve(curveValue) };
+}
+
+function normalizeHeroFadeCurve(value: unknown): 'soft' | 'balanced' | 'strong' {
+  return value === 'soft' || value === 'strong' ? value : 'balanced';
 }
 
 function normalizeFilters(value: unknown): FeaturedFilterRule[] {

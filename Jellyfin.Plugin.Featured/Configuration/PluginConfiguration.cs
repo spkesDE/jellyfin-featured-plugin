@@ -118,6 +118,12 @@ public sealed class PluginConfiguration : BasePluginConfiguration
 
     public int HeroGradientStrength { get; set; } = 85;
 
+    public int HeroFadeStart { get; set; } = 40;
+
+    public int HeroFadeEnd { get; set; } = 90;
+
+    public string HeroFadeCurve { get; set; } = "balanced";
+
     public string HeroTextPosition { get; set; } = "left";
 
     public string TransitionEffect { get; set; } = "slide";
@@ -227,6 +233,9 @@ public sealed class FeaturedPresetLayoutSettings
     public int MobileBannerHeight { get; set; } = 340;
     public int HeroBorderRadius { get; set; }
     public int HeroGradientStrength { get; set; } = 85;
+    public int HeroFadeStart { get; set; } = 40;
+    public int HeroFadeEnd { get; set; } = 90;
+    public string HeroFadeCurve { get; set; } = "balanced";
     public string HeroTextPosition { get; set; } = "left";
     public string TransitionEffect { get; set; } = "slide";
     public string HeroBackdropPosition { get; set; } = "center";

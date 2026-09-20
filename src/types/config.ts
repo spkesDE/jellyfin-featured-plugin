@@ -4,7 +4,8 @@ export type FilterOperator = 'EQUALS' | 'NOT_EQUALS' | 'GTE' | 'LTE' | 'CONTAINS
 export type FrontendInjectionMethod = 'automatic' | 'file-transformation' | 'javascript-injector';
 export type TransitionEffect = 'slide' | 'fade';
 export type HeroBackdropPosition = 'top' | 'center' | 'bottom';
-export type HeroHeightMode = 'auto' | 'compact' | 'standard' | 'cinematic' | 'custom';
+export type HeroHeightMode = 'auto' | 'compact' | 'standard' | 'cinematic' | 'fullscreen' | 'custom';
+export type HeroFadeCurve = 'soft' | 'balanced' | 'strong';
 export type HeroTextPosition = 'left' | 'center' | 'right';
 export type TrailerSourcePriority = 'prefer_local' | 'prefer_remote' | 'local_only' | 'remote_only' | 'automatic';
 export type MultipleTrailerMode = 'first' | 'random';
@@ -90,6 +91,9 @@ export interface FeaturedPluginConfig {
   MobileBannerHeight: number;
   HeroBorderRadius: number;
   HeroGradientStrength: number;
+  HeroFadeStart: number;
+  HeroFadeEnd: number;
+  HeroFadeCurve: HeroFadeCurve;
   HeroTextPosition: HeroTextPosition;
   TransitionEffect: TransitionEffect;
   HeroBackdropPosition: HeroBackdropPosition;
@@ -158,6 +162,9 @@ export interface FeaturedPresetLayoutSettings {
   MobileBannerHeight: number;
   HeroBorderRadius: number;
   HeroGradientStrength: number;
+  HeroFadeStart: number;
+  HeroFadeEnd: number;
+  HeroFadeCurve: HeroFadeCurve;
   HeroTextPosition: HeroTextPosition;
   TransitionEffect: TransitionEffect;
   HeroBackdropPosition: HeroBackdropPosition;

@@ -100,7 +100,8 @@ internal static class PluginConfigurationNormalizer
         config.MobileBannerHeight = Math.Clamp(config.MobileBannerHeight, 220, 600);
         config.HeroBorderRadius = Math.Clamp(config.HeroBorderRadius, 0, 48);
         config.HeroGradientStrength = Math.Clamp(config.HeroGradientStrength, 0, 100);
-        config.HeroHeightMode = config.HeroHeightMode is "auto" or "compact" or "cinematic" or "custom" ? config.HeroHeightMode : "standard";
+        NormalizeHeroFade(config);
+        config.HeroHeightMode = config.HeroHeightMode is "auto" or "compact" or "cinematic" or "fullscreen" or "custom" ? config.HeroHeightMode : "standard";
         config.HeroTextPosition = config.HeroTextPosition is "center" or "right" ? config.HeroTextPosition : "left";
         config.MediaPadding = Math.Clamp(config.MediaPadding, -240, 240);
         config.TransitionEffect = config.TransitionEffect is "fade" ? "fade" : "slide";
@@ -166,7 +167,8 @@ internal static class PluginConfigurationNormalizer
         layout.MobileBannerHeight = Math.Clamp(layout.MobileBannerHeight, 220, 600);
         layout.HeroBorderRadius = Math.Clamp(layout.HeroBorderRadius, 0, 48);
         layout.HeroGradientStrength = Math.Clamp(layout.HeroGradientStrength, 0, 100);
-        layout.HeroHeightMode = layout.HeroHeightMode is "auto" or "compact" or "cinematic" or "custom" ? layout.HeroHeightMode : "standard";
+        NormalizeHeroFade(layout);
+        layout.HeroHeightMode = layout.HeroHeightMode is "auto" or "compact" or "cinematic" or "fullscreen" or "custom" ? layout.HeroHeightMode : "standard";
         layout.HeroTextPosition = layout.HeroTextPosition is "center" or "right" ? layout.HeroTextPosition : "left";
         layout.MediaPadding = Math.Clamp(layout.MediaPadding, -240, 240);
         layout.TransitionEffect = layout.TransitionEffect is "fade" ? "fade" : "slide";
@@ -176,6 +178,35 @@ internal static class PluginConfigurationNormalizer
         layout.Heading = NullIfWhiteSpace(layout.Heading);
         layout.PlayButtonText = NullIfWhiteSpace(layout.PlayButtonText);
     }
+
+    private static void NormalizeHeroFade(PluginConfiguration config)
+    {
+        config.HeroFadeStart = Math.Clamp(config.HeroFadeStart, 0, 100);
+        config.HeroFadeEnd = Math.Clamp(config.HeroFadeEnd, 0, 100);
+        if (config.HeroFadeEnd <= config.HeroFadeStart)
+        {
+            config.HeroFadeStart = 40;
+            config.HeroFadeEnd = 90;
+        }
+
+        config.HeroFadeCurve = NormalizeHeroFadeCurve(config.HeroFadeCurve);
+    }
+
+    private static void NormalizeHeroFade(FeaturedPresetLayoutSettings layout)
+    {
+        layout.HeroFadeStart = Math.Clamp(layout.HeroFadeStart, 0, 100);
+        layout.HeroFadeEnd = Math.Clamp(layout.HeroFadeEnd, 0, 100);
+        if (layout.HeroFadeEnd <= layout.HeroFadeStart)
+        {
+            layout.HeroFadeStart = 40;
+            layout.HeroFadeEnd = 90;
+        }
+
+        layout.HeroFadeCurve = NormalizeHeroFadeCurve(layout.HeroFadeCurve);
+    }
+
+    private static string NormalizeHeroFadeCurve(string? curve)
+        => curve is "soft" or "strong" ? curve : "balanced";
 
     private static void NormalizePresetTrailers(FeaturedPresetTrailerSettings trailers)
     {

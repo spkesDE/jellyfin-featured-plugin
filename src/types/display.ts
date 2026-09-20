@@ -1,4 +1,4 @@
-import type { HeroBackdropPosition, HeroHeightMode, HeroTextPosition, TrailerVolumeSliderDirection, TransitionEffect } from './config';
+import type { HeroBackdropPosition, HeroFadeCurve, HeroHeightMode, HeroTextPosition, TrailerVolumeSliderDirection, TransitionEffect } from './config';
 
 export interface FeaturedDisplaySettings {
   showAutoplayButton: boolean;
@@ -29,6 +29,9 @@ export interface FeaturedDisplaySettings {
   mobileBannerHeight: number;
   heroBorderRadius: number;
   heroGradientStrength: number;
+  heroFadeStart: number;
+  heroFadeEnd: number;
+  heroFadeCurve: HeroFadeCurve;
   heroTextPosition: HeroTextPosition;
   transitionEffect: TransitionEffect;
   heroBackdropPosition: HeroBackdropPosition;

@@ -999,23 +999,13 @@
 }
 
 .ec-root.ec-hero .ec-media {
-  -webkit-mask-image: linear-gradient(to bottom,
-      #000 18%,
-      rgba(0, 0, 0, .92) 36%,
-      rgba(0, 0, 0, .58) 53%,
-      rgba(0, 0, 0, .22) 70%,
-      transparent 85%);
-  mask-image: linear-gradient(to bottom,
-      #000 18%,
-      rgba(0, 0, 0, .92) 36%,
-      rgba(0, 0, 0, .58) 53%,
-      rgba(0, 0, 0, .22) 70%,
-      transparent 85%);
+  -webkit-mask-image: var(--ec-hero-media-mask);
+  mask-image: var(--ec-hero-media-mask);
 }
 
 .ec-root.ec-hero .ec-slide::after {
-  -webkit-mask-image: linear-gradient(to bottom, #000 32%, rgba(0, 0, 0, .78) 48%, rgba(0, 0, 0, .28) 64%, transparent 78%);
-  mask-image: linear-gradient(to bottom, #000 32%, rgba(0, 0, 0, .78) 48%, rgba(0, 0, 0, .28) 64%, transparent 78%);
+  -webkit-mask-image: var(--ec-hero-media-mask);
+  mask-image: var(--ec-hero-media-mask);
 }
 
 .ec-root.ec-hero .ec-content {
@@ -1036,6 +1026,10 @@
 
 .ec-height-cinematic {
   --ec-height: 750px;
+}
+
+.ec-height-fullscreen {
+  --ec-height: 100vh;
 }
 
 @media (max-width: 1000px) {
@@ -1122,5 +1116,17 @@
 
   .ec-autoplay.ec-countdown-loading .ec-countdown-ring {
     animation: none;
+  }
+}
+
+/* Keep 100vh as the webOS/Chromium 79 baseline. Modern engines may use the
+   dynamic viewport so browser chrome does not leave a gap. */
+.ec-root.ec-height-fullscreen {
+  --ec-height: 100vh !important;
+}
+
+@supports (height: 100dvh) {
+  .ec-root.ec-height-fullscreen {
+    --ec-height: 100dvh !important;
   }
 }

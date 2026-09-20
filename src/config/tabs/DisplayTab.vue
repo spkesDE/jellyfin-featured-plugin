@@ -21,7 +21,13 @@ const heightModeOptions: SelectOption[] = [
   { value: 'compact', label: t('option.heightCompact') },
   { value: 'standard', label: t('option.heightStandard') },
   { value: 'cinematic', label: t('option.heightCinematic') },
+  { value: 'fullscreen', label: t('option.heightFullscreen') },
   { value: 'custom', label: t('option.heightCustom') }
+];
+const fadeCurveOptions: SelectOption[] = [
+  { value: 'soft', label: t('option.fadeSoft') },
+  { value: 'balanced', label: t('option.fadeBalanced') },
+  { value: 'strong', label: t('option.fadeStrong') }
 ];
 const textPositionOptions: SelectOption[] = [
   { value: 'left', label: t('option.left') },
@@ -49,6 +55,9 @@ const titleOptions: SelectOption[] = [
         <ConfigNumber v-model="store.config.MobileBannerHeight" :label="t('display.mobileHeight')" :min="220" :max="600" :step="10" />
         <ConfigNumber v-if="!store.config.UseHeroLayout" v-model="store.config.HeroBorderRadius" :label="t('display.borderRadius')" :min="0" :max="48" :step="1" />
         <ConfigNumber v-if="store.config.UseHeroLayout" v-model="store.config.HeroGradientStrength" :label="t('display.gradientStrength')" :min="0" :max="100" :step="5" />
+        <ConfigNumber v-if="store.config.UseHeroLayout" v-model="store.config.HeroFadeStart" :label="t('display.fadeStart')" :min="0" :max="Math.max(0, store.config.HeroFadeEnd - 1)" :step="1" />
+        <ConfigNumber v-if="store.config.UseHeroLayout" v-model="store.config.HeroFadeEnd" :label="t('display.fadeEnd')" :min="Math.min(100, store.config.HeroFadeStart + 1)" :max="100" :step="1" />
+        <ConfigSelect v-if="store.config.UseHeroLayout" v-model="store.config.HeroFadeCurve" :label="t('display.fadeCurve')" :options="fadeCurveOptions" />
         <ConfigSelect v-model="store.config.HeroTextPosition" :label="t('display.textPosition')" :options="textPositionOptions" />
         <ConfigSelect v-model="store.config.HeroBackdropPosition" :label="t('display.backdropPosition')" :options="positionOptions" />
         <ConfigSelect v-model="store.config.TransitionEffect" :label="t('display.transitionEffect')" :options="transitionOptions" />

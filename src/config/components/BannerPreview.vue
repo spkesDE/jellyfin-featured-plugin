@@ -2,7 +2,7 @@
 import { computed } from 'vue';
 import { t } from '../../i18n';
 import { heroImageUrl, logoUrl } from '../../slider/images';
-import { getHeroDesktopHeight, getHeroOverlap } from '../../slider/layout';
+import { createHeroFadeMask, getHeroDesktopHeight, getHeroOverlap } from '../../slider/layout';
 import { useConfigStore } from '../libs/store';
 import type { FeaturedItem } from '../../types/featured';
 
@@ -19,11 +19,16 @@ const item = computed<FeaturedItem | null>(() => {
 const itemCount = computed(() => manualItems.value.length || store.preview.value?.items?.length || 5);
 const desktopHeight = computed(() => getHeroDesktopHeight(store.config.HeroHeightMode, store.config.BannerHeight));
 const previewScale = computed(() => store.config.UseHeroLayout ? 0.52 : 0.44);
-const heroOverlap = computed(() => getHeroOverlap(desktopHeight.value));
+const heroOverlap = computed(() => getHeroOverlap(desktopHeight.value, store.config.HeroHeightMode));
 const previewStyle = computed(() => ({
   height: `${Math.max(190, Math.min(360, desktopHeight.value * previewScale.value))}px`,
   '--ec-preview-radius': store.config.UseHeroLayout ? '0px' : `${store.config.HeroBorderRadius}px`,
-  '--ec-preview-gradient': String(store.config.UseHeroLayout ? store.config.HeroGradientStrength / 100 : 0.85)
+  '--ec-preview-gradient': String(store.config.UseHeroLayout ? store.config.HeroGradientStrength / 100 : 0.85),
+  '--ec-preview-fade': createHeroFadeMask(
+    store.config.HeroFadeStart,
+    store.config.HeroFadeEnd,
+    store.config.HeroFadeCurve
+  )
 }));
 const mockStyle = computed(() => ({
   '--ec-preview-media-offset': `${Math.max(-90, Math.min(90, (store.config.MediaPadding + (store.config.UseHeroLayout ? 52 - heroOverlap.value : 0)) * previewScale.value))}px`

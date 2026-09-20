@@ -29,7 +29,7 @@ internal static class FrontendBootstrap
             mobileHeight = configuration.MobileBannerHeight,
             radius = configuration.HeroBorderRadius,
             mediaPadding = configuration.MediaPadding,
-            heroOverlap = FeaturedLayout.GetHeroOverlap(FeaturedLayout.GetDesktopHeight(configuration)),
+            heroOverlap = FeaturedLayout.GetHeroOverlap(FeaturedLayout.GetDesktopHeight(configuration), configuration.HeroHeightMode),
             heading = configuration.Heading
         }, new JsonSerializerSettings { StringEscapeHandling = StringEscapeHandling.EscapeHtml });
 
@@ -48,11 +48,13 @@ internal static class FrontendBootstrap
                     .ec-bootstrap-placeholder.ec-bootstrap-hero{margin-bottom:calc((var(--ec-hero-overlap,100px) * -1) + 52px + var(--ec-media-padding,0px));margin-top:0}
                     .ec-bootstrap-heading{margin:0 0 .55em;overflow:hidden;padding-right:10rem;text-overflow:ellipsis;white-space:nowrap}
                     .ec-bootstrap-viewport{animation:ec-bootstrap-shimmer 1.5s ease-in-out infinite;background:linear-gradient(105deg,#141414 20%,#202020 38%,#141414 56%);background-size:220% 100%;border-radius:var(--ec-radius,0);height:var(--ec-height);min-height:240px;opacity:.72;overflow:hidden;width:100%}
-                    .ec-bootstrap-height-auto{--ec-height:clamp(360px,46vw,750px)}.ec-bootstrap-height-compact{--ec-height:360px}.ec-bootstrap-height-standard{--ec-height:500px}.ec-bootstrap-height-cinematic{--ec-height:750px}
+                    .ec-bootstrap-height-auto{--ec-height:clamp(360px,46vw,750px)}.ec-bootstrap-height-compact{--ec-height:360px}.ec-bootstrap-height-standard{--ec-height:500px}.ec-bootstrap-height-cinematic{--ec-height:750px}.ec-bootstrap-height-fullscreen{--ec-height:100vh}
                     @keyframes ec-bootstrap-shimmer{from{background-position:100% 0}to{background-position:-120% 0}}
                     @media(max-width:1000px){.ec-bootstrap-placeholder{--ec-height:var(--ec-tablet-height)!important;--ec-hero-overlap:100px!important}}
                     @media(max-width:700px){.ec-bootstrap-placeholder{--ec-height:var(--ec-mobile-height)!important;--ec-hero-overlap:75px!important}}
                     @media(max-width:700px),(hover:none) and (pointer:coarse){.ec-bootstrap-placeholder.ec-bootstrap-hero{margin-bottom:calc(1.25rem + var(--ec-media-padding,0px))}}
+                    .ec-bootstrap-placeholder.ec-bootstrap-height-fullscreen{--ec-height:100vh!important}
+                    @supports(height:100dvh){.ec-bootstrap-placeholder.ec-bootstrap-height-fullscreen{--ec-height:100dvh!important}}
                     @media(prefers-reduced-motion:reduce){.ec-bootstrap-viewport{animation:none}}
                 `;
                 (document.head || document.documentElement).appendChild(style);

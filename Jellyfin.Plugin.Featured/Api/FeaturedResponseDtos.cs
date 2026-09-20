@@ -36,6 +36,9 @@ public abstract class FeaturedDisplaySettingsDto
         MobileBannerHeight = config.MobileBannerHeight;
         HeroBorderRadius = config.HeroBorderRadius;
         HeroGradientStrength = config.HeroGradientStrength;
+        HeroFadeStart = config.HeroFadeStart;
+        HeroFadeEnd = config.HeroFadeEnd;
+        HeroFadeCurve = config.HeroFadeCurve;
         HeroTextPosition = config.HeroTextPosition;
         TransitionEffect = config.TransitionEffect;
         HeroBackdropPosition = config.HeroBackdropPosition;
@@ -77,6 +80,9 @@ public abstract class FeaturedDisplaySettingsDto
     public int MobileBannerHeight { get; }
     public int HeroBorderRadius { get; }
     public int HeroGradientStrength { get; }
+    public int HeroFadeStart { get; }
+    public int HeroFadeEnd { get; }
+    public string HeroFadeCurve { get; }
     public string HeroTextPosition { get; }
     public string TransitionEffect { get; }
     public string HeroBackdropPosition { get; }
