@@ -11,6 +11,7 @@ export interface FeaturedDisplaySettings {
   trailerEndOffsetSeconds: number;
   allowTrailersOnMobile: boolean;
   showPlayButton: boolean;
+  showFavoriteButton: boolean;
   showNavigationArrows: boolean;
   showControlsOnHoverOnly: boolean;
   interactOnWholeBanner: boolean;

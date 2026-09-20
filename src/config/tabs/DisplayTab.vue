@@ -63,6 +63,7 @@ const titleOptions: SelectOption[] = [
         <ConfigCheckbox v-model="store.config.ShowYear" :label="t('display.showYear')" />
         <ConfigCheckbox v-model="store.config.ShowRuntime" :label="t('display.showRuntime')" />
         <ConfigCheckbox v-model="store.config.ShowPlayButton" :label="t('display.showPlayButton')" />
+        <ConfigCheckbox v-model="store.config.ShowFavoriteButton" :label="t('display.showFavoriteButton')" />
         <ConfigText v-if="store.config.ShowPlayButton" v-model="store.config.PlayButtonText" :label="t('display.customPlayText')" :placeholder="t('common.play')" />
         <ConfigCheckbox v-model="store.config.ShowSecondaryButton" :label="t('display.showSecondaryButton')" />
         <ConfigText v-if="store.config.ShowSecondaryButton" v-model="store.config.SecondaryButtonText" :label="t('display.secondaryButtonText')" :placeholder="t('display.moreInfo')" />

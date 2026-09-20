@@ -18,6 +18,7 @@ public abstract class FeaturedDisplaySettingsDto
         TrailerEndOffsetSeconds = config.TrailerEndOffsetSeconds;
         AllowTrailersOnMobile = config.AllowTrailersOnMobile;
         ShowPlayButton = config.ShowPlayButton;
+        ShowFavoriteButton = personalization?.Display.ShowFavoriteButton ?? config.ShowFavoriteButton;
         ShowNavigationArrows = config.ShowNavigationArrows;
         ShowControlsOnHoverOnly = config.ShowControlsOnHoverOnly;
         InteractOnWholeBanner = config.InteractOnWholeBanner;
@@ -56,6 +57,7 @@ public abstract class FeaturedDisplaySettingsDto
     public int TrailerEndOffsetSeconds { get; }
     public bool AllowTrailersOnMobile { get; }
     public bool ShowPlayButton { get; }
+    public bool ShowFavoriteButton { get; }
     public bool ShowNavigationArrows { get; }
     public bool ShowControlsOnHoverOnly { get; }
     public bool InteractOnWholeBanner { get; }
@@ -239,7 +241,7 @@ public sealed class FeaturedEffectivePreferences
     public int InProgressSeriesBoost { get; set; }
     public int RepeatCooldownDays { get; set; }
     public int RepeatCooldownHours { get; set; }
-    public FeaturedDisplayPreferences Display { get; set; } = new(false, false, false, false, false);
+    public FeaturedDisplayPreferences Display { get; set; } = new(false, false, false, false, false, false);
 }
 
 public sealed class FeaturedPreferencesUpdate

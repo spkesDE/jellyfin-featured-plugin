@@ -110,7 +110,7 @@ export function createSlide(item: FeaturedItem, response: FeaturedResponse): HTM
     appendText(content, 'ec-overview', item.overview);
   }
 
-  if (response.showPlayButton || response.showSecondaryButton || (item.trailer?.provider === 'external' && item.trailer.url) || item.id) {
+  if (response.showPlayButton || response.showSecondaryButton || (item.trailer?.provider === 'external' && item.trailer.url) || response.showFavoriteButton) {
     const actions = document.createElement('div');
     actions.className = 'ec-actions';
     if (response.showPlayButton) {
@@ -137,7 +137,7 @@ export function createSlide(item: FeaturedItem, response: FeaturedResponse): HTM
       trailer.addEventListener('click', () => new ExternalPlayer(item.trailer!.url!).open());
       actions.appendChild(trailer);
     }
-    actions.appendChild(createFavoriteButton(item));
+    if (response.showFavoriteButton) actions.appendChild(createFavoriteButton(item));
     content.appendChild(actions);
   }
 

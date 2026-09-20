@@ -61,6 +61,7 @@ export interface FeaturedUserDisplayPreferences {
   showDescription: boolean | null;
   showYear: boolean | null;
   showRuntime: boolean | null;
+  showFavoriteButton: boolean | null;
 }
 
 export interface FeaturedEffectivePreferences {
@@ -82,6 +83,7 @@ export interface FeaturedEffectiveDisplayPreferences {
   showDescription: boolean;
   showYear: boolean;
   showRuntime: boolean;
+  showFavoriteButton: boolean;
 }
 
 export interface FeaturedPreferencesResponse {

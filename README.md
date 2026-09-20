@@ -109,6 +109,7 @@ A random selection is enabled by default, so you should see the banner without h
 You can combine as many sources as you like. Give a source more weight if you want its titles to appear more often. Filters can apply to the whole banner or only to one source.
 
 Viewers can mark or unmark a title as a favourite directly from the banner. The current viewer's favourite state is shown on each slide, and changing it refreshes favourite-dependent feeds.
+Administrators can hide the favourite button under `Display`, and viewers can hide it for their own account in `Featured settings` when the administrator leaves it enabled.
 
 The movie recommendations source uses Jellyfin 12's recommendation providers. It is specific to each viewer and may be empty without movie watch history; pair it with another source or a fallback rule.
 

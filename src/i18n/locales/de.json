@@ -322,6 +322,7 @@
   "display.showYear": "Erscheinungsjahr anzeigen",
   "display.showRuntime": "Laufzeit anzeigen",
   "display.showPlayButton": "Wiedergabeschaltfläche anzeigen",
+  "display.showFavoriteButton": "Favoriten-Schaltfläche anzeigen",
   "display.customPlayText": "Eigener Text der Wiedergabeschaltfläche",
   "display.showSecondaryButton": "Sekundäre Schaltfläche anzeigen",
   "display.secondaryButtonText": "Text der sekundären Schaltfläche",

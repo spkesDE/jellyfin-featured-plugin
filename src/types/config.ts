@@ -71,6 +71,7 @@ export interface FeaturedPluginConfig {
   TrailerOverrides: FeaturedTrailerOverride[];
   AutoplayInterval: number;
   ShowPlayButton: boolean;
+  ShowFavoriteButton: boolean;
   ShowNavigationArrows: boolean;
   ShowControlsOnHoverOnly: boolean;
   InteractOnWholeBanner: boolean;
@@ -138,6 +139,7 @@ export interface FeaturedPresetLayoutSettings {
   ShowAutoplayButton: boolean;
   AutoplayInterval: number;
   ShowPlayButton: boolean;
+  ShowFavoriteButton: boolean;
   ShowNavigationArrows: boolean;
   ShowControlsOnHoverOnly: boolean;
   InteractOnWholeBanner: boolean;

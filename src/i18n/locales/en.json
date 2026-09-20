@@ -322,6 +322,7 @@
   "display.showYear": "Show release year",
   "display.showRuntime": "Show runtime",
   "display.showPlayButton": "Show play button",
+  "display.showFavoriteButton": "Show favorite button",
   "display.customPlayText": "Custom play button text",
   "display.showSecondaryButton": "Show secondary button",
   "display.secondaryButtonText": "Secondary button text",

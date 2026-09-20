@@ -127,8 +127,10 @@ public sealed class FeaturedPreparedCacheTests : IDisposable
             ShowRating = true,
             ShowDescription = true,
             ShowYear = true,
-            ShowRuntime = true
+            ShowRuntime = true,
+            ShowFavoriteButton = true
         };
+        Assert.True(_personalization.Resolve(config, _user.Id).Display.ShowFavoriteButton);
         _personalization.NormalizeAndSave(
             config,
             _user.Id,
@@ -140,7 +142,8 @@ public sealed class FeaturedPreparedCacheTests : IDisposable
                     ShowRating = false,
                     ShowDescription = true,
                     ShowYear = false,
-                    ShowRuntime = true
+                    ShowRuntime = true,
+                    ShowFavoriteButton = false
                 }
             },
             new HashSet<string>());
@@ -152,6 +155,7 @@ public sealed class FeaturedPreparedCacheTests : IDisposable
         Assert.True(effective.Display.ShowDescription);
         Assert.False(effective.Display.ShowYear);
         Assert.True(effective.Display.ShowRuntime);
+        Assert.False(effective.Display.ShowFavoriteButton);
 
         FeaturedItemsResponseDto response = new(config, [], 5, 5, effective, null, null, null);
         Assert.False(response.EnableBackgroundTrailers);
@@ -159,13 +163,23 @@ public sealed class FeaturedPreparedCacheTests : IDisposable
         Assert.True(response.ShowDescription);
         Assert.False(response.ShowYear);
         Assert.True(response.ShowRuntime);
+        Assert.False(response.ShowFavoriteButton);
 
         config.ShowDescription = false;
         config.ShowRuntime = false;
+        config.ShowFavoriteButton = false;
         effective = _personalization.Resolve(config, _user.Id);
 
         Assert.False(effective.Display.ShowDescription);
         Assert.False(effective.Display.ShowRuntime);
+        Assert.False(effective.Display.ShowFavoriteButton);
+
+        _personalization.NormalizeAndSave(config, _user.Id,
+            new FeaturedUserPreferences
+            {
+                Display = new FeaturedUserDisplayPreferences { ShowFavoriteButton = true }
+            }, new HashSet<string>());
+        Assert.False(_personalization.Resolve(config, _user.Id).Display.ShowFavoriteButton);
     }
 
     [Fact]

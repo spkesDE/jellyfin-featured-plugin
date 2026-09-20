@@ -36,7 +36,8 @@ public sealed record FeaturedDisplayPreferences(
     bool ShowRating,
     bool ShowDescription,
     bool ShowYear,
-    bool ShowRuntime);
+    bool ShowRuntime,
+    bool ShowFavoriteButton = true);
 
 public sealed class FeaturedPersonalizationService
 {
@@ -113,7 +114,8 @@ public sealed class FeaturedPersonalizationService
             config.ShowRating && display?.ShowRating is not false,
             config.ShowDescription && display?.ShowDescription is not false,
             config.ShowYear && display?.ShowYear is not false,
-            config.ShowRuntime && display?.ShowRuntime is not false);
+            config.ShowRuntime && display?.ShowRuntime is not false,
+            config.ShowFavoriteButton && display?.ShowFavoriteButton is not false);
         return new FeaturedPersonalizationContext(sources, effectiveProfile, excludedGenres, cooldown, effectiveDisplay, saved is not null);
     }
 
@@ -136,7 +138,8 @@ public sealed class FeaturedPersonalizationService
             ShowRating = submittedDisplay.ShowRating is false ? false : null,
             ShowDescription = submittedDisplay.ShowDescription is false ? false : null,
             ShowYear = submittedDisplay.ShowYear is false ? false : null,
-            ShowRuntime = submittedDisplay.ShowRuntime is false ? false : null
+            ShowRuntime = submittedDisplay.ShowRuntime is false ? false : null,
+            ShowFavoriteButton = submittedDisplay.ShowFavoriteButton is false ? false : null
         };
         if (policy.AllowSourceSelection)
         {

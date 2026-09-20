@@ -82,6 +82,8 @@ public sealed class PluginConfiguration : BasePluginConfiguration
 
     public bool ShowPlayButton { get; set; } = true;
 
+    public bool ShowFavoriteButton { get; set; } = true;
+
     public bool ShowNavigationArrows { get; set; } = true;
 
     public bool ShowControlsOnHoverOnly { get; set; }
@@ -205,6 +207,7 @@ public sealed class FeaturedPresetLayoutSettings
     public bool ShowAutoplayButton { get; set; } = true;
     public int AutoplayInterval { get; set; } = 10;
     public bool ShowPlayButton { get; set; } = true;
+    public bool ShowFavoriteButton { get; set; } = true;
     public bool ShowNavigationArrows { get; set; } = true;
     public bool ShowControlsOnHoverOnly { get; set; }
     public bool InteractOnWholeBanner { get; set; } = true;

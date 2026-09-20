@@ -80,12 +80,15 @@ const mediaCards = [
             <div v-if="store.config.ShowDescription" class="ec-configPreviewText">
               {{ item?.overview || t('preview.fallbackDescription') }}
             </div>
-            <div v-if="store.config.ShowPlayButton || store.config.ShowSecondaryButton" class="ec-configPreviewActions">
+            <div v-if="store.config.ShowPlayButton || store.config.ShowSecondaryButton || store.config.ShowFavoriteButton" class="ec-configPreviewActions">
               <button v-if="store.config.ShowPlayButton" type="button" class="ec-configPreviewButton raised button-submit emby-button">
                 {{ store.config.PlayButtonText || `▶ ${t('common.play')}` }}
               </button>
               <button v-if="store.config.ShowSecondaryButton" type="button" class="ec-configPreviewButton is-secondary raised emby-button">
                 {{ store.config.SecondaryButtonText || t('display.moreInfo') }}
+              </button>
+              <button v-if="store.config.ShowFavoriteButton" type="button" class="ec-configPreviewButton is-secondary is-favorite raised emby-button" :title="t('display.showFavoriteButton')">
+                <span class="material-icons" aria-hidden="true">{{ item?.isFavorite ? 'favorite' : 'favorite_border' }}</span>
               </button>
             </div>
           </div>
