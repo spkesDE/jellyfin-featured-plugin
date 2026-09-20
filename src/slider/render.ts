@@ -59,6 +59,9 @@ function createMetadata(item: FeaturedItem, response: FeaturedResponse): HTMLEle
     runtime.textContent = `${item.runtimeMinutes} min`;
     metadata.appendChild(runtime);
   }
+  if (response.showFavoriteButton) {
+    metadata.appendChild(createFavoriteButton(item, 'metadata'));
+  }
   return metadata.childElementCount ? metadata : null;
 }
 
@@ -110,7 +113,7 @@ export function createSlide(item: FeaturedItem, response: FeaturedResponse): HTM
     appendText(content, 'ec-overview', item.overview);
   }
 
-  if (response.showPlayButton || response.showSecondaryButton || (item.trailer?.provider === 'external' && item.trailer.url) || response.showFavoriteButton) {
+  if (response.showPlayButton || response.showSecondaryButton || (item.trailer?.provider === 'external' && item.trailer.url)) {
     const actions = document.createElement('div');
     actions.className = 'ec-actions';
     if (response.showPlayButton) {
@@ -137,7 +140,6 @@ export function createSlide(item: FeaturedItem, response: FeaturedResponse): HTM
       trailer.addEventListener('click', () => new ExternalPlayer(item.trailer!.url!).open());
       actions.appendChild(trailer);
     }
-    if (response.showFavoriteButton) actions.appendChild(createFavoriteButton(item));
     content.appendChild(actions);
   }
 

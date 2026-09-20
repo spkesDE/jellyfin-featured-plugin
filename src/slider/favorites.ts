@@ -10,14 +10,39 @@ function updateButton(button: HTMLButtonElement, favorite: boolean): void {
   button.title = t(favorite ? 'carousel.removeFavorite' : 'carousel.addFavorite');
   const icon = button.querySelector<HTMLElement>('.material-icons');
   if (icon) icon.textContent = favorite ? 'favorite' : 'favorite_border';
+  if (button.classList.contains('ec-favorite-button-meta')) {
+    button.style.color = favorite ? '#ff4058' : 'var(--ec-on-media-color, #fff)';
+  }
 }
 
-export function createFavoriteButton(item: FeaturedItem): HTMLButtonElement {
+function styleMetadataButton(button: HTMLButtonElement): void {
+  Object.assign(button.style, {
+    alignItems: 'center',
+    appearance: 'none',
+    background: 'transparent',
+    border: '0',
+    borderRadius: '50%',
+    cursor: 'pointer',
+    display: 'inline-flex',
+    justifyContent: 'center',
+    lineHeight: '1',
+    minHeight: '1.8rem',
+    minWidth: '1.8rem',
+    padding: '.15rem',
+    textShadow: '0 2px 8px rgba(0, 0, 0, .8)'
+  });
+}
+
+export function createFavoriteButton(item: FeaturedItem, variant: 'action' | 'metadata' = 'action'): HTMLButtonElement {
   const button = document.createElement('button');
   button.type = 'button';
-  button.className = 'ec-button ec-button-secondary ec-favorite-button raised emby-button';
+  button.className = variant === 'metadata'
+    ? 'ec-favorite-button ec-favorite-button-meta'
+    : 'ec-button ec-button-secondary ec-favorite-button raised emby-button';
+  if (variant === 'metadata') styleMetadataButton(button);
   const icon = document.createElement('span');
   icon.className = 'material-icons';
+  if (variant === 'metadata') icon.style.fontSize = '1.35rem';
   icon.setAttribute('aria-hidden', 'true');
   button.appendChild(icon);
   updateButton(button, item.isFavorite);
