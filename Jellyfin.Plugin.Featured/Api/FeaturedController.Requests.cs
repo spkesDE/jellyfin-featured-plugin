@@ -10,6 +10,11 @@ public sealed class FeaturedDisplayedRequest
     public Guid ItemId { get; set; }
 }
 
+public sealed class FeaturedFavoriteChangedRequest
+{
+    public Guid ItemId { get; set; }
+}
+
 public sealed class FeaturedClearHistoryRequest
 {
     public Guid[] UserIds { get; set; } = [];

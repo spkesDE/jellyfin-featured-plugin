@@ -1,5 +1,5 @@
 export interface JellyfinAjaxRequest {
-  type: 'GET' | 'POST' | 'PUT';
+  type: 'GET' | 'POST' | 'PUT' | 'DELETE';
   url: string;
   dataType?: 'json';
   contentType?: 'application/json';

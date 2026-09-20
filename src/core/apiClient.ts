@@ -5,7 +5,7 @@ export function getApiClient(): JellyfinApiClient | undefined {
 }
 
 interface JsonRequestOptions {
-  method?: 'GET' | 'POST' | 'PUT';
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
   body?: unknown;
 }
 

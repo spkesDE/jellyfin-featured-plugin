@@ -3,6 +3,7 @@ import { t } from '../i18n';
 import { heroImageUrl, logoUrl } from './images';
 import { openItemDetails } from './navigation';
 import { ExternalPlayer } from './trailer';
+import { createFavoriteButton } from './favorites';
 
 export function loadSlideArtwork(slide: HTMLElement): void {
   const backdrop = slide.querySelector<HTMLElement>('.ec-backdrop');
@@ -109,7 +110,7 @@ export function createSlide(item: FeaturedItem, response: FeaturedResponse): HTM
     appendText(content, 'ec-overview', item.overview);
   }
 
-  if (response.showPlayButton || response.showSecondaryButton || (item.trailer?.provider === 'external' && item.trailer.url)) {
+  if (response.showPlayButton || response.showSecondaryButton || (item.trailer?.provider === 'external' && item.trailer.url) || item.id) {
     const actions = document.createElement('div');
     actions.className = 'ec-actions';
     if (response.showPlayButton) {
@@ -136,6 +137,7 @@ export function createSlide(item: FeaturedItem, response: FeaturedResponse): HTM
       trailer.addEventListener('click', () => new ExternalPlayer(item.trailer!.url!).open());
       actions.appendChild(trailer);
     }
+    actions.appendChild(createFavoriteButton(item));
     content.appendChild(actions);
   }
 

@@ -291,6 +291,7 @@ public sealed class FeaturedItemDto
     public required string MediaType { get; init; }
     public required string ImageType { get; init; }
     public required bool HasLogo { get; init; }
+    public bool IsFavorite { get; init; }
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Tagline { get; init; }

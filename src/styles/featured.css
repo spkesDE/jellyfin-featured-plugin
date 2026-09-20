@@ -690,6 +690,26 @@
   transform: scale(1.25);
 }
 
+.ec-favorite-button {
+  justify-content: center;
+  min-width: 2.8rem;
+  padding-inline: .65rem;
+}
+
+.ec-favorite-button[aria-pressed="true"] {
+  color: var(--ec-theme-primary);
+}
+
+.ec-favorite-button:disabled {
+  opacity: .55;
+}
+
+.ec-favorite-error {
+  align-self: center;
+  color: var(--ec-theme-error-light);
+  font-size: .85rem;
+}
+
 .ec-dot:focus {
   outline: 2px solid #fff;
   outline-offset: 3px;

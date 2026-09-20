@@ -16,7 +16,8 @@ public sealed class FeaturedItemDtoFactory
         Jellyfin.Database.Implementations.Entities.User activeUser,
         PluginConfiguration config,
         FeaturedPersonalizationContext personalization,
-        bool allowBackgroundTrailers = true)
+        bool allowBackgroundTrailers = true,
+        bool isFavorite = false)
     {
         IReadOnlyList<FeaturedTrailerDto> trailers = personalization.Display.EnableBackgroundTrailers && allowBackgroundTrailers
             ? _trailerResolver.ResolveCandidates(item, activeUser, config)
@@ -30,6 +31,7 @@ public sealed class FeaturedItemDtoFactory
             Tagline = personalization.Display.ShowDescription ? item.Tagline : null,
             OfficialRating = personalization.Display.ShowRating ? item.OfficialRating : null,
             HasLogo = item.HasImage(MediaBrowser.Model.Entities.ImageType.Logo),
+            IsFavorite = isFavorite,
             ProductionYear = personalization.Display.ShowYear ? item.ProductionYear : null,
             RuntimeMinutes = personalization.Display.ShowRuntime && item.RunTimeTicks.HasValue
                 ? (int)Math.Round(TimeSpan.FromTicks(item.RunTimeTicks.Value).TotalMinutes)

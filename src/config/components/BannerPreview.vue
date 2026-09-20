@@ -4,15 +4,16 @@ import { t } from '../../i18n';
 import { heroImageUrl, logoUrl } from '../../slider/images';
 import { getHeroDesktopHeight, getHeroOverlap } from '../../slider/layout';
 import { useConfigStore } from '../libs/store';
+import type { FeaturedItem } from '../../types/featured';
 
 const store = useConfigStore();
 const manualItems = computed(() => store.config.ManualLists
   .filter((list) => list.Enabled)
   .flatMap((list) => list.Items));
-const item = computed(() => {
+const item = computed<FeaturedItem | null>(() => {
   const manual = manualItems.value[0];
   return manual
-    ? { id: manual.ItemId, name: manual.Name, hasLogo: false, imageType: manual.ImageType, mediaType: manual.MediaType, overview: null, community_rating: undefined, critic_rating: undefined }
+    ? { id: manual.ItemId, name: manual.Name, hasLogo: false, isFavorite: false, imageType: manual.ImageType, mediaType: manual.MediaType, overview: null, community_rating: undefined, critic_rating: undefined }
     : store.preview.value?.items?.[0] ?? null;
 });
 const itemCount = computed(() => manualItems.value.length || store.preview.value?.items?.length || 5);

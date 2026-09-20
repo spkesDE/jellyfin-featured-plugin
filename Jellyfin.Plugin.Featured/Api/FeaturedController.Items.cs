@@ -51,6 +51,20 @@ public sealed partial class FeaturedController
         return Ok(new { ok = true });
     }
 
+    [HttpPost("favorites/changed")]
+    [Authorize]
+    public ActionResult FavoriteChanged([FromBody] FeaturedFavoriteChangedRequest? request)
+    {
+        Jellyfin.Database.Implementations.Entities.User? activeUser = GetActiveUser();
+        if (activeUser is null) return NotFound();
+        if (request is null || request.ItemId == Guid.Empty) return BadRequest();
+        BaseItem? item = _libraryManager.GetItemById(request.ItemId);
+        if (item is null || !item.IsVisible(activeUser)) return NotFound();
+        _candidateCache.Clear();
+        _preparedCache.Clear();
+        return Ok(new { ok = true });
+    }
+
     private ActionResult<FeaturedItemsResponseDto> BuildItemsResponse(HashSet<Guid> excludedIds)
     {
         long requestStarted = Stopwatch.GetTimestamp();
@@ -132,12 +146,16 @@ public sealed partial class FeaturedController
                     ruleEngineMilliseconds += GetElapsedMilliseconds(ref checkpoint);
                 }
 
-                items = selection.Items
+                List<BaseItem> displayItems = selection.Items
                     .Where(item => !allExcludedIds.Contains(item.Id))
                     .Take(requestedCount)
+                    .ToList();
+                IReadOnlyDictionary<Guid, UserItemData> userData = _userDataManager.GetUserDataBatch(displayItems, activeUser);
+                items = displayItems
                     .Select(item => _itemDtoFactory.Create(item, activeUser, _config, personalization,
                         !selection.ItemReasons.TryGetValue(item.Id, out FeaturedItemSelectionReason? reason)
-                        || reason.AllowBackgroundTrailers))
+                        || reason.AllowBackgroundTrailers,
+                        userData.TryGetValue(item.Id, out UserItemData? data) && data.IsFavorite))
                     .ToList();
                 dtoMilliseconds += GetElapsedMilliseconds(ref checkpoint);
                 if (_config.EnablePreparedCache) _preparedCache.QueueUserRefresh(activeUser.Id);

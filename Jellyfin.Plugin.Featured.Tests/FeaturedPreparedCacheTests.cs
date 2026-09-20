@@ -18,6 +18,7 @@ public sealed class FeaturedPreparedCacheTests : IDisposable
     private readonly string _temporaryPath = Path.Combine(Path.GetTempPath(), "Jellyfin.Featured.Tests", Guid.NewGuid().ToString("N"));
     private readonly ILibraryManager _previousLibraryManager;
     private readonly IUserManager _userManager;
+    private readonly UserDataManagerStub _userData;
     private readonly LibraryManagerStub _libraryManager;
     private readonly FeaturedDisplayHistoryStore _historyStore;
     private readonly FeaturedPersonalizationService _personalization;
@@ -41,6 +42,7 @@ public sealed class FeaturedPreparedCacheTests : IDisposable
         BaseItem.LibraryManager = libraryManager;
 
         IUserDataManager userDataManager = DispatchProxy.Create<IUserDataManager, UserDataManagerStub>();
+        _userData = (UserDataManagerStub)userDataManager;
         IApplicationPaths paths = DispatchProxy.Create<IApplicationPaths, ApplicationPathsStub>();
         ((ApplicationPathsStub)paths).PluginConfigurationsPath = _temporaryPath;
 
@@ -257,6 +259,20 @@ public sealed class FeaturedPreparedCacheTests : IDisposable
             candidates.GetMovieRecommendations(_user, 10).Select(movie => movie.Id));
     }
 
+    [Fact]
+    public void PreparedItemsExposeCurrentUserFavoriteState()
+    {
+        List<BaseItem> source = CreateItems(2);
+        _userData.FavoriteIds.Add(source[0].Id);
+        PluginConfiguration config = new();
+        FeaturedPersonalizationContext personalization = CreatePersonalization();
+        Store(config, personalization, source);
+
+        Assert.True(TryGet(config, personalization, [], 2, out List<FeaturedItemDto> items, out _));
+        Assert.True(items.Single(item => item.Id == source[0].Id.ToString()).IsFavorite);
+        Assert.False(items.Single(item => item.Id == source[1].Id.ToString()).IsFavorite);
+    }
+
     public void Dispose()
     {
         BaseItem.LibraryManager = _previousLibraryManager;
@@ -363,9 +379,12 @@ public sealed class FeaturedPreparedCacheTests : IDisposable
 
     public class UserDataManagerStub : DispatchProxy
     {
+        public HashSet<Guid> FavoriteIds { get; } = [];
+
         protected override object? Invoke(MethodInfo? targetMethod, object?[]? args)
             => targetMethod?.Name == nameof(IUserDataManager.GetUserDataBatch)
-                ? new Dictionary<Guid, UserItemData>()
+                ? ((IReadOnlyList<BaseItem>)args![0]!).Where(item => FavoriteIds.Contains(item.Id))
+                    .ToDictionary(item => item.Id, item => new UserItemData { Key = item.Id.ToString(), IsFavorite = true })
                 : GetDefaultValue(targetMethod?.ReturnType);
     }
 
