@@ -20,7 +20,7 @@ test('favorite changes invalidate only the active user caches', async () => {
   assert.doesNotMatch(controller, /FavoriteChanged[\s\S]*?_preparedCache\.Clear\(\)/);
 });
 
-test('favorite control renders as a compact metadata heart', async () => {
+test('favorite control supports compact metadata and standalone action placement', async () => {
   const [render, favorites, styles] = await Promise.all([
     read('src/slider/render.ts'),
     read('src/slider/favorites.ts'),
@@ -28,7 +28,9 @@ test('favorite control renders as a compact metadata heart', async () => {
   ]);
 
   assert.match(render, /metadata\.appendChild\(createFavoriteButton\(item, 'metadata'\)\)/);
-  assert.doesNotMatch(render, /actions\.appendChild\(createFavoriteButton/);
+  assert.match(render, /favoriteButtonPlacement === 'metadata'/);
+  assert.match(render, /favoriteButtonPlacement === 'actions'/);
+  assert.match(render, /actions\.appendChild\(createFavoriteButton\(item, 'action'\)\)/);
   assert.match(favorites, /ec-favorite-button-meta/);
   assert.match(favorites, /favorite \? '#ff4058' : 'var\(--ec-on-media-color, #fff\)'/);
   assert.match(favorites, /icon\.style\.fontSize = '1\.35rem'/);

@@ -16,10 +16,12 @@ function updateButton(button: HTMLButtonElement, played: boolean): void {
   }
 }
 
-export function createPlaystateButton(item: FeaturedItem): HTMLButtonElement {
+export function createPlaystateButton(item: FeaturedItem, variant: 'action' | 'metadata' = 'metadata'): HTMLButtonElement {
   const button = document.createElement('button');
   button.type = 'button';
-  button.className = 'button-flat btnPlaystate detailButton emby-button ec-playstate-button ec-playstate-button-meta';
+  button.className = variant === 'metadata'
+    ? 'button-flat btnPlaystate detailButton emby-button ec-playstate-button ec-playstate-button-meta'
+    : 'ec-button ec-button-secondary ec-playstate-button raised emby-button';
   button.setAttribute('is', 'emby-playstatebutton');
   button.dataset.id = item.id;
   button.dataset.type = item.mediaType;
@@ -30,7 +32,7 @@ export function createPlaystateButton(item: FeaturedItem): HTMLButtonElement {
   content.className = 'detailButton-content';
   const icon = document.createElement('span');
   icon.className = 'material-icons detailButton-icon check';
-  icon.style.fontSize = '1.35rem';
+  if (variant === 'metadata') icon.style.fontSize = '1.35rem';
   icon.setAttribute('aria-hidden', 'true');
   content.appendChild(icon);
   button.appendChild(content);

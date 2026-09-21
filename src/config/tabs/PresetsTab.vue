@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref } from 'vue';
 import { t } from '../../i18n';
 import type { FeaturedPreset } from '../../types/config';
 import ConfigCard from '../components/ConfigCard.vue';
@@ -10,6 +11,7 @@ import ConfigText from '../components/ConfigText.vue';
 import { useConfigStore } from '../libs/store';
 
 const store = useConfigStore();
+const expandedPresetId = ref<string | null>(null);
 const scheduleTypeOptions = [
   { value: 'one_time', label: t('preset.schedule.oneTime') },
   { value: 'weekly', label: t('preset.schedule.weekly') },
@@ -45,6 +47,34 @@ function toggleDay(preset: FeaturedPreset, day: number): void {
 function stateLabel(preset: FeaturedPreset): string {
   return t(`preset.state.${scheduleState(preset)}` as Parameters<typeof t>[0]);
 }
+
+function scheduleSummary(preset: FeaturedPreset): string {
+  if (preset.ScheduleType === 'weekly') {
+    const days = weekdays.filter((day) => preset.DaysOfWeek.includes(day.value)).map((day) => day.label).join(', ');
+    return `${t('preset.schedule.weekly')} · ${days || t('preset.summaryNoDays')} · ${preset.StartTime}–${preset.EndTime}`;
+  }
+  if (preset.ScheduleType === 'annual') {
+    return `${t('preset.schedule.annual')} · ${preset.AnnualStart}–${preset.AnnualEnd} · ${preset.StartTime}–${preset.EndTime}`;
+  }
+  const starts = preset.StartsAt ? new Date(preset.StartsAt).toLocaleString() : t('preset.summaryOpen');
+  const ends = preset.EndsAt ? new Date(preset.EndsAt).toLocaleString() : t('preset.summaryOpen');
+  return `${t('preset.schedule.oneTime')} · ${starts}–${ends}`;
+}
+
+function addPreset(): void {
+  store.addPreset();
+  expandedPresetId.value = store.config.Presets[store.config.Presets.length - 1]?.Id ?? null;
+}
+
+function expandDuplicatedPreset(index: number): void {
+  expandedPresetId.value = store.config.Presets[index + 1]?.Id ?? null;
+}
+
+function syncExpandedPreset(event: Event, presetId: string): void {
+  const details = event.currentTarget as HTMLDetailsElement;
+  if (details.open) expandedPresetId.value = presetId;
+  else if (expandedPresetId.value === presetId) expandedPresetId.value = null;
+}
 </script>
 
 <template>
@@ -55,7 +85,7 @@ function stateLabel(preset: FeaturedPreset): string {
           <strong>{{ t('preset.defaultTitle') }}</strong>
           <p>{{ t('preset.defaultHelp') }}</p>
         </div>
-        <button type="button" class="raised button-submit emby-button ec-primaryAction" @click="store.addPreset()">
+        <button type="button" class="raised button-submit emby-button ec-primaryAction" @click="addPreset">
           <span class="material-icons" aria-hidden="true">add</span>
           {{ t('preset.add') }}
         </button>
@@ -63,13 +93,31 @@ function stateLabel(preset: FeaturedPreset): string {
     </ConfigCard>
 
     <div v-if="store.config.Presets.length" class="ec-presetList">
-      <ConfigCard
+      <details
         v-for="(preset, index) in store.config.Presets"
         :key="preset.Id"
-        :title="preset.Name || t('preset.defaultName')"
-        :badge="stateLabel(preset)"
-        :badge-tone="scheduleState(preset) === 'active' ? 'default' : 'muted'"
+        class="ec-presetCard"
+        :open="expandedPresetId === preset.Id"
+        @toggle="syncExpandedPreset($event, preset.Id)"
       >
+        <summary class="ec-presetCardSummary">
+          <span class="ec-presetCardCopy">
+            <span class="ec-presetTitleRow">
+              <strong>{{ preset.Name || t('preset.defaultName') }}</strong>
+              <span class="jmp-badge" :class="{ 'jmp-badge-muted': scheduleState(preset) !== 'active' }">{{ stateLabel(preset) }}</span>
+            </span>
+            <small>{{ t('preset.summaryPriority', { value: preset.Priority }) }} · {{ scheduleSummary(preset) }}</small>
+            <span class="ec-presetSummary" :aria-label="t('preset.snapshotSummary')">
+              <span>{{ t('preset.sourcesSummary', { count: preset.SourceRules.length }) }}</span>
+              <span>{{ t('preset.filtersSummary', { count: preset.GlobalFilters.length }) }}</span>
+              <span>{{ preset.PersonalizationPolicy.Enabled ? t('preset.personalizationOn') : t('preset.personalizationOff') }}</span>
+              <span>{{ preset.Layout.UseHeroLayout ? t('preset.heroLayout') : t('preset.standardLayout') }}</span>
+              <span>{{ preset.Trailers.EnableBackgroundTrailers ? t('preset.trailersOn') : t('preset.trailersOff') }}</span>
+            </span>
+          </span>
+          <span class="material-icons ec-presetChevron" aria-hidden="true">expand_more</span>
+        </summary>
+        <div class="ec-presetCardBody">
         <div class="ec-presetGrid">
           <ConfigText v-model="preset.Name" :label="t('preset.name')" />
           <ConfigNumber v-model="preset.Priority" :label="t('preset.priority')" :help-text="t('preset.priorityHelp')" :min="-1000" :max="1000" :step="1" />
@@ -105,14 +153,6 @@ function stateLabel(preset: FeaturedPreset): string {
         <p v-if="preset.ScheduleType !== 'one_time'" class="ec-presetTimezoneHelp">{{ t('preset.timeZoneHelp') }}</p>
         <ConfigCheckbox v-model="preset.Enabled" :label="t('preset.enabled')" :help-text="t('preset.enabledHelp')" />
 
-        <div class="ec-presetSummary" :aria-label="t('preset.snapshotSummary')">
-          <span>{{ t('preset.sourcesSummary', { count: preset.SourceRules.length }) }}</span>
-          <span>{{ t('preset.filtersSummary', { count: preset.GlobalFilters.length }) }}</span>
-          <span>{{ preset.PersonalizationPolicy.Enabled ? t('preset.personalizationOn') : t('preset.personalizationOff') }}</span>
-          <span>{{ preset.Layout.UseHeroLayout ? t('preset.heroLayout') : t('preset.standardLayout') }}</span>
-          <span>{{ preset.Trailers.EnableBackgroundTrailers ? t('preset.trailersOn') : t('preset.trailersOff') }}</span>
-        </div>
-
         <p class="ec-presetSnapshotHelp">{{ t('preset.snapshotHelp') }}</p>
         <div class="ec-presetActions">
           <button type="button" class="raised emby-button ec-secondaryAction" @click="store.openFeedPreview(preset.Id)">
@@ -123,7 +163,7 @@ function stateLabel(preset: FeaturedPreset): string {
             <span class="material-icons" aria-hidden="true">sync</span>
             {{ t('preset.updateSnapshot') }}
           </button>
-          <button type="button" class="raised emby-button ec-secondaryAction" @click="store.duplicatePreset(index)">
+          <button type="button" class="raised emby-button ec-secondaryAction" @click="store.duplicatePreset(index); expandDuplicatedPreset(index)">
             <span class="material-icons" aria-hidden="true">content_copy</span>
             {{ t('preset.duplicate') }}
           </button>
@@ -132,7 +172,8 @@ function stateLabel(preset: FeaturedPreset): string {
             {{ t('preset.remove') }}
           </button>
         </div>
-      </ConfigCard>
+        </div>
+      </details>
     </div>
 
     <div v-else class="ec-emptySources">
@@ -147,6 +188,16 @@ function stateLabel(preset: FeaturedPreset): string {
 .ec-presetIntro { align-items: center; display: flex; gap: 1rem; justify-content: space-between; }
 .ec-presetIntro p { margin: .25rem 0 0; opacity: .75; }
 .ec-presetList { display: grid; gap: 1rem; }
+.ec-presetCard { background: var(--ec-config-card-background); border: 1px solid var(--ec-theme-divider); border-radius: .9rem; overflow: hidden; }
+.ec-presetCardSummary { align-items: center; cursor: pointer; display: grid; gap: .75rem; grid-template-columns: minmax(0, 1fr) auto; list-style: none; padding: 1rem; }
+.ec-presetCardSummary::-webkit-details-marker { display: none; }
+.ec-presetCardCopy { display: grid; gap: .35rem; min-width: 0; }
+.ec-presetTitleRow { align-items: center; display: flex; flex-wrap: wrap; gap: .55rem; }
+.ec-presetTitleRow strong { font-size: 1.08rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ec-presetCardCopy > small { opacity: .68; overflow-wrap: anywhere; }
+.ec-presetChevron { transition: transform .16s ease; }
+.ec-presetCard[open] .ec-presetChevron { transform: rotate(180deg); }
+.ec-presetCardBody { border-top: 1px solid var(--ec-theme-divider); padding: 1rem; }
 .ec-presetGrid { display: grid; gap: 1rem; grid-template-columns: 2fr 1fr 1.5fr; }
 .ec-presetScheduleGrid { display: grid; gap: 1rem; grid-template-columns: 1fr 1fr; }
 .ec-recurringSchedule { display: grid; gap: 1rem; grid-template-columns: repeat(4, minmax(0, 1fr)); }
@@ -156,7 +207,7 @@ function stateLabel(preset: FeaturedPreset): string {
 .ec-weekdays button { background: var(--ec-theme-action-hover); border: 1px solid var(--ec-theme-divider); border-radius: 999px; color: inherit; cursor: pointer; padding: .45rem .7rem; }
 .ec-weekdays button.is-selected { background: var(--ec-theme-primary); border-color: var(--ec-theme-primary); color: var(--ec-theme-primary-contrast); }
 .ec-presetTimezoneHelp { margin: -.35rem 0 .75rem; opacity: .7; }
-.ec-presetSummary { display: flex; flex-wrap: wrap; gap: .5rem; margin: .75rem 0; }
+.ec-presetSummary { display: flex; flex-wrap: wrap; gap: .4rem; }
 .ec-presetSummary span { background: var(--ec-theme-action-hover); border-radius: 999px; padding: .35rem .65rem; }
 .ec-presetSnapshotHelp { margin: .25rem 0 .75rem; opacity: .7; }
 .ec-presetActions { display: flex; flex-wrap: wrap; gap: .65rem; }

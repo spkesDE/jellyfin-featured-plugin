@@ -43,8 +43,6 @@ function addOverride(item: FeaturedSearchItem): void {
           <ConfigSelect v-model="store.config.TrailerSourcePriority" :label="t('trailers.sourceLabel')"
             :options="sourceOptions" />
           <ConfigCheckbox v-model="store.config.StartTrailersMuted" :label="t('trailers.startMuted')" />
-          <ConfigCheckbox v-model="store.config.ShowTrailerControls" :label="t('trailers.showControls')"
-            :help-text="t('trailers.showControlsHelp')" />
           <ConfigCheckbox v-model="store.config.HideYouTubeTrailerUntilControlsFade"
             :label="t('trailers.hideYouTubeControls')" :help-text="t('trailers.hideYouTubeControlsHelp')" />
           <ConfigCheckbox v-model="store.config.WaitForTrailerToFinish" :label="t('trailers.waitForFinish')"
@@ -70,21 +68,26 @@ function addOverride(item: FeaturedSearchItem): void {
       <ManualItemAutocomplete input-id="trailer-override-search"
         :exclude-ids="store.config.TrailerOverrides.map((entry) => entry.ItemId)" @select="addOverride" />
       <div v-if="store.config.TrailerOverrides.length" class="ec-trailerOverrideList">
-        <article v-for="(entry, index) in store.config.TrailerOverrides" :key="entry.ItemId"
+        <details v-for="(entry, index) in store.config.TrailerOverrides" :key="entry.ItemId"
           class="ec-trailerOverride">
-          <div class="ec-trailerOverrideHeader">
-            <strong>{{ entry.Name }}</strong>
+          <summary class="ec-trailerOverrideHeader">
+            <span><strong>{{ entry.Name }}</strong><small>{{ entry.Url || entry.LocalTrailerItemId || t('trailers.overrideNotConfigured') }}</small></span>
+            <span class="material-icons ec-trailerOverrideChevron" aria-hidden="true">expand_more</span>
+          </summary>
+          <div class="ec-trailerOverrideBody">
+            <div class="ec-trailerOverrideRemove">
             <button type="button" class="paper-icon-button-light ec-ruleIconButton ec-removeRule"
               :title="t('trailers.removeOverride')" @click="store.config.TrailerOverrides.splice(index, 1)">
               <span class="material-icons" aria-hidden="true">delete</span>
             </button>
-          </div>
+            </div>
           <ConfigText v-model="entry.Url" :label="t('trailers.overrideUrl')"
             placeholder="https://www.youtube.com/watch?v=…" />
           <ConfigText v-model="entry.LocalTrailerItemId" :label="t('trailers.overrideLocalId')"
             :placeholder="t('common.optional')" />
           <p class="jmp-note">{{ t('trailers.overrideHint') }}</p>
-        </article>
+          </div>
+        </details>
       </div>
       <p v-else class="jmp-note">{{ t('trailers.noOverrides') }}</p>
     </ConfigCard>
@@ -94,8 +97,15 @@ function addOverride(item: FeaturedSearchItem): void {
 <style scoped>
 .ec-trailerOverrides { margin-top: 1rem; }
 .ec-trailerOverrideList { display: grid; gap: .8rem; margin-top: 1rem; }
-.ec-trailerOverride { background: rgba(255, 255, 255, .035); border: 1px solid rgba(255, 255, 255, .09); border-radius: .7rem; padding: .8rem; }
-.ec-trailerOverrideHeader { align-items: center; display: flex; justify-content: space-between; }
+.ec-trailerOverride { background: var(--ec-config-nested-background); border: 1px solid var(--ec-theme-divider); border-radius: .7rem; overflow: hidden; }
+.ec-trailerOverrideHeader { align-items: center; cursor: pointer; display: flex; justify-content: space-between; list-style: none; padding: .8rem; }
+.ec-trailerOverrideHeader::-webkit-details-marker { display: none; }
+.ec-trailerOverrideHeader > span:first-child { display: grid; gap: .15rem; }
+.ec-trailerOverrideHeader small { font-size: .75rem; font-weight: 400; opacity: .62; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ec-trailerOverrideChevron { transition: transform .16s ease; }
+.ec-trailerOverride[open] .ec-trailerOverrideChevron { transform: rotate(180deg); }
+.ec-trailerOverrideBody { border-top: 1px solid rgba(255, 255, 255, .07); padding: .8rem; }
+.ec-trailerOverrideRemove { display: flex; justify-content: flex-end; }
 .ec-trailerOverride :deep(.inputContainer) { margin-bottom: .7rem; }
 .ec-trailerOverride .jmp-note { margin: 0; }
 </style>

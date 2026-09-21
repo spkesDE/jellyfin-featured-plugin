@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue';
 import type { FeaturedSourceRule, SourceType } from '../../types/config';
 import { t, type TranslationKey } from '../../i18n';
 import ConfigCheckbox from './ConfigCheckbox.vue';
@@ -9,7 +10,8 @@ import FilterRuleEditor from './FilterRuleEditor.vue';
 import { useConfigStore } from '../libs/store';
 import { namedOptions, valueOptions } from '../libs/options';
 
-const props = defineProps<{ rule: FeaturedSourceRule; index: number; count: number }>();
+const props = defineProps<{ rule: FeaturedSourceRule; index: number; count: number; expanded: boolean }>();
+defineEmits<{ toggle: [] }>();
 const store = useConfigStore();
 
 const labelKeys: Record<SourceType, TranslationKey> = {
@@ -35,15 +37,37 @@ const collectionOptions = (): SelectOption[] => namedOptions(store.collections.v
 const playlistOptions = (): SelectOption[] => namedOptions(store.playlists.value);
 const manualListOptions = (): SelectOption[] => namedOptions(store.config.ManualLists);
 const tagOptions = (): SelectOption[] => valueOptions(store.tags.value);
+const selectionCount = computed(() => {
+  const rule = props.rule;
+  if (rule.Type === 'LIBRARIES') return rule.LibraryIds.length;
+  if (rule.Type === 'COLLECTIONS') return rule.CollectionIds.length;
+  if (rule.Type === 'PLAYLISTS') return rule.PlaylistIds.length;
+  if (rule.Type === 'MANUAL_LISTS') return rule.ManualListIds.length;
+  if (rule.Type === 'TAGS') return rule.Tags.length;
+  return 0;
+});
 </script>
 
 <template>
   <article class="ec-sourceRule" :class="{ 'is-disabled': !rule.Enabled }">
     <header class="ec-sourceRuleHeader">
-      <div>
+      <button type="button" class="ec-sourceDragHandle" :title="t('source.drag')">
+        <span class="material-icons" aria-hidden="true">drag_indicator</span>
+      </button>
+      <button type="button" class="ec-sourceRuleToggle" :aria-expanded="expanded" @click="$emit('toggle')">
+        <div>
         <p class="ec-sourceRuleEyebrow">{{ t('source.ruleNumber', { number: index + 1 }) }}</p>
         <h3>{{ sourceLabel(rule.Type) }}</h3>
-      </div>
+        <p class="ec-sourceRuleSummary">
+          <span>{{ rule.Enabled ? t('source.statusActive') : t('source.statusInactive') }}</span>
+          <span>{{ t('source.summaryWeight', { weight: rule.Weight }) }}</span>
+          <span v-if="selectionCount">{{ t('source.summarySelections', { count: selectionCount }) }}</span>
+          <span v-if="rule.Filters.length">{{ t('source.summaryFilters', { count: rule.Filters.length }) }}</span>
+          <span v-if="rule.IsFallback">{{ t('source.summaryFallback') }}</span>
+        </p>
+        </div>
+        <span class="material-icons ec-sourceChevron" aria-hidden="true">expand_more</span>
+      </button>
       <div class="ec-sourceRuleActions">
         <button type="button" class="paper-icon-button-light ec-ruleIconButton" :disabled="index === 0" :title="t('source.moveUp')" @click="store.moveSource(index, -1)">
           <span class="material-icons" aria-hidden="true">arrow_upward</span>
@@ -57,6 +81,7 @@ const tagOptions = (): SelectOption[] => valueOptions(store.tags.value);
       </div>
     </header>
 
+    <div v-show="expanded" class="ec-sourceRuleBody">
     <p class="jmp-subsectionHelp">{{ sourceHelp(rule.Type) }}</p>
     <div class="ec-sourceRuleBasics">
       <ConfigCheckbox v-model="rule.Enabled" :label="t('source.enabled')" />
@@ -83,16 +108,25 @@ const tagOptions = (): SelectOption[] => valueOptions(store.tags.value);
         <FilterRuleEditor :filters="rule.Filters" />
       </details>
     </div>
+    </div>
   </article>
 </template>
 
 <style scoped>
-.ec-sourceRule { background: rgba(255, 255, 255, .035); border: 1px solid rgba(255, 255, 255, .09); border-radius: .9rem; padding: 1rem 1.1rem 1.15rem; }
+.ec-sourceRule { background: var(--ec-config-card-background); border: 1px solid var(--ec-theme-divider); border-radius: .9rem; padding: 1rem 1.1rem 1.15rem; }
 .ec-sourceRule.is-disabled { opacity: .72; }
-.ec-sourceRuleHeader { align-items: flex-start; display: flex; gap: 1rem; justify-content: space-between; }
+.ec-sourceRuleHeader { align-items: center; display: grid; gap: .55rem; grid-template-columns: auto minmax(0, 1fr) auto; }
 .ec-sourceRuleHeader h3 { font-size: 1.08rem; margin: .12rem 0 .25rem; }
 .ec-sourceRuleEyebrow { font-size: .7rem; letter-spacing: .08em; margin: 0; opacity: .58; text-transform: uppercase; }
+.ec-sourceRuleToggle { align-items: center; background: transparent; border: 0; color: inherit; cursor: pointer; display: flex; justify-content: space-between; min-width: 0; padding: 0; text-align: left; }
+.ec-sourceRuleSummary { display: flex; flex-wrap: wrap; font-size: .78rem; gap: .2rem .75rem; margin: 0; opacity: .68; }
+.ec-sourceRuleSummary span + span::before { content: '·'; margin-right: .75rem; }
+.ec-sourceChevron { transition: transform .16s ease; }
+.ec-sourceRuleToggle[aria-expanded="true"] .ec-sourceChevron { transform: rotate(180deg); }
+.ec-sourceDragHandle { background: transparent; border: 0; color: inherit; cursor: grab; opacity: .55; padding: .2rem; }
+.ec-sourceDragHandle:active { cursor: grabbing; }
 .ec-sourceRuleActions { display: flex; gap: .2rem; }
+.ec-sourceRuleBody { border-top: 1px solid rgba(255, 255, 255, .07); margin-top: .8rem; padding-top: .8rem; }
 .ec-sourceRuleBasics { align-items: center; display: grid; gap: .75rem 1.25rem; grid-template-columns: repeat(2, minmax(10rem, 1fr)); margin-top: 0; }
 .ec-sourceRule > .jmp-subsectionHelp { margin-bottom: .4rem; }
 .ec-sourceRuleBasics > :deep(.checkboxContainer),
@@ -104,7 +138,7 @@ const tagOptions = (): SelectOption[] => valueOptions(store.tags.value);
 
 @media (max-width: 700px) {
   .ec-sourceRuleBasics { grid-template-columns: 1fr; }
-  .ec-sourceRuleHeader { align-items: stretch; flex-direction: column; }
-  .ec-sourceRuleActions { justify-content: flex-end; }
+  .ec-sourceRuleHeader { grid-template-columns: auto minmax(0, 1fr); }
+  .ec-sourceRuleActions { grid-column: 1 / -1; justify-content: flex-end; }
 }
 </style>

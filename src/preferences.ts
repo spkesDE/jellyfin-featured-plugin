@@ -183,7 +183,8 @@ export async function openPreferencesDialog(): Promise<void> {
       ['showRating', 'display.showRatings'],
       ['showYear', 'display.showYear'],
       ['showRuntime', 'display.showRuntime'],
-      ['showFavoriteButton', 'display.showFavoriteButton']
+      ['showFavoriteButton', 'display.showFavoriteButton'],
+      ['showPlaystateButton', 'display.showPlaystateButton']
     ];
     const display = document.createElement('fieldset');
     display.className = 'ec-preference-display';

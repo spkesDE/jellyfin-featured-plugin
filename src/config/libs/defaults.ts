@@ -51,6 +51,9 @@ export function createPresetFromConfig(config: FeaturedPluginConfig, name = 'Fea
       EnableAutoplay: config.EnableAutoplay, ShowAutoplayButton: config.ShowAutoplayButton,
       AutoplayInterval: config.AutoplayInterval, ShowPlayButton: config.ShowPlayButton,
       ShowFavoriteButton: config.ShowFavoriteButton,
+      FavoriteButtonPlacement: config.FavoriteButtonPlacement,
+      ShowPlaystateButton: config.ShowPlaystateButton,
+      PlaystateButtonPlacement: config.PlaystateButtonPlacement,
       ShowNavigationArrows: config.ShowNavigationArrows, ShowControlsOnHoverOnly: config.ShowControlsOnHoverOnly,
       InteractOnWholeBanner: config.InteractOnWholeBanner,
       ShowSlidePosition: config.ShowSlidePosition,
@@ -148,6 +151,9 @@ export const CONFIG_DEFAULTS: FeaturedPluginConfig = {
   AutoplayInterval: 10,
   ShowPlayButton: true,
   ShowFavoriteButton: true,
+  FavoriteButtonPlacement: 'metadata',
+  ShowPlaystateButton: true,
+  PlaystateButtonPlacement: 'metadata',
   ShowNavigationArrows: true,
   ShowControlsOnHoverOnly: false,
   InteractOnWholeBanner: true,
@@ -201,6 +207,9 @@ export function createDisplaySettings(config: FeaturedPluginConfig): FeaturedDis
     allowTrailersOnMobile: config.AllowTrailersOnMobile,
     showPlayButton: config.ShowPlayButton,
     showFavoriteButton: config.ShowFavoriteButton,
+    favoriteButtonPlacement: config.FavoriteButtonPlacement,
+    showPlaystateButton: config.ShowPlaystateButton,
+    playstateButtonPlacement: config.PlaystateButtonPlacement,
     showNavigationArrows: config.ShowNavigationArrows,
     showControlsOnHoverOnly: config.ShowControlsOnHoverOnly,
     interactOnWholeBanner: config.InteractOnWholeBanner,
@@ -372,6 +381,8 @@ export function normalizeConfig(value: unknown): FeaturedPluginConfig {
   config.Heading ??= '';
   config.PlayButtonText ??= '';
   config.SecondaryButtonText ??= '';
+  config.FavoriteButtonPlacement = config.FavoriteButtonPlacement === 'actions' ? 'actions' : 'metadata';
+  config.PlaystateButtonPlacement = config.PlaystateButtonPlacement === 'actions' ? 'actions' : 'metadata';
   return config;
 }
 

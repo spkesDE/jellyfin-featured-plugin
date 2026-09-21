@@ -107,6 +107,8 @@ internal static class PluginConfigurationNormalizer
         config.TransitionEffect = config.TransitionEffect is "fade" ? "fade" : "slide";
         config.HeroBackdropPosition = config.HeroBackdropPosition is "top" or "bottom" ? config.HeroBackdropPosition : "center";
         config.TitleDisplayMode = config.TitleDisplayMode is "title" ? "title" : "logo";
+        config.FavoriteButtonPlacement = NormalizeControlPlacement(config.FavoriteButtonPlacement);
+        config.PlaystateButtonPlacement = NormalizeControlPlacement(config.PlaystateButtonPlacement);
         return config;
     }
 
@@ -174,6 +176,8 @@ internal static class PluginConfigurationNormalizer
         layout.TransitionEffect = layout.TransitionEffect is "fade" ? "fade" : "slide";
         layout.HeroBackdropPosition = layout.HeroBackdropPosition is "top" or "bottom" ? layout.HeroBackdropPosition : "center";
         layout.TitleDisplayMode = layout.TitleDisplayMode is "title" ? "title" : "logo";
+        layout.FavoriteButtonPlacement = NormalizeControlPlacement(layout.FavoriteButtonPlacement);
+        layout.PlaystateButtonPlacement = NormalizeControlPlacement(layout.PlaystateButtonPlacement);
         layout.SecondaryButtonText = NullIfWhiteSpace(layout.SecondaryButtonText);
         layout.Heading = NullIfWhiteSpace(layout.Heading);
         layout.PlayButtonText = NullIfWhiteSpace(layout.PlayButtonText);
@@ -435,6 +439,9 @@ internal static class PluginConfigurationNormalizer
             .Take(100)
             .ToArray();
     }
+
+    private static string NormalizeControlPlacement(string? value)
+        => value == "actions" ? "actions" : "metadata";
 
     private static string NormalizeTrailerVolumeSliderDirection(string? _)
         => "down";

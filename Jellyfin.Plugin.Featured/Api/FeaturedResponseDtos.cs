@@ -21,6 +21,9 @@ public abstract class FeaturedDisplaySettingsDto
         AllowTrailersOnMobile = config.AllowTrailersOnMobile;
         ShowPlayButton = config.ShowPlayButton;
         ShowFavoriteButton = personalization?.Display.ShowFavoriteButton ?? config.ShowFavoriteButton;
+        FavoriteButtonPlacement = config.FavoriteButtonPlacement;
+        ShowPlaystateButton = personalization?.Display.ShowPlaystateButton ?? config.ShowPlaystateButton;
+        PlaystateButtonPlacement = config.PlaystateButtonPlacement;
         ShowNavigationArrows = config.ShowNavigationArrows;
         ShowControlsOnHoverOnly = config.ShowControlsOnHoverOnly;
         InteractOnWholeBanner = config.InteractOnWholeBanner;
@@ -65,6 +68,9 @@ public abstract class FeaturedDisplaySettingsDto
     public bool AllowTrailersOnMobile { get; }
     public bool ShowPlayButton { get; }
     public bool ShowFavoriteButton { get; }
+    public string FavoriteButtonPlacement { get; }
+    public bool ShowPlaystateButton { get; }
+    public string PlaystateButtonPlacement { get; }
     public bool ShowNavigationArrows { get; }
     public bool ShowControlsOnHoverOnly { get; }
     public bool InteractOnWholeBanner { get; }

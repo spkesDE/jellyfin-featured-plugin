@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref, watch } from 'vue';
 import ConfigCard from '../components/ConfigCard.vue';
 import ConfigCheckbox from '../components/ConfigCheckbox.vue';
 import ConfigSelect, { type SelectOption } from '../components/ConfigSelect.vue';
@@ -6,11 +7,28 @@ import { t } from '../../i18n';
 import { useConfigStore } from '../libs/store';
 
 const store = useConfigStore();
+const diagnosticsOpen = ref(false);
 const injectionOptions: SelectOption[] = [
   { value: 'automatic', label: t('advanced.automatic') },
   { value: 'file-transformation', label: t('advanced.fileTransformation') },
   { value: 'javascript-injector', label: t('advanced.javascriptInjector') }
 ];
+
+watch(
+  () => [store.diagnostics.value, store.diagnosticsError.value],
+  ([result, error]) => {
+    if (result || error) diagnosticsOpen.value = true;
+  }
+);
+
+function syncDiagnosticsOpen(event: Event): void {
+  diagnosticsOpen.value = (event.currentTarget as HTMLDetailsElement).open;
+}
+
+function runDiagnostics(): void {
+  diagnosticsOpen.value = true;
+  void store.runDiagnostics();
+}
 </script>
 
 <template>
@@ -27,15 +45,16 @@ const injectionOptions: SelectOption[] = [
         <ConfigCheckbox v-model="store.config.ReduceImageSize" :label="t('advanced.reducedImages')" :help-text="t('advanced.performanceHelp')" />
         <ConfigCheckbox v-model="store.config.EnablePreparedCache" :label="t('advanced.preparedCache')" :help-text="t('advanced.preparedCacheHelp')" />
       </ConfigCard>
-      <ConfigCard :title="t('advanced.credits')" :help="t('advanced.creditsHelp')">
-        <a href="https://github.com/lachlandcp/jellyfin-editors-choice-plugin" target="_blank" rel="noopener noreferrer">
-          {{ t('advanced.originalProject') }}
-        </a>
-      </ConfigCard>
-      <ConfigCard class="ec-diagnostics-section" :title="t('advanced.diagnostics')" :help="t('advanced.diagnosticsHelp')">
+      <details class="ec-diagnostics-section" :open="diagnosticsOpen" @toggle="syncDiagnosticsOpen">
+        <summary class="ec-advancedSummary">
+          <span class="material-icons" aria-hidden="true">troubleshoot</span>
+          <span><strong>{{ t('advanced.diagnostics') }}</strong><small>{{ t('advanced.diagnosticsHelp') }}</small></span>
+          <span class="material-icons ec-advancedChevron" aria-hidden="true">expand_more</span>
+        </summary>
+        <div class="ec-diagnosticsBody">
         <ConfigCheckbox v-model="store.config.Debug" :label="t('advanced.debug')" />
         <button type="button" class="raised emby-button ec-diagnosticsButton" :disabled="store.diagnosticsLoading.value"
-          @click="store.runDiagnostics">
+          @click="runDiagnostics">
           {{ store.diagnosticsLoading.value ? t('advanced.testingHero') : t('advanced.testHero') }}
         </button>
         <p v-if="store.diagnosticsError.value" class="ec-diagnosticsError" role="alert">
@@ -135,7 +154,28 @@ const injectionOptions: SelectOption[] = [
             </table>
           </div>
         </div>
-      </ConfigCard>
+        </div>
+      </details>
+
+      <footer class="ec-advancedCredits">
+        <span>{{ t('advanced.creditsHelp') }}</span>
+        <a href="https://github.com/lachlandcp/jellyfin-editors-choice-plugin" target="_blank" rel="noopener noreferrer">
+          {{ t('advanced.originalProject') }}
+        </a>
+      </footer>
     </div>
   </section>
 </template>
+
+<style scoped>
+.ec-diagnostics-section { background: var(--ec-config-card-background); border: 1px solid var(--ec-theme-divider); border-radius: .9rem; grid-column: 1 / -1; overflow: hidden; }
+.ec-advancedSummary { align-items: center; cursor: pointer; display: grid; gap: .75rem; grid-template-columns: auto minmax(0, 1fr) auto; list-style: none; padding: .9rem 1rem; }
+.ec-advancedSummary::-webkit-details-marker { display: none; }
+.ec-advancedSummary > span:nth-child(2) { display: grid; gap: .1rem; }
+.ec-advancedSummary small { font-size: .78rem; font-weight: 400; opacity: .65; }
+.ec-advancedChevron { transition: transform .16s ease; }
+.ec-diagnostics-section[open] .ec-advancedChevron { transform: rotate(180deg); }
+.ec-diagnosticsBody { border-top: 1px solid var(--ec-theme-divider); padding: 1rem; }
+.ec-advancedCredits { display: flex; flex-wrap: wrap; font-size: .8rem; gap: .35rem .75rem; grid-column: 1 / -1; justify-content: center; opacity: .58; padding: .35rem 1rem 0; text-align: center; }
+.ec-advancedCredits a { color: inherit; }
+</style>

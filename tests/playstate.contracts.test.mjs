@@ -11,13 +11,15 @@ test('played toggle uses Jellyfin playstate markup and updates in place', async 
     read('src/styles/featured.css')
   ]);
 
-  assert.match(render, /metadata\.appendChild\(createPlaystateButton\(item\)\)/);
+  assert.match(render, /metadata\.appendChild\(createPlaystateButton\(item, 'metadata'\)\)/);
+  assert.match(render, /playstateButtonPlacement === 'actions'/);
+  assert.match(render, /actions\.appendChild\(createPlaystateButton\(item, 'action'\)\)/);
   assert.match(playstate, /emby-playstatebutton/);
   assert.match(playstate, /button-flat btnPlaystate detailButton emby-button/);
   assert.match(playstate, /UserPlayedItems\/\$\{encodeURIComponent\(item\.id\)\}/);
   assert.match(playstate, /item\.isPlayed = result\.Played \?\? next;[\s\S]*?updateButton\(button, item\.isPlayed\)/);
   assert.match(playstate, /featured\/playstate\/changed/);
-  assert.match(styles, /\.ec-playstate-button-meta\[aria-pressed="true"\][\s\S]*?color:\s*#52b54b/);
+  assert.match(styles, /\.ec-playstate-button\[aria-pressed="true"\][\s\S]*?color:\s*#52b54b/);
 });
 
 test('favorite toggle uses Jellyfin rating button markup', async () => {

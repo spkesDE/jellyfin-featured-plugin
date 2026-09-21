@@ -5,7 +5,7 @@ import test from 'node:test';
 const read = async (path) => await readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 
 test('proper trailer support keeps resolution and playback source independent', async () => {
-  const [configuration, normalizer, resolver, response, player, carousel, render, trailerTab, styles] = await Promise.all([
+  const [configuration, normalizer, resolver, response, player, carousel, render, trailerTab, displayTab, styles] = await Promise.all([
     read('Jellyfin.Plugin.Featured/Configuration/PluginConfiguration.cs'),
     read('Jellyfin.Plugin.Featured/Configuration/PluginConfigurationNormalizer.cs'),
     read('Jellyfin.Plugin.Featured/Api/TrailerResolver.cs'),
@@ -14,6 +14,7 @@ test('proper trailer support keeps resolution and playback source independent', 
     read('src/slider/carousel.ts'),
     read('src/slider/render.ts'),
     read('src/config/tabs/TrailersTab.vue'),
+    read('src/config/tabs/DisplayTab.vue'),
     read('src/styles/featured.css')
   ]);
   for (const setting of [
@@ -23,10 +24,12 @@ test('proper trailer support keeps resolution and playback source independent', 
     'TrailerEndOffsetSeconds', 'MultipleTrailerMode', 'AllowTrailersOnMobile', 'TrailerOverrides'
   ]) {
     assert.equal(configuration.includes(setting), true, `backend misses ${setting}`);
-    assert.equal(trailerTab.includes(`store.config.${setting}`), true, `trailer editor misses ${setting}`);
+    const editor = setting === 'ShowTrailerControls' ? displayTab : trailerTab;
+    assert.equal(editor.includes(`store.config.${setting}`), true, `settings editor misses ${setting}`);
   }
   assert.equal(configuration.includes('TrailerVolumeSliderDirection'), true);
   assert.doesNotMatch(trailerTab, /TrailerVolumeSliderDirection|trailers\.volumeDirection/);
+  assert.doesNotMatch(displayTab, /TrailerVolumeSliderDirection|trailers\.volumeDirection/);
   assert.match(normalizer, /NormalizeTrailerUrl[\s\S]*?Uri\.UriSchemeHttp[\s\S]*?Uri\.UriSchemeHttps/);
   assert.match(resolver, /ResolveManual\(manual, activeUser\)[\s\S]*?if \(manualTrailer is not null\) candidates\.Add\(manualTrailer\)/);
   assert.match(resolver, /LocalOnly:[\s\S]*?AddRange\(local\)[\s\S]*?RemoteOnly:[\s\S]*?AddRange\(remote\)/);

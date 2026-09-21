@@ -124,6 +124,7 @@ public sealed class FeaturedUserDisplayPreferences
     public bool? ShowYear { get; set; }
     public bool? ShowRuntime { get; set; }
     public bool? ShowFavoriteButton { get; set; }
+    public bool? ShowPlaystateButton { get; set; }
 
     internal FeaturedUserDisplayPreferences Copy() => new()
     {
@@ -132,7 +133,8 @@ public sealed class FeaturedUserDisplayPreferences
         ShowDescription = ShowDescription,
         ShowYear = ShowYear,
         ShowRuntime = ShowRuntime,
-        ShowFavoriteButton = ShowFavoriteButton
+        ShowFavoriteButton = ShowFavoriteButton,
+        ShowPlaystateButton = ShowPlaystateButton
     };
 
     internal bool IsEmpty()
@@ -141,5 +143,6 @@ public sealed class FeaturedUserDisplayPreferences
             && !ShowDescription.HasValue
             && !ShowYear.HasValue
             && !ShowRuntime.HasValue
-            && !ShowFavoriteButton.HasValue;
+            && !ShowFavoriteButton.HasValue
+            && !ShowPlaystateButton.HasValue;
 }

@@ -206,6 +206,9 @@ internal static class FeaturedPresetResolver
         config.AutoplayInterval = preset.Layout.AutoplayInterval;
         config.ShowPlayButton = preset.Layout.ShowPlayButton;
         config.ShowFavoriteButton = preset.Layout.ShowFavoriteButton;
+        config.FavoriteButtonPlacement = preset.Layout.FavoriteButtonPlacement;
+        config.ShowPlaystateButton = preset.Layout.ShowPlaystateButton;
+        config.PlaystateButtonPlacement = preset.Layout.PlaystateButtonPlacement;
         config.ShowNavigationArrows = preset.Layout.ShowNavigationArrows;
         config.ShowControlsOnHoverOnly = preset.Layout.ShowControlsOnHoverOnly;
         config.InteractOnWholeBanner = preset.Layout.InteractOnWholeBanner;

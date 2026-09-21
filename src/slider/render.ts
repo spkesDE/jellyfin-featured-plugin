@@ -60,9 +60,11 @@ function createMetadata(item: FeaturedItem, response: FeaturedResponse): HTMLEle
     runtime.textContent = `${item.runtimeMinutes} min`;
     metadata.appendChild(runtime);
   }
-  if (response.showFavoriteButton) {
+  if (response.showFavoriteButton && response.favoriteButtonPlacement === 'metadata') {
     metadata.appendChild(createFavoriteButton(item, 'metadata'));
-    metadata.appendChild(createPlaystateButton(item));
+  }
+  if (response.showPlaystateButton && response.playstateButtonPlacement === 'metadata') {
+    metadata.appendChild(createPlaystateButton(item, 'metadata'));
   }
   return metadata.childElementCount ? metadata : null;
 }
@@ -115,7 +117,9 @@ export function createSlide(item: FeaturedItem, response: FeaturedResponse): HTM
     appendText(content, 'ec-overview', item.overview);
   }
 
-  if (response.showPlayButton || response.showSecondaryButton || (item.trailer?.provider === 'external' && item.trailer.url)) {
+  const favoriteAction = response.showFavoriteButton && response.favoriteButtonPlacement === 'actions';
+  const playstateAction = response.showPlaystateButton && response.playstateButtonPlacement === 'actions';
+  if (response.showPlayButton || response.showSecondaryButton || favoriteAction || playstateAction || (item.trailer?.provider === 'external' && item.trailer.url)) {
     const actions = document.createElement('div');
     actions.className = 'ec-actions';
     if (response.showPlayButton) {
@@ -134,6 +138,8 @@ export function createSlide(item: FeaturedItem, response: FeaturedResponse): HTM
       details.addEventListener('click', () => openItemDetails(item.id));
       actions.appendChild(details);
     }
+    if (favoriteAction) actions.appendChild(createFavoriteButton(item, 'action'));
+    if (playstateAction) actions.appendChild(createPlaystateButton(item, 'action'));
     if (item.trailer?.provider === 'external' && item.trailer.url) {
       const trailer = document.createElement('button');
       trailer.type = 'button';

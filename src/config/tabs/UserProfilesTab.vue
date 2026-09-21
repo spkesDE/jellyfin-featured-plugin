@@ -11,6 +11,7 @@ import { namedOptions, valueOptions } from '../libs/options';
 
 const store = useConfigStore();
 const selectedUserId = ref('');
+const expandedProfileId = ref<string | null>(null);
 const userOptions = computed<SelectOption[]>(() => [
   { value: '', label: t('users.selectUser') },
   ...namedOptions(store.users.value
@@ -22,6 +23,7 @@ const userName = (userId: string) => store.users.value.find((user) => user.Id ==
 function addProfile(): void {
   if (!selectedUserId.value) return;
   store.addUserProfile(selectedUserId.value);
+  expandedProfileId.value = store.config.UserProfiles[store.config.UserProfiles.length - 1]?.Id ?? null;
   selectedUserId.value = '';
 }
 </script>
@@ -73,12 +75,27 @@ function addProfile(): void {
     <div v-if="store.config.UserProfiles.length" class="ec-userProfiles">
       <article v-for="(profile, index) in store.config.UserProfiles" :key="profile.Id" class="ec-userProfile">
         <header class="ec-userProfileHeader">
-          <div><p class="ec-sourceRuleEyebrow">{{ t('users.profile') }}</p><h3>{{ userName(profile.UserId) }}</h3></div>
+          <button type="button" class="ec-userProfileToggle" :aria-expanded="expandedProfileId === profile.Id"
+            @click="expandedProfileId = expandedProfileId === profile.Id ? null : profile.Id">
+            <span>
+              <span class="ec-sourceRuleEyebrow">{{ t('users.profile') }}</span>
+              <strong>{{ userName(profile.UserId) }}</strong>
+              <small>
+                {{ profile.Enabled ? t('source.statusActive') : t('source.statusInactive') }}
+                · {{ t('users.summaryUnplayed', { value: profile.UnplayedBoost }) }}
+                · {{ t('users.summaryFavorite', { value: profile.FavouriteBoost }) }}
+                · {{ t('users.summaryGenre', { value: profile.PreferredGenreBoost }) }}
+                · {{ t('users.summarySeries', { value: profile.InProgressSeriesBoost }) }}
+              </small>
+            </span>
+            <span class="material-icons ec-userProfileChevron" aria-hidden="true">expand_more</span>
+          </button>
           <div class="ec-userProfileActions">
-            <ConfigCheckbox v-model="profile.Enabled" :label="t('users.enabled')" />
             <button type="button" class="paper-icon-button-light ec-ruleIconButton ec-removeRule" :title="t('users.removeProfile')" @click="store.removeUserProfile(index)"><span class="material-icons" aria-hidden="true">delete</span></button>
           </div>
         </header>
+        <div v-show="expandedProfileId === profile.Id" class="ec-userProfileBody">
+        <ConfigCheckbox v-model="profile.Enabled" :label="t('users.enabled')" />
         <p class="jmp-subsectionHelp">{{ t('users.scoringHelp') }}</p>
         <ConfigMultiPicker v-model="profile.PreferredGenres" :label="t('users.preferredGenres')" :options="genreOptions()" />
         <div class="ec-scoreGrid">
@@ -86,6 +103,7 @@ function addProfile(): void {
           <ConfigNumber v-model="profile.FavouriteBoost" :label="t('users.favouriteBoost')" :min="0" :max="100" :step="1" />
           <ConfigNumber v-model="profile.PreferredGenreBoost" :label="t('users.genreBoost')" :min="0" :max="100" :step="1" />
           <ConfigNumber v-model="profile.InProgressSeriesBoost" :label="t('users.inProgressBoost')" :min="0" :max="100" :step="1" />
+        </div>
         </div>
       </article>
     </div>
@@ -101,13 +119,19 @@ function addProfile(): void {
 .ec-userExplanation ol { display: grid; gap: .25rem; margin: 0; padding-left: 1.25rem; }
 .ec-userExplanation li { line-height: 1.35; opacity: .85; }
 .ec-userProfiles { display: grid; gap: 1rem; margin-top: 1rem; }
-.ec-userProfile { background: var(--ec-theme-paper); border: 1px solid var(--ec-theme-divider); border-radius: var(--ec-theme-radius); padding: 1rem; }
-.ec-userProfileHeader { align-items: center; display: flex; gap: 1rem; justify-content: space-between; }
-.ec-userProfileHeader h3 { margin: .12rem 0 .25rem; }
+.ec-userProfile { background: var(--ec-config-card-background); border: 1px solid var(--ec-theme-divider); border-radius: .9rem; padding: 1rem; }
+.ec-userProfileHeader { align-items: center; display: grid; gap: .35rem; grid-template-columns: minmax(0, 1fr) auto; }
+.ec-userProfileToggle { align-items: center; background: transparent; border: 0; color: inherit; cursor: pointer; display: flex; justify-content: space-between; min-width: 0; padding: 0; text-align: left; }
+.ec-userProfileToggle > span:first-child { display: grid; gap: .16rem; min-width: 0; }
+.ec-userProfileToggle strong { font-size: 1.08rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ec-userProfileToggle small { display: flex; flex-wrap: wrap; font-size: .78rem; gap: .15rem; opacity: .68; }
+.ec-userProfileChevron { transition: transform .16s ease; }
+.ec-userProfileToggle[aria-expanded="true"] .ec-userProfileChevron { transform: rotate(180deg); }
+.ec-userProfileBody { border-top: 1px solid var(--ec-theme-divider); margin-top: .8rem; padding-top: .8rem; }
 .ec-sourceRuleEyebrow { font-size: .7rem; letter-spacing: .08em; margin: 0; opacity: .58; text-transform: uppercase; }
 .ec-userProfileActions { align-items: center; display: flex; gap: .15rem; }
 .ec-userProfileActions > :deep(.checkboxContainer) { margin-bottom: 0; }
-.ec-userProfile > .jmp-subsectionHelp { margin-bottom: .75rem; }
+.ec-userProfileBody > .jmp-subsectionHelp { margin-bottom: .75rem; }
 .ec-scoreGrid { display: grid; gap: .85rem 1rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .ec-scoreGrid :deep(.inputContainer) { margin-bottom: 0; }
 .ec-policyGrid { display: grid; gap: .25rem 1rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -123,7 +147,6 @@ function addProfile(): void {
   .ec-addSourceRow { grid-template-columns: 1fr; }
   .ec-scoreGrid { grid-template-columns: 1fr; }
   .ec-policyGrid { grid-template-columns: 1fr; }
-  .ec-userProfileHeader { align-items: stretch; flex-direction: column; }
-  .ec-userProfileActions { justify-content: space-between; }
+  .ec-userProfileHeader { align-items: center; }
 }
 </style>

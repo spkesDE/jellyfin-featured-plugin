@@ -1,4 +1,4 @@
-import type { HeroBackdropPosition, HeroFadeCurve, HeroHeightMode, HeroTextPosition, TrailerVolumeSliderDirection, TransitionEffect } from './config';
+import type { FeatureControlPlacement, HeroBackdropPosition, HeroFadeCurve, HeroHeightMode, HeroTextPosition, TrailerVolumeSliderDirection, TransitionEffect } from './config';
 
 export interface FeaturedDisplaySettings {
   showAutoplayButton: boolean;
@@ -14,6 +14,9 @@ export interface FeaturedDisplaySettings {
   allowTrailersOnMobile: boolean;
   showPlayButton: boolean;
   showFavoriteButton: boolean;
+  favoriteButtonPlacement: FeatureControlPlacement;
+  showPlaystateButton: boolean;
+  playstateButtonPlacement: FeatureControlPlacement;
   showNavigationArrows: boolean;
   showControlsOnHoverOnly: boolean;
   interactOnWholeBanner: boolean;

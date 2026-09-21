@@ -7,6 +7,7 @@ import { useConfigStore } from '../libs/store';
 import type { FeaturedItem } from '../../types/featured';
 
 const store = useConfigStore();
+defineEmits<{ focusSection: [section: string] }>();
 const manualItems = computed(() => store.config.ManualLists
   .filter((list) => list.Enabled)
   .flatMap((list) => list.Items));
@@ -70,42 +71,47 @@ const mediaCards = [
         <div v-if="store.config.Heading && !store.config.UseHeroLayout" class="ec-jellyfinMockHeading">
           {{ store.config.Heading }}
         </div>
-        <div class="ec-configPreview" :class="[`text-${store.config.HeroTextPosition}`, { 'is-hero': store.config.UseHeroLayout, 'controls-on-hover': store.config.ShowControlsOnHoverOnly }]" :style="previewStyle">
+        <div class="ec-configPreview" :class="[`text-${store.config.HeroTextPosition}`, { 'is-hero': store.config.UseHeroLayout, 'controls-on-hover': store.config.ShowControlsOnHoverOnly }]" :style="previewStyle" @click="$emit('focusSection', 'layout')">
           <div class="ec-configPreviewBackdrop" :style="backdropStyle" />
           <div class="ec-configPreviewShade" />
           <div class="ec-configPreviewContent">
             <img v-if="logoSource" class="ec-configPreviewImageLogo" :src="logoSource" :alt="item?.name || ''">
             <div v-else class="ec-configPreviewLogo">{{ item?.name || t('preview.fallbackTitle') }}</div>
-            <div v-if="store.config.ShowRating || store.config.ShowYear || store.config.ShowRuntime" class="ec-configPreviewMeta">
+            <div v-if="store.config.ShowRating || store.config.ShowYear || store.config.ShowRuntime || (store.config.ShowFavoriteButton && store.config.FavoriteButtonPlacement === 'metadata') || (store.config.ShowPlaystateButton && store.config.PlaystateButtonPlacement === 'metadata')" class="ec-configPreviewMeta" @click.stop="$emit('focusSection', 'metadata')">
               <span v-if="store.config.ShowRating">★ {{ item?.community_rating?.toFixed(1) || '8.7' }}</span>
-              <span v-if="store.config.ShowRating && item?.critic_rating">{{ Math.round(item.critic_rating) }}%</span>
+              <span v-if="store.config.ShowRating">{{ item?.critic_rating ? Math.round(item.critic_rating) : 92 }}%</span>
+              <span v-if="store.config.ShowRating">{{ item?.official_rating || 'FSK 12' }}</span>
               <span v-if="store.config.ShowYear">{{ item?.productionYear || 2026 }}</span>
               <span v-if="store.config.ShowRuntime">{{ item?.runtimeMinutes || 124 }} min</span>
+              <button v-if="store.config.ShowFavoriteButton && store.config.FavoriteButtonPlacement === 'metadata'" type="button" class="ec-configPreviewMetaControl" :title="t('display.showFavoriteButton')"><span class="material-icons" aria-hidden="true">{{ item?.isFavorite ? 'favorite' : 'favorite_border' }}</span></button>
+              <button v-if="store.config.ShowPlaystateButton && store.config.PlaystateButtonPlacement === 'metadata'" type="button" class="ec-configPreviewMetaControl" :title="t('display.showPlaystateButton')"><span class="material-icons" aria-hidden="true">check</span></button>
             </div>
             <div v-if="store.config.ShowDescription" class="ec-configPreviewText">
               {{ item?.overview || t('preview.fallbackDescription') }}
             </div>
-            <div v-if="store.config.ShowPlayButton || store.config.ShowSecondaryButton || store.config.ShowFavoriteButton" class="ec-configPreviewActions">
+            <div v-if="store.config.ShowPlayButton || store.config.ShowSecondaryButton || (store.config.ShowFavoriteButton && store.config.FavoriteButtonPlacement === 'actions') || (store.config.ShowPlaystateButton && store.config.PlaystateButtonPlacement === 'actions')" class="ec-configPreviewActions" @click.stop="$emit('focusSection', 'actions')">
               <button v-if="store.config.ShowPlayButton" type="button" class="ec-configPreviewButton raised button-submit emby-button">
                 {{ store.config.PlayButtonText || `▶ ${t('common.play')}` }}
               </button>
               <button v-if="store.config.ShowSecondaryButton" type="button" class="ec-configPreviewButton is-secondary raised emby-button">
                 {{ store.config.SecondaryButtonText || t('display.moreInfo') }}
               </button>
-              <button v-if="store.config.ShowFavoriteButton" type="button" class="ec-configPreviewButton is-secondary is-favorite raised emby-button" :title="t('display.showFavoriteButton')">
+              <button v-if="store.config.ShowFavoriteButton && store.config.FavoriteButtonPlacement === 'actions'" type="button" class="ec-configPreviewButton is-secondary is-favorite raised emby-button" :title="t('display.showFavoriteButton')">
                 <span class="material-icons" aria-hidden="true">{{ item?.isFavorite ? 'favorite' : 'favorite_border' }}</span>
               </button>
+              <button v-if="store.config.ShowPlaystateButton && store.config.PlaystateButtonPlacement === 'actions'" type="button" class="ec-configPreviewButton is-secondary raised emby-button" :title="t('display.showPlaystateButton')"><span class="material-icons" aria-hidden="true">check</span></button>
             </div>
           </div>
           <div
-            v-if="itemCount > 1 && (store.config.ShowNavigationArrows || (store.config.EnableAutoplay && store.config.ShowAutoplayButton) || (!store.config.EnableInfiniteLoading && (store.config.ShowPaginationDots || store.config.ShowSlidePosition)))"
-            class="ec-configPreviewNavigation"
+            v-if="itemCount > 1 && (store.config.ShowNavigationArrows || (store.config.EnableAutoplay && store.config.ShowAutoplayButton) || (store.config.EnableBackgroundTrailers && store.config.ShowTrailerControls) || (!store.config.EnableInfiniteLoading && (store.config.ShowPaginationDots || store.config.ShowSlidePosition)))"
+            class="ec-configPreviewNavigation" @click.stop="$emit('focusSection', 'navigation')"
           >
-            <div v-if="store.config.ShowNavigationArrows || (store.config.EnableAutoplay && store.config.ShowAutoplayButton) || (!store.config.EnableInfiniteLoading && store.config.ShowSlidePosition && !store.config.ShowPaginationDots)" class="ec-configPreviewControls">
+            <div v-if="store.config.ShowNavigationArrows || (store.config.EnableAutoplay && store.config.ShowAutoplayButton) || (store.config.EnableBackgroundTrailers && store.config.ShowTrailerControls) || (!store.config.EnableInfiniteLoading && store.config.ShowSlidePosition && !store.config.ShowPaginationDots)" class="ec-configPreviewControls">
               <span v-if="!store.config.EnableInfiniteLoading && store.config.ShowSlidePosition && !store.config.ShowPaginationDots" class="ec-configPreviewStatus">1 / {{ itemCount }}</span>
               <span v-if="store.config.ShowNavigationArrows" class="ec-mockControl">‹</span>
               <span v-if="store.config.EnableAutoplay && store.config.ShowAutoplayButton" class="ec-mockControl">Ⅱ</span>
               <span v-if="store.config.ShowNavigationArrows" class="ec-mockControl">›</span>
+              <span v-if="store.config.EnableBackgroundTrailers && store.config.ShowTrailerControls" class="ec-mockControl material-icons">volume_off</span>
             </div>
             <div v-if="!store.config.EnableInfiniteLoading && store.config.ShowPaginationDots" class="ec-configPreviewDots" aria-hidden="true">
               <span v-for="dot in Math.min(itemCount, 10)" :key="dot" :class="{ 'is-active': dot === 1 }" />
@@ -127,3 +133,9 @@ const mediaCards = [
     </div>
   </div>
 </template>
+
+<style scoped>
+.ec-jellyfinMockHeader { display: none !important; }
+.ec-configPreviewMetaControl { align-items: center; background: transparent; border: 0; color: inherit; display: inline-flex; padding: 0; }
+.ec-configPreviewMetaControl .material-icons { font-size: 1.15em; }
+</style>

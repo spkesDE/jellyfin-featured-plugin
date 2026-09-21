@@ -10,6 +10,7 @@ export type HeroTextPosition = 'left' | 'center' | 'right';
 export type TrailerSourcePriority = 'prefer_local' | 'prefer_remote' | 'local_only' | 'remote_only' | 'automatic';
 export type MultipleTrailerMode = 'first' | 'random';
 export type TrailerVolumeSliderDirection = 'side' | 'up' | 'down';
+export type FeatureControlPlacement = 'metadata' | 'actions';
 export type PresetScheduleType = 'one_time' | 'weekly' | 'annual';
 
 import type { FeaturedDisplaySettings } from './display';
@@ -76,6 +77,9 @@ export interface FeaturedPluginConfig {
   AutoplayInterval: number;
   ShowPlayButton: boolean;
   ShowFavoriteButton: boolean;
+  FavoriteButtonPlacement: FeatureControlPlacement;
+  ShowPlaystateButton: boolean;
+  PlaystateButtonPlacement: FeatureControlPlacement;
   ShowNavigationArrows: boolean;
   ShowControlsOnHoverOnly: boolean;
   InteractOnWholeBanner: boolean;
@@ -147,6 +151,9 @@ export interface FeaturedPresetLayoutSettings {
   AutoplayInterval: number;
   ShowPlayButton: boolean;
   ShowFavoriteButton: boolean;
+  FavoriteButtonPlacement: FeatureControlPlacement;
+  ShowPlaystateButton: boolean;
+  PlaystateButtonPlacement: FeatureControlPlacement;
   ShowNavigationArrows: boolean;
   ShowControlsOnHoverOnly: boolean;
   InteractOnWholeBanner: boolean;

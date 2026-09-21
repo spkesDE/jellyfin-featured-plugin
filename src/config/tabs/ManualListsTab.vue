@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref } from 'vue';
 import Draggable from 'vuedraggable';
 import type { FeaturedManualList } from '../../types/config';
 import type { FeaturedSearchItem } from '../../types/featured';
@@ -12,6 +13,12 @@ import ManualItemAutocomplete from '../components/ManualItemAutocomplete.vue';
 import { useConfigStore } from '../libs/store';
 
 const store = useConfigStore();
+const expandedManualListId = ref<string | null>(null);
+
+function addManualList(): void {
+  store.addManualList();
+  expandedManualListId.value = store.config.ManualLists[store.config.ManualLists.length - 1]?.Id ?? null;
+}
 
 function addResult(list: FeaturedManualList, item: FeaturedSearchItem): void {
   store.addManualItem(list, item);
@@ -27,20 +34,36 @@ function syncItemPositions(list: FeaturedManualList): void {
   <section id="featuredPanel-manual" class="jmp-section jmp-section-plain" role="tabpanel"
     aria-labelledby="featuredTab-manual">
     <ConfigCard :title="t('manual.title')" :help="t('manual.help')">
-      <button type="button" class="raised button-submit emby-button ec-primaryAction" @click="store.addManualList">
+      <button type="button" class="raised button-submit emby-button ec-primaryAction" @click="addManualList">
         <span class="material-icons" aria-hidden="true">add</span>{{ t('manual.addList') }}
       </button>
     </ConfigCard>
 
     <div v-if="store.config.ManualLists.length" class="ec-manualLists">
       <article v-for="(list, listIndex) in store.config.ManualLists" :key="list.Id" class="ec-manualList">
-        <div class="ec-manualListHeader">
-          <ConfigText v-model="list.Name" />
-          <ConfigCheckbox v-model="list.Enabled" :label="t('manual.listEnabled')" />
+        <header class="ec-manualListSummary">
+          <button type="button" class="ec-manualListToggle" :aria-expanded="expandedManualListId === list.Id"
+            @click="expandedManualListId = expandedManualListId === list.Id ? null : list.Id">
+            <span>
+              <strong>{{ list.Name || t('manual.defaultName') }}</strong>
+              <small>
+                {{ list.Enabled ? t('source.statusActive') : t('source.statusInactive') }}
+                · {{ t('manual.summaryItems', { count: list.Items.length }) }}
+                <template v-if="list.StartsAt || list.EndsAt"> · {{ t('manual.summaryScheduled') }}</template>
+              </small>
+            </span>
+            <span class="material-icons ec-manualListChevron" aria-hidden="true">expand_more</span>
+          </button>
           <button type="button" class="paper-icon-button-light ec-ruleIconButton ec-removeRule"
             :title="t('manual.removeList')" @click="store.removeManualList(listIndex)">
             <span class="material-icons" aria-hidden="true">delete</span>
           </button>
+        </header>
+
+        <div v-show="expandedManualListId === list.Id" class="ec-manualListBody">
+        <div class="ec-manualListHeader">
+          <ConfigText v-model="list.Name" :label="t('manual.listName')" />
+          <ConfigCheckbox v-model="list.Enabled" :label="t('manual.listEnabled')" />
         </div>
 
         <details class="ec-manualSchedule">
@@ -93,6 +116,7 @@ function syncItemPositions(list: FeaturedManualList): void {
           </template>
         </Draggable>
         <p v-else class="ec-emptyInline">{{ t('manual.emptyList') }}</p>
+        </div>
       </article>
     </div>
     <div v-else class="ec-emptySources"><span class="material-icons" aria-hidden="true">featured_play_list</span>
@@ -110,17 +134,26 @@ function syncItemPositions(list: FeaturedManualList): void {
 }
 
 .ec-manualList {
-  background: rgba(255, 255, 255, .035);
-  border: 1px solid rgba(255, 255, 255, .09);
+  background: var(--ec-config-card-background);
+  border: 1px solid var(--ec-theme-divider);
   border-radius: .9rem;
   padding: 1rem;
 }
+
+.ec-manualListSummary { align-items: center; display: grid; gap: .35rem; grid-template-columns: minmax(0, 1fr) auto; }
+.ec-manualListToggle { align-items: center; background: transparent; border: 0; color: inherit; cursor: pointer; display: flex; justify-content: space-between; min-width: 0; padding: 0; text-align: left; }
+.ec-manualListToggle > span:first-child { display: grid; gap: .18rem; min-width: 0; }
+.ec-manualListToggle strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ec-manualListToggle small { opacity: .68; }
+.ec-manualListChevron { transition: transform .16s ease; }
+.ec-manualListToggle[aria-expanded="true"] .ec-manualListChevron { transform: rotate(180deg); }
+.ec-manualListBody { border-top: 1px solid var(--ec-theme-divider); margin-top: .8rem; padding-top: .8rem; }
 
 .ec-manualListHeader {
   align-items: center;
   display: grid;
   gap: 1rem;
-  grid-template-columns: minmax(15rem, 1fr) auto auto;
+  grid-template-columns: minmax(15rem, 1fr) auto;
 }
 
 .ec-manualListHeader> :deep(.inputContainer),

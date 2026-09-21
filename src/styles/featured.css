@@ -765,7 +765,7 @@
   justify-content: center;
 }
 
-.ec-playstate-button-meta[aria-pressed="true"] {
+.ec-playstate-button[aria-pressed="true"] {
   color: #52b54b;
 }
 
