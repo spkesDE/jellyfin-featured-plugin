@@ -80,6 +80,7 @@ export class FeaturedCarousel {
   private trailerVolume: number;
   private trailerPaused = false;
   private trailerConcealed = false;
+  private trailerIsTrickplay = false;
   private heroLayoutGuardStarted = false;
   private heroLayoutFrame: number | null = null;
   private heroLayoutVerificationPasses = 0;
@@ -170,7 +171,7 @@ export class FeaturedCarousel {
     }
     if (controls.childElementCount) navigation.appendChild(controls);
 
-    if (response.showTrailerControls && response.enableBackgroundTrailers
+    if (response.showTrailerControls
       && this.items.some((item) => item.trailer || item.trailers?.length)) {
       this.trailerControls = document.createElement('div');
       this.trailerControls.className = 'ec-trailer-controls';
@@ -540,8 +541,11 @@ export class FeaturedCarousel {
   private startTrailer(slide: HTMLElement, item: FeaturedItem, candidateIndex = 0): void {
     const candidates = item.trailers?.length ? item.trailers : item.trailer ? [item.trailer] : [];
     const trailer = candidates[candidateIndex];
-    if (!this.response.enableBackgroundTrailers || !trailer || document.hidden) return;
-    if (!this.response.allowTrailersOnMobile && isMobileTrailerClient()) return;
+    const isTrickplay = trailer?.provider === 'trickplay';
+    const isMediaPreview = trailer?.provider === 'media-preview';
+    const isFallbackMedia = isTrickplay || isMediaPreview;
+    if ((!this.response.enableBackgroundTrailers && !isFallbackMedia) || !trailer || document.hidden) return;
+    if (!isTrickplay && !this.response.allowTrailersOnMobile && isMobileTrailerClient()) return;
     if (this.trailerItemId === item.id
       && this.trailerCandidateIndex === candidateIndex
       && (this.trailerPlayer || this.trailerDelayTimer !== null)) return;
@@ -551,7 +555,8 @@ export class FeaturedCarousel {
     const expectedIndex = this.index;
     const concealYouTube = trailer.provider === 'youtube'
       && this.response.hideYouTubeTrailerUntilControlsFade;
-    const launchDelayMilliseconds = concealYouTube || candidateIndex > 0 ? 0 : this.response.trailerDelayMilliseconds;
+    let launchDelayMilliseconds = concealYouTube || candidateIndex > 0 ? 0 : this.response.trailerDelayMilliseconds;
+    if (isFallbackMedia && item.hasImage === false) launchDelayMilliseconds = 0;
     const concealDurationMilliseconds = concealYouTube
       ? Math.max(YOUTUBE_CONTROL_CONCEALMENT_MS, this.response.trailerDelayMilliseconds)
       : 0;
@@ -562,9 +567,10 @@ export class FeaturedCarousel {
       if (this.destroyed || document.hidden || this.index !== expectedIndex) return;
       if (!concealYouTube) this.stopTrailerCountdown();
       let player: TrailerPlayer | null = null;
-      const recover = (): void => {
+      const recover = (error?: Error): void => {
         if (this.destroyed || this.index !== expectedIndex) return;
         if (player && this.trailerPlayer !== player) return;
+        if (error) console.warn(`${CONSOLE_PREFIX} Background media fallback failed.`, error);
         this.stopTrailer();
         if (candidateIndex + 1 < candidates.length) this.startTrailer(slide, item, candidateIndex + 1);
         else this.restartTimer();
@@ -589,6 +595,9 @@ export class FeaturedCarousel {
         onEnded: () => {
           if (this.response.waitForTrailerToFinish && this.autoplayEnabled && this.index === expectedIndex) {
             this.show(this.index + 1, false);
+          } else if (isMediaPreview && this.index === expectedIndex) {
+            this.stopTrailer();
+            this.restartTimer();
           }
         },
         onError: recover
@@ -598,6 +607,7 @@ export class FeaturedCarousel {
         return;
       }
       this.trailerPlayer = player;
+      this.trailerIsTrickplay = isTrickplay;
       this.trailerPaused = false;
       this.trailerConcealed = concealYouTube;
       this.trailerSlide = slide;
@@ -624,6 +634,7 @@ export class FeaturedCarousel {
     this.trailerCandidateIndex = -1;
     this.trailerPaused = false;
     this.trailerConcealed = false;
+    this.trailerIsTrickplay = false;
     this.updateTrailerControls();
   }
 
@@ -690,6 +701,7 @@ export class FeaturedCarousel {
       this.trailerControls.hidden = !this.trailerPlayer || this.trailerConcealed;
       if (!this.trailerControls.hidden) window.requestAnimationFrame(this.placeTrailerVolumePopover);
     }
+    if (this.trailerVolumeControl) this.trailerVolumeControl.hidden = this.trailerIsTrickplay;
     if (this.trailerPauseButton) {
       let icon = this.trailerPauseButton.querySelector<HTMLElement>('.material-icons');
       if (!icon) {

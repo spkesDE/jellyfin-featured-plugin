@@ -53,7 +53,7 @@ internal sealed partial class FeaturedRuleEngine
         string[] excludedGenres = personalization?.ExcludedGenres ?? [];
 
         List<(FeaturedSourceRule Rule, List<BaseItem> Items)> candidatesByRule = (personalization?.SourceRules ?? _config.SourceRules)
-            .Where(rule => rule.Enabled)
+            .Where(rule => rule.Enabled && IsSourceVisibleToUser(rule, activeUser.Id))
             .Select(rule => (rule, GetSourceCandidates(rule, activeUser, requestedCount)))
             .ToList();
         List<BaseItem> distinctCandidates = candidatesByRule
@@ -101,7 +101,11 @@ internal sealed partial class FeaturedRuleEngine
                 .Where(item => excludedGenres.Length == 0 || !ContainsAny(item.Genres, excludedGenres))
                 .ToList();
             List<BaseItem> eligibleBeforeCooldown = afterFilters
-                .Where(item => IsEligibleItem(item, allowedItemIds, requestExcludedIds))
+                .Where(item => IsEligibleItem(
+                    item,
+                    allowedItemIds,
+                    requestExcludedIds,
+                    rule.UseTrickplayFallback || rule.UseMediaPreviewFallback))
                 .DistinctBy(item => item.Id)
                 .ToList();
             List<BaseItem> eligible = eligibleBeforeCooldown
@@ -182,6 +186,10 @@ internal sealed partial class FeaturedRuleEngine
 
     private static double ElapsedMilliseconds(long started)
         => Stopwatch.GetElapsedTime(started).TotalMilliseconds;
+
+    private static bool IsSourceVisibleToUser(FeaturedSourceRule rule, Guid userId)
+        => rule.UserIds.Length == 0
+            || rule.UserIds.Any(value => Guid.TryParse(value, out Guid id) && id == userId);
 
     private Dictionary<Guid, BaseItem> GetAllowedManualItems(
         IEnumerable<FeaturedManualItem> configuredItems)

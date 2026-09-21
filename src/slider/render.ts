@@ -83,7 +83,9 @@ export function createSlide(item: FeaturedItem, response: FeaturedResponse): HTM
 
   const backdrop = document.createElement('div');
   backdrop.className = 'ec-backdrop';
-  backdrop.dataset.ecImageUrl = heroImageUrl(item.id, item.imageType, response.reduceImageSizes);
+  if (item.hasImage !== false) {
+    backdrop.dataset.ecImageUrl = heroImageUrl(item.id, item.imageType, response.reduceImageSizes);
+  }
   backdrop.style.backgroundPosition = response.heroBackdropPosition;
   media.appendChild(backdrop);
   slide.appendChild(media);

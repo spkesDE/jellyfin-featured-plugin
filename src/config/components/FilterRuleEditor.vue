@@ -20,7 +20,8 @@ const fieldOptions: SelectOption[] = [
   { value: 'COMMUNITY_RATING', label: t('filter.field.communityRating') },
   { value: 'CRITIC_RATING', label: t('filter.field.criticRating') },
   { value: 'PRODUCTION_YEAR', label: t('filter.field.productionYear') },
-  { value: 'RUNTIME_MINUTES', label: t('filter.field.runtime') }
+  { value: 'RUNTIME_MINUTES', label: t('filter.field.runtime') },
+  { value: 'VIDEO_RESOLUTION', label: t('filter.field.videoResolution') }
 ];
 const libraryOptions = (): SelectOption[] => namedOptions(store.libraries.value);
 const genreOptions = (): SelectOption[] => valueOptions(store.genres.value);
@@ -30,9 +31,17 @@ const playedOptions: SelectOption[] = [
   { value: 'false', label: t('filter.value.unplayed') },
   { value: 'true', label: t('filter.value.played') }
 ];
+const resolutionOptions: SelectOption[] = [
+  { value: '480', label: '480p' },
+  { value: '720', label: '720p' },
+  { value: '1080', label: '1080p' },
+  { value: '1440', label: '1440p' },
+  { value: '2160', label: '2160p (4K)' },
+  { value: '4320', label: '4320p (8K)' }
+];
 
 function isNumeric(field: FilterField): boolean {
-  return ['COMMUNITY_RATING', 'CRITIC_RATING', 'PRODUCTION_YEAR', 'RUNTIME_MINUTES'].includes(field);
+  return ['COMMUNITY_RATING', 'CRITIC_RATING', 'PRODUCTION_YEAR', 'RUNTIME_MINUTES', 'VIDEO_RESOLUTION'].includes(field);
 }
 
 function operatorOptions(field: FilterField): SelectOption[] {
@@ -54,7 +63,9 @@ function operatorOptions(field: FilterField): SelectOption[] {
 function setField(filter: FeaturedFilterRule, value: string): void {
   filter.Field = value as FilterField;
   filter.Operator = operatorOptions(filter.Field)[0].value as FilterOperator;
-  filter.Values = filter.Field === 'PLAYED' ? ['false'] : [];
+  filter.Values = filter.Field === 'PLAYED'
+    ? ['false']
+    : filter.Field === 'VIDEO_RESOLUTION' ? ['720'] : [];
 }
 
 function setOperator(filter: FeaturedFilterRule, value: string): void {
@@ -96,6 +107,8 @@ function numberLimits(field: FilterField): { min: number; max: number; step: num
         :label="t('filter.valueLabel')" :options="supportedMediaTypeOptions" />
       <ConfigSelect v-else-if="filter.Field === 'PLAYED'" :model-value="filter.Values[0] || 'false'"
         :label="t('filter.valueLabel')" :options="playedOptions" @update:model-value="filter.Values = [$event]" />
+      <ConfigSelect v-else-if="filter.Field === 'VIDEO_RESOLUTION'" :model-value="filter.Values[0] || '720'"
+        :label="t('filter.valueLabel')" :options="resolutionOptions" @update:model-value="filter.Values = [$event]" />
       <ConfigNumber v-else :model-value="numericValue(filter)" :label="t('filter.valueLabel')"
         v-bind="numberLimits(filter.Field)" @update:model-value="setNumericValue(filter, $event)" />
 

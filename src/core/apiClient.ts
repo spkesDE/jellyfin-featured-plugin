@@ -7,11 +7,12 @@ export function getApiClient(): JellyfinApiClient | undefined {
 interface JsonRequestOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
   body?: unknown;
+  query?: Record<string, string | number | boolean | null | undefined>;
 }
 
 export async function requestJson<T>(path: string, options: JsonRequestOptions = {}): Promise<T> {
   const apiClient = getApiClient();
-  const url = apiClient?.getUrl?.(path) ?? path;
+  const url = apiClient?.getUrl?.(path, options.query) ?? path;
   const method = options.method ?? 'GET';
   if (!url) throw new Error(`Could not resolve ${path}`);
 
@@ -83,6 +84,14 @@ function parseErrorDetail(body: string): string {
 }
 
 export function getAccessToken(): string | undefined {
-  const value = getApiClient()?.accessToken;
-  return typeof value === 'function' ? value() : value;
+  const apiClient = getApiClient();
+  const value = apiClient?.accessToken;
+  return (typeof value === 'function' ? value.call(apiClient) : value) || apiClient?._serverInfo?.AccessToken;
+}
+
+export function getCurrentUserId(): string | undefined {
+  const apiClient = getApiClient();
+  return apiClient?.getCurrentUserId?.()
+    || apiClient?.getCurrentUser?.()?.Id
+    || apiClient?._serverInfo?.UserId;
 }

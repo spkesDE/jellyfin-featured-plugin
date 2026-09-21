@@ -16,6 +16,40 @@ namespace Jellyfin.Plugin.Featured.Tests;
 public sealed class FeaturedPersonalizationDisplayTests : FeaturedPreparedCacheTestBase
 {
     [Fact]
+    public void SourceUserRestrictionsAreAppliedBeforePersonalization()
+    {
+        string visibleSourceId = Guid.NewGuid().ToString("N");
+        PluginConfiguration config = new()
+        {
+            SourceRules =
+            [
+                new FeaturedSourceRule
+                {
+                    Id = visibleSourceId,
+                    Type = FeaturedSourceTypes.Random,
+                    UserIds = [_user.Id.ToString("N")],
+                    UseTrickplayFallback = true,
+                    UseMediaPreviewFallback = true
+                },
+                new FeaturedSourceRule
+                {
+                    Id = Guid.NewGuid().ToString("N"),
+                    Type = FeaturedSourceTypes.LatestReleases,
+                    UserIds = [Guid.NewGuid().ToString("N")]
+                }
+            ]
+        };
+
+        FeaturedPersonalizationContext effective = _personalization.Resolve(config, _user.Id);
+
+        FeaturedSourceRule source = Assert.Single(effective.SourceRules);
+        Assert.Equal(visibleSourceId, source.Id);
+        Assert.True(source.UseTrickplayFallback);
+        Assert.True(source.UseMediaPreviewFallback);
+        Assert.Equal(_user.Id.ToString("N"), Assert.Single(source.UserIds));
+    }
+
+    [Fact]
     public void UserDisplayPreferencesOnlyDisableAdminEnabledFeatures()
     {
         PluginConfiguration config = new()

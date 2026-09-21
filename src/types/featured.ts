@@ -4,6 +4,7 @@ export interface FeaturedItem {
   tagline?: string | null;
   official_rating?: string | null;
   hasLogo: boolean;
+  hasImage: boolean;
   isFavorite: boolean;
   isPlayed: boolean;
   imageType: 'Backdrop' | 'Primary';
@@ -18,7 +19,7 @@ export interface FeaturedItem {
 }
 
 export interface FeaturedTrailer {
-  type: 'local' | 'remote';
+  type: 'local' | 'remote' | 'trickplay';
   provider: 'jellyfin' | 'youtube' | 'direct' | 'external' | string;
   name?: string | null;
   url?: string | null;

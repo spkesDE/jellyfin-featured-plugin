@@ -14,7 +14,7 @@ const manualItems = computed(() => store.config.ManualLists
 const item = computed<FeaturedItem | null>(() => {
   const manual = manualItems.value[0];
   return manual
-    ? { id: manual.ItemId, name: manual.Name, hasLogo: false, isFavorite: false, isPlayed: false, imageType: manual.ImageType, mediaType: manual.MediaType, overview: null, community_rating: undefined, critic_rating: undefined }
+    ? { id: manual.ItemId, name: manual.Name, hasLogo: false, hasImage: true, isFavorite: false, isPlayed: false, imageType: manual.ImageType, mediaType: manual.MediaType, overview: null, community_rating: undefined, critic_rating: undefined }
     : store.preview.value?.items?.[0] ?? null;
 });
 const itemCount = computed(() => manualItems.value.length || store.preview.value?.items?.length || 5);

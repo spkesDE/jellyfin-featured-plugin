@@ -32,11 +32,27 @@ const userOptions = (): SelectOption[] => [
   { value: '', label: t('source.selectUser') },
   ...namedOptions(store.users.value)
 ];
+const restrictedUserOptions = (): SelectOption[] => namedOptions(store.users.value);
 const libraryOptions = (): SelectOption[] => namedOptions(store.libraries.value);
 const collectionOptions = (): SelectOption[] => namedOptions(store.collections.value);
 const playlistOptions = (): SelectOption[] => namedOptions(store.playlists.value);
 const manualListOptions = (): SelectOption[] => namedOptions(store.config.ManualLists);
 const tagOptions = (): SelectOption[] => valueOptions(store.tags.value);
+const mediaFallbackOptions = (): SelectOption[] => [
+  { value: 'none', label: t('source.mediaFallback.none') },
+  { value: 'media-preview', label: t('source.mediaFallback.mediaPreview') },
+  { value: 'trickplay', label: t('source.mediaFallback.trickplay') },
+  { value: 'media-preview-then-trickplay', label: t('source.mediaFallback.mediaPreviewThenTrickplay') }
+];
+const mediaFallbackMode = computed({
+  get: () => props.rule.UseMediaPreviewFallback
+    ? (props.rule.UseTrickplayFallback ? 'media-preview-then-trickplay' : 'media-preview')
+    : (props.rule.UseTrickplayFallback ? 'trickplay' : 'none'),
+  set: (value: string) => {
+    props.rule.UseMediaPreviewFallback = value === 'media-preview' || value === 'media-preview-then-trickplay';
+    props.rule.UseTrickplayFallback = value === 'trickplay' || value === 'media-preview-then-trickplay';
+  }
+});
 const selectionCount = computed(() => {
   const rule = props.rule;
   if (rule.Type === 'LIBRARIES') return rule.LibraryIds.length;
@@ -64,6 +80,7 @@ const selectionCount = computed(() => {
           <span v-if="selectionCount">{{ t('source.summarySelections', { count: selectionCount }) }}</span>
           <span v-if="rule.Filters.length">{{ t('source.summaryFilters', { count: rule.Filters.length }) }}</span>
           <span v-if="rule.IsFallback">{{ t('source.summaryFallback') }}</span>
+          <span v-if="rule.UserIds.length">{{ t('source.summaryUsers', { count: rule.UserIds.length }) }}</span>
         </p>
         </div>
         <span class="material-icons ec-sourceChevron" aria-hidden="true">expand_more</span>
@@ -90,9 +107,11 @@ const selectionCount = computed(() => {
       <ConfigNumber v-model="rule.MaximumItems" :label="t('source.maximumItems')" :help-text="t('source.maximumItemsHelp')" :min="0" :max="100" :step="1" />
       <ConfigCheckbox v-model="rule.IsFallback" :label="t('source.fallback')" :help-text="t('source.fallbackHelp')" />
       <ConfigCheckbox v-model="rule.AllowBackgroundTrailers" :label="t('source.allowBackgroundTrailers')" :help-text="t('source.allowBackgroundTrailersHelp')" />
+      <ConfigSelect v-model="mediaFallbackMode" :label="t('source.mediaFallback')" :help-text="t('source.mediaFallbackHelp')" :options="mediaFallbackOptions()" />
     </div>
 
     <div v-if="rule.Enabled" class="ec-sourceSettings">
+      <ConfigMultiPicker v-model="rule.UserIds" :label="t('source.onlyUsers')" :help-text="t('source.onlyUsersHelp')" :options="restrictedUserOptions()" :empty-text="t('source.noUsers')" />
       <ConfigSelect v-if="rule.Type === 'FAVOURITES'" v-model="rule.EditorUserId" :label="t('source.favouritesOwner')" :help-text="t('source.editorAccountHelp')" :options="userOptions()" />
       <ConfigMultiPicker v-else-if="rule.Type === 'LIBRARIES'" v-model="rule.LibraryIds" :label="t('source.chooseLibraries')" :options="libraryOptions()" :empty-text="t('filter.noLibraries')" />
       <ConfigMultiPicker v-else-if="rule.Type === 'COLLECTIONS'" v-model="rule.CollectionIds" :label="t('source.chooseCollections')" :help-text="t('source.collectionsHelp')" :options="collectionOptions()" :empty-text="t('source.noCollections')" />

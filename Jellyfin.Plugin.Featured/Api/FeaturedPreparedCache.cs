@@ -261,6 +261,10 @@ public sealed class FeaturedPreparedCache
                         () => _itemDtoFactory.Create(item, user, config, personalization,
                             !selection.ItemReasons.TryGetValue(item.Id, out FeaturedItemSelectionReason? reason)
                             || reason.AllowBackgroundTrailers,
+                            selection.ItemReasons.TryGetValue(item.Id, out reason)
+                            && reason.UseTrickplayFallback,
+                            selection.ItemReasons.TryGetValue(item.Id, out reason)
+                            && reason.UseMediaPreviewFallback,
                             data?.IsFavorite == true,
                             data?.Played == true),
                         LazyThreadSafetyMode.ExecutionAndPublication));

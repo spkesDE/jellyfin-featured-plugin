@@ -43,8 +43,22 @@ internal sealed partial class FeaturedRuleEngine
                 item.RunTimeTicks.HasValue ? TimeSpan.FromTicks(item.RunTimeTicks.Value).TotalMinutes : null,
                 filter.Values[0],
                 filter.Operator),
+            FeaturedFilterFields.VideoResolution => MatchNumber(
+                GetVideoResolution(item),
+                filter.Values[0],
+                filter.Operator),
             _ => true
         };
+    }
+
+    private static double? GetVideoResolution(BaseItem item)
+    {
+        if (item is not Video video) return null;
+        MediaBrowser.Model.Entities.MediaStream? stream = video.GetDefaultVideoStream();
+        if (stream is null) return null;
+        if (!stream.Width.HasValue) return stream.Height;
+        if (!stream.Height.HasValue) return stream.Width;
+        return Math.Min(stream.Width.Value, stream.Height.Value);
     }
 
     private static bool MatchCollection(IEnumerable<string> actualValues, IEnumerable<string> expectedValues, string filterOperator)
@@ -96,12 +110,14 @@ internal sealed partial class FeaturedRuleEngine
     private static bool IsEligibleItem(
         BaseItem item,
         HashSet<Guid> allowedItemIds,
-        HashSet<Guid> excludedIds)
+        HashSet<Guid> excludedIds,
+        bool useTrickplayFallback)
     {
         return allowedItemIds.Contains(item.Id)
             && !excludedIds.Contains(item.Id)
             && IsSupportedItemType(item)
-            && (item.HasImage(MediaBrowser.Model.Entities.ImageType.Backdrop)
+            && ((useTrickplayFallback && item is Video)
+                || item.HasImage(MediaBrowser.Model.Entities.ImageType.Backdrop)
                 || item.HasImage(MediaBrowser.Model.Entities.ImageType.Primary));
     }
 

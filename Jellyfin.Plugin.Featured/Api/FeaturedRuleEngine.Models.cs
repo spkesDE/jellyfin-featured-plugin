@@ -30,7 +30,12 @@ internal sealed record FeaturedSelection(
     FeaturedRuleEngineTiming Timing,
     IReadOnlyDictionary<Guid, FeaturedItemSelectionReason> ItemReasons);
 
-internal sealed record FeaturedItemSelectionReason(string RuleId, string SourceType, bool AllowBackgroundTrailers);
+internal sealed record FeaturedItemSelectionReason(
+    string RuleId,
+    string SourceType,
+    bool AllowBackgroundTrailers,
+    bool UseTrickplayFallback = false,
+    bool UseMediaPreviewFallback = false);
 
 internal sealed record FeaturedRuleEngineTiming(
     double SourceCandidatesMilliseconds,

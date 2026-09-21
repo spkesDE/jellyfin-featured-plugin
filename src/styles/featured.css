@@ -711,6 +711,12 @@
   transform: scale(1.25);
 }
 
+.ec-trickplay {
+  background-position: center;
+  background-repeat: no-repeat;
+  background-color: #000;
+}
+
 .ec-favorite-button,
 .ec-playstate-button {
   justify-content: center;
@@ -810,6 +816,10 @@
 .ec-trailer-pause,
 .ec-trailer-volume-control {
   background: rgba(0, 0, 0, .58);
+}
+
+.ec-trailer-volume-control[hidden] {
+  display: none;
 }
 
 .ec-trailer-volume-control {

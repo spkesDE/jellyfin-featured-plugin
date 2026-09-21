@@ -197,3 +197,37 @@ test('configuration discovery uses the authenticated server options fallback', a
   assert.match(styles, /\.jmp-configForm,[\s\S]*?width:\s*100%[\s\S]*?max-width:\s*none\s*!important/);
   assert.match(styles, /\.jmp-section-plain\s*>\s*\.jmp-subsection\s*\{[\s\S]*?margin-bottom:\s*1rem/);
 });
+
+test('source-scoped media fallback, resolution, and user visibility flow through both runtimes', async () => {
+  const [configuration, normalizer, personalization, engine, engineFilters, factory, defaults, card, filterEditor, trailer, carousel, apiClient] = await Promise.all([
+    read('Jellyfin.Plugin.Featured/Configuration/PluginConfiguration.cs'),
+    read('Jellyfin.Plugin.Featured/Configuration/PluginConfigurationNormalizer.cs'),
+    read('Jellyfin.Plugin.Featured/Api/FeaturedPersonalizationService.cs'),
+    read('Jellyfin.Plugin.Featured/Api/FeaturedRuleEngine.cs'),
+    read('Jellyfin.Plugin.Featured/Api/FeaturedRuleEngine.Filters.cs'),
+    read('Jellyfin.Plugin.Featured/Api/FeaturedItemDtoFactory.cs'),
+    read('src/config/libs/defaults.ts'),
+    read('src/config/components/SourceRuleCard.vue'),
+    read('src/config/components/FilterRuleEditor.vue'),
+    read('src/slider/trailer.ts'),
+    read('src/slider/carousel.ts'),
+    read('src/core/apiClient.ts')
+  ]);
+  assert.match(configuration, /class FeaturedSourceRule[\s\S]*?UseTrickplayFallback[\s\S]*?UseMediaPreviewFallback[\s\S]*?UserIds/);
+  assert.match(normalizer, /rule\.UserIds = NormalizeValues\(rule\.UserIds\)/);
+  assert.match(personalization, /rule\.UserIds\.Length ===? 0|rule\.UserIds\.Length == 0/);
+  assert.match(engine, /IsSourceVisibleToUser\(rule, activeUser\.Id\)/);
+  assert.match(factory, /trailers\.Count == 0[\s\S]*?Provider = "media-preview"[\s\S]*?Provider = "trickplay"/);
+  assert.match(defaults, /UseMediaPreviewFallback:\s*false[\s\S]*?UseTrickplayFallback:\s*false[\s\S]*?UserIds:\s*\[\]/);
+  assert.match(card, /mediaFallbackMode = computed[\s\S]*?UseMediaPreviewFallback[\s\S]*?UseTrickplayFallback[\s\S]*?v-model="mediaFallbackMode"/);
+  assert.match(configuration, /VideoResolution = "VIDEO_RESOLUTION"/);
+  assert.match(normalizer, /FeaturedFilterFields\.VideoResolution/);
+  assert.match(engineFilters, /GetVideoResolution\(item\)[\s\S]*?Math\.Min\(stream\.Width\.Value, stream\.Height\.Value\)/);
+  assert.match(filterEditor, /VIDEO_RESOLUTION[\s\S]*?480p[\s\S]*?720p[\s\S]*?1080p[\s\S]*?2160p \(4K\)[\s\S]*?4320p \(8K\)/);
+  assert.match(trailer, /class TrickplayPlayer[\s\S]*?Fields: 'Trickplay,MediaSources'[\s\S]*?Videos\/\$\{encodeURIComponent\(this\.itemId\)\}\/Trickplay/);
+  assert.match(trailer, /findTrickplayLeaves\(manifest\)[\s\S]*?path\.some\(\(key\) => key\.toLowerCase\(\) === id\.toLowerCase\(\)\)/);
+  assert.match(trailer, /getBoundingClientRect\(\)[\s\S]*?renderedFrameWidth \* info\.columns[\s\S]*?backgroundPosition = `\$\{offsetX\}px \$\{offsetY\}px`/);
+  assert.match(carousel, /trailer\?\.provider === 'trickplay'[\s\S]*?trailer\?\.provider === 'media-preview'[\s\S]*?!this\.response\.enableBackgroundTrailers && !isFallbackMedia/);
+  assert.match(trailer, /class JellyfinMediaPreviewPlayer[\s\S]*?startFraction: 0\.2[\s\S]*?maximumDurationSeconds: 30/);
+  assert.match(apiClient, /value\.call\(apiClient\)/);
+});

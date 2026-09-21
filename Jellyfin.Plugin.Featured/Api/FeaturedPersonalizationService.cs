@@ -78,7 +78,10 @@ public sealed class FeaturedPersonalizationService
             PreferredGenres = policy.AllowPreferredGenres && saved?.PreferredGenres is not null
                 ? saved.PreferredGenres : adminProfile?.PreferredGenres ?? defaults.PreferredGenres
         };
-        FeaturedSourceRule[] sources = config.SourceRules.Select(rule => new FeaturedSourceRule
+        FeaturedSourceRule[] sources = config.SourceRules
+            .Where(rule => rule.UserIds.Length == 0
+                || rule.UserIds.Any(value => Guid.TryParse(value, out Guid id) && id == userId))
+            .Select(rule => new FeaturedSourceRule
         {
             Id = rule.Id,
             Type = rule.Type,
@@ -90,6 +93,9 @@ public sealed class FeaturedPersonalizationService
             MaximumItems = rule.MaximumItems,
             IsFallback = rule.IsFallback,
             AllowBackgroundTrailers = rule.AllowBackgroundTrailers,
+            UseTrickplayFallback = rule.UseTrickplayFallback,
+            UseMediaPreviewFallback = rule.UseMediaPreviewFallback,
+            UserIds = rule.UserIds,
             EditorUserId = rule.EditorUserId,
             LibraryIds = rule.LibraryIds,
             CollectionIds = rule.CollectionIds,

@@ -27,7 +27,8 @@ internal static class PluginConfigurationNormalizer
         FeaturedFilterFields.CommunityRating,
         FeaturedFilterFields.CriticRating,
         FeaturedFilterFields.ProductionYear,
-        FeaturedFilterFields.RuntimeMinutes
+        FeaturedFilterFields.RuntimeMinutes,
+        FeaturedFilterFields.VideoResolution
     };
 
     private static readonly HashSet<string> ValidFilterOperators = new(StringComparer.OrdinalIgnoreCase)
@@ -250,6 +251,7 @@ internal static class PluginConfigurationNormalizer
             rule.MinimumItems = rule.MaximumItems;
         }
         rule.EditorUserId = string.IsNullOrWhiteSpace(rule.EditorUserId) ? null : rule.EditorUserId.Trim();
+        rule.UserIds = NormalizeValues(rule.UserIds);
         rule.LibraryIds = NormalizeValues(rule.LibraryIds);
         rule.CollectionIds = NormalizeValues(rule.CollectionIds);
         rule.PlaylistIds = NormalizeValues(rule.PlaylistIds);
@@ -411,7 +413,8 @@ internal static class PluginConfigurationNormalizer
         if (field is FeaturedFilterFields.CommunityRating
             or FeaturedFilterFields.CriticRating
             or FeaturedFilterFields.ProductionYear
-            or FeaturedFilterFields.RuntimeMinutes)
+            or FeaturedFilterFields.RuntimeMinutes
+            or FeaturedFilterFields.VideoResolution)
         {
             return filterOperator == FeaturedFilterOperators.LessThanOrEqual
                 ? FeaturedFilterOperators.LessThanOrEqual

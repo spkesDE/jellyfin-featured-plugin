@@ -296,6 +296,12 @@ public sealed class FeaturedSourceRule
 
     public bool AllowBackgroundTrailers { get; set; } = true;
 
+    public bool UseTrickplayFallback { get; set; }
+
+    public bool UseMediaPreviewFallback { get; set; }
+
+    public string[] UserIds { get; set; } = [];
+
     public string? EditorUserId { get; set; }
 
     public string[] LibraryIds { get; set; } = [];
@@ -463,6 +469,7 @@ public static class FeaturedFilterFields
     public const string CriticRating = "CRITIC_RATING";
     public const string ProductionYear = "PRODUCTION_YEAR";
     public const string RuntimeMinutes = "RUNTIME_MINUTES";
+    public const string VideoResolution = "VIDEO_RESOLUTION";
 }
 
 public static class FeaturedFilterOperators

@@ -9,7 +9,8 @@ const createId = (): string => globalThis.crypto?.randomUUID?.() ?? `${Date.now(
 export function createSourceRule(type: SourceType = 'RANDOM'): FeaturedSourceRule {
   return {
     Id: createId(), Type: type, Enabled: true, Weight: 100,
-    MinimumItems: 0, MaximumItems: 0, IsFallback: false, AllowBackgroundTrailers: true, EditorUserId: null,
+    MinimumItems: 0, MaximumItems: 0, IsFallback: false, AllowBackgroundTrailers: true,
+    UseMediaPreviewFallback: false, UseTrickplayFallback: false, UserIds: [], EditorUserId: null,
     LibraryIds: [], CollectionIds: [], PlaylistIds: [], ManualListIds: [], Tags: [],
     RecentDays: type === 'LATEST_RELEASES' ? 365 : 30, Filters: []
   };
@@ -296,6 +297,7 @@ export function normalizeConfig(value: unknown): FeaturedPluginConfig {
   config.SourceRules = Array.isArray(source.SourceRules)
     ? source.SourceRules.map((rule) => ({
         ...createSourceRule(rule.Type), ...rule,
+        UserIds: Array.isArray(rule.UserIds) ? rule.UserIds : [],
         ManualListIds: Array.isArray(rule.ManualListIds) ? rule.ManualListIds : [],
         Filters: normalizeFilters(rule.Filters)
       }))
@@ -342,7 +344,14 @@ export function normalizeConfig(value: unknown): FeaturedPluginConfig {
           EndTime: preset.EndTime || fallback.EndTime,
           AnnualStart: preset.AnnualStart || fallback.AnnualStart,
           AnnualEnd: preset.AnnualEnd || fallback.AnnualEnd,
-          SourceRules: Array.isArray(preset.SourceRules) ? cloneJsonValue(preset.SourceRules) : fallback.SourceRules,
+          SourceRules: Array.isArray(preset.SourceRules)
+            ? preset.SourceRules.map((rule) => ({
+                ...createSourceRule(rule.Type), ...cloneJsonValue(rule),
+                UserIds: Array.isArray(rule.UserIds) ? [...rule.UserIds] : [],
+                ManualListIds: Array.isArray(rule.ManualListIds) ? [...rule.ManualListIds] : [],
+                Filters: normalizeFilters(rule.Filters)
+              }))
+            : fallback.SourceRules,
           GlobalFilters: normalizeFilters(preset.GlobalFilters),
           PersonalizationPolicy: { ...fallback.PersonalizationPolicy, ...(preset.PersonalizationPolicy ?? {}) },
           Mixer: { ...fallback.Mixer, ...(preset.Mixer ?? {}) },
