@@ -1,3 +1,10 @@
+                #FeaturedConfigPage {
+                    --ec-config-control-padding: 0.55rem 0.9rem;
+                    --ec-config-control-transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
+                    --ec-config-pill-radius: 999px;
+                    --ec-controls-reveal-transition: opacity .2s ease, transform .2s ease;
+                }
+
                 #FeaturedConfigPage .jmp-configForm {
                     box-sizing: border-box;
                 }
@@ -144,7 +151,10 @@
                 }
 
                 #FeaturedConfigPage .ec-configPreview {
-                    background: #181b22 radial-gradient(circle at 72% 28%, #465267 0, #222936 35%, #11151d 72%);
+                    --ec-preview-background: #181b22 radial-gradient(circle at 72% 28%, #465267 0, #222936 35%, #11151d 72%);
+                    --ec-preview-content-inline-inset: 8%;
+                    --ec-preview-shade: linear-gradient(90deg, rgb(4 6 10 / var(--ec-preview-gradient, .85)), rgb(4 6 10 / calc(var(--ec-preview-gradient, .85) * .48)) 56%, transparent);
+                    background: var(--ec-preview-background);
                     border-radius: var(--ec-preview-radius, 0);
                     color: #fff;
                     container-type: inline-size;
@@ -243,14 +253,14 @@
                 }
 
                 #FeaturedConfigPage .ec-configPreviewShade {
-                    background: linear-gradient(90deg, rgb(4 6 10 / var(--ec-preview-gradient, .85)), rgb(4 6 10 / calc(var(--ec-preview-gradient, .85) * .48)) 56%, transparent);
+                    background: var(--ec-preview-shade);
                     inset: 0;
                     position: absolute;
                 }
 
                 #FeaturedConfigPage .ec-configPreviewContent {
                     bottom: 13%;
-                    left: 8%;
+                    left: var(--ec-preview-content-inline-inset);
                     max-width: 54%;
                     position: absolute;
                     z-index: 2;
@@ -269,7 +279,7 @@
                     display: flex;
                     flex-direction: column;
                     left: auto;
-                    right: 8%;
+                    right: var(--ec-preview-content-inline-inset);
                     text-align: right;
                 }
 
@@ -581,7 +591,7 @@
                     justify-content: center;
                     flex: 0 0 auto;
                     padding: 0.28rem 0.55rem;
-                    border-radius: 999px;
+                    border-radius: var(--ec-config-pill-radius);
                     border: 1px solid var(--ec-theme-primary);
                     background: var(--ec-theme-primary);
                     color: var(--ec-theme-primary-contrast);
@@ -709,14 +719,14 @@
                     justify-content: center;
                     gap: 0.4rem;
                     border: 1px solid var(--ec-theme-divider);
-                    border-radius: 999px;
+                    border-radius: var(--ec-config-pill-radius);
                     background: var(--ec-theme-action-hover);
                     color: var(--ec-theme-text-secondary);
-                    padding: 0.55rem 0.9rem;
+                    padding: var(--ec-config-control-padding);
                     font-size: 0.92em;
                     line-height: 1;
                     cursor: pointer;
-                    transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
+                    transition: var(--ec-config-control-transition);
                 }
 
                 #FeaturedConfigPage .jmp-tabButton:hover {
@@ -753,9 +763,9 @@
                     height: auto;
                     margin-top: 0;
                     margin-bottom: 0;
-                    padding: 0.55rem 0.9rem;
+                    padding: var(--ec-config-control-padding);
                     border: 1px solid var(--ec-theme-divider);
-                    border-radius: 999px;
+                    border-radius: var(--ec-config-pill-radius);
                     background: var(--ec-theme-action-hover);
                     color: var(--ec-theme-text-secondary);
                     box-shadow: none !important;
@@ -767,7 +777,7 @@
                     white-space: nowrap;
                     text-transform: none;
                     text-decoration: none;
-                    transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
+                    transition: var(--ec-config-control-transition);
                 }
 
                 #FeaturedConfigPage .jmp-saveButton span {
@@ -819,7 +829,7 @@
                     align-items: center;
                     gap: 0.35rem;
                     padding: 0.35rem 0.7rem;
-                    border-radius: 999px;
+                    border-radius: var(--ec-config-pill-radius);
                     background: rgba(255, 255, 255, 0.06);
                     border: 1px solid rgba(255, 255, 255, 0.08);
                     font-size: 0.88em;
@@ -850,7 +860,7 @@
                     flex: 0 0 auto;
                     width: 1.9rem;
                     height: 1.9rem;
-                    border-radius: 999px;
+                    border-radius: var(--ec-config-pill-radius);
                     display: inline-flex;
                     align-items: center;
                     justify-content: center;
@@ -910,6 +920,8 @@
                 }
 
                 #FeaturedConfigPage .jmp-appearanceCard {
+                    --jmp-appearance-placeholder-background: radial-gradient(circle at 72% 25%, rgba(62, 188, 220, 0.58), transparent 24%), linear-gradient(145deg, #18283b 5%, #315a75 48%, #111820 100%);
+                    --jmp-metadata-overlay-background: linear-gradient(180deg, rgba(8, 10, 14, 0.86), rgba(8, 10, 14, 0.72));
                     position: relative;
                     width: 100%;
                     overflow: hidden;
@@ -922,17 +934,18 @@
 
                 #FeaturedConfigPage .jmp-appearanceCard-portrait {
                     --jmp-appearancePortraitHeight: min(300px, 56.25cqw);
-                    width: min(100%, calc(var(--jmp-appearancePortraitHeight) * 0.666667));
+                    --jmp-appearanceWidthRatio: 0.666667;
                     height: var(--jmp-appearancePortraitHeight);
+                    width: min(100%, calc(var(--jmp-appearancePortraitHeight) * var(--jmp-appearanceWidthRatio)));
                     transition: width 280ms cubic-bezier(0.2, 0.75, 0.2, 1);
                 }
 
                 #FeaturedConfigPage .jmp-appearanceCard-portrait-wide-3-2 {
-                    width: min(100%, calc(var(--jmp-appearancePortraitHeight) * 1.5));
+                    --jmp-appearanceWidthRatio: 1.5;
                 }
 
                 #FeaturedConfigPage .jmp-appearanceCard-portrait-wide-16-9 {
-                    width: min(100%, calc(var(--jmp-appearancePortraitHeight) * 1.777778));
+                    --jmp-appearanceWidthRatio: 1.777778;
                 }
 
                 #FeaturedConfigPage .jmp-appearanceCard-backdrop {
@@ -949,9 +962,7 @@
 
                 #FeaturedConfigPage .jmp-appearancePoster {
                     z-index: 0;
-                    background:
-                        radial-gradient(circle at 72% 25%, rgba(62, 188, 220, 0.58), transparent 24%),
-                        linear-gradient(145deg, #18283b 5%, #315a75 48%, #111820 100%);
+                    background: var(--jmp-appearance-placeholder-background);
                     background-position: center;
                     background-repeat: no-repeat;
                     background-size: cover;
@@ -1001,7 +1012,7 @@
                     padding: 8px 10px;
                     pointer-events: none;
                     border-radius: 10px;
-                    background: linear-gradient(180deg, rgba(8, 10, 14, 0.86), rgba(8, 10, 14, 0.72));
+                    background: var(--jmp-metadata-overlay-background);
                     box-shadow: 0 8px 22px rgba(0, 0, 0, 0.32);
                     color: #fff;
                 }
@@ -1050,7 +1061,7 @@
                     height: 3px;
                     overflow: hidden;
                     pointer-events: none;
-                    border-radius: 999px;
+                    border-radius: var(--ec-config-pill-radius);
                     background: rgba(255, 255, 255, 0.18);
                 }
 
@@ -1190,7 +1201,7 @@
                     #FeaturedConfigPage .ec-configPreview.controls-on-hover .ec-configPreviewControls {
                         opacity: 0;
                         transform: translateY(-.2rem);
-                        transition: opacity .2s ease, transform .2s ease;
+                        transition: var(--ec-controls-reveal-transition);
                     }
 
                     #FeaturedConfigPage .ec-configPreview.controls-on-hover:hover .ec-configPreviewControls,

@@ -29,8 +29,8 @@ test('webOS 6 gets Chromium 79 compatible output and runtime fallbacks', async (
   assert.doesNotMatch(defaults, /structuredCloneValue/);
   assert.doesNotMatch(`${defaults}\n${store}`, /\bstructuredClone\(/);
   assert.doesNotMatch(`${preferences}\n${carousel}\n${trailer}\n${navigation}`, /\.replaceChildren\(/);
-  assert.match(`${styles}\n${webosOverrides}`, /height:\s*min\(52rem, calc\(100vh - 2rem\)\);[\s\S]*?height:\s*min\(52rem, calc\(100dvh - 2rem\)\);/);
-
+  assert.match(styles, /--ec-dialog-viewport-height:\s*calc\(100vh - 2rem\)[\s\S]*?height:\s*min\(52rem, var\(--ec-dialog-viewport-height\)\)/);
+  assert.match(styles, /@supports \(height: 100dvh\)[\s\S]*?--ec-dialog-viewport-height:\s*calc\(100dvh - 2rem\)/);
   const esbuild = await import('esbuild');
   const transformed = await esbuild.transform('.webos { position: absolute; inset: 0; }', {
     loader: 'css', target: 'chrome79', minify: true
@@ -55,10 +55,11 @@ test('hero content adapts overview lines without moving following sections', asy
   assert.match(main, /import \{ installAdaptiveHeroOverview \} from '\.\/slider\/heroOverviewFit'/);
   assert.match(main, /installAdaptiveHeroOverview\(\)/);
   assert.match(main, /style\.textContent = `\$\{styles\}\\n\$\{webosOverrides\}`/);
-  assert.match(styles, /\.ec-root\.ec-ready\.ec-hero\s*\{[\s\S]*?margin-bottom:\s*calc\(\(var\(--ec-hero-overlap, 150px\) \* -1\) \+ 52px \+ var\(--ec-media-padding, 0px\)\);/);
+  assert.match(styles, /--ec-desktop-overlap-offset:\s*calc\(\(var\(--ec-hero-overlap, 150px\) \* -1\) \+ 52px \+ var\(--ec-media-padding, 0px\)\)/);
+  assert.match(styles, /\.ec-root\.ec-ready\.ec-hero\s*\{[^}]*margin-bottom:\s*var\(--ec-hero-overlap-offset\)/);
   assert.doesNotMatch(`${styles}\n${webosOverrides}`, /margin-bottom:[^;]+var\(--ec-content-clearance/);
-  assert.match(webosOverrides, /@media \(min-width: 701px\) and \(hover: none\) and \(pointer: coarse\)[\s\S]*?margin-bottom:\s*calc\(\(var\(--ec-hero-overlap, 150px\) \* -1\) \+ 52px \+ var\(--ec-media-padding, 0px\)\)/);
-  assert.match(webosOverrides, /@media \(min-width: 701px\)[\s\S]*?\.ec-root\.ec-ready\.ec-hero \.ec-content\s*\{[\s\S]*?height:\s*clamp\(0px, calc\(var\(--ec-height\) - var\(--ec-hero-overlap, 150px\) \+ 52px \+ var\(--ec-media-padding, 0px\)\), var\(--ec-height\)\);[\s\S]*?overflow:\s*hidden;/);
+  assert.match(webosOverrides, /@media \(min-width: 701px\) and \(hover: none\) and \(pointer: coarse\)[\s\S]*?--ec-hero-overlap-offset:\s*var\(--ec-desktop-overlap-offset\)/);
+  assert.match(webosOverrides, /@media \(min-width: 701px\)[\s\S]*?\.ec-root\.ec-ready\.ec-hero \.ec-content\s*\{[\s\S]*?height:\s*var\(--ec-content-height\);[\s\S]*?overflow:\s*hidden;/);
   assert.match(webosOverrides, /\.ec-root\.ec-ready\.ec-hero \.ec-logo\s*\{[\s\S]*?flex:\s*0 0 auto;[\s\S]*?height:\s*clamp\(5rem, 11vw, 8\.5rem\);[\s\S]*?max-height:\s*min\(34%, 8\.5rem\);[\s\S]*?max-width:\s*min\(34rem, 82vw\);/);
   assert.match(webosOverrides, /\.ec-root\.ec-ready\.ec-hero \.ec-meta\s*\{[\s\S]*?font-size:\s*\.9rem;[\s\S]*?margin-top:\s*\.8rem;/);
   assert.match(webosOverrides, /\.ec-root\.ec-ready\.ec-hero \.ec-tagline\s*\{[\s\S]*?font-size:\s*\.95rem;[\s\S]*?margin-top:\s*\.65rem;/);

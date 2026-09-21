@@ -4,13 +4,20 @@
 }
 
 .ec-root {
+  --ec-banner-border-radius: var(--ec-banner-radius, var(--ec-radius));
+  --ec-content-padding: clamp(1.4rem, 4vw, 4.5rem);
+  --ec-controls-reveal-transition: opacity .2s ease, transform .2s ease;
   --ec-height: 360px;
+  --ec-media-opacity-transition: opacity .8s ease;
   --ec-tablet-height: 400px;
   --ec-mobile-height: 340px;
   --ec-radius: 0px;
   --ec-gradient-strength: .85;
+  --ec-media-shade: linear-gradient(90deg, rgb(5 7 12 / var(--ec-gradient-strength)) 0%, rgb(5 7 12 / calc(var(--ec-gradient-strength) * .74)) 30%, rgb(5 7 12 / calc(var(--ec-gradient-strength) * .16)) 66%, rgb(5 7 12 / calc(var(--ec-gradient-strength) * .42)) 100%), linear-gradient(0deg, rgb(5 7 12 / calc(var(--ec-gradient-strength) * .74)), transparent 45%);
+  --ec-on-media-color: #fff;
+  --ec-slide-transition: transform .62s cubic-bezier(.22, .61, .36, 1), opacity .46s ease;
   box-sizing: border-box;
-  color: #fff;
+  color: var(--ec-on-media-color);
   isolation: isolate;
   margin: 30px 0 calc(2.2em + var(--ec-media-padding, 0px));
   position: relative;
@@ -38,6 +45,8 @@
 }
 
 .ec-preferences-dialog {
+  --ec-dialog-viewport-height: calc(100vh - 2rem);
+  --ec-dialog-viewport-width: calc(100vw - 2rem);
   background: var(--ec-dialog-background, var(--ec-theme-background));
   border: var(--ec-dialog-border, 1px solid var(--ec-theme-divider));
   border-radius: var(--ec-dialog-radius, var(--ec-theme-radius));
@@ -46,10 +55,10 @@
   color: var(--ec-dialog-color, var(--ec-theme-text-primary));
   display: flex;
   flex-direction: column;
-  height: min(52rem, calc(100dvh - 2rem));
+  height: min(52rem, var(--ec-dialog-viewport-height));
   margin: auto;
-  max-height: calc(100dvh - 2rem);
-  max-width: calc(100vw - 2rem);
+  max-height: var(--ec-dialog-viewport-height);
+  max-width: var(--ec-dialog-viewport-width);
   overflow: hidden;
   width: 64rem;
 }
@@ -317,8 +326,9 @@
   }
 
   .ec-preferences-dialog {
+    --ec-dialog-viewport-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
     border-radius: 0;
-    height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    height: var(--ec-dialog-viewport-height);
     max-height: none;
     max-width: none;
     width: 100%;
@@ -356,6 +366,18 @@
   }
 }
 
+@supports (height: 100dvh) {
+  .ec-preferences-dialog {
+    --ec-dialog-viewport-height: calc(100dvh - 2rem);
+  }
+
+  @media (max-width: 600px) {
+    .ec-preferences-dialog {
+      --ec-dialog-viewport-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    }
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .ec-preferences-spinner {
     animation: none;
@@ -376,13 +398,13 @@
 }
 
 .ec-root:not(.ec-hero) .ec-viewport {
-  border-radius: var(--ec-banner-radius, var(--ec-radius));
+  border-radius: var(--ec-banner-border-radius);
   box-shadow: 0 .35rem 1.2rem rgba(0, 0, 0, .28);
 }
 
 .ec-viewport {
   background: #111;
-  border-radius: var(--ec-banner-radius, var(--ec-radius));
+  border-radius: var(--ec-banner-border-radius);
   height: var(--ec-height);
   min-height: 240px;
   overflow: hidden;
@@ -419,8 +441,8 @@
 }
 
 .ec-slide {
-  border-radius: var(--ec-banner-radius, var(--ec-radius));
-  clip-path: inset(0 round var(--ec-banner-radius, var(--ec-radius)));
+  border-radius: var(--ec-banner-border-radius);
+  clip-path: inset(0 round var(--ec-banner-border-radius));
   color: inherit;
   cursor: pointer;
   inset: 0;
@@ -428,7 +450,7 @@
   overflow: hidden;
   position: absolute;
   transform: translate3d(var(--ec-offset, 100%), 0, 0);
-  transition: transform .62s cubic-bezier(.22, .61, .36, 1), opacity .46s ease;
+  transition: var(--ec-slide-transition);
   width: 100%;
   z-index: 0;
 }
@@ -439,7 +461,7 @@
 
 .ec-slide.is-active:focus::before {
   border: 3px solid var(--ec-theme-secondary);
-  border-radius: var(--ec-banner-radius, var(--ec-radius));
+  border-radius: var(--ec-banner-border-radius);
   content: '';
   inset: 3px;
   pointer-events: none;
@@ -479,13 +501,12 @@
   inset: 0;
   position: absolute;
   transform: scale(1.015);
-  transition: opacity .8s ease;
+  transition: var(--ec-media-opacity-transition);
   z-index: 0;
 }
 
 .ec-slide::after {
-  background: linear-gradient(90deg, rgb(5 7 12 / var(--ec-gradient-strength)) 0%, rgb(5 7 12 / calc(var(--ec-gradient-strength) * .74)) 30%, rgb(5 7 12 / calc(var(--ec-gradient-strength) * .16)) 66%, rgb(5 7 12 / calc(var(--ec-gradient-strength) * .42)) 100%),
-    linear-gradient(0deg, rgb(5 7 12 / calc(var(--ec-gradient-strength) * .74)), transparent 45%);
+  background: var(--ec-media-shade);
   content: '';
   inset: 0;
   position: absolute;
@@ -505,7 +526,7 @@
   opacity: 1;
   top: 50%;
   transform: translate(-50%, -50%);
-  transition: opacity .8s ease;
+  transition: var(--ec-media-opacity-transition);
   width: max(100vw, calc(var(--ec-height) * 1.7778));
   z-index: 0;
 }
@@ -528,7 +549,7 @@
   flex-direction: column;
   height: 100%;
   max-width: min(42rem, 62%);
-  padding: clamp(1.4rem, 4vw, 4.5rem);
+  padding: var(--ec-content-padding);
   position: relative;
   text-shadow: 0 2px 12px rgba(0, 0, 0, .72);
   z-index: 2;
@@ -686,7 +707,7 @@
 }
 
 .ec-dot.is-active {
-  background: #fff;
+  background: var(--ec-on-media-color);
   transform: scale(1.25);
 }
 
@@ -743,7 +764,7 @@
 }
 
 .ec-dot:focus {
-  outline: 2px solid #fff;
+  outline: 2px solid var(--ec-on-media-color);
   outline-offset: 3px;
 }
 
@@ -807,7 +828,7 @@
     opacity: 0;
     pointer-events: none;
     transform: translateY(-.25rem);
-    transition: opacity .2s ease, transform .2s ease;
+    transition: var(--ec-controls-reveal-transition);
   }
 
   .ec-root.ec-controls-hover:hover .ec-controls,
@@ -825,7 +846,7 @@
   background: transparent;
   border: 0;
   border-radius: 50%;
-  color: #fff;
+  color: var(--ec-on-media-color);
   cursor: pointer;
   display: inline-flex;
   font-size: 1.1rem;
@@ -842,7 +863,7 @@
 .ec-control:focus-visible {
   background: rgba(255, 255, 255, .08);
   opacity: .95;
-  outline: 2px solid #fff;
+  outline: 2px solid var(--ec-on-media-color);
   outline-offset: 2px;
 }
 
@@ -955,7 +976,7 @@
 }
 
 .ec-countdown-progress {
-  stroke: #fff;
+  stroke: var(--ec-on-media-color);
   stroke-dasharray: 100;
   stroke-dashoffset: 0;
   stroke-linecap: round;
@@ -999,13 +1020,23 @@
   white-space: nowrap;
 }
 
+.ec-root.ec-hero {
+  --ec-content-height: var(--ec-desktop-content-height);
+  --ec-desktop-content-height: clamp(0px, calc(var(--ec-height) - var(--ec-hero-overlap, 150px) + 52px + var(--ec-media-padding, 0px)), var(--ec-height));
+  --ec-desktop-overlap-offset: calc((var(--ec-hero-overlap, 150px) * -1) + 52px + var(--ec-media-padding, 0px));
+  --ec-hero-content-padding-top: clamp(5em, 10vw, 9rem);
+  --ec-hero-media-mask: linear-gradient(to bottom, #000 18%, rgba(0, 0, 0, .92) 36%, rgba(0, 0, 0, .58) 53%, rgba(0, 0, 0, .22) 70%, transparent 85%);
+  --ec-hero-overlap-offset: var(--ec-desktop-overlap-offset);
+  --ec-hero-slide-background: linear-gradient(to bottom, #000 0%, #000 54%, rgba(0, 0, 0, .88) 60%, rgba(0, 0, 0, .58) 67%, rgba(0, 0, 0, .24) 73%, transparent 80%);
+}
+
 .ec-root.ec-ready.ec-hero {
-  margin-bottom: calc((var(--ec-hero-overlap, 150px) * -1) + 52px + var(--ec-media-padding, 0px));
+  margin-bottom: var(--ec-hero-overlap-offset);
   pointer-events: none;
 }
 
 .ec-root.ec-placeholder.ec-hero {
-  margin-bottom: calc((var(--ec-hero-overlap, 150px) * -1) + 52px + var(--ec-media-padding, 0px));
+  margin-bottom: var(--ec-hero-overlap-offset);
   margin-top: 0;
 }
 
@@ -1016,7 +1047,7 @@
 }
 
 .ec-root.ec-ready.ec-hero .ec-slide-hitbox {
-  height: clamp(0px, calc(var(--ec-height) - var(--ec-hero-overlap, 150px) + 52px + var(--ec-media-padding, 0px)), var(--ec-height));
+  height: var(--ec-content-height);
   inset: 0 0 auto;
   pointer-events: none;
   position: absolute;
@@ -1052,13 +1083,7 @@
 }
 
 .ec-root.ec-hero .ec-slide {
-  background: linear-gradient(to bottom,
-      #000 0%,
-      #000 54%,
-      rgba(0, 0, 0, .88) 60%,
-      rgba(0, 0, 0, .58) 67%,
-      rgba(0, 0, 0, .24) 73%,
-      transparent 80%);
+  background: var(--ec-hero-slide-background);
 }
 
 .ec-root.ec-hero .ec-slide.ec-trailer-active .ec-backdrop {
@@ -1076,7 +1101,7 @@
 }
 
 .ec-root.ec-hero .ec-content {
-  padding-top: clamp(5em, 10vw, 9rem);
+  padding-top: var(--ec-hero-content-padding-top);
 }
 
 .ec-height-auto {
@@ -1116,6 +1141,10 @@
     --ec-hero-overlap: 75px !important;
   }
 
+  .ec-root.ec-hero {
+    --ec-hero-slide-background: linear-gradient(0deg, rgba(5, 7, 12, .96) 0%, rgba(5, 7, 12, .54) 58%, rgba(5, 7, 12, .08) 100%);
+  }
+
   .ec-root.ec-hero .ec-viewport {
     height: var(--ec-height);
   }
@@ -1138,10 +1167,6 @@
     object-position: left center;
   }
 
-  .ec-root.ec-hero .ec-slide::after {
-    background: linear-gradient(0deg, rgba(5, 7, 12, .96) 0%, rgba(5, 7, 12, .54) 58%, rgba(5, 7, 12, .08) 100%);
-  }
-
   .ec-logo {
     max-height: 7.5rem;
     max-width: 70vw;
@@ -1161,14 +1186,18 @@
 }
 
 @media (max-width: 700px), (hover: none) and (pointer: coarse) {
+  .ec-root.ec-hero {
+    --ec-content-height: clamp(0px, calc(var(--ec-height) + 1.25rem + var(--ec-media-padding, 0px)), var(--ec-height));
+    --ec-hero-overlap-offset: calc(1.25rem + var(--ec-media-padding, 0px));
+  }
 
   .ec-root.ec-ready.ec-hero,
   .ec-root.ec-placeholder.ec-hero {
-    margin-bottom: calc(1.25rem + var(--ec-media-padding, 0px));
+    margin-bottom: var(--ec-hero-overlap-offset);
   }
 
   .ec-root.ec-ready.ec-hero .ec-slide-hitbox {
-    height: clamp(0px, calc(var(--ec-height) + 1.25rem + var(--ec-media-padding, 0px)), var(--ec-height));
+    height: var(--ec-content-height);
   }
 }
 
