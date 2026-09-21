@@ -67,14 +67,15 @@ test('hero hit-testing ends at the first Jellyfin section without clipping the v
 });
 
 test('whole-banner interaction is configurable while buttons remain independent', async () => {
-  const [configuration, resolver, response, defaults, displayTab, carousel, render] = await Promise.all([
+  const [configuration, resolver, response, defaults, displayTab, carousel, render, styles] = await Promise.all([
     read('Jellyfin.Plugin.Featured/Configuration/PluginConfiguration.cs'),
     read('Jellyfin.Plugin.Featured/Configuration/FeaturedPresetResolver.cs'),
     read('Jellyfin.Plugin.Featured/Api/FeaturedResponseDtos.cs'),
     read('src/config/libs/defaults.ts'),
     read('src/config/tabs/DisplayTab.vue'),
     read('src/slider/carousel.ts'),
-    read('src/slider/render.ts')
+    read('src/slider/render.ts'),
+    read('src/styles/featured.css')
   ]);
   assert.match(configuration, /InteractOnWholeBanner\s*\{\s*get;\s*set;\s*\}\s*=\s*true/);
   assert.match(resolver, /config\.InteractOnWholeBanner = preset\.Layout\.InteractOnWholeBanner/);
@@ -84,6 +85,8 @@ test('whole-banner interaction is configurable while buttons remain independent'
   assert.match(carousel, /response\.interactOnWholeBanner \? ' ec-whole-banner-interactive'/);
   assert.match(carousel, /isActive && this\.response\.interactOnWholeBanner \? 0 : -1/);
   assert.match(render, /if \(response\.interactOnWholeBanner\)[\s\S]*?slide\.addEventListener\('click'/);
+  assert.match(styles, /\.ec-slide\.is-active:focus-visible::before/);
+  assert.doesNotMatch(styles, /\.ec-slide\.is-active:focus::before/);
 });
 
 test('carousel controls can be hidden until hover without affecting touch input', async () => {

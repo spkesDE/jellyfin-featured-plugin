@@ -459,7 +459,7 @@
   transition: none !important;
 }
 
-.ec-slide.is-active:focus::before {
+.ec-slide.is-active:focus-visible::before {
   border: 3px solid var(--ec-theme-secondary);
   border-radius: var(--ec-banner-border-radius);
   content: '';
