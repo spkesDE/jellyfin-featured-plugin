@@ -4,6 +4,7 @@ import { heroImageUrl, logoUrl } from './images';
 import { openItemDetails } from './navigation';
 import { ExternalPlayer } from './trailer';
 import { createFavoriteButton } from './favorites';
+import { createPlaystateButton } from './playstate';
 
 export function loadSlideArtwork(slide: HTMLElement): void {
   const backdrop = slide.querySelector<HTMLElement>('.ec-backdrop');
@@ -61,6 +62,7 @@ function createMetadata(item: FeaturedItem, response: FeaturedResponse): HTMLEle
   }
   if (response.showFavoriteButton) {
     metadata.appendChild(createFavoriteButton(item, 'metadata'));
+    metadata.appendChild(createPlaystateButton(item));
   }
   return metadata.childElementCount ? metadata : null;
 }

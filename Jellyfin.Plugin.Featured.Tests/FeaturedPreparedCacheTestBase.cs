@@ -171,11 +171,18 @@ public abstract class FeaturedPreparedCacheTestBase : IDisposable
     public class UserDataManagerStub : DispatchProxy
     {
         public HashSet<Guid> FavoriteIds { get; } = [];
+        public HashSet<Guid> PlayedIds { get; } = [];
 
         protected override object? Invoke(MethodInfo? targetMethod, object?[]? args)
             => targetMethod?.Name == nameof(IUserDataManager.GetUserDataBatch)
-                ? ((IReadOnlyList<BaseItem>)args![0]!).Where(item => FavoriteIds.Contains(item.Id))
-                    .ToDictionary(item => item.Id, item => new UserItemData { Key = item.Id.ToString(), IsFavorite = true })
+                ? ((IReadOnlyList<BaseItem>)args![0]!)
+                    .Where(item => FavoriteIds.Contains(item.Id) || PlayedIds.Contains(item.Id))
+                    .ToDictionary(item => item.Id, item => new UserItemData
+                    {
+                        Key = item.Id.ToString(),
+                        IsFavorite = FavoriteIds.Contains(item.Id),
+                        Played = PlayedIds.Contains(item.Id)
+                    })
                 : GetDefaultValue(targetMethod?.ReturnType);
     }
 

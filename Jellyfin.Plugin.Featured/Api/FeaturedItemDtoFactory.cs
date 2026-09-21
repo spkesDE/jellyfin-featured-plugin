@@ -17,7 +17,8 @@ public sealed class FeaturedItemDtoFactory
         PluginConfiguration config,
         FeaturedPersonalizationContext personalization,
         bool allowBackgroundTrailers = true,
-        bool isFavorite = false)
+        bool isFavorite = false,
+        bool isPlayed = false)
     {
         IReadOnlyList<FeaturedTrailerDto> trailers = personalization.Display.EnableBackgroundTrailers && allowBackgroundTrailers
             ? _trailerResolver.ResolveCandidates(item, activeUser, config)
@@ -32,6 +33,7 @@ public sealed class FeaturedItemDtoFactory
             OfficialRating = personalization.Display.ShowRating ? item.OfficialRating : null,
             HasLogo = item.HasImage(MediaBrowser.Model.Entities.ImageType.Logo),
             IsFavorite = isFavorite,
+            IsPlayed = isPlayed,
             ProductionYear = personalization.Display.ShowYear ? item.ProductionYear : null,
             RuntimeMinutes = personalization.Display.ShowRuntime && item.RunTimeTicks.HasValue
                 ? (int)Math.Round(TimeSpan.FromTicks(item.RunTimeTicks.Value).TotalMinutes)

@@ -65,6 +65,20 @@ public sealed partial class FeaturedController
         return Ok(new { ok = true });
     }
 
+    [HttpPost("playstate/changed")]
+    [Authorize]
+    public ActionResult PlaystateChanged([FromBody] FeaturedPlaystateChangedRequest? request)
+    {
+        Jellyfin.Database.Implementations.Entities.User? activeUser = GetActiveUser();
+        if (activeUser is null) return NotFound();
+        if (request is null || request.ItemId == Guid.Empty) return BadRequest();
+        BaseItem? item = _libraryManager.GetItemById(request.ItemId);
+        if (item is null || !item.IsVisible(activeUser)) return NotFound();
+        _candidateCache.RemoveUser(activeUser.Id);
+        _preparedCache.RemoveUser(activeUser.Id);
+        return Ok(new { ok = true });
+    }
+
     private ActionResult<FeaturedItemsResponseDto> BuildItemsResponse(HashSet<Guid> excludedIds)
     {
         long requestStarted = Stopwatch.GetTimestamp();
@@ -152,10 +166,15 @@ public sealed partial class FeaturedController
                     .ToList();
                 IReadOnlyDictionary<Guid, UserItemData> userData = _userDataManager.GetUserDataBatch(displayItems, activeUser);
                 items = displayItems
-                    .Select(item => _itemDtoFactory.Create(item, activeUser, _config, personalization,
-                        !selection.ItemReasons.TryGetValue(item.Id, out FeaturedItemSelectionReason? reason)
-                        || reason.AllowBackgroundTrailers,
-                        userData.TryGetValue(item.Id, out UserItemData? data) && data.IsFavorite))
+                    .Select(item =>
+                    {
+                        userData.TryGetValue(item.Id, out UserItemData? data);
+                        return _itemDtoFactory.Create(item, activeUser, _config, personalization,
+                            !selection.ItemReasons.TryGetValue(item.Id, out FeaturedItemSelectionReason? reason)
+                            || reason.AllowBackgroundTrailers,
+                            data?.IsFavorite == true,
+                            data?.Played == true);
+                    })
                     .ToList();
                 dtoMilliseconds += GetElapsedMilliseconds(ref checkpoint);
                 if (_config.EnablePreparedCache) _preparedCache.QueueUserRefresh(activeUser.Id);

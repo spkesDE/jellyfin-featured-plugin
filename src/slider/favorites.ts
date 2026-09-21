@@ -1,4 +1,4 @@
-import { requestJson } from '../core/apiClient';
+import { getApiClient, requestJson } from '../core/apiClient';
 import { t } from '../i18n';
 import type { FeaturedItem } from '../types/featured';
 
@@ -10,6 +10,7 @@ function updateButton(button: HTMLButtonElement, favorite: boolean): void {
   button.title = t(favorite ? 'carousel.removeFavorite' : 'carousel.addFavorite');
   const icon = button.querySelector<HTMLElement>('.material-icons');
   if (icon) icon.textContent = favorite ? 'favorite' : 'favorite_border';
+  button.dataset.isfavorite = String(favorite);
   if (button.classList.contains('ec-favorite-button-meta')) {
     button.style.color = favorite ? '#ff4058' : 'var(--ec-on-media-color, #fff)';
   }
@@ -37,14 +38,22 @@ export function createFavoriteButton(item: FeaturedItem, variant: 'action' | 'me
   const button = document.createElement('button');
   button.type = 'button';
   button.className = variant === 'metadata'
-    ? 'ec-favorite-button ec-favorite-button-meta'
+    ? 'button-flat btnUserRating detailButton emby-button ec-favorite-button ec-favorite-button-meta'
     : 'ec-button ec-button-secondary ec-favorite-button raised emby-button';
+  button.setAttribute('is', 'emby-ratingbutton');
+  button.dataset.id = item.id;
+  const serverId = getApiClient()?.serverId?.();
+  if (serverId) button.dataset.serverid = serverId;
+  button.dataset.likes = 'undefined';
   if (variant === 'metadata') styleMetadataButton(button);
+  const content = document.createElement('div');
+  content.className = 'detailButton-content';
   const icon = document.createElement('span');
-  icon.className = 'material-icons';
+  icon.className = 'material-icons detailButton-icon favorite';
   if (variant === 'metadata') icon.style.fontSize = '1.35rem';
   icon.setAttribute('aria-hidden', 'true');
-  button.appendChild(icon);
+  content.appendChild(icon);
+  button.appendChild(content);
   updateButton(button, item.isFavorite);
 
   button.addEventListener('click', async () => {

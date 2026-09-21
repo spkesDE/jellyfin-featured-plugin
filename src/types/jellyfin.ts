@@ -38,6 +38,7 @@ export interface ParentalRating {
 export interface JellyfinApiClient {
   accessToken?: (() => string | undefined) | string;
   deviceId?: () => string | undefined;
+  serverId?: () => string | null | undefined;
   getCurrentUserId?: () => string | null | undefined;
   getUrl?: (path: string, query?: Record<string, string | number | boolean | null | undefined>) => string | null;
   ajax?: (request: JellyfinAjaxRequest) => Promise<unknown> | unknown;

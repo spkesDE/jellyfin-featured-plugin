@@ -690,21 +690,53 @@
   transform: scale(1.25);
 }
 
-.ec-favorite-button {
+.ec-favorite-button,
+.ec-playstate-button {
   justify-content: center;
   min-width: 2.8rem;
   padding-inline: .65rem;
+}
+
+.ec-favorite-button-meta,
+.ec-playstate-button-meta {
+  align-items: center;
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-radius: 50%;
+  color: var(--ec-on-media-color, #fff);
+  cursor: pointer;
+  display: inline-flex;
+  justify-content: center;
+  line-height: 1;
+  min-height: 1.8rem;
+  min-width: 1.8rem;
+  padding: .15rem;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, .8);
+}
+
+.ec-favorite-button-meta .detailButton-content,
+.ec-playstate-button-meta .detailButton-content {
+  align-items: center;
+  display: inline-flex;
+  justify-content: center;
+}
+
+.ec-playstate-button-meta[aria-pressed="true"] {
+  color: #52b54b;
 }
 
 .ec-favorite-button[aria-pressed="true"] {
   color: var(--ec-theme-primary);
 }
 
-.ec-favorite-button:disabled {
+.ec-favorite-button:disabled,
+.ec-playstate-button:disabled {
   opacity: .55;
 }
 
-.ec-favorite-error {
+.ec-favorite-error,
+.ec-playstate-error {
   align-self: center;
   color: var(--ec-theme-error-light);
   font-size: .85rem;
@@ -1001,6 +1033,7 @@
 
 .ec-root.ec-ready.ec-hero .ec-slide.is-active .ec-button,
 .ec-root.ec-ready.ec-hero .ec-slide.is-active .ec-favorite-button-meta,
+.ec-root.ec-ready.ec-hero .ec-slide.is-active .ec-playstate-button-meta,
 .ec-root.ec-ready.ec-hero .ec-navigation {
   pointer-events: auto;
 }

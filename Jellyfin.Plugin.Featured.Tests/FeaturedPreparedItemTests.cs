@@ -60,4 +60,18 @@ public sealed class FeaturedPreparedItemTests : FeaturedPreparedCacheTestBase
         Assert.True(items.Single(item => item.Id == source[0].Id.ToString()).IsFavorite);
         Assert.False(items.Single(item => item.Id == source[1].Id.ToString()).IsFavorite);
     }
+
+    [Fact]
+    public void PreparedItemsExposeCurrentUserPlayedState()
+    {
+        List<BaseItem> source = CreateItems(2);
+        _userData.PlayedIds.Add(source[0].Id);
+        PluginConfiguration config = new();
+        FeaturedPersonalizationContext personalization = CreatePersonalization();
+        Store(config, personalization, source);
+
+        Assert.True(TryGet(config, personalization, [], 2, out List<FeaturedItemDto> items, out _));
+        Assert.True(items.Single(item => item.Id == source[0].Id.ToString()).IsPlayed);
+        Assert.False(items.Single(item => item.Id == source[1].Id.ToString()).IsPlayed);
+    }
 }

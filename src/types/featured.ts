@@ -5,6 +5,7 @@ export interface FeaturedItem {
   official_rating?: string | null;
   hasLogo: boolean;
   isFavorite: boolean;
+  isPlayed: boolean;
   imageType: 'Backdrop' | 'Primary';
   mediaType: string;
   trailer?: FeaturedTrailer | null;

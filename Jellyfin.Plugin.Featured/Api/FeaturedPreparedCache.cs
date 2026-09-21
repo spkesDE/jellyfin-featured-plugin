@@ -252,14 +252,19 @@ public sealed class FeaturedPreparedCache
         string fingerprint = GetConfigurationFingerprint(config, personalization);
         IReadOnlyDictionary<Guid, UserItemData> userData = _userDataManager.GetUserDataBatch(selection.Items, user);
         PreparedItem[] items = selection.Items
-            .Select(item => new PreparedItem(
-                item.Id,
-                new Lazy<FeaturedItemDto>(
-                    () => _itemDtoFactory.Create(item, user, config, personalization,
-                        !selection.ItemReasons.TryGetValue(item.Id, out FeaturedItemSelectionReason? reason)
-                        || reason.AllowBackgroundTrailers,
-                        userData.TryGetValue(item.Id, out UserItemData? data) && data.IsFavorite),
-                    LazyThreadSafetyMode.ExecutionAndPublication)))
+            .Select(item =>
+            {
+                userData.TryGetValue(item.Id, out UserItemData? data);
+                return new PreparedItem(
+                    item.Id,
+                    new Lazy<FeaturedItemDto>(
+                        () => _itemDtoFactory.Create(item, user, config, personalization,
+                            !selection.ItemReasons.TryGetValue(item.Id, out FeaturedItemSelectionReason? reason)
+                            || reason.AllowBackgroundTrailers,
+                            data?.IsFavorite == true,
+                            data?.Played == true),
+                        LazyThreadSafetyMode.ExecutionAndPublication));
+            })
             .ToArray();
         if (eagerlyBuildDtos)
         {

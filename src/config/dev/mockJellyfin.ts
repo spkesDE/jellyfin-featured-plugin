@@ -105,6 +105,8 @@ export function installMockJellyfin(): void {
             mediaType: 'Movie',
             imageType: 'Backdrop',
             hasLogo: false,
+            isFavorite: false,
+            isPlayed: false,
             overview: 'A real-library-style preview showing how the selected banner settings will look.',
             community_rating: 8.7,
             critic_rating: 92,

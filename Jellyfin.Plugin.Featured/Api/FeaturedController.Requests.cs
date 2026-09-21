@@ -15,6 +15,11 @@ public sealed class FeaturedFavoriteChangedRequest
     public Guid ItemId { get; set; }
 }
 
+public sealed class FeaturedPlaystateChangedRequest
+{
+    public Guid ItemId { get; set; }
+}
+
 public sealed class FeaturedClearHistoryRequest
 {
     public Guid[] UserIds { get; set; } = [];
