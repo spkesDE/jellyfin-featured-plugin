@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { nextTick, ref } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
 import BannerPreview from '../components/BannerPreview.vue';
 import ConfigCard from '../components/ConfigCard.vue';
 import ConfigCheckbox from '../components/ConfigCheckbox.vue';
@@ -11,6 +11,57 @@ import { useConfigStore } from '../libs/store';
 
 const store = useConfigStore();
 const displayEditor = ref<HTMLElement | null>(null);
+const previewRail = ref<HTMLElement | null>(null);
+const previewOffset = ref(0);
+let previewFrame = 0;
+let previewResizeObserver: ResizeObserver | null = null;
+
+const previewPositionStyle = computed(() => ({
+  transform: previewOffset.value ? `translateY(${previewOffset.value}px)` : undefined
+}));
+
+function updatePreviewPosition(): void {
+  previewFrame = 0;
+  const rail = previewRail.value;
+  const editor = displayEditor.value;
+  const preview = rail?.firstElementChild as HTMLElement | null;
+  if (!rail || !editor || !preview || window.innerWidth <= 1050) {
+    previewOffset.value = 0;
+    return;
+  }
+
+  const rootFontSize = Number.parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+  const appBarOffset = rootFontSize * 4;
+  const toolbar = document.querySelector<HTMLElement>('#FeaturedConfigPage .jmp-toolbar');
+  const toolbarRect = toolbar?.getBoundingClientRect();
+  const visibleToolbarBottom = toolbarRect && toolbarRect.bottom > appBarOffset && toolbarRect.top <= appBarOffset + 1
+    ? toolbarRect.bottom + rootFontSize
+    : appBarOffset;
+  const railRect = rail.getBoundingClientRect();
+  const maximumOffset = Math.max(0, editor.offsetHeight - preview.offsetHeight);
+  previewOffset.value = Math.min(maximumOffset, Math.max(0, visibleToolbarBottom - railRect.top));
+}
+
+function schedulePreviewPosition(): void {
+  if (previewFrame) return;
+  previewFrame = window.requestAnimationFrame(updatePreviewPosition);
+}
+
+onMounted(() => {
+  document.addEventListener('scroll', schedulePreviewPosition, true);
+  window.addEventListener('resize', schedulePreviewPosition);
+  previewResizeObserver = new ResizeObserver(schedulePreviewPosition);
+  if (displayEditor.value) previewResizeObserver.observe(displayEditor.value);
+  if (previewRail.value?.firstElementChild) previewResizeObserver.observe(previewRail.value.firstElementChild);
+  schedulePreviewPosition();
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener('scroll', schedulePreviewPosition, true);
+  window.removeEventListener('resize', schedulePreviewPosition);
+  previewResizeObserver?.disconnect();
+  if (previewFrame) window.cancelAnimationFrame(previewFrame);
+});
 function focusSection(event: Event): void {
   const current = event.currentTarget as HTMLDetailsElement;
   if (!current.open) return;
@@ -148,9 +199,11 @@ const placementOptions: SelectOption[] = [
       </details>
       </div>
 
-      <ConfigCard class="ec-preview-section" :title="t('display.livePreview')" :help="t('display.livePreviewHelp')">
-        <BannerPreview @focus-section="openPreviewSection" />
-      </ConfigCard>
+      <div ref="previewRail" class="ec-previewRail">
+        <ConfigCard class="ec-preview-section" :style="previewPositionStyle" :title="t('display.livePreview')" :help="t('display.livePreviewHelp')">
+          <BannerPreview @focus-section="openPreviewSection" />
+        </ConfigCard>
+      </div>
     </div>
   </section>
 </template>
@@ -168,18 +221,20 @@ const placementOptions: SelectOption[] = [
 .ec-displayGroupBody { border-top: 1px solid rgba(255, 255, 255, .07); padding: 1rem; }
 .ec-displayGroupBody > :deep(.checkboxContainer:last-child), .ec-displayGroupBody > :deep(.inputContainer:last-child), .ec-displayGroupBody > :deep(.selectContainer:last-child) { margin-bottom: 0; }
 .ec-dependentSetting { border-top: 1px solid rgba(255, 255, 255, .07); margin-top: .7rem; padding-top: .7rem; }
+.ec-previewRail { align-self: stretch; min-width: 0; }
 .ec-preview-section {
   box-sizing: border-box;
-  max-height: calc(100vh - var(--ec-config-sticky-offset) - 1rem);
+  max-height: calc(100vh - var(--ec-config-appbar-offset) - 1rem);
   overflow-y: auto;
   overscroll-behavior: contain;
-  position: sticky;
+  position: relative;
   scrollbar-width: thin;
-  top: var(--ec-config-sticky-offset);
+  will-change: transform;
 }
 @media (max-width: 1050px) {
   .ec-displayWorkspace { grid-template-columns: 1fr; }
-  .ec-preview-section { grid-row: 1; max-height: none; overflow: visible; position: static; }
+  .ec-previewRail { grid-row: 1; }
+  .ec-preview-section { max-height: none; overflow: visible; transform: none !important; }
 }
 @media (max-width: 600px) { .ec-displayWorkspace { grid-template-columns: minmax(0, 1fr); } }
 </style>
