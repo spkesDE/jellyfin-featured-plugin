@@ -64,7 +64,7 @@ public sealed class PluginConfiguration : BasePluginConfiguration
 
     public bool ShowTrailerControls { get; set; } = true;
 
-    public string TrailerVolumeSliderDirection { get; set; } = "side";
+    public string TrailerVolumeSliderDirection { get; set; } = "down";
 
     public bool HideYouTubeTrailerUntilControlsFade { get; set; } = true;
 
@@ -258,7 +258,7 @@ public sealed class FeaturedPresetTrailerSettings
     public bool? FallBackToRemoteTrailers { get; set; }
     public bool StartTrailersMuted { get; set; } = true;
     public bool ShowTrailerControls { get; set; } = true;
-    public string TrailerVolumeSliderDirection { get; set; } = "side";
+    public string TrailerVolumeSliderDirection { get; set; } = "down";
     public bool HideYouTubeTrailerUntilControlsFade { get; set; } = true;
     public bool WaitForTrailerToFinish { get; set; }
     public int TrailerDelayMilliseconds { get; set; } = 1500;

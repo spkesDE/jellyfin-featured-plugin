@@ -8,8 +8,6 @@ function updateButton(button: HTMLButtonElement, favorite: boolean): void {
   button.setAttribute('aria-pressed', String(favorite));
   button.setAttribute('aria-label', t(favorite ? 'carousel.removeFavorite' : 'carousel.addFavorite'));
   button.title = t(favorite ? 'carousel.removeFavorite' : 'carousel.addFavorite');
-  const icon = button.querySelector<HTMLElement>('.material-icons');
-  if (icon) icon.textContent = favorite ? 'favorite' : 'favorite_border';
   button.dataset.isfavorite = String(favorite);
   if (button.classList.contains('ec-favorite-button-meta')) {
     button.style.color = favorite ? '#ff4058' : 'var(--ec-on-media-color, #fff)';

@@ -201,6 +201,9 @@ export function updateAdminNavigationEntry(entry: Element): void {
   entry.setAttribute('title', PLUGIN_DISPLAY_NAME);
   entry.removeAttribute('id');
 
+  const icon = entry.querySelector('.MuiListItemIcon-root');
+  if (icon) replaceElementChildren(icon, createUserSettingsIcon());
+
   const labelSelectors = [
     '.MuiListItemText-primary',
     '.MuiTypography-root.MuiListItemText-primary',

@@ -736,6 +736,28 @@
   text-shadow: 0 2px 8px rgba(0, 0, 0, .8);
 }
 
+/* Keep theme overrides such as ElegantFin from inflating these compact metadata controls. */
+.ec-root .ec-meta>button.ec-favorite-button-meta,
+.ec-root .ec-meta>button.ec-playstate-button-meta {
+  box-sizing: border-box !important;
+  height: 1.8rem !important;
+  margin: 0 !important;
+  max-height: 1.8rem !important;
+  max-width: 1.8rem !important;
+  min-height: 1.8rem !important;
+  min-width: 1.8rem !important;
+  padding: .15rem !important;
+  width: 1.8rem !important;
+}
+
+.ec-root .ec-meta>button.ec-favorite-button-meta:hover,
+.ec-root .ec-meta>button.ec-playstate-button-meta:hover,
+.ec-root .ec-meta>button.ec-favorite-button-meta:focus-visible,
+.ec-root .ec-meta>button.ec-playstate-button-meta:focus-visible {
+  background: rgba(255, 255, 255, .18) !important;
+  outline: none;
+}
+
 .ec-favorite-button-meta .detailButton-content,
 .ec-playstate-button-meta .detailButton-content {
   align-items: center;
@@ -792,19 +814,42 @@
 
 .ec-trailer-volume-control {
   align-items: center;
-  background: rgba(0, 0, 0, .72);
+  background: transparent;
   border-radius: 999px;
   display: flex;
   flex: 0 0 2.15rem;
   height: 2.15rem;
   position: relative;
+  transition: background .15s ease;
   width: 2.15rem;
 }
 
-.ec-trailer-mute {
+.ec-trailer-volume-control:hover,
+.ec-trailer-volume-control:focus-within {
+  background: var(--ec-theme-contained-hover, rgb(255 255 255 / .3));
+}
+
+.ec-root button.ec-trailer-mute {
+  align-items: center !important;
   box-sizing: border-box;
-  flex: 0 0 2.15rem;
+  display: flex !important;
+  height: 2.15rem !important;
+  inset: 0;
+  justify-content: center !important;
+  margin: 0 !important;
+  max-height: 2.15rem !important;
+  max-width: 2.15rem !important;
+  min-height: 2.15rem !important;
+  min-width: 2.15rem !important;
+  padding: .35em !important;
+  position: absolute;
+  width: 2.15rem !important;
   z-index: 3;
+}
+
+.ec-root button.ec-trailer-mute .material-icons {
+  line-height: 1;
+  margin: auto;
 }
 
 .ec-trailer-volume-popover {

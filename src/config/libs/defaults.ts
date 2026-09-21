@@ -136,7 +136,7 @@ export const CONFIG_DEFAULTS: FeaturedPluginConfig = {
   TrailerSourcePriority: 'prefer_local',
   StartTrailersMuted: true,
   ShowTrailerControls: true,
-  TrailerVolumeSliderDirection: 'side',
+  TrailerVolumeSliderDirection: 'down',
   HideYouTubeTrailerUntilControlsFade: true,
   WaitForTrailerToFinish: false,
   TrailerDelayMilliseconds: 1500,

@@ -101,6 +101,7 @@ test('personalization is authenticated, policy-bound, user scoped, and fast to r
   assert.match(navigation, /focus', preloadPreferencesDialog, \{ once: true \}/);
   assert.doesNotMatch(navigation, /section\.appendChild\(entry\);\s*preloadPreferencesDialog\(\)/);
   assert.match(navigation, /userSettingsEnabled = config\.personalizationEnabled/);
+  assert.match(navigation, /function updateAdminNavigationEntry[\s\S]*?\.MuiListItemIcon-root[\s\S]*?createUserSettingsIcon\(\)/);
   assert.match(styles, /ec-preferences-spinner/);
   assert.match(styles, /env\(safe-area-inset-top\)/);
   assert.match(styles, /\.ec-preferences-dialog[^}]*--ec-dialog-viewport-height:\s*calc\(100vh - 2rem\)[^}]*height:\s*min\(52rem, var\(--ec-dialog-viewport-height\)\)[^}]*width:\s*64rem/);

@@ -47,7 +47,7 @@ test('critical C# and TypeScript defaults stay in parity', async () => {
     EnableBackgroundTrailers: 'false',
     StartTrailersMuted: 'true',
     ShowTrailerControls: 'true',
-    TrailerVolumeSliderDirection: "'side'",
+    TrailerVolumeSliderDirection: "'down'",
     HideYouTubeTrailerUntilControlsFade: 'true',
     AllowTrailersOnMobile: 'false',
     AllowSourceSelection: 'false',

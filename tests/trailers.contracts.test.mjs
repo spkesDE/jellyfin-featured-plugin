@@ -17,7 +17,7 @@ test('proper trailer support keeps resolution and playback source independent', 
     read('src/styles/featured.css')
   ]);
   for (const setting of [
-    'TrailerSourcePriority', 'StartTrailersMuted', 'ShowTrailerControls', 'TrailerVolumeSliderDirection',
+    'TrailerSourcePriority', 'StartTrailersMuted', 'ShowTrailerControls',
     'HideYouTubeTrailerUntilControlsFade',
     'WaitForTrailerToFinish', 'TrailerDelayMilliseconds', 'TrailerStartOffsetSeconds',
     'TrailerEndOffsetSeconds', 'MultipleTrailerMode', 'AllowTrailersOnMobile', 'TrailerOverrides'
@@ -25,6 +25,8 @@ test('proper trailer support keeps resolution and playback source independent', 
     assert.equal(configuration.includes(setting), true, `backend misses ${setting}`);
     assert.equal(trailerTab.includes(`store.config.${setting}`), true, `trailer editor misses ${setting}`);
   }
+  assert.equal(configuration.includes('TrailerVolumeSliderDirection'), true);
+  assert.doesNotMatch(trailerTab, /TrailerVolumeSliderDirection|trailers\.volumeDirection/);
   assert.match(normalizer, /NormalizeTrailerUrl[\s\S]*?Uri\.UriSchemeHttp[\s\S]*?Uri\.UriSchemeHttps/);
   assert.match(resolver, /ResolveManual\(manual, activeUser\)[\s\S]*?if \(manualTrailer is not null\) candidates\.Add\(manualTrailer\)/);
   assert.match(resolver, /LocalOnly:[\s\S]*?AddRange\(local\)[\s\S]*?RemoteOnly:[\s\S]*?AddRange\(remote\)/);
@@ -64,10 +66,13 @@ test('proper trailer support keeps resolution and playback source independent', 
   assert.match(styles, /\.ec-trailer-volume\s*\{[^}]*width:\s*7rem/);
   assert.match(styles, /\.ec-volume-up \.ec-trailer-volume,[\s\S]*?\.ec-volume-down \.ec-trailer-volume\s*\{[^}]*height:\s*7rem[^}]*width:\s*1\.5rem[^}]*writing-mode:\s*vertical-lr/);
   assert.match(styles, /\.ec-trailer-volume-popover\s*\{[^}]*background:\s*inherit/);
+  assert.match(styles, /\.ec-trailer-volume-control\s*\{[^}]*background:\s*transparent[^}]*transition:\s*background \.15s ease/);
+  assert.match(styles, /\.ec-trailer-volume-control:hover,[\s\S]*?\.ec-trailer-volume-control:focus-within\s*\{[^}]*background:\s*var\(--ec-theme-contained-hover/);
+  assert.match(styles, /\.ec-root button\.ec-trailer-mute\s*\{[^}]*inset:\s*0[^}]*margin:\s*0 !important[^}]*position:\s*absolute/);
   assert.match(styles, /\.ec-volume-down \.ec-trailer-volume-popover\s*\{[^}]*padding:\s*calc\(2\.15rem \+ \.35rem\)[^}]*top:\s*0/);
   assert.match(carousel, /placeTrailerVolumePopover[\s\S]*?\['right', 'left', 'down', 'up'\][\s\S]*?getBoundingClientRect\(\)[\s\S]*?lowestOverflow/);
   assert.match(carousel, /addEventListener\('pointerenter', this\.placeTrailerVolumePopover\)[\s\S]*?addEventListener\('focusin', this\.placeTrailerVolumePopover\)/);
-  assert.match(normalizer, /NormalizeTrailerVolumeSliderDirection[\s\S]*?value is "up" or "down" \? value : "side"/);
+  assert.match(normalizer, /NormalizeTrailerVolumeSliderDirection[\s\S]*?=> "down"/);
   assert.match(carousel, /event\.key === '\+' \|\| event\.code === 'NumpadAdd'[\s\S]*?event\.key === '-' \|\| event\.code === 'NumpadSubtract'[\s\S]*?setTrailerVolume\(this\.trailerVolume \+ \(direction \* 10\)\)/);
   assert.match(carousel, /private setTrailerVolume[\s\S]*?setVolume\(this\.trailerVolume\)/);
   assert.match(carousel, /closest\('input, textarea, select, button,[\s\S]*?\[role="dialog"\]'/);

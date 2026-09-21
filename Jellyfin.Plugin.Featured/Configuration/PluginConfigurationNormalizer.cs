@@ -436,6 +436,6 @@ internal static class PluginConfigurationNormalizer
             .ToArray();
     }
 
-    private static string NormalizeTrailerVolumeSliderDirection(string? value)
-        => value is "up" or "down" ? value : "side";
+    private static string NormalizeTrailerVolumeSliderDirection(string? _)
+        => "down";
 }
