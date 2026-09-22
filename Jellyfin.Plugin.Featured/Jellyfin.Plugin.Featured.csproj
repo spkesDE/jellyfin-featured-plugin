@@ -5,9 +5,9 @@
     <Nullable>enable</Nullable>
     <AssemblyName>Jellyfin.Plugin.Featured</AssemblyName>
     <RootNamespace>Jellyfin.Plugin.Featured</RootNamespace>
-    <AssemblyVersion>12.5.0.0</AssemblyVersion>
-    <FileVersion>12.5.0.0</FileVersion>
-    <Version>12.5.0.0</Version>
+    <AssemblyVersion>12.5.1.0</AssemblyVersion>
+    <FileVersion>12.5.1.0</FileVersion>
+    <Version>12.5.1.0</Version>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
   </PropertyGroup>
   <ItemGroup>
