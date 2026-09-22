@@ -2,6 +2,7 @@ import type { FeaturedItem, FeaturedResponse } from '../types/featured';
 import { t } from '../i18n';
 import { heroImageUrl, logoUrl } from './images';
 import { openItemDetails } from './navigation';
+import { createPlaybackButton } from './playback';
 import { ExternalPlayer } from './trailer';
 import { createFavoriteButton } from './favorites';
 import { createPlaystateButton } from './playstate';
@@ -125,12 +126,7 @@ export function createSlide(item: FeaturedItem, response: FeaturedResponse): HTM
     const actions = document.createElement('div');
     actions.className = 'ec-actions';
     if (response.showPlayButton) {
-      const play = document.createElement('button');
-      play.type = 'button';
-      play.className = 'ec-button raised button-submit emby-button';
-      play.textContent = response.playButtonText || `▶ ${t('carousel.play')}`;
-      play.addEventListener('click', () => window.Emby?.Page?.showItem?.(item.id));
-      actions.appendChild(play);
+      actions.appendChild(createPlaybackButton(item, response.playButtonText));
     }
     if (response.showSecondaryButton) {
       const details = document.createElement('button');

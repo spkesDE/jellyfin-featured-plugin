@@ -111,12 +111,13 @@ test('carousel controls can be hidden until hover without affecting touch input'
 });
 
 test('frontend theming inherits Jellyfin palette tokens and exposes a Custom CSS API', async () => {
-  const [tokens, main, configMain, devMain, render, runtimeStyles, configStyles, preview, guide, readme] = await Promise.all([
+  const [tokens, main, configMain, devMain, render, playback, runtimeStyles, configStyles, preview, guide, readme] = await Promise.all([
     read('src/styles/jellyfin-theme.ts'),
     read('src/main.ts'),
     read('src/config/main.ts'),
     read('src/config/dev/main.ts'),
     read('src/slider/render.ts'),
+    read('src/slider/playback.ts'),
     read('src/styles/featured.css'),
     read('src/config/config.css'),
     read('src/config/components/BannerPreview.vue'),
@@ -139,7 +140,7 @@ test('frontend theming inherits Jellyfin palette tokens and exposes a Custom CSS
   assert.match(main, /injectJellyfinThemeTokens\(\)/);
   assert.match(configMain, /injectJellyfinThemeTokens\(\)/);
   assert.match(devMain, /injectJellyfinThemeTokens\(\)/);
-  assert.match(render, /ec-button raised button-submit emby-button/);
+  assert.match(render + playback, /ec-button raised button-submit emby-button/);
   assert.match(render, /ec-button ec-button-secondary raised emby-button/);
   assert.match(runtimeStyles, /\.ec-button\s*\{[^}]*background:\s*var\(--ec-button-primary-background, var\(--ec-theme-primary\)\)[^}]*color:\s*var\(--ec-button-primary-color, var\(--ec-theme-primary-contrast\)\)/);
   assert.match(runtimeStyles, /\.ec-preferences-dialog\s*\{[^}]*background:\s*var\(--ec-dialog-background, var\(--ec-theme-background\)\)[^}]*color:\s*var\(--ec-dialog-color, var\(--ec-theme-text-primary\)\)/);
