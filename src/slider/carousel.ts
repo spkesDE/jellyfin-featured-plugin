@@ -203,6 +203,8 @@ export class FeaturedCarousel {
       this.trailerVolumeInput.addEventListener('input', () => {
         this.setTrailerVolume(Number(this.trailerVolumeInput?.value ?? this.trailerVolume));
       });
+      this.trailerVolumeInput.addEventListener('pointerup', this.releaseTrailerVolumeInput);
+      this.trailerVolumeInput.addEventListener('pointercancel', this.releaseTrailerVolumeInput);
       const volumePopover = document.createElement('div');
       volumePopover.className = 'ec-trailer-volume-popover';
       this.trailerVolumePopover = volumePopover;
@@ -799,6 +801,10 @@ export class FeaturedCarousel {
     if (!this.trailerConcealed) void this.trailerPlayer.setMuted(this.trailerMuted);
     this.updateTrailerControls();
   }
+
+  private releaseTrailerVolumeInput = (): void => {
+    this.trailerVolumeInput?.blur();
+  };
 
   private toggleTrailerPaused(): void {
     if (!this.trailerPlayer) return;

@@ -60,6 +60,7 @@ test('proper trailer support keeps resolution and playback source independent', 
   assert.match(carousel, /toggleTrailerPaused[\s\S]*?trailerPlayer\.pause\(\)[\s\S]*?trailerPlayer\.play\(\)/);
   assert.match(carousel, /event\.code !== 'Space'[\s\S]*?toggleTrailerPaused\(\)/);
   assert.match(carousel, /type = 'range'[\s\S]*?min = '0'[\s\S]*?max = '100'[\s\S]*?setTrailerVolume/);
+  assert.match(carousel, /addEventListener\('pointerup', this\.releaseTrailerVolumeInput\)[\s\S]*?addEventListener\('pointercancel', this\.releaseTrailerVolumeInput\)[\s\S]*?releaseTrailerVolumeInput[\s\S]*?\.blur\(\)/);
   assert.match(carousel, /ec-trailer-volume-control ec-volume-[\s\S]*?appendChild\(this\.trailerMuteButton\)[\s\S]*?ec-trailer-volume-popover[\s\S]*?appendChild\(this\.trailerVolumeInput\)/);
   assert.match(carousel, /if \(controls\.childElementCount\) navigation\.appendChild\(controls\);[\s\S]*?navigation\.appendChild\(dots\);[\s\S]*?if \(this\.trailerControls\) navigation\.appendChild\(this\.trailerControls\)/);
   assert.match(styles, /\.ec-trailer-controls\[hidden\][^}]*display:\s*none/);
