@@ -1,5 +1,41 @@
 # Changelog
 
+## v12.5.0.0 - 2026-09-21
+
+### Features
+
+- feat: control background trailers per source rule
+- feat: add Jellyfin movie recommendations as a mixer source
+- feat: toggle viewer favorites from featured slides
+- feat: make featured favorite button configurable for admins and users
+- feat: place favorite heart in banner metadata
+- feat(preferences): preload user settings cache
+- feat(trailers): add configurable media controls
+- feat(display): add fullscreen hero fade controls
+- feat(playstate): add watched toggle beside favorites
+- feat(styles): enhance CSS variables for responsive design and transitions
+- feat(sources): add media fallbacks and resolution filter
+
+### Fixes
+
+- fix(navigation): preserve carousel focus and native keyboard controls
+- fix: show critic rating with rotten icon
+- fix: remove item-page critic rating classes
+- fix: update favorites without reloading carousel
+- fix(trailers): disable subtitles for remote trailers
+- fix(favorites): keep metadata heart clickable
+- fix(trailers): refine volume slider pill placement
+- fix(carousel): hide focus border on pointer clicks
+- fix(trailers): volume slider related styles fixes
+- fix(settings): streamline configuration and preview controls
+- fix(settings): keep live preview visible while scrolling
+
+### Other
+
+- chore(tests): split and prune test suites
+- deps(deps): bump the npm-minor-and-patch group with 3 updates (#13)
+- deps: Bump the nuget-minor-and-patch group with 4 updates (#15)
+- deps(deps-dev): bump typescript from 5.9.3 to 6.0.3 (#14)
 ## v12.4.0.0 - 2026-09-15
 
 ### Fixes
