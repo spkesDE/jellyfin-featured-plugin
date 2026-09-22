@@ -1,5 +1,10 @@
 # Changelog
 
+## v12.5.1.0 - 2026-09-22
+
+### Fixes
+
+- fix(trailers): release volume slider focus after drag
 ## v12.5.0.0 - 2026-09-21
 
 ### Features
