@@ -548,7 +548,7 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  max-width: min(42rem, 62%);
+  max-width: min(max(42rem, 40vw), 62%);
   padding: var(--ec-content-padding);
   position: relative;
   text-shadow: 0 2px 12px rgba(0, 0, 0, .72);
