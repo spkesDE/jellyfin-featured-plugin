@@ -173,7 +173,7 @@ async function mount(container: Element): Promise<void> {
   const placeholder = createPlaceholder(container);
   try {
     const response = removeEpisodeItems(await requestJson<FeaturedResponse>('featured/items'));
-    setUserSettingsMenuEnabled(response.personalizationEnabled);
+    setUserSettingsMenuEnabled(response.personalizationEnabled || response.dismissalsEnabled);
     schedulePresetRefresh(response.nextPresetChange);
     if (
       mountToken !== lifecycleToken ||

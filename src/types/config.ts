@@ -53,6 +53,7 @@ export interface FeaturedPluginConfig {
   UserProfiles: FeaturedUserProfile[];
   PersonalizationDefaults: FeaturedPersonalizationDefaults;
   PersonalizationPolicy: FeaturedPersonalizationPolicy;
+  DismissalPolicy: FeaturedDismissalPolicy;
   Presets: FeaturedPreset[];
   RepeatCooldownDays: number;
   RelaxRepeatCooldownWhenNeeded: boolean;
@@ -83,6 +84,8 @@ export interface FeaturedPluginConfig {
   FavoriteButtonPlacement: FeatureControlPlacement;
   ShowPlaystateButton: boolean;
   PlaystateButtonPlacement: FeatureControlPlacement;
+  ShowDismissalButton: boolean;
+  DismissalButtonPlacement: FeatureControlPlacement;
   ShowNavigationArrows: boolean;
   ShowControlsOnHoverOnly: boolean;
   InteractOnWholeBanner: boolean;
@@ -157,6 +160,8 @@ export interface FeaturedPresetLayoutSettings {
   FavoriteButtonPlacement: FeatureControlPlacement;
   ShowPlaystateButton: boolean;
   PlaystateButtonPlacement: FeatureControlPlacement;
+  ShowDismissalButton: boolean;
+  DismissalButtonPlacement: FeatureControlPlacement;
   ShowNavigationArrows: boolean;
   ShowControlsOnHoverOnly: boolean;
   InteractOnWholeBanner: boolean;
@@ -262,6 +267,13 @@ export interface FeaturedPersonalizationPolicy {
   AllowRepeatCooldown: boolean;
 }
 
+export interface FeaturedDismissalPolicy {
+  Enabled: boolean;
+  AllowTitle: boolean;
+  AllowSeries: boolean;
+  AllowFranchise: boolean;
+}
+
 export interface RuntimeConfig extends FeaturedDisplaySettings {
   frontendInjectionMethod: FrontendInjectionMethod;
   randomMediaCount: number;
@@ -272,6 +284,7 @@ export interface RuntimeConfig extends FeaturedDisplaySettings {
   autoplayInterval: number;
   reduceImageSize: boolean;
   personalizationEnabled: boolean;
+  dismissalsEnabled: boolean;
   secondaryButtonText: string | null;
   heading: string | null;
   playButtonText: string | null;

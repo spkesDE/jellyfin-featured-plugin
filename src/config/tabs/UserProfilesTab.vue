@@ -31,6 +31,15 @@ function addProfile(): void {
 <template>
   <section id="featuredPanel-users" class="jmp-section jmp-section-plain" role="tabpanel" aria-labelledby="featuredTab-users">
     <div class="ec-userSettingsGrid">
+      <ConfigCard :title="t('users.dismissalsTitle')" :help="t('users.dismissalsHelp')">
+        <ConfigCheckbox v-model="store.config.DismissalPolicy.Enabled" :label="t('users.dismissalsEnabled')" />
+        <div class="ec-policyGrid" :class="{ 'ec-disabledGroup': !store.config.DismissalPolicy.Enabled }">
+          <ConfigCheckbox v-model="store.config.DismissalPolicy.AllowTitle" :label="t('users.dismissTitle')" :disabled="!store.config.DismissalPolicy.Enabled" />
+          <ConfigCheckbox v-model="store.config.DismissalPolicy.AllowSeries" :label="t('users.dismissSeries')" :disabled="!store.config.DismissalPolicy.Enabled" />
+          <ConfigCheckbox v-model="store.config.DismissalPolicy.AllowFranchise" :label="t('users.dismissFranchise')" :disabled="!store.config.DismissalPolicy.Enabled" />
+        </div>
+      </ConfigCard>
+
       <ConfigCard :title="t('users.personalizationTitle')" :help="t('users.personalizationHelp')">
         <ConfigCheckbox v-model="store.config.PersonalizationPolicy.Enabled" :label="t('users.personalizationEnabled')" />
         <div class="ec-policyGrid" :class="{ 'ec-disabledGroup': !store.config.PersonalizationPolicy.Enabled }">

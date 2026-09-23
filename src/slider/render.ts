@@ -6,6 +6,7 @@ import { createPlaybackButton } from './playback';
 import { ExternalPlayer } from './trailer';
 import { createFavoriteButton } from './favorites';
 import { createPlaystateButton } from './playstate';
+import { createDismissalControl } from './dismissals';
 
 export function loadSlideArtwork(slide: HTMLElement): void {
   const backdrop = slide.querySelector<HTMLElement>('.ec-backdrop');
@@ -67,6 +68,9 @@ function createMetadata(item: FeaturedItem, response: FeaturedResponse): HTMLEle
   if (response.showPlaystateButton && response.playstateButtonPlacement === 'metadata') {
     metadata.appendChild(createPlaystateButton(item, 'metadata'));
   }
+  if (response.dismissalsEnabled && response.showDismissalButton && response.dismissalButtonPlacement === 'metadata' && item.dismissalOptions?.length) {
+    metadata.appendChild(createDismissalControl(item, 'metadata'));
+  }
   return metadata.childElementCount ? metadata : null;
 }
 
@@ -122,7 +126,11 @@ export function createSlide(item: FeaturedItem, response: FeaturedResponse): HTM
 
   const favoriteAction = response.showFavoriteButton && response.favoriteButtonPlacement === 'actions';
   const playstateAction = response.showPlaystateButton && response.playstateButtonPlacement === 'actions';
-  if (response.showPlayButton || response.showSecondaryButton || favoriteAction || playstateAction || (item.trailer?.provider === 'external' && item.trailer.url)) {
+  const dismissalAction = response.dismissalsEnabled
+    && response.showDismissalButton
+    && response.dismissalButtonPlacement === 'actions'
+    && !!item.dismissalOptions?.length;
+  if (response.showPlayButton || response.showSecondaryButton || favoriteAction || playstateAction || dismissalAction || (item.trailer?.provider === 'external' && item.trailer.url)) {
     const actions = document.createElement('div');
     actions.className = 'ec-actions';
     if (response.showPlayButton) {
@@ -138,6 +146,7 @@ export function createSlide(item: FeaturedItem, response: FeaturedResponse): HTM
     }
     if (favoriteAction) actions.appendChild(createFavoriteButton(item, 'action'));
     if (playstateAction) actions.appendChild(createPlaystateButton(item, 'action'));
+    if (dismissalAction) actions.appendChild(createDismissalControl(item));
     if (item.trailer?.provider === 'external' && item.trailer.url) {
       const trailer = document.createElement('button');
       trailer.type = 'button';

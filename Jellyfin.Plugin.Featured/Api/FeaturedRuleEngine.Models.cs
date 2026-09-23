@@ -13,6 +13,7 @@ public sealed class FeaturedRuleDiagnostic
     public int AfterFilters { get; set; }
     public int Ineligible { get; set; }
     public int CooldownExcluded { get; set; }
+    public int DismissedExcluded { get; set; }
     public int Eligible { get; set; }
     public int Allocated { get; set; }
     public int Duplicates { get; set; }

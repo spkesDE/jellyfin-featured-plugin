@@ -26,7 +26,7 @@ public sealed partial class FeaturedController
     {
         Jellyfin.Database.Implementations.Entities.User? activeUser = GetActiveUser();
         if (activeUser == null) return NotFound();
-        if (!_config.PersonalizationPolicy.Enabled) return Forbid();
+        if (!_config.PersonalizationPolicy.Enabled && !_config.DismissalPolicy.Enabled) return Forbid();
         if (request?.Reset == true)
         {
             _personalization.Remove(activeUser.Id);
@@ -87,7 +87,8 @@ public sealed partial class FeaturedController
             totalTimer.Elapsed.TotalMilliseconds,
             preferencesMilliseconds,
             optionsMilliseconds);
-        return new JsonResult(new FeaturedPreferencesBootstrapResponse(current, options), RuntimeConfigJsonOptions);
+        FeaturedDismissalsResponse dismissals = new(_config.DismissalPolicy, _dismissalStore.Get(activeUser.Id));
+        return new JsonResult(new FeaturedPreferencesBootstrapResponse(current, options, dismissals), RuntimeConfigJsonOptions);
     }
 
     private FeaturedPreferencesResponse CreatePreferencesResponse(Jellyfin.Database.Implementations.Entities.User user)

@@ -97,6 +97,8 @@ public sealed partial class FeaturedController
             FeaturedPersonalizationContext personalization = _personalization.Resolve(_config, activeUser.Id);
             double personalizationMilliseconds = GetElapsedMilliseconds(ref checkpoint);
 
+            FeaturedDismissalSnapshot dismissals = _dismissalStore.GetSnapshot(activeUser.Id);
+
             IReadOnlyDictionary<Guid, DateTimeOffset> recentHistory = _historyStore.GetRecentItems(activeUser.Id, personalization.RepeatCooldownHours);
             double historyMilliseconds = GetElapsedMilliseconds(ref checkpoint);
 
@@ -110,7 +112,8 @@ public sealed partial class FeaturedController
                 requestedCount,
                 out items,
                 out string preparedCacheStatus,
-                out double cachedDtoMilliseconds);
+                out double cachedDtoMilliseconds,
+                dismissals);
             string initialPreparedCacheStatus = preparedCacheStatus;
             double preparedCacheMilliseconds = Math.Max(0, GetElapsedMilliseconds(ref checkpoint) - cachedDtoMilliseconds);
 
@@ -124,10 +127,11 @@ public sealed partial class FeaturedController
                     [],
                     recentHistory,
                     FeaturedPreparedCache.GetRequestedPoolSize(_config),
-                    personalization);
+                    personalization,
+                    dismissals);
                 LogRuleEngineTiming(coldPool.Timing);
                 ruleEngineMilliseconds += GetElapsedMilliseconds(ref checkpoint);
-                _preparedCache.StoreRequestPool(activeUser, _config, personalization, coldPool);
+                _preparedCache.StoreRequestPool(activeUser, _config, personalization, coldPool, dismissals);
 
                 preparedCacheHit = _preparedCache.TryGetItems(
                     activeUser,
@@ -137,7 +141,8 @@ public sealed partial class FeaturedController
                     requestedCount,
                     out items,
                     out string coldFillStatus,
-                    out double coldFillDtoMilliseconds);
+                    out double coldFillDtoMilliseconds,
+                    dismissals);
                 preparedCacheMilliseconds += Math.Max(0, GetElapsedMilliseconds(ref checkpoint) - coldFillDtoMilliseconds);
                 dtoMilliseconds += coldFillDtoMilliseconds;
                 preparedCacheStatus = preparedCacheHit
@@ -155,7 +160,7 @@ public sealed partial class FeaturedController
                 else
                 {
                     selection = CreateEngine()
-                        .SelectItems(activeUser, excludedIds, recentHistory, requestedCount, personalization);
+                        .SelectItems(activeUser, excludedIds, recentHistory, requestedCount, personalization, dismissals);
                     LogRuleEngineTiming(selection.Timing);
                     ruleEngineMilliseconds += GetElapsedMilliseconds(ref checkpoint);
                 }

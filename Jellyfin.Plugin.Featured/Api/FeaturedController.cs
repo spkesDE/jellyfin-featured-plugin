@@ -16,6 +16,7 @@ public sealed partial class FeaturedController : ControllerBase
     private readonly ILibraryManager _libraryManager;
     private readonly IUserDataManager _userDataManager;
     private readonly FeaturedDisplayHistoryStore _historyStore;
+    private readonly FeaturedDismissalStore _dismissalStore;
     private readonly FeaturedCandidateCache _candidateCache;
     private readonly FeaturedRecommendationCandidates _recommendations;
     private readonly FeaturedPreparedCache _preparedCache;
@@ -29,6 +30,7 @@ public sealed partial class FeaturedController : ControllerBase
         ILibraryManager libraryManager,
         IUserDataManager userDataManager,
         FeaturedDisplayHistoryStore historyStore,
+        FeaturedDismissalStore dismissalStore,
         FeaturedCandidateCache candidateCache,
         FeaturedRecommendationCandidates recommendations,
         FeaturedPreparedCache preparedCache,
@@ -41,6 +43,7 @@ public sealed partial class FeaturedController : ControllerBase
         _libraryManager = libraryManager;
         _userDataManager = userDataManager;
         _historyStore = historyStore;
+        _dismissalStore = dismissalStore;
         _candidateCache = candidateCache;
         _recommendations = recommendations;
         _preparedCache = preparedCache;

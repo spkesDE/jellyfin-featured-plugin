@@ -77,7 +77,7 @@ const mediaCards = [
           <div class="ec-configPreviewContent">
             <img v-if="logoSource" class="ec-configPreviewImageLogo" :src="logoSource" :alt="item?.name || ''">
             <div v-else class="ec-configPreviewLogo">{{ item?.name || t('preview.fallbackTitle') }}</div>
-            <div v-if="store.config.ShowRating || store.config.ShowYear || store.config.ShowRuntime || (store.config.ShowFavoriteButton && store.config.FavoriteButtonPlacement === 'metadata') || (store.config.ShowPlaystateButton && store.config.PlaystateButtonPlacement === 'metadata')" class="ec-configPreviewMeta" @click.stop="$emit('focusSection', 'metadata')">
+            <div v-if="store.config.ShowRating || store.config.ShowYear || store.config.ShowRuntime || (store.config.ShowFavoriteButton && store.config.FavoriteButtonPlacement === 'metadata') || (store.config.ShowPlaystateButton && store.config.PlaystateButtonPlacement === 'metadata') || (store.config.DismissalPolicy.Enabled && store.config.ShowDismissalButton && store.config.DismissalButtonPlacement === 'metadata')" class="ec-configPreviewMeta" @click.stop="$emit('focusSection', 'metadata')">
               <span v-if="store.config.ShowRating">★ {{ item?.community_rating?.toFixed(1) || '8.7' }}</span>
               <span v-if="store.config.ShowRating">{{ item?.critic_rating ? Math.round(item.critic_rating) : 92 }}%</span>
               <span v-if="store.config.ShowRating">{{ item?.official_rating || 'FSK 12' }}</span>
@@ -85,11 +85,12 @@ const mediaCards = [
               <span v-if="store.config.ShowRuntime">{{ item?.runtimeMinutes || 124 }} min</span>
               <button v-if="store.config.ShowFavoriteButton && store.config.FavoriteButtonPlacement === 'metadata'" type="button" class="ec-configPreviewMetaControl" :title="t('display.showFavoriteButton')"><span class="material-icons" aria-hidden="true">{{ item?.isFavorite ? 'favorite' : 'favorite_border' }}</span></button>
               <button v-if="store.config.ShowPlaystateButton && store.config.PlaystateButtonPlacement === 'metadata'" type="button" class="ec-configPreviewMetaControl" :title="t('display.showPlaystateButton')"><span class="material-icons" aria-hidden="true">check</span></button>
+              <button v-if="store.config.DismissalPolicy.Enabled && store.config.ShowDismissalButton && store.config.DismissalButtonPlacement === 'metadata'" type="button" class="ec-configPreviewMetaControl" :title="t('display.showDismissalButton')"><span class="material-icons" aria-hidden="true">visibility_off</span></button>
             </div>
             <div v-if="store.config.ShowDescription" class="ec-configPreviewText">
               {{ item?.overview || t('preview.fallbackDescription') }}
             </div>
-            <div v-if="store.config.ShowPlayButton || store.config.ShowSecondaryButton || (store.config.ShowFavoriteButton && store.config.FavoriteButtonPlacement === 'actions') || (store.config.ShowPlaystateButton && store.config.PlaystateButtonPlacement === 'actions')" class="ec-configPreviewActions" @click.stop="$emit('focusSection', 'actions')">
+            <div v-if="store.config.ShowPlayButton || store.config.ShowSecondaryButton || (store.config.ShowFavoriteButton && store.config.FavoriteButtonPlacement === 'actions') || (store.config.ShowPlaystateButton && store.config.PlaystateButtonPlacement === 'actions') || (store.config.DismissalPolicy.Enabled && store.config.ShowDismissalButton && store.config.DismissalButtonPlacement === 'actions')" class="ec-configPreviewActions" @click.stop="$emit('focusSection', 'actions')">
               <button v-if="store.config.ShowPlayButton" type="button" class="ec-configPreviewButton raised button-submit emby-button">
                 {{ store.config.PlayButtonText || `▶ ${t('common.play')}` }}
               </button>
@@ -100,6 +101,7 @@ const mediaCards = [
                 <span class="material-icons" aria-hidden="true">{{ item?.isFavorite ? 'favorite' : 'favorite_border' }}</span>
               </button>
               <button v-if="store.config.ShowPlaystateButton && store.config.PlaystateButtonPlacement === 'actions'" type="button" class="ec-configPreviewButton is-secondary raised emby-button" :title="t('display.showPlaystateButton')"><span class="material-icons" aria-hidden="true">check</span></button>
+              <button v-if="store.config.DismissalPolicy.Enabled && store.config.ShowDismissalButton && store.config.DismissalButtonPlacement === 'actions'" type="button" class="ec-configPreviewButton is-secondary raised emby-button" :title="t('display.showDismissalButton')"><span class="material-icons" aria-hidden="true">visibility_off</span></button>
             </div>
           </div>
           <div

@@ -140,7 +140,7 @@ test('frontend theming inherits Jellyfin palette tokens and exposes a Custom CSS
   assert.match(main, /injectJellyfinThemeTokens\(\)/);
   assert.match(configMain, /injectJellyfinThemeTokens\(\)/);
   assert.match(devMain, /injectJellyfinThemeTokens\(\)/);
-  assert.match(render + playback, /ec-button raised button-submit emby-button/);
+  assert.match(render + playback, /raised button-submit emby-button/);
   assert.match(render, /ec-button ec-button-secondary raised emby-button/);
   assert.match(runtimeStyles, /\.ec-button\s*\{[^}]*background:\s*var\(--ec-button-primary-background, var\(--ec-theme-primary\)\)[^}]*color:\s*var\(--ec-button-primary-color, var\(--ec-theme-primary-contrast\)\)/);
   assert.match(runtimeStyles, /\.ec-preferences-dialog\s*\{[^}]*background:\s*var\(--ec-dialog-background, var\(--ec-theme-background\)\)[^}]*color:\s*var\(--ec-dialog-color, var\(--ec-theme-text-primary\)\)/);

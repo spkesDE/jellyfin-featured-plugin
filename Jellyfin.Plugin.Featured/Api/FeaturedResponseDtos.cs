@@ -24,6 +24,9 @@ public abstract class FeaturedDisplaySettingsDto
         FavoriteButtonPlacement = config.FavoriteButtonPlacement;
         ShowPlaystateButton = personalization?.Display.ShowPlaystateButton ?? config.ShowPlaystateButton;
         PlaystateButtonPlacement = config.PlaystateButtonPlacement;
+        ShowDismissalButton = personalization?.Display.ShowDismissalButton
+            ?? (config.DismissalPolicy.Enabled && config.ShowDismissalButton);
+        DismissalButtonPlacement = config.DismissalButtonPlacement;
         ShowNavigationArrows = config.ShowNavigationArrows;
         ShowControlsOnHoverOnly = config.ShowControlsOnHoverOnly;
         InteractOnWholeBanner = config.InteractOnWholeBanner;
@@ -71,6 +74,8 @@ public abstract class FeaturedDisplaySettingsDto
     public string FavoriteButtonPlacement { get; }
     public bool ShowPlaystateButton { get; }
     public string PlaystateButtonPlacement { get; }
+    public bool ShowDismissalButton { get; }
+    public string DismissalButtonPlacement { get; }
     public bool ShowNavigationArrows { get; }
     public bool ShowControlsOnHoverOnly { get; }
     public bool InteractOnWholeBanner { get; }
@@ -129,6 +134,7 @@ public sealed class FeaturedRuntimeConfigurationDto : FeaturedDisplaySettingsDto
         AutoplayInterval = config.AutoplayInterval;
         ReduceImageSize = config.ReduceImageSize;
         PersonalizationEnabled = config.PersonalizationPolicy.Enabled;
+        DismissalsEnabled = config.DismissalPolicy.Enabled;
         Debug = config.Debug;
         ActivePresetId = activePresetId;
         ActivePresetName = activePresetName;
@@ -144,6 +150,7 @@ public sealed class FeaturedRuntimeConfigurationDto : FeaturedDisplaySettingsDto
     public int AutoplayInterval { get; }
     public bool ReduceImageSize { get; }
     public bool PersonalizationEnabled { get; }
+    public bool DismissalsEnabled { get; }
     public bool Debug { get; }
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
@@ -178,6 +185,7 @@ public sealed class FeaturedItemsResponseDto : FeaturedDisplaySettingsDto
         ReduceImageSizes = config.ReduceImageSize;
         TrackDisplayedItems = personalization.RepeatCooldownHours > 0;
         PersonalizationEnabled = config.PersonalizationPolicy.Enabled;
+        DismissalsEnabled = config.DismissalPolicy.Enabled;
         ActivePresetId = activePresetId;
         ActivePresetName = activePresetName;
         NextPresetChange = nextPresetChange;
@@ -192,6 +200,7 @@ public sealed class FeaturedItemsResponseDto : FeaturedDisplaySettingsDto
     public bool ReduceImageSizes { get; }
     public bool TrackDisplayedItems { get; }
     public bool PersonalizationEnabled { get; }
+    public bool DismissalsEnabled { get; }
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? ActivePresetId { get; }
@@ -284,14 +293,34 @@ public sealed class FeaturedPreferencesBootstrapResponse
 {
     internal FeaturedPreferencesBootstrapResponse(
         FeaturedPreferencesResponse current,
-        FeaturedPreferenceOptionsResponse options)
+        FeaturedPreferenceOptionsResponse options,
+        FeaturedDismissalsResponse dismissals)
     {
         Current = current;
         Options = options;
+        Dismissals = dismissals;
     }
 
     public FeaturedPreferencesResponse Current { get; }
     public FeaturedPreferenceOptionsResponse Options { get; }
+    public FeaturedDismissalsResponse Dismissals { get; }
+}
+
+public sealed class FeaturedDismissalsResponse
+{
+    internal FeaturedDismissalsResponse(FeaturedDismissalPolicy policy, IReadOnlyList<FeaturedDismissalEntry> entries)
+    {
+        Policy = policy;
+        Entries = entries;
+    }
+
+    public FeaturedDismissalPolicy Policy { get; }
+    public IReadOnlyList<FeaturedDismissalEntry> Entries { get; }
+}
+
+public sealed class FeaturedDismissalMutationResponse
+{
+    public required FeaturedDismissalEntry Dismissal { get; init; }
 }
 
 public sealed class FeaturedPreferenceSourceOption
@@ -312,6 +341,9 @@ public sealed class FeaturedItemDto
     public required bool HasLogo { get; init; }
     public bool IsFavorite { get; init; }
     public bool IsPlayed { get; init; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public IReadOnlyList<FeaturedDismissalOptionDto>? DismissalOptions { get; init; }
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Tagline { get; init; }
@@ -344,6 +376,12 @@ public sealed class FeaturedItemDto
     public int? RuntimeMinutes { get; init; }
 }
 
+public sealed class FeaturedDismissalOptionDto
+{
+    public required string Scope { get; init; }
+    public required string Name { get; init; }
+}
+
 public sealed class FeaturedFeedPreviewResponse
 {
     public string UserId { get; init; } = string.Empty;
@@ -355,6 +393,7 @@ public sealed class FeaturedFeedPreviewResponse
     public IReadOnlyList<FeaturedRuleDiagnostic> Rules { get; init; } = [];
     public int DuplicatesRemoved { get; init; }
     public int CooldownExcluded { get; init; }
+    public int DismissedExcluded { get; init; }
     public int DiversitySkipped { get; init; }
     public bool UserProfileApplied { get; init; }
 }

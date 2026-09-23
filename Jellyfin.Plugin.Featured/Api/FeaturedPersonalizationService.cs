@@ -38,7 +38,8 @@ public sealed record FeaturedDisplayPreferences(
     bool ShowYear,
     bool ShowRuntime,
     bool ShowFavoriteButton = true,
-    bool ShowPlaystateButton = true);
+    bool ShowPlaystateButton = true,
+    bool ShowDismissalButton = true);
 
 public sealed class FeaturedPersonalizationService
 {
@@ -50,7 +51,7 @@ public sealed class FeaturedPersonalizationService
     }
 
     internal FeaturedPersonalizationContext Resolve(PluginConfiguration config, Guid userId)
-        => Resolve(config, userId, config.PersonalizationPolicy.Enabled ? _store.Get(userId) : null);
+        => Resolve(config, userId, _store.Get(userId));
 
     internal FeaturedPersonalizationContext ResolveDefaults(PluginConfiguration config, Guid userId)
         => Resolve(config, userId, null);
@@ -61,6 +62,7 @@ public sealed class FeaturedPersonalizationService
         FeaturedUserPreferences? saved)
     {
         FeaturedPersonalizationPolicy policy = config.PersonalizationPolicy;
+        FeaturedUserPreferences? personalized = policy.Enabled ? saved : null;
         FeaturedUserProfile? adminProfile = config.UserProfiles.FirstOrDefault(candidate =>
             candidate.Enabled && Guid.TryParse(candidate.UserId, out Guid id) && id == userId);
         FeaturedPersonalizationDefaults defaults = config.PersonalizationDefaults;
@@ -68,15 +70,15 @@ public sealed class FeaturedPersonalizationService
         {
             UserId = userId.ToString("N"),
             Enabled = true,
-            UnplayedBoost = policy.AllowUnplayedBoost && saved?.UnplayedBoost is int unplayed
+            UnplayedBoost = policy.AllowUnplayedBoost && personalized?.UnplayedBoost is int unplayed
                 ? unplayed : adminProfile?.UnplayedBoost ?? defaults.UnplayedBoost,
-            FavouriteBoost = policy.AllowFavouriteBoost && saved?.FavouriteBoost is int favourite
+            FavouriteBoost = policy.AllowFavouriteBoost && personalized?.FavouriteBoost is int favourite
                 ? favourite : adminProfile?.FavouriteBoost ?? defaults.FavouriteBoost,
             PreferredGenreBoost = adminProfile?.PreferredGenreBoost ?? defaults.PreferredGenreBoost,
-            InProgressSeriesBoost = policy.AllowInProgressSeriesBoost && saved?.InProgressSeriesBoost is int inProgress
+            InProgressSeriesBoost = policy.AllowInProgressSeriesBoost && personalized?.InProgressSeriesBoost is int inProgress
                 ? inProgress : adminProfile?.InProgressSeriesBoost ?? defaults.InProgressSeriesBoost,
-            PreferredGenres = policy.AllowPreferredGenres && saved?.PreferredGenres is not null
-                ? saved.PreferredGenres : adminProfile?.PreferredGenres ?? defaults.PreferredGenres
+            PreferredGenres = policy.AllowPreferredGenres && personalized?.PreferredGenres is not null
+                ? personalized.PreferredGenres : adminProfile?.PreferredGenres ?? defaults.PreferredGenres
         };
         FeaturedSourceRule[] sources = config.SourceRules
             .Where(rule => rule.UserIds.Length == 0
@@ -85,9 +87,9 @@ public sealed class FeaturedPersonalizationService
         {
             Id = rule.Id,
             Type = rule.Type,
-            Enabled = policy.Enabled && policy.AllowSourceSelection && saved?.SourceEnabled.TryGetValue(rule.Id, out bool enabled) == true
+            Enabled = policy.AllowSourceSelection && personalized?.SourceEnabled.TryGetValue(rule.Id, out bool enabled) == true
                 ? enabled : rule.Enabled,
-            Weight = policy.Enabled && policy.AllowSourceWeights && saved?.SourceWeights.TryGetValue(rule.Id, out int weight) == true
+            Weight = policy.AllowSourceWeights && personalized?.SourceWeights.TryGetValue(rule.Id, out int weight) == true
                 ? weight : rule.Weight,
             MinimumItems = rule.MinimumItems,
             MaximumItems = rule.MaximumItems,
@@ -105,17 +107,17 @@ public sealed class FeaturedPersonalizationService
             RecentDays = rule.RecentDays,
             Filters = rule.Filters
         }).ToArray();
-        string[] excludedGenres = policy.AllowPreferredGenres && saved?.ExcludedGenres is not null
-            ? saved.ExcludedGenres : [];
+        string[] excludedGenres = policy.AllowPreferredGenres && personalized?.ExcludedGenres is not null
+            ? personalized.ExcludedGenres : [];
         int defaultCooldownHours = config.RepeatCooldownDays * 24;
-        int cooldown = policy.Enabled && policy.AllowRepeatCooldown
-            ? saved?.RepeatCooldownHours is int hours
+        int cooldown = policy.AllowRepeatCooldown
+            ? personalized?.RepeatCooldownHours is int hours
                 ? Math.Clamp(hours, 0, 3650 * 24)
-                : saved?.RepeatCooldownDays is int legacyDays
+                : personalized?.RepeatCooldownDays is int legacyDays
                     ? Math.Clamp(legacyDays, 0, 3650) * 24
                     : defaultCooldownHours
             : defaultCooldownHours;
-        FeaturedUserDisplayPreferences? display = policy.Enabled ? saved?.Display : null;
+        FeaturedUserDisplayPreferences? display = personalized?.Display;
         FeaturedDisplayPreferences effectiveDisplay = new(
             config.EnableBackgroundTrailers && display?.EnableBackgroundTrailers is not false,
             config.ShowRating && display?.ShowRating is not false,
@@ -123,7 +125,10 @@ public sealed class FeaturedPersonalizationService
             config.ShowYear && display?.ShowYear is not false,
             config.ShowRuntime && display?.ShowRuntime is not false,
             config.ShowFavoriteButton && display?.ShowFavoriteButton is not false,
-            config.ShowPlaystateButton && display?.ShowPlaystateButton is not false);
+            config.ShowPlaystateButton && display?.ShowPlaystateButton is not false,
+            config.DismissalPolicy.Enabled
+                && config.ShowDismissalButton
+                && saved?.Display?.ShowDismissalButton is not false);
         return new FeaturedPersonalizationContext(sources, effectiveProfile, excludedGenres, cooldown, effectiveDisplay, saved is not null);
     }
 
@@ -148,7 +153,8 @@ public sealed class FeaturedPersonalizationService
             ShowYear = submittedDisplay.ShowYear is false ? false : null,
             ShowRuntime = submittedDisplay.ShowRuntime is false ? false : null,
             ShowFavoriteButton = submittedDisplay.ShowFavoriteButton is false ? false : null,
-            ShowPlaystateButton = submittedDisplay.ShowPlaystateButton is false ? false : null
+            ShowPlaystateButton = submittedDisplay.ShowPlaystateButton is false ? false : null,
+            ShowDismissalButton = submittedDisplay.ShowDismissalButton is false ? false : null
         };
         if (policy.AllowSourceSelection)
         {

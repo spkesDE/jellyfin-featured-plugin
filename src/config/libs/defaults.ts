@@ -55,6 +55,8 @@ export function createPresetFromConfig(config: FeaturedPluginConfig, name = 'Fea
       FavoriteButtonPlacement: config.FavoriteButtonPlacement,
       ShowPlaystateButton: config.ShowPlaystateButton,
       PlaystateButtonPlacement: config.PlaystateButtonPlacement,
+      ShowDismissalButton: config.ShowDismissalButton,
+      DismissalButtonPlacement: config.DismissalButtonPlacement,
       ShowNavigationArrows: config.ShowNavigationArrows, ShowControlsOnHoverOnly: config.ShowControlsOnHoverOnly,
       InteractOnWholeBanner: config.InteractOnWholeBanner,
       ShowSlidePosition: config.ShowSlidePosition,
@@ -125,6 +127,9 @@ export const CONFIG_DEFAULTS: FeaturedPluginConfig = {
     AllowPreferredGenres: true, AllowUnplayedBoost: true, AllowFavouriteBoost: true,
     AllowInProgressSeriesBoost: true, AllowRepeatCooldown: false
   },
+  DismissalPolicy: {
+    Enabled: true, AllowTitle: true, AllowSeries: true, AllowFranchise: true
+  },
   Presets: [],
   RepeatCooldownDays: 1,
   RelaxRepeatCooldownWhenNeeded: false,
@@ -155,6 +160,8 @@ export const CONFIG_DEFAULTS: FeaturedPluginConfig = {
   FavoriteButtonPlacement: 'metadata',
   ShowPlaystateButton: true,
   PlaystateButtonPlacement: 'metadata',
+  ShowDismissalButton: true,
+  DismissalButtonPlacement: 'metadata',
   ShowNavigationArrows: true,
   ShowControlsOnHoverOnly: false,
   InteractOnWholeBanner: true,
@@ -211,6 +218,8 @@ export function createDisplaySettings(config: FeaturedPluginConfig): FeaturedDis
     favoriteButtonPlacement: config.FavoriteButtonPlacement,
     showPlaystateButton: config.ShowPlaystateButton,
     playstateButtonPlacement: config.PlaystateButtonPlacement,
+    showDismissalButton: config.DismissalPolicy.Enabled && config.ShowDismissalButton,
+    dismissalButtonPlacement: config.DismissalButtonPlacement,
     showNavigationArrows: config.ShowNavigationArrows,
     showControlsOnHoverOnly: config.ShowControlsOnHoverOnly,
     interactOnWholeBanner: config.InteractOnWholeBanner,
@@ -256,6 +265,7 @@ export function createRuntimeConfigDefaults(): RuntimeConfig {
     autoplayInterval: config.AutoplayInterval,
     reduceImageSize: config.ReduceImageSize,
     personalizationEnabled: config.PersonalizationPolicy.Enabled,
+    dismissalsEnabled: config.DismissalPolicy.Enabled,
     secondaryButtonText: config.SecondaryButtonText || null,
     heading: config.Heading || null,
     playButtonText: config.PlayButtonText || null,
@@ -274,7 +284,8 @@ export function createFeaturedResponseDefaults(): Omit<FeaturedResponse, 'items'
     autoplayInterval: config.AutoplayInterval * 1000,
     reduceImageSizes: config.ReduceImageSize,
     trackDisplayedItems: config.RepeatCooldownDays > 0,
-    personalizationEnabled: config.PersonalizationPolicy.Enabled
+    personalizationEnabled: config.PersonalizationPolicy.Enabled,
+    dismissalsEnabled: config.DismissalPolicy.Enabled
   };
 }
 
@@ -381,6 +392,10 @@ export function normalizeConfig(value: unknown): FeaturedPluginConfig {
     ...createDefaultConfig().PersonalizationPolicy,
     ...(source.PersonalizationPolicy ?? {})
   };
+  config.DismissalPolicy = {
+    ...createDefaultConfig().DismissalPolicy,
+    ...(source.DismissalPolicy ?? {})
+  };
   config.TrailerOverrides = Array.isArray(source.TrailerOverrides)
     ? source.TrailerOverrides.map((entry) => ({
         ItemId: entry.ItemId || '', Name: entry.Name || '', Url: entry.Url || null,
@@ -392,6 +407,7 @@ export function normalizeConfig(value: unknown): FeaturedPluginConfig {
   config.SecondaryButtonText ??= '';
   config.FavoriteButtonPlacement = config.FavoriteButtonPlacement === 'actions' ? 'actions' : 'metadata';
   config.PlaystateButtonPlacement = config.PlaystateButtonPlacement === 'actions' ? 'actions' : 'metadata';
+  config.DismissalButtonPlacement = config.DismissalButtonPlacement === 'actions' ? 'actions' : 'metadata';
   return config;
 }
 

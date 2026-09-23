@@ -7,6 +7,7 @@ export interface FeaturedItem {
   hasImage: boolean;
   isFavorite: boolean;
   isPlayed: boolean;
+  dismissalOptions?: FeaturedDismissalOption[] | null;
   imageType: 'Backdrop' | 'Primary';
   mediaType: string;
   trailer?: FeaturedTrailer | null;
@@ -16,6 +17,39 @@ export interface FeaturedItem {
   community_rating?: number;
   productionYear?: number;
   runtimeMinutes?: number;
+}
+
+export type FeaturedDismissalScope = 'title' | 'series' | 'franchise';
+
+export interface FeaturedDismissalOption {
+  scope: FeaturedDismissalScope;
+  name: string;
+}
+
+export interface FeaturedDismissalEntry {
+  id: string;
+  scope: FeaturedDismissalScope;
+  key: string;
+  name: string;
+  itemId: string;
+  dismissedAt: string;
+}
+
+export interface FeaturedDismissalPolicy {
+  enabled: boolean;
+  showButton: boolean;
+  allowTitle: boolean;
+  allowSeries: boolean;
+  allowFranchise: boolean;
+}
+
+export interface FeaturedDismissalsResponse {
+  policy: FeaturedDismissalPolicy;
+  entries: FeaturedDismissalEntry[];
+}
+
+export interface FeaturedDismissalMutationResponse {
+  dismissal: FeaturedDismissalEntry;
 }
 
 export interface FeaturedTrailer {
@@ -39,6 +73,7 @@ export interface FeaturedResponse extends FeaturedDisplaySettings {
   reduceImageSizes: boolean;
   trackDisplayedItems: boolean;
   personalizationEnabled: boolean;
+  dismissalsEnabled: boolean;
   activePresetId?: string;
   activePresetName?: string;
   nextPresetChange?: string;
@@ -65,6 +100,7 @@ export interface FeaturedUserDisplayPreferences {
   showRuntime: boolean | null;
   showFavoriteButton: boolean | null;
   showPlaystateButton: boolean | null;
+  showDismissalButton: boolean | null;
 }
 
 export interface FeaturedEffectivePreferences {
@@ -88,6 +124,7 @@ export interface FeaturedEffectiveDisplayPreferences {
   showRuntime: boolean;
   showFavoriteButton: boolean;
   showPlaystateButton: boolean;
+  showDismissalButton: boolean;
 }
 
 export interface FeaturedPreferencesResponse {
@@ -117,6 +154,7 @@ export interface FeaturedPreferenceOptions {
 export interface FeaturedPreferencesBootstrapResponse {
   current: FeaturedPreferencesResponse;
   options: FeaturedPreferenceOptions;
+  dismissals: FeaturedDismissalsResponse;
 }
 
 export interface FeaturedDiagnostics {
@@ -150,6 +188,7 @@ export interface FeaturedRuleDiagnostics {
   afterFilters: number;
   ineligible: number;
   cooldownExcluded: number;
+  dismissedExcluded: number;
   eligible: number;
   allocated: number;
   duplicates: number;
@@ -178,6 +217,7 @@ export interface FeaturedFeedPreview {
   rules: FeaturedRuleDiagnostics[];
   duplicatesRemoved: number;
   cooldownExcluded: number;
+  dismissedExcluded: number;
   diversitySkipped: number;
   userProfileApplied: boolean;
 }

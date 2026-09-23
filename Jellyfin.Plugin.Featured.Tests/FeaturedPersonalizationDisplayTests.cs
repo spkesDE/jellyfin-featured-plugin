@@ -112,4 +112,31 @@ public sealed class FeaturedPersonalizationDisplayTests : FeaturedPreparedCacheT
             }, new HashSet<string>());
         Assert.False(_personalization.Resolve(config, _user.Id).Display.ShowFavoriteButton);
     }
+
+    [Fact]
+    public void DismissalButtonCanBeHiddenByUserOrAdminWithoutPersonalization()
+    {
+        PluginConfiguration config = new()
+        {
+            PersonalizationPolicy = new FeaturedPersonalizationPolicy { Enabled = false },
+            DismissalPolicy = new FeaturedDismissalPolicy { Enabled = true },
+            ShowDismissalButton = true
+        };
+
+        Assert.True(_personalization.Resolve(config, _user.Id).Display.ShowDismissalButton);
+        _personalization.NormalizeAndSave(
+            config,
+            _user.Id,
+            new FeaturedUserPreferences
+            {
+                Display = new FeaturedUserDisplayPreferences { ShowDismissalButton = false }
+            },
+            new HashSet<string>());
+
+        Assert.False(_personalization.Resolve(config, _user.Id).Display.ShowDismissalButton);
+
+        _personalization.Remove(_user.Id);
+        config.ShowDismissalButton = false;
+        Assert.False(_personalization.Resolve(config, _user.Id).Display.ShowDismissalButton);
+    }
 }

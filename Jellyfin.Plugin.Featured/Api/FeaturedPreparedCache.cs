@@ -18,6 +18,7 @@ public sealed class FeaturedPreparedCache
     private readonly ILibraryManager _libraryManager;
     private readonly IUserDataManager _userDataManager;
     private readonly FeaturedDisplayHistoryStore _historyStore;
+    private readonly FeaturedDismissalStore _dismissalStore;
     private readonly FeaturedCandidateCache _candidateCache;
     private readonly FeaturedRecommendationCandidates _recommendations;
     private readonly FeaturedPersonalizationService _personalization;
@@ -29,6 +30,7 @@ public sealed class FeaturedPreparedCache
         ILibraryManager libraryManager,
         IUserDataManager userDataManager,
         FeaturedDisplayHistoryStore historyStore,
+        FeaturedDismissalStore dismissalStore,
         FeaturedCandidateCache candidateCache,
         FeaturedRecommendationCandidates recommendations,
         FeaturedPersonalizationService personalization,
@@ -39,6 +41,7 @@ public sealed class FeaturedPreparedCache
         _libraryManager = libraryManager;
         _userDataManager = userDataManager;
         _historyStore = historyStore;
+        _dismissalStore = dismissalStore;
         _candidateCache = candidateCache;
         _recommendations = recommendations;
         _personalization = personalization;
@@ -54,7 +57,8 @@ public sealed class FeaturedPreparedCache
         int requestedCount,
         out List<FeaturedItemDto> items,
         out string status,
-        out double dtoCreationMilliseconds)
+        out double dtoCreationMilliseconds,
+        FeaturedDismissalSnapshot? dismissals = null)
     {
         items = [];
         dtoCreationMilliseconds = 0;
@@ -76,7 +80,11 @@ public sealed class FeaturedPreparedCache
             return false;
         }
 
-        if (!string.Equals(entry.ConfigurationFingerprint, GetConfigurationFingerprint(config, personalization), StringComparison.Ordinal))
+        FeaturedDismissalSnapshot dismissalSnapshot = dismissals ?? _dismissalStore.GetSnapshot(user.Id);
+        if (!string.Equals(
+            entry.ConfigurationFingerprint,
+            GetConfigurationFingerprint(config, personalization, dismissalSnapshot),
+            StringComparison.Ordinal))
         {
             status = "miss (fingerprint mismatch)";
             return false;
@@ -102,8 +110,15 @@ public sealed class FeaturedPreparedCache
         Jellyfin.Database.Implementations.Entities.User user,
         PluginConfiguration config,
         FeaturedPersonalizationContext personalization,
-        FeaturedSelection selection)
-        => StorePreparedItems(user, config, personalization, selection, eagerlyBuildDtos: false, replaceExisting: false);
+        FeaturedSelection selection,
+        FeaturedDismissalSnapshot? dismissals = null)
+        => StorePreparedItems(
+            user,
+            config,
+            personalization,
+            selection,
+            dismissals ?? _dismissalStore.GetSnapshot(user.Id),
+            eagerlyBuildDtos: false, replaceExisting: false);
 
     internal void RemoveDisplayedItem(Guid userId, Guid itemId)
     {
@@ -234,11 +249,13 @@ public sealed class FeaturedPreparedCache
         }
 
         FeaturedPersonalizationContext personalization = _personalization.Resolve(config, user.Id);
+        FeaturedDismissalSnapshot dismissals = _dismissalStore.GetSnapshot(user.Id);
         IReadOnlyDictionary<Guid, DateTimeOffset> recentHistory = _historyStore.GetRecentItems(user.Id, personalization.RepeatCooldownHours);
         FeaturedRuleEngine engine = new(config, _userManager, _libraryManager, _userDataManager, _candidateCache, _recommendations);
-        FeaturedSelection selection = engine.SelectItems(user, [], recentHistory, GetPoolSize(config), personalization);
+        FeaturedSelection selection = engine.SelectItems(user, [], recentHistory, GetPoolSize(config), personalization, dismissals);
         if (config.Debug) _logger.LogInformation("{RuleEngineTiming}", selection.Timing.FormatReport());
-        StorePreparedItems(user, config, personalization, selection, eagerlyBuildDtos: true, replaceExisting: true);
+        StorePreparedItems(user, config, personalization, selection, dismissals,
+            eagerlyBuildDtos: true, replaceExisting: true);
     }
 
     private void StorePreparedItems(
@@ -246,10 +263,11 @@ public sealed class FeaturedPreparedCache
         PluginConfiguration config,
         FeaturedPersonalizationContext personalization,
         FeaturedSelection selection,
+        FeaturedDismissalSnapshot dismissals,
         bool eagerlyBuildDtos,
         bool replaceExisting)
     {
-        string fingerprint = GetConfigurationFingerprint(config, personalization);
+        string fingerprint = GetConfigurationFingerprint(config, personalization, dismissals);
         IReadOnlyDictionary<Guid, UserItemData> userData = _userDataManager.GetUserDataBatch(selection.Items, user);
         PreparedItem[] items = selection.Items
             .Select(item =>
@@ -305,8 +323,11 @@ public sealed class FeaturedPreparedCache
         return FeaturedPresetResolver.Resolve(baseConfig, DateTimeOffset.UtcNow).Configuration;
     }
 
-    private string GetConfigurationFingerprint(PluginConfiguration config, FeaturedPersonalizationContext personalization)
-        => JsonSerializer.Serialize(config) + personalization.Fingerprint;
+    private string GetConfigurationFingerprint(
+        PluginConfiguration config,
+        FeaturedPersonalizationContext personalization,
+        FeaturedDismissalSnapshot dismissals)
+        => JsonSerializer.Serialize(config) + personalization.Fingerprint + dismissals.Fingerprint;
 
     private sealed record PreparedItem(Guid Id, Lazy<FeaturedItemDto> Dto);
 

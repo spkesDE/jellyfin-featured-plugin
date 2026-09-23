@@ -37,7 +37,7 @@ export function preloadPreferencesDialog(): void {
   void loadPreferencesBootstrap().catch(() => undefined);
 }
 
-function invalidatePreferencesBootstrap(): void {
+export function invalidatePreferencesBootstrap(): void {
   bootstrapCache = null;
 }
 
@@ -159,9 +159,11 @@ export async function openPreferencesDialog(): Promise<void> {
   backdrop.addEventListener('keydown', (event) => { if (event.key === 'Escape') close(); });
 
   try {
-    const { current, options } = await loadPreferencesBootstrap();
+    const { current, options, dismissals } = await loadPreferencesBootstrap();
     if (!backdrop.isConnected) return;
-    if (!options.policy.enabled) throw new Error(t('preferences.disabled'));
+    if (!options.policy.enabled && !dismissals.policy.enabled && !dismissals.entries.length) {
+      throw new Error(t('preferences.disabled'));
+    }
     const effective = current.effective;
     const dialog = document.createElement('form');
     dialog.className = 'ec-preferences-dialog';
@@ -177,7 +179,7 @@ export async function openPreferencesDialog(): Promise<void> {
     hotkeys.innerHTML = `<strong>${t('preferences.hotkeys')}</strong><span><kbd>M</kbd> ${t('preferences.hotkeyMute')}</span><span><kbd>+ / −</kbd> ${t('preferences.hotkeyVolume')}</span><span><kbd>${t('preferences.hotkeySpace')}</kbd> ${t('preferences.hotkeyPause')}</span>`;
     if (effective.display.enableBackgroundTrailers) content.appendChild(hotkeys);
 
-    const displayFields: Array<[keyof FeaturedEffectiveDisplayPreferences, TranslationKey]> = [
+    const displayFields: Array<[keyof FeaturedEffectiveDisplayPreferences, TranslationKey]> = options.policy.enabled ? [
       ['enableBackgroundTrailers', 'trailers.enabled'],
       ['showDescription', 'display.showDescription'],
       ['showRating', 'display.showRatings'],
@@ -185,7 +187,8 @@ export async function openPreferencesDialog(): Promise<void> {
       ['showRuntime', 'display.showRuntime'],
       ['showFavoriteButton', 'display.showFavoriteButton'],
       ['showPlaystateButton', 'display.showPlaystateButton']
-    ];
+    ] : [];
+    if (dismissals.policy.enabled) displayFields.push(['showDismissalButton', 'display.showDismissalButton']);
     const display = document.createElement('fieldset');
     display.className = 'ec-preference-display';
     display.innerHTML = `<legend>${t('preferences.display')}</legend><p class="ec-preference-display-help">${t('preferences.displayHelp')}</p>`;
@@ -244,11 +247,96 @@ export async function openPreferencesDialog(): Promise<void> {
     if (options.policy.allowRepeatCooldown) boosts.appendChild(cooldownField(effective.repeatCooldownHours));
     if (boosts.children.length > 1) content.appendChild(boosts);
 
+    if (!options.policy.enabled) {
+      const disabled = document.createElement('p');
+      disabled.className = 'ec-preferences-help';
+      disabled.textContent = t('preferences.disabled');
+      replaceElementChildren(content, disabled);
+      if (displayOptionCount > 0) content.appendChild(display);
+    }
+
+    if (dismissals.policy.enabled || dismissals.entries.length) {
+      const dismissalSection = document.createElement('fieldset');
+      dismissalSection.innerHTML = `<legend>${t('preferences.dismissals')}</legend><p class="ec-preferences-help">${t('preferences.dismissalsHelp')}</p>`;
+      const list = document.createElement('div');
+      list.className = 'itemsContainer';
+      const reset = document.createElement('button');
+      reset.type = 'button';
+      reset.className = 'raised emby-button';
+      reset.textContent = t('preferences.clearDismissals');
+
+      const renderDismissals = (): void => {
+        replaceElementChildren(list);
+        if (!dismissals.entries.length) {
+          const empty = document.createElement('p');
+          empty.className = 'ec-preferences-help';
+          empty.textContent = t('preferences.noDismissals');
+          list.appendChild(empty);
+          reset.hidden = true;
+          return;
+        }
+        reset.hidden = false;
+        for (const entry of dismissals.entries) {
+          const row = document.createElement('div');
+          row.className = 'listItem listItem-border';
+          const label = document.createElement('span');
+          label.className = 'listItemBody';
+          const name = document.createElement('span');
+          name.className = 'listItemBodyText';
+          name.textContent = entry.name;
+          const scope = document.createElement('span');
+          scope.className = 'listItemBodyText secondary';
+          scope.textContent = t(`preferences.scope.${entry.scope}` as TranslationKey);
+          label.append(name, scope);
+          const remove = document.createElement('button');
+          remove.type = 'button';
+          remove.className = 'paper-icon-button-light';
+          remove.setAttribute('aria-label', t('preferences.removeDismissal', { name: entry.name }));
+          remove.innerHTML = '<span class="material-icons" aria-hidden="true">restore</span>';
+          remove.addEventListener('click', async () => {
+            remove.disabled = true;
+            try {
+              await requestJson('featured/dismissals/undo', {
+                method: 'POST', body: { dismissalId: entry.id }
+              });
+              dismissals.entries = dismissals.entries.filter((candidate) => candidate.id !== entry.id);
+              invalidatePreferencesBootstrap();
+              renderDismissals();
+              document.dispatchEvent(new CustomEvent(USER_PREFERENCES_CHANGED_EVENT));
+            } catch (error) {
+              remove.disabled = false;
+              const status = dialog.querySelector<HTMLElement>('.ec-preferences-status');
+              if (status) status.textContent = t('preferences.saveFailed', { error: error instanceof Error ? error.message : String(error) });
+            }
+          });
+          row.append(label, remove);
+          list.appendChild(row);
+        }
+      };
+      reset.addEventListener('click', async () => {
+        reset.disabled = true;
+        try {
+          await requestJson('featured/dismissals/reset', { method: 'POST' });
+          dismissals.entries = [];
+          invalidatePreferencesBootstrap();
+          renderDismissals();
+          document.dispatchEvent(new CustomEvent(USER_PREFERENCES_CHANGED_EVENT));
+        } catch (error) {
+          reset.disabled = false;
+          const status = dialog.querySelector<HTMLElement>('.ec-preferences-status');
+          if (status) status.textContent = t('preferences.saveFailed', { error: error instanceof Error ? error.message : String(error) });
+        }
+      });
+      renderDismissals();
+      dismissalSection.append(list, reset);
+      content.appendChild(dismissalSection);
+    }
+
     dialog.appendChild(content);
 
     const actions = document.createElement('div');
     actions.className = 'ec-preferences-actions';
-    actions.innerHTML = `<span class="ec-preferences-status" aria-live="polite"></span><button type="button" class="raised emby-button ec-preferences-reset">${t('preferences.reset')}</button><button type="submit" class="raised button-submit emby-button ec-preferences-save">${t('preferences.save')}</button>`;
+    actions.innerHTML = `<span class="ec-preferences-status" aria-live="polite"></span>${options.policy.enabled || dismissals.policy.enabled ? `<button type="button" class="raised emby-button ec-preferences-reset">${t('preferences.reset')}</button><button type="submit" class="raised button-submit emby-button ec-preferences-save">${t('preferences.save')}</button>` : ''}`;
     dialog.appendChild(actions);
     replaceElementChildren(backdrop, dialog);
     dialog.querySelector('.ec-preferences-close')?.addEventListener('click', close);
@@ -273,6 +361,7 @@ export async function openPreferencesDialog(): Promise<void> {
     });
     dialog.addEventListener('submit', async (event) => {
       event.preventDefault();
+      if (!options.policy.enabled && !dismissals.policy.enabled) return;
       const preferences: FeaturedUserPreferences = {
         sourceEnabled: {}, sourceWeights: {},
         display: { ...current.preferences.display },

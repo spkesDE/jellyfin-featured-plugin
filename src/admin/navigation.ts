@@ -15,7 +15,7 @@ const USER_PREFERENCES_SELECTOR = 'a[href="#/mypreferencesmenu"], a[href$="/#/my
 
 let refreshScheduled = false;
 let refreshFrame: number | null = null;
-let userSettingsEnabled = config.personalizationEnabled;
+let userSettingsEnabled = config.personalizationEnabled || config.dismissalsEnabled;
 
 export function isUserSettingsMenu(element: Element): boolean {
   return element.matches('ul[role="menu"]') && element.querySelector(USER_PREFERENCES_SELECTOR) !== null;

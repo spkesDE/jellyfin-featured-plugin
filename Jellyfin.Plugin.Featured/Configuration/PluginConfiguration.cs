@@ -30,6 +30,8 @@ public sealed class PluginConfiguration : BasePluginConfiguration
 
     public FeaturedPersonalizationPolicy PersonalizationPolicy { get; set; } = new();
 
+    public FeaturedDismissalPolicy DismissalPolicy { get; set; } = new();
+
     public FeaturedPreset[] Presets { get; set; } = [];
 
     public int RepeatCooldownDays { get; set; } = 1;
@@ -93,6 +95,10 @@ public sealed class PluginConfiguration : BasePluginConfiguration
     public bool ShowPlaystateButton { get; set; } = true;
 
     public string PlaystateButtonPlacement { get; set; } = "metadata";
+
+    public bool ShowDismissalButton { get; set; } = true;
+
+    public string DismissalButtonPlacement { get; set; } = "metadata";
 
     public bool ShowNavigationArrows { get; set; } = true;
 
@@ -227,6 +233,8 @@ public sealed class FeaturedPresetLayoutSettings
     public string FavoriteButtonPlacement { get; set; } = "metadata";
     public bool ShowPlaystateButton { get; set; } = true;
     public string PlaystateButtonPlacement { get; set; } = "metadata";
+    public bool ShowDismissalButton { get; set; } = true;
+    public string DismissalButtonPlacement { get; set; } = "metadata";
     public bool ShowNavigationArrows { get; set; } = true;
     public bool ShowControlsOnHoverOnly { get; set; }
     public bool InteractOnWholeBanner { get; set; } = true;
@@ -470,6 +478,17 @@ public static class FeaturedFilterFields
     public const string ProductionYear = "PRODUCTION_YEAR";
     public const string RuntimeMinutes = "RUNTIME_MINUTES";
     public const string VideoResolution = "VIDEO_RESOLUTION";
+}
+
+public sealed class FeaturedDismissalPolicy
+{
+    public bool Enabled { get; set; } = true;
+
+    public bool AllowTitle { get; set; } = true;
+
+    public bool AllowSeries { get; set; } = true;
+
+    public bool AllowFranchise { get; set; } = true;
 }
 
 public static class FeaturedFilterOperators

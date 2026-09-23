@@ -635,6 +635,7 @@
 
 .ec-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: .7rem;
   margin-top: 1.2rem;
 }
@@ -718,14 +719,16 @@
 }
 
 .ec-favorite-button,
-.ec-playstate-button {
+.ec-playstate-button,
+.ec-dismissal-button {
   justify-content: center;
   min-width: 2.8rem;
   padding-inline: .65rem;
 }
 
 .ec-favorite-button-meta,
-.ec-playstate-button-meta {
+.ec-playstate-button-meta,
+.ec-dismissal-button-meta {
   align-items: center;
   appearance: none;
   background: transparent;
@@ -744,7 +747,8 @@
 
 /* Keep theme overrides such as ElegantFin from inflating these compact metadata controls. */
 .ec-root .ec-meta>button.ec-favorite-button-meta,
-.ec-root .ec-meta>button.ec-playstate-button-meta {
+.ec-root .ec-meta>button.ec-playstate-button-meta,
+.ec-root .ec-meta>button.ec-dismissal-button-meta {
   box-sizing: border-box !important;
   height: 1.8rem !important;
   margin: 0 !important;
@@ -758,14 +762,17 @@
 
 .ec-root .ec-meta>button.ec-favorite-button-meta:hover,
 .ec-root .ec-meta>button.ec-playstate-button-meta:hover,
+.ec-root .ec-meta>button.ec-dismissal-button-meta:hover,
 .ec-root .ec-meta>button.ec-favorite-button-meta:focus-visible,
-.ec-root .ec-meta>button.ec-playstate-button-meta:focus-visible {
+.ec-root .ec-meta>button.ec-playstate-button-meta:focus-visible,
+.ec-root .ec-meta>button.ec-dismissal-button-meta:focus-visible {
   background: rgba(255, 255, 255, .18) !important;
   outline: none;
 }
 
 .ec-favorite-button-meta .detailButton-content,
-.ec-playstate-button-meta .detailButton-content {
+.ec-playstate-button-meta .detailButton-content,
+.ec-dismissal-button-meta .detailButton-content {
   align-items: center;
   display: inline-flex;
   justify-content: center;
@@ -780,7 +787,8 @@
 }
 
 .ec-favorite-button:disabled,
-.ec-playstate-button:disabled {
+.ec-playstate-button:disabled,
+.ec-dismissal-button:disabled {
   opacity: .55;
 }
 
@@ -1120,6 +1128,7 @@
 .ec-root.ec-ready.ec-hero .ec-slide.is-active .ec-button,
 .ec-root.ec-ready.ec-hero .ec-slide.is-active .ec-favorite-button-meta,
 .ec-root.ec-ready.ec-hero .ec-slide.is-active .ec-playstate-button-meta,
+.ec-root.ec-ready.ec-hero .ec-slide.is-active button,
 .ec-root.ec-ready.ec-hero .ec-navigation {
   pointer-events: auto;
 }

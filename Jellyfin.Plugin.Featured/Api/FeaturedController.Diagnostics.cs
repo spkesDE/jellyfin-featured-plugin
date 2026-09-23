@@ -25,7 +25,13 @@ public sealed partial class FeaturedController
             int requestedCount = _config.EnableInfiniteLoading ? InfiniteBatchSize : _config.RandomMediaCount;
             FeaturedPersonalizationContext personalization = _personalization.Resolve(_config, activeUser.Id);
             IReadOnlyDictionary<Guid, DateTimeOffset> recentHistory = _historyStore.GetRecentItems(activeUser.Id, personalization.RepeatCooldownHours);
-            FeaturedSelection selection = CreateEngine().SelectItems(activeUser, [], recentHistory, requestedCount, personalization);
+            FeaturedSelection selection = CreateEngine().SelectItems(
+                activeUser,
+                [],
+                recentHistory,
+                requestedCount,
+                personalization,
+                _dismissalStore.GetSnapshot(activeUser.Id));
             LogRuleEngineTiming(selection.Timing);
             DateTimeOffset now = DateTimeOffset.UtcNow;
             HashSet<string> referencedManualListIds = _config.SourceRules
@@ -64,6 +70,7 @@ public sealed partial class FeaturedController
                     ["afterFilters"] = stat.AfterFilters,
                     ["ineligible"] = stat.Ineligible,
                     ["cooldownExcluded"] = stat.CooldownExcluded,
+                    ["dismissedExcluded"] = stat.DismissedExcluded,
                     ["eligible"] = stat.Eligible,
                     ["allocated"] = stat.Allocated,
                     ["duplicates"] = stat.Duplicates,

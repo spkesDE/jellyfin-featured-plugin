@@ -37,7 +37,8 @@ internal sealed partial class FeaturedRuleEngine
         HashSet<Guid> requestExcludedIds,
         IReadOnlyDictionary<Guid, DateTimeOffset> recentHistory,
         int requestedCount,
-        FeaturedPersonalizationContext? personalization = null)
+        FeaturedPersonalizationContext? personalization = null,
+        FeaturedDismissalSnapshot? dismissals = null)
     {
         long totalStarted = Stopwatch.GetTimestamp();
         long phaseStarted = totalStarted;
@@ -95,11 +96,14 @@ internal sealed partial class FeaturedRuleEngine
             phaseStarted = Stopwatch.GetTimestamp();
             FeaturedSourceRule rule = candidatesByRule[index].Rule;
             List<BaseItem> candidates = candidatesByRule[index].Items;
-            List<BaseItem> afterFilters = candidates
+            List<BaseItem> filteredCandidates = candidates
                 .Where(item => globallyFilteredItemIds is null || globallyFilteredItemIds.Contains(item.Id))
                 .Where(item => MatchesAllFilters(item, rule.Filters, selectionUserData))
                 .Where(item => excludedGenres.Length == 0 || !ContainsAny(item.Genres, excludedGenres))
                 .ToList();
+            List<BaseItem> afterFilters = dismissals is null
+                ? filteredCandidates
+                : filteredCandidates.Where(item => !dismissals.IsDismissed(item)).ToList();
             List<BaseItem> eligibleBeforeCooldown = afterFilters
                 .Where(item => IsEligibleItem(
                     item,
@@ -136,6 +140,7 @@ internal sealed partial class FeaturedRuleEngine
                 Type = rule.Type,
                 CandidateItems = candidates.Count,
                 FilteredOut = candidates.Count - afterFilters.Count,
+                DismissedExcluded = filteredCandidates.Count - afterFilters.Count,
                 AfterFilters = afterFilters.Count,
                 Ineligible = afterFilters.Count - eligibleBeforeCooldown.Count,
                 CooldownExcluded = eligibleBeforeCooldown.Count - eligible.Count,

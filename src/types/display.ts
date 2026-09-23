@@ -17,6 +17,8 @@ export interface FeaturedDisplaySettings {
   favoriteButtonPlacement: FeatureControlPlacement;
   showPlaystateButton: boolean;
   playstateButtonPlacement: FeatureControlPlacement;
+  showDismissalButton: boolean;
+  dismissalButtonPlacement: FeatureControlPlacement;
   showNavigationArrows: boolean;
   showControlsOnHoverOnly: boolean;
   interactOnWholeBanner: boolean;

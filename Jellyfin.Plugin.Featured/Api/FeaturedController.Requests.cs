@@ -20,6 +20,17 @@ public sealed class FeaturedPlaystateChangedRequest
     public Guid ItemId { get; set; }
 }
 
+public sealed class FeaturedDismissalRequest
+{
+    public Guid ItemId { get; set; }
+    public string Scope { get; set; } = FeaturedDismissalScopes.Title;
+}
+
+public sealed class FeaturedDismissalUndoRequest
+{
+    public string DismissalId { get; set; } = string.Empty;
+}
+
 public sealed class FeaturedClearHistoryRequest
 {
     public Guid[] UserIds { get; set; } = [];

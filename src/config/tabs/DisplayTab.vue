@@ -172,6 +172,10 @@ const placementOptions: SelectOption[] = [
             <ConfigCheckbox v-model="store.config.ShowPlaystateButton" :label="t('display.showPlaystateButton')" />
             <ConfigSelect v-if="store.config.ShowPlaystateButton" v-model="store.config.PlaystateButtonPlacement" :label="t('display.controlPlacement')" :options="placementOptions" />
           </div>
+          <div class="ec-dependentSetting">
+            <ConfigCheckbox v-model="store.config.ShowDismissalButton" :label="t('display.showDismissalButton')" :disabled="!store.config.DismissalPolicy.Enabled" />
+            <ConfigSelect v-if="store.config.ShowDismissalButton && store.config.DismissalPolicy.Enabled" v-model="store.config.DismissalButtonPlacement" :label="t('display.controlPlacement')" :options="placementOptions" />
+          </div>
         </div>
       </details>
 

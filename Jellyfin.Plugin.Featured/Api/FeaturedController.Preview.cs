@@ -54,7 +54,8 @@ public sealed partial class FeaturedController
                 [],
                 recentHistory,
                 requestedCount,
-                personalization);
+                personalization,
+                _dismissalStore.GetSnapshot(previewUser.Id));
             LogRuleEngineTiming(selection.Timing);
 
             FeaturedFeedPreviewItem[] items = selection.Items.Select(item =>
@@ -82,6 +83,7 @@ public sealed partial class FeaturedController
                 Rules = selection.RuleStats,
                 DuplicatesRemoved = selection.RuleStats.Sum(rule => rule.Duplicates),
                 CooldownExcluded = selection.RuleStats.Sum(rule => rule.CooldownExcluded),
+                DismissedExcluded = selection.RuleStats.Sum(rule => rule.DismissedExcluded),
                 DiversitySkipped = selection.RuleStats.Sum(rule => rule.DiversitySkipped),
                 UserProfileApplied = selection.UserProfileApplied
             };

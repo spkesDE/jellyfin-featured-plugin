@@ -13,6 +13,7 @@ public sealed class PluginServiceRegistrator : IPluginServiceRegistrator
     {
         serviceCollection.AddSingleton<FeaturedDisplayHistoryStore>();
         serviceCollection.AddSingleton<FeaturedPreferenceStore>();
+        serviceCollection.AddSingleton<FeaturedDismissalStore>();
         serviceCollection.AddSingleton<FeaturedPersonalizationService>();
         serviceCollection.AddSingleton<FeaturedPreferenceOptionsCache>();
         serviceCollection.AddSingleton<TrailerResolver>();

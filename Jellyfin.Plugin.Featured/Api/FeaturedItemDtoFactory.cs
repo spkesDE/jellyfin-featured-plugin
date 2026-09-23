@@ -1,4 +1,5 @@
 using MediaBrowser.Controller.Entities;
+using MediaBrowser.Controller.Entities.Movies;
 
 namespace Jellyfin.Plugin.Featured.Api;
 
@@ -55,6 +56,29 @@ public sealed class FeaturedItemDtoFactory
 
             trailers = fallbackCandidates;
         }
+        List<FeaturedDismissalOptionDto> dismissalOptions = [];
+        if (config.DismissalPolicy.Enabled)
+        {
+            if (config.DismissalPolicy.AllowTitle)
+            {
+                dismissalOptions.Add(new FeaturedDismissalOptionDto { Scope = FeaturedDismissalScopes.Title, Name = item.Name });
+            }
+
+            if (config.DismissalPolicy.AllowSeries && item.GetBaseItemKind() == Jellyfin.Data.Enums.BaseItemKind.Series)
+            {
+                dismissalOptions.Add(new FeaturedDismissalOptionDto { Scope = FeaturedDismissalScopes.Series, Name = item.Name });
+            }
+
+            if (config.DismissalPolicy.AllowFranchise && item is Movie movie && !string.IsNullOrWhiteSpace(movie.TmdbCollectionName))
+            {
+                dismissalOptions.Add(new FeaturedDismissalOptionDto
+                {
+                    Scope = FeaturedDismissalScopes.Franchise,
+                    Name = movie.TmdbCollectionName.Trim()
+                });
+            }
+        }
+
         return new FeaturedItemDto
         {
             Id = item.Id.ToString(),
@@ -67,6 +91,7 @@ public sealed class FeaturedItemDtoFactory
             HasLogo = item.HasImage(MediaBrowser.Model.Entities.ImageType.Logo),
             IsFavorite = isFavorite,
             IsPlayed = isPlayed,
+            DismissalOptions = dismissalOptions.Count > 0 ? dismissalOptions : null,
             ProductionYear = personalization.Display.ShowYear ? item.ProductionYear : null,
             RuntimeMinutes = personalization.Display.ShowRuntime && item.RunTimeTicks.HasValue
                 ? (int)Math.Round(TimeSpan.FromTicks(item.RunTimeTicks.Value).TotalMinutes)

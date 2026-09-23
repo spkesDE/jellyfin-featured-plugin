@@ -55,6 +55,7 @@ public abstract class FeaturedPreparedCacheTestBase : IDisposable
             libraryManager,
             userDataManager,
             _historyStore,
+            new FeaturedDismissalStore(paths, NullLogger<FeaturedDismissalStore>.Instance),
             new FeaturedCandidateCache(),
             new FeaturedRecommendationCandidates(
                 DispatchProxy.Create<ISimilarItemsManager, SimilarItemsManagerStub>(),

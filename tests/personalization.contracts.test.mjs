@@ -53,7 +53,7 @@ test('personalization is authenticated, policy-bound, user scoped, and fast to r
   assert.match(engine, /excludedGenres[\s\S]*?!ContainsAny\(item\.Genres, excludedGenres\)/);
   assert.match(service, /ResolveDefaults\(PluginConfiguration config, Guid userId\)[\s\S]*?Resolve\(config, userId, null\)/);
   assert.match(service, /if \(IsEmpty\(normalized\)\) _store\.Remove\(userId\)/);
-  assert.match(service, /config\.RepeatCooldownDays \* 24[\s\S]*?saved\?\.RepeatCooldownHours[\s\S]*?saved\?\.RepeatCooldownDays/);
+  assert.match(service, /config\.RepeatCooldownDays \* 24[\s\S]*?personalized\?\.RepeatCooldownHours[\s\S]*?personalized\?\.RepeatCooldownDays/);
   assert.match(service, /submitted\.RepeatCooldownHours[\s\S]*?3650 \* 24/);
   assert.match(service, /config\.EnableBackgroundTrailers && display\?\.EnableBackgroundTrailers is not false/);
   assert.match(service, /config\.ShowRating && display\?\.ShowRating is not false/);

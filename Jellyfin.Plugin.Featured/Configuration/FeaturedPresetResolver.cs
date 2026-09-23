@@ -209,6 +209,8 @@ internal static class FeaturedPresetResolver
         config.FavoriteButtonPlacement = preset.Layout.FavoriteButtonPlacement;
         config.ShowPlaystateButton = preset.Layout.ShowPlaystateButton;
         config.PlaystateButtonPlacement = preset.Layout.PlaystateButtonPlacement;
+        config.ShowDismissalButton = preset.Layout.ShowDismissalButton;
+        config.DismissalButtonPlacement = preset.Layout.DismissalButtonPlacement;
         config.ShowNavigationArrows = preset.Layout.ShowNavigationArrows;
         config.ShowControlsOnHoverOnly = preset.Layout.ShowControlsOnHoverOnly;
         config.InteractOnWholeBanner = preset.Layout.InteractOnWholeBanner;

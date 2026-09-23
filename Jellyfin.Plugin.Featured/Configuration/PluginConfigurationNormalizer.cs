@@ -68,6 +68,7 @@ internal static class PluginConfigurationNormalizer
         config.PersonalizationDefaults.InProgressSeriesBoost = Math.Clamp(config.PersonalizationDefaults.InProgressSeriesBoost, 0, 100);
         config.PersonalizationDefaults.PreferredGenres = NormalizeValues(config.PersonalizationDefaults.PreferredGenres);
         config.PersonalizationPolicy ??= new FeaturedPersonalizationPolicy();
+        config.DismissalPolicy ??= new FeaturedDismissalPolicy();
         config.Presets = NormalizePresets(config.Presets);
         config.RepeatCooldownDays = Math.Clamp(config.RepeatCooldownDays, 0, 3650);
         config.MaximumItemsPerGenre = Math.Clamp(config.MaximumItemsPerGenre, 0, 100);
@@ -110,6 +111,7 @@ internal static class PluginConfigurationNormalizer
         config.TitleDisplayMode = config.TitleDisplayMode is "title" ? "title" : "logo";
         config.FavoriteButtonPlacement = NormalizeControlPlacement(config.FavoriteButtonPlacement);
         config.PlaystateButtonPlacement = NormalizeControlPlacement(config.PlaystateButtonPlacement);
+        config.DismissalButtonPlacement = NormalizeControlPlacement(config.DismissalButtonPlacement);
         return config;
     }
 
@@ -179,6 +181,7 @@ internal static class PluginConfigurationNormalizer
         layout.TitleDisplayMode = layout.TitleDisplayMode is "title" ? "title" : "logo";
         layout.FavoriteButtonPlacement = NormalizeControlPlacement(layout.FavoriteButtonPlacement);
         layout.PlaystateButtonPlacement = NormalizeControlPlacement(layout.PlaystateButtonPlacement);
+        layout.DismissalButtonPlacement = NormalizeControlPlacement(layout.DismissalButtonPlacement);
         layout.SecondaryButtonText = NullIfWhiteSpace(layout.SecondaryButtonText);
         layout.Heading = NullIfWhiteSpace(layout.Heading);
         layout.PlayButtonText = NullIfWhiteSpace(layout.PlayButtonText);
