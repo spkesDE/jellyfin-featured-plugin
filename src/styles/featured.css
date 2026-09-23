@@ -667,6 +667,16 @@
   outline-offset: 2px;
 }
 
+.ec-play-button {
+  transition: background .16s ease, box-shadow .16s ease, filter .16s ease, transform .16s ease;
+}
+
+.ec-root .ec-play-button:hover,
+.ec-root .ec-play-button:focus-visible {
+  box-shadow: 0 .4rem 1.15rem rgb(0 0 0 / .38);
+  filter: brightness(1.16);
+}
+
 .ec-button-secondary {
   background: var(--ec-button-secondary-background, var(--ec-theme-contained));
   color: var(--ec-button-secondary-color, var(--ec-theme-text-primary));
@@ -1269,6 +1279,15 @@
 @media (prefers-reduced-motion: reduce) {
   .ec-slide {
     transition-duration: .01ms !important;
+  }
+
+  .ec-play-button {
+    transition: none;
+  }
+
+  .ec-root .ec-play-button:hover,
+  .ec-root .ec-play-button:focus-visible {
+    transform: none;
   }
 
   .ec-placeholder-viewport {

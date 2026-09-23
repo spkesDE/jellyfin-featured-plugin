@@ -5,9 +5,10 @@ import test from 'node:test';
 const read = async (path) => await readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 
 test('hero play action resolves video progress and starts native Jellyfin playback', async () => {
-  const [render, playback, english, german] = await Promise.all([
+  const [render, playback, styles, english, german] = await Promise.all([
     read('src/slider/render.ts'),
     read('src/slider/playback.ts'),
+    read('src/styles/featured.css'),
     read('src/i18n/locales/en.json'),
     read('src/i18n/locales/de.json')
   ]);
@@ -18,7 +19,8 @@ test('hero play action resolves video progress and starts native Jellyfin playba
   assert.match(playback, /dataset\.action = target\.positionTicks > 0 \? 'resume' : 'play'/);
   assert.match(playback, /dataset\.positionticks = String\(target\.positionTicks\)/);
   assert.match(playback, /className = 'itemAction ec-native-playback-action'/);
-  assert.match(playback, /className = 'ec-button raised button-submit emby-button'/);
+  assert.match(playback, /className = 'ec-button ec-play-button raised button-submit emby-button'/);
+  assert.match(styles, /\.ec-root \.ec-play-button:hover,[\s\S]*?filter:\s*brightness\(1\.16\)[\s\S]*?/);
   assert.match(playback, /new MouseEvent\('click', \{ bubbles: true, cancelable: true, view: window \}\)/);
   assert.match(english, /"carousel\.resume": "Resume"/);
   assert.match(german, /"carousel\.resume": "Fortsetzen"/);
