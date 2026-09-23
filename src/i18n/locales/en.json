@@ -568,7 +568,6 @@
   "preferences.disabled": "Personalization is disabled by the server administrator.",
   "preferences.close": "Close personalization",
   "preferences.dismissals": "Dismissed recommendations",
-  "preferences.dismissalsHelp": "These permanent exclusions are separate from the temporary repeat cooldown.",
   "preferences.noDismissals": "You have not dismissed any recommendations.",
   "preferences.clearDismissals": "Reset all dismissals",
   "preferences.removeDismissal": "Restore {name}",

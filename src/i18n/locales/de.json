@@ -568,7 +568,6 @@
   "preferences.disabled": "Die Personalisierung wurde vom Serveradministrator deaktiviert.",
   "preferences.close": "Personalisierung schließen",
   "preferences.dismissals": "Ausgeblendete Empfehlungen",
-  "preferences.dismissalsHelp": "Diese dauerhaften Ausschlüsse sind von der vorübergehenden Wiederholungssperre getrennt.",
   "preferences.noDismissals": "Du hast noch keine Empfehlungen ausgeblendet.",
   "preferences.clearDismissals": "Alle Ausblendungen zurücksetzen",
   "preferences.removeDismissal": "{name} wiederherstellen",

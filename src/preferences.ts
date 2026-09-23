@@ -257,7 +257,7 @@ export async function openPreferencesDialog(): Promise<void> {
 
     if (dismissals.policy.enabled || dismissals.entries.length) {
       const dismissalSection = document.createElement('fieldset');
-      dismissalSection.innerHTML = `<legend>${t('preferences.dismissals')}</legend><p class="ec-preferences-help">${t('preferences.dismissalsHelp')}</p>`;
+      dismissalSection.innerHTML = `<legend>${t('preferences.dismissals')}</legend>`;
       const list = document.createElement('div');
       list.className = 'itemsContainer';
       const reset = document.createElement('button');
