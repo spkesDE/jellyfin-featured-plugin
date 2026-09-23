@@ -103,6 +103,8 @@ A random selection is enabled by default, so you should see the banner without h
 | Latest Releases | Recently released media |
 | Random | A changing mix of eligible titles |
 | Unplayed | Content the user has not watched or played |
+| Continue Watching | Resumable movies, episodes, videos and audiobooks for the current viewer |
+| Next Up | The next episode from each series the current viewer is watching |
 | Manual Lists | Your own hand-picked and ordered selection |
 | Jellyfin Movie Recommendations | Suggestions based on the viewer's recently watched and liked movies |
 
@@ -114,6 +116,8 @@ Administrators can hide the favourite button under `Display`, and viewers can hi
 The movie recommendations source uses Jellyfin 12's recommendation providers. It is specific to each viewer and may be empty without movie watch history; pair it with another source or a fallback rule.
 
 You can also set minimums or maximums for individual sources and mark a source as a fallback. Feed-diversity settings help prevent one genre or film series from dominating the banner. A repeat cooldown keeps recently shown titles out of the rotation for a while.
+
+Filters can include or exclude actors, directors, original-language metadata, and available audio-track languages. Original language and audio language are separate fields. For predictable handling of incomplete libraries, missing metadata does not satisfy an inclusion rule and remains eligible under an exclusion rule.
 
 ## Display Options
 

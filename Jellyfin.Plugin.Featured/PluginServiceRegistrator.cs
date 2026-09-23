@@ -20,6 +20,7 @@ public sealed class PluginServiceRegistrator : IPluginServiceRegistrator
         serviceCollection.AddSingleton<FeaturedItemDtoFactory>();
         serviceCollection.AddSingleton<FeaturedCandidateCache>();
         serviceCollection.AddSingleton<FeaturedRecommendationCandidates>();
+        serviceCollection.AddSingleton<FeaturedMediaMetadataService>();
         serviceCollection.AddSingleton<FeaturedPreparedCache>();
         serviceCollection.AddSingleton<IScheduledTask, RefreshFeaturedCacheTask>();
         serviceCollection.AddSingleton<IScheduledTask, WarmUserSettingsCacheTask>();

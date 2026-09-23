@@ -16,17 +16,20 @@ internal sealed partial class FeaturedRuleEngine
     private bool MatchesAllFilters(
         BaseItem item,
         IEnumerable<FeaturedFilterRule> filters,
-        IReadOnlyDictionary<Guid, UserItemData>? userDataById)
+        IReadOnlyDictionary<Guid, UserItemData>? userDataById,
+        FeaturedMediaMetadataSnapshot metadata)
     {
-        return filters.All(filter => MatchesFilter(item, filter, userDataById));
+        return filters.All(filter => MatchesFilter(item, filter, userDataById, metadata));
     }
 
     private static bool MatchesFilter(
         BaseItem item,
         FeaturedFilterRule filter,
-        IReadOnlyDictionary<Guid, UserItemData>? userDataById)
+        IReadOnlyDictionary<Guid, UserItemData>? userDataById,
+        FeaturedMediaMetadataSnapshot metadata)
     {
         if (filter.Values.Length == 0) return true;
+        FeaturedItemMetadata itemMetadata = metadata.Get(item.Id);
         return filter.Field switch
         {
             FeaturedFilterFields.Library => MatchBoolean(IsInAnyLibrary(item, filter.Values), filter.Operator),
@@ -47,6 +50,10 @@ internal sealed partial class FeaturedRuleEngine
                 GetVideoResolution(item),
                 filter.Values[0],
                 filter.Operator),
+            FeaturedFilterFields.Actor => MatchMetadataCollection(itemMetadata.Actors, filter.Values, filter.Operator),
+            FeaturedFilterFields.Director => MatchMetadataCollection(itemMetadata.Directors, filter.Values, filter.Operator),
+            FeaturedFilterFields.OriginalLanguage => MatchMetadataCollection(itemMetadata.OriginalLanguages, filter.Values, filter.Operator),
+            FeaturedFilterFields.AudioLanguage => MatchMetadataCollection(itemMetadata.AudioLanguages, filter.Values, filter.Operator),
             _ => true
         };
     }
@@ -72,6 +79,18 @@ internal sealed partial class FeaturedRuleEngine
             FeaturedFilterOperators.ContainsAll => expected.All(actual.Contains),
             _ => any
         };
+    }
+
+    internal static bool MatchMetadataCollection(
+        IEnumerable<string> actualValues,
+        IEnumerable<string> expectedValues,
+        string filterOperator)
+    {
+        string[] actual = actualValues.ToArray();
+        // Missing metadata never satisfies an inclusion rule and is retained by an exclusion rule.
+        return actual.Length == 0
+            ? filterOperator == FeaturedFilterOperators.NotEquals
+            : MatchCollection(actual, expectedValues, filterOperator);
     }
 
     private static bool MatchNumber(double? actual, string expectedValue, string filterOperator)
@@ -111,22 +130,27 @@ internal sealed partial class FeaturedRuleEngine
         BaseItem item,
         HashSet<Guid> allowedItemIds,
         HashSet<Guid> excludedIds,
+        bool allowEpisodes,
         bool useTrickplayFallback)
     {
         return allowedItemIds.Contains(item.Id)
             && !excludedIds.Contains(item.Id)
-            && IsSupportedItemType(item)
+            && IsSupportedItemType(item, allowEpisodes)
             && ((useTrickplayFallback && item is Video)
                 || item.HasImage(MediaBrowser.Model.Entities.ImageType.Backdrop)
                 || item.HasImage(MediaBrowser.Model.Entities.ImageType.Primary));
     }
 
     private static bool IsSupportedItemType(BaseItem item)
-        => item is not Episode
+        => IsSupportedItemType(item, false);
+
+    private static bool IsSupportedItemType(BaseItem item, bool allowEpisodes)
+        => (allowEpisodes || item is not Episode)
             && item is not Season
             && item.ExtraType is null
             && !IsSampleFile(item)
-            && FeaturedMediaTypes.Contains(item.GetBaseItemKind());
+            && (FeaturedMediaTypes.Contains(item.GetBaseItemKind())
+                || (allowEpisodes && item.GetBaseItemKind() == Jellyfin.Data.Enums.BaseItemKind.Episode));
 
     private static bool IsSampleFile(BaseItem item)
     {

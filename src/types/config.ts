@@ -1,5 +1,5 @@
-export type SourceType = 'LIBRARIES' | 'COLLECTIONS' | 'FAVOURITES' | 'TAGS' | 'PLAYLISTS' | 'RECENTLY_ADDED' | 'LATEST_RELEASES' | 'RANDOM' | 'UNPLAYED' | 'MANUAL_LISTS' | 'RECOMMENDATIONS';
-export type FilterField = 'LIBRARY' | 'GENRE' | 'TAG' | 'MEDIA_TYPE' | 'PLAYED' | 'COMMUNITY_RATING' | 'CRITIC_RATING' | 'PRODUCTION_YEAR' | 'RUNTIME_MINUTES' | 'VIDEO_RESOLUTION';
+export type SourceType = 'LIBRARIES' | 'COLLECTIONS' | 'FAVOURITES' | 'TAGS' | 'PLAYLISTS' | 'RECENTLY_ADDED' | 'LATEST_RELEASES' | 'RANDOM' | 'UNPLAYED' | 'MANUAL_LISTS' | 'RECOMMENDATIONS' | 'CONTINUE_WATCHING' | 'NEXT_UP';
+export type FilterField = 'LIBRARY' | 'GENRE' | 'TAG' | 'MEDIA_TYPE' | 'PLAYED' | 'COMMUNITY_RATING' | 'CRITIC_RATING' | 'PRODUCTION_YEAR' | 'RUNTIME_MINUTES' | 'VIDEO_RESOLUTION' | 'ACTOR' | 'DIRECTOR' | 'ORIGINAL_LANGUAGE' | 'AUDIO_LANGUAGE';
 export type FilterOperator = 'EQUALS' | 'NOT_EQUALS' | 'GTE' | 'LTE' | 'CONTAINS_ANY' | 'CONTAINS_ALL';
 export type FrontendInjectionMethod = 'automatic' | 'file-transformation' | 'javascript-injector';
 export type TransitionEffect = 'slide' | 'fade';

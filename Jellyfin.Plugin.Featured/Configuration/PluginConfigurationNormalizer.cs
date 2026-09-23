@@ -14,7 +14,9 @@ internal static class PluginConfigurationNormalizer
         FeaturedSourceTypes.Random,
         FeaturedSourceTypes.Unplayed,
         FeaturedSourceTypes.ManualLists,
-        FeaturedSourceTypes.Recommendations
+        FeaturedSourceTypes.Recommendations,
+        FeaturedSourceTypes.ContinueWatching,
+        FeaturedSourceTypes.NextUp
     };
 
     private static readonly HashSet<string> ValidFilterFields = new(StringComparer.OrdinalIgnoreCase)
@@ -28,7 +30,11 @@ internal static class PluginConfigurationNormalizer
         FeaturedFilterFields.CriticRating,
         FeaturedFilterFields.ProductionYear,
         FeaturedFilterFields.RuntimeMinutes,
-        FeaturedFilterFields.VideoResolution
+        FeaturedFilterFields.VideoResolution,
+        FeaturedFilterFields.Actor,
+        FeaturedFilterFields.Director,
+        FeaturedFilterFields.OriginalLanguage,
+        FeaturedFilterFields.AudioLanguage
     };
 
     private static readonly HashSet<string> ValidFilterOperators = new(StringComparer.OrdinalIgnoreCase)

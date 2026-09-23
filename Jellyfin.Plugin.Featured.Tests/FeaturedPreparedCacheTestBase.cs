@@ -7,6 +7,7 @@ using MediaBrowser.Common.Configuration;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Entities.Movies;
 using MediaBrowser.Controller.Library;
+using MediaBrowser.Controller.TV;
 using MediaBrowser.Model.Entities;
 using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
@@ -50,6 +51,10 @@ public abstract class FeaturedPreparedCacheTestBase : IDisposable
         FeaturedPreferenceStore preferenceStore = new(paths, NullLogger<FeaturedPreferenceStore>.Instance);
         _personalization = new FeaturedPersonalizationService(preferenceStore);
         FeaturedItemDtoFactory dtoFactory = new(new TrailerResolver(libraryManager));
+        FeaturedMediaMetadataService mediaMetadata = new(
+            libraryManager,
+            DispatchProxy.Create<IMediaSourceManager, EmptyServiceStub>(),
+            DispatchProxy.Create<ITVSeriesManager, EmptyServiceStub>());
         _cache = new FeaturedPreparedCache(
             userManager,
             libraryManager,
@@ -60,6 +65,7 @@ public abstract class FeaturedPreparedCacheTestBase : IDisposable
             new FeaturedRecommendationCandidates(
                 DispatchProxy.Create<ISimilarItemsManager, SimilarItemsManagerStub>(),
                 NullLogger<FeaturedRecommendationCandidates>.Instance),
+            mediaMetadata,
             _personalization,
             dtoFactory,
             NullLogger<FeaturedPreparedCache>.Instance);
@@ -195,6 +201,12 @@ public abstract class FeaturedPreparedCacheTestBase : IDisposable
             => targetMethod?.Name == "get_PluginConfigurationsPath"
                 ? PluginConfigurationsPath
                 : GetDefaultValue(targetMethod?.ReturnType);
+    }
+
+    public class EmptyServiceStub : DispatchProxy
+    {
+        protected override object? Invoke(MethodInfo? targetMethod, object?[]? args)
+            => GetDefaultValue(targetMethod?.ReturnType);
     }
 
     protected sealed class TestMovie : Movie

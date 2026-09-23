@@ -52,13 +52,19 @@ public sealed partial class FeaturedController
                 .Distinct(StringComparer.CurrentCultureIgnoreCase)
                 .OrderBy(value => value, StringComparer.CurrentCultureIgnoreCase)
                 .ToArray();
+            FeaturedFilterOptions filterOptions = _mediaMetadata.GetFilterOptions(
+                items.Where(item => FeaturedMediaTypes.Contains(item.GetBaseItemKind())));
 
             return Ok(new Dictionary<string, object>
             {
                 ["collections"] = collections,
                 ["playlists"] = playlists,
                 ["genres"] = genres,
-                ["tags"] = tags
+                ["tags"] = tags,
+                ["actors"] = filterOptions.Actors,
+                ["directors"] = filterOptions.Directors,
+                ["originalLanguages"] = filterOptions.OriginalLanguages,
+                ["audioLanguages"] = filterOptions.AudioLanguages
             });
         }
         catch (Exception ex)

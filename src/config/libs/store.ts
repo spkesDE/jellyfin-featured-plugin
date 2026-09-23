@@ -20,6 +20,10 @@ export interface ConfigStore {
   playlists: Ref<ConfigPlaylist[]>;
   genres: Ref<string[]>;
   tags: Ref<string[]>;
+  actors: Ref<string[]>;
+  directors: Ref<string[]>;
+  originalLanguages: Ref<string[]>;
+  audioLanguages: Ref<string[]>;
   ratings: Ref<ConfigRating[]>;
   preview: Ref<FeaturedResponse | null>;
   diagnostics: Ref<FeaturedDiagnostics | null>;
@@ -69,6 +73,10 @@ export function createConfigStore(): ConfigStore {
   const playlists = ref<ConfigPlaylist[]>([]);
   const genres = ref<string[]>([]);
   const tags = ref<string[]>([]);
+  const actors = ref<string[]>([]);
+  const directors = ref<string[]>([]);
+  const originalLanguages = ref<string[]>([]);
+  const audioLanguages = ref<string[]>([]);
   const ratings = ref<ConfigRating[]>([{ value: '-2,0', label: t('filter.currentUserProfile') }]);
   const preview = ref<FeaturedResponse | null>(null);
   const diagnostics = ref<FeaturedDiagnostics | null>(null);
@@ -115,6 +123,10 @@ export function createConfigStore(): ConfigStore {
       playlists.value = discovery.playlists;
       genres.value = discovery.genres;
       tags.value = discovery.tags;
+      actors.value = discovery.actors;
+      directors.value = discovery.directors;
+      originalLanguages.value = discovery.originalLanguages;
+      audioLanguages.value = discovery.audioLanguages;
       ratings.value = loadedRatings;
     }).finally(() => {
       supportingDataPromise = null;
@@ -304,7 +316,8 @@ export function createConfigStore(): ConfigStore {
     });
   }
   return {
-    config, users, libraries, collections, playlists, genres, tags, ratings, preview, diagnostics, diagnosticsError, diagnosticsLoading,
+    config, users, libraries, collections, playlists, genres, tags, actors, directors, originalLanguages, audioLanguages,
+    ratings, preview, diagnostics, diagnosticsError, diagnosticsLoading,
     feedPreview, feedPreviewOpen, feedPreviewLoading, feedPreviewError, feedPreviewPresetId, feedPreviewUserId,
     activeTab, loading, saveState, parentalRatingValue,
     loadConfig, saveConfig, runDiagnostics, openFeedPreview, closeFeedPreview, runFeedPreview, selectTab: (tab) => {

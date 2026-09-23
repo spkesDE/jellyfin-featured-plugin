@@ -15,6 +15,7 @@ internal sealed partial class FeaturedRuleEngine
     private readonly IUserDataManager _userDataManager;
     private readonly FeaturedCandidateCache _candidateCache;
     private readonly FeaturedRecommendationCandidates _recommendations;
+    private readonly FeaturedMediaMetadataService _mediaMetadata;
 
     internal FeaturedRuleEngine(
         PluginConfiguration config,
@@ -22,7 +23,8 @@ internal sealed partial class FeaturedRuleEngine
         ILibraryManager libraryManager,
         IUserDataManager userDataManager,
         FeaturedCandidateCache candidateCache,
-        FeaturedRecommendationCandidates recommendations)
+        FeaturedRecommendationCandidates recommendations,
+        FeaturedMediaMetadataService mediaMetadata)
     {
         _config = config;
         _userManager = userManager;
@@ -30,6 +32,7 @@ internal sealed partial class FeaturedRuleEngine
         _userDataManager = userDataManager;
         _candidateCache = candidateCache;
         _recommendations = recommendations;
+        _mediaMetadata = mediaMetadata;
     }
 
     internal FeaturedSelection SelectItems(
@@ -61,6 +64,10 @@ internal sealed partial class FeaturedRuleEngine
             .SelectMany(candidateSet => candidateSet.Items)
             .DistinctBy(item => item.Id)
             .ToList();
+        FeaturedFilterRule[] metadataFilters = _config.GlobalFilters
+            .Concat(candidatesByRule.SelectMany(candidateSet => candidateSet.Rule.Filters))
+            .ToArray();
+        FeaturedMediaMetadataSnapshot metadata = _mediaMetadata.BuildSnapshot(distinctCandidates, metadataFilters, activeUser);
         double sourceCandidatesMilliseconds = ElapsedMilliseconds(phaseStarted);
 
         phaseStarted = Stopwatch.GetTimestamp();
@@ -83,7 +90,7 @@ internal sealed partial class FeaturedRuleEngine
         HashSet<Guid>? globallyFilteredItemIds = _config.GlobalFilters.Length == 0
             ? null
             : distinctCandidates
-                .Where(item => MatchesAllFilters(item, _config.GlobalFilters, selectionUserData))
+                .Where(item => MatchesAllFilters(item, _config.GlobalFilters, selectionUserData, metadata))
                 .Select(item => item.Id)
                 .ToHashSet();
         double globalFiltersMilliseconds = ElapsedMilliseconds(phaseStarted);
@@ -98,7 +105,7 @@ internal sealed partial class FeaturedRuleEngine
             List<BaseItem> candidates = candidatesByRule[index].Items;
             List<BaseItem> filteredCandidates = candidates
                 .Where(item => globallyFilteredItemIds is null || globallyFilteredItemIds.Contains(item.Id))
-                .Where(item => MatchesAllFilters(item, rule.Filters, selectionUserData))
+                .Where(item => MatchesAllFilters(item, rule.Filters, selectionUserData, metadata))
                 .Where(item => excludedGenres.Length == 0 || !ContainsAny(item.Genres, excludedGenres))
                 .ToList();
             List<BaseItem> afterFilters = dismissals is null
@@ -109,6 +116,7 @@ internal sealed partial class FeaturedRuleEngine
                     item,
                     allowedItemIds,
                     requestExcludedIds,
+                    rule.Type is FeaturedSourceTypes.ContinueWatching or FeaturedSourceTypes.NextUp,
                     rule.UseTrickplayFallback || rule.UseMediaPreviewFallback))
                 .DistinctBy(item => item.Id)
                 .ToList();
@@ -124,7 +132,10 @@ internal sealed partial class FeaturedRuleEngine
             ruleFiltersMilliseconds += ElapsedMilliseconds(phaseStarted);
 
             phaseStarted = Stopwatch.GetTimestamp();
-            if (rule.Type is not (FeaturedSourceTypes.ManualLists or FeaturedSourceTypes.Recommendations))
+            if (rule.Type is not (FeaturedSourceTypes.ManualLists
+                or FeaturedSourceTypes.Recommendations
+                or FeaturedSourceTypes.ContinueWatching
+                or FeaturedSourceTypes.NextUp))
             {
                 eligible = OrderForProfile(eligible, profile, selectionUserData);
                 cooldownEligible = OrderForProfile(cooldownEligible, profile, selectionUserData)

@@ -464,6 +464,8 @@ public static class FeaturedSourceTypes
     public const string Unplayed = "UNPLAYED";
     public const string ManualLists = "MANUAL_LISTS";
     public const string Recommendations = "RECOMMENDATIONS";
+    public const string ContinueWatching = "CONTINUE_WATCHING";
+    public const string NextUp = "NEXT_UP";
 }
 
 public static class FeaturedFilterFields
@@ -478,6 +480,10 @@ public static class FeaturedFilterFields
     public const string ProductionYear = "PRODUCTION_YEAR";
     public const string RuntimeMinutes = "RUNTIME_MINUTES";
     public const string VideoResolution = "VIDEO_RESOLUTION";
+    public const string Actor = "ACTOR";
+    public const string Director = "DIRECTOR";
+    public const string OriginalLanguage = "ORIGINAL_LANGUAGE";
+    public const string AudioLanguage = "AUDIO_LANGUAGE";
 }
 
 public sealed class FeaturedDismissalPolicy

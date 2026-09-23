@@ -18,13 +18,15 @@ const labelKeys: Record<SourceType, TranslationKey> = {
   LIBRARIES: 'source.type.libraries', COLLECTIONS: 'source.type.collections', FAVOURITES: 'source.type.favourites',
   TAGS: 'source.type.tags', PLAYLISTS: 'source.type.playlists', RECENTLY_ADDED: 'source.type.recently_added',
   LATEST_RELEASES: 'source.type.latest_releases', RANDOM: 'source.type.random', UNPLAYED: 'source.type.unplayed',
-  MANUAL_LISTS: 'source.type.manual_lists', RECOMMENDATIONS: 'source.type.recommendations'
+  MANUAL_LISTS: 'source.type.manual_lists', RECOMMENDATIONS: 'source.type.recommendations',
+  CONTINUE_WATCHING: 'source.type.continue_watching', NEXT_UP: 'source.type.next_up'
 };
 const helpKeys: Record<SourceType, TranslationKey> = {
   LIBRARIES: 'source.help.libraries', COLLECTIONS: 'source.help.collections', FAVOURITES: 'source.help.favourites',
   TAGS: 'source.help.tags', PLAYLISTS: 'source.help.playlists', RECENTLY_ADDED: 'source.help.recently_added',
   LATEST_RELEASES: 'source.help.latest_releases', RANDOM: 'source.help.random', UNPLAYED: 'source.help.unplayed',
-  MANUAL_LISTS: 'source.help.manual_lists', RECOMMENDATIONS: 'source.help.recommendations'
+  MANUAL_LISTS: 'source.help.manual_lists', RECOMMENDATIONS: 'source.help.recommendations',
+  CONTINUE_WATCHING: 'source.help.continue_watching', NEXT_UP: 'source.help.next_up'
 };
 const sourceLabel = (type: SourceType): string => t(labelKeys[type]);
 const sourceHelp = (type: SourceType): string => t(helpKeys[type]);

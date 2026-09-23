@@ -245,7 +245,7 @@ public sealed partial class FeaturedController
     }
 
     private FeaturedRuleEngine CreateEngine(PluginConfiguration? config = null)
-        => new(config ?? _config, _userManager, _libraryManager, _userDataManager, _candidateCache, _recommendations);
+        => new(config ?? _config, _userManager, _libraryManager, _userDataManager, _candidateCache, _recommendations, _mediaMetadata);
 
     internal static void WarmItemsResponseSerialization(
         PluginConfiguration config,

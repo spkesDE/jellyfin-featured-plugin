@@ -21,12 +21,23 @@ const fieldOptions: SelectOption[] = [
   { value: 'CRITIC_RATING', label: t('filter.field.criticRating') },
   { value: 'PRODUCTION_YEAR', label: t('filter.field.productionYear') },
   { value: 'RUNTIME_MINUTES', label: t('filter.field.runtime') },
-  { value: 'VIDEO_RESOLUTION', label: t('filter.field.videoResolution') }
+  { value: 'VIDEO_RESOLUTION', label: t('filter.field.videoResolution') },
+  { value: 'ACTOR', label: t('filter.field.actor') },
+  { value: 'DIRECTOR', label: t('filter.field.director') },
+  { value: 'ORIGINAL_LANGUAGE', label: t('filter.field.originalLanguage') },
+  { value: 'AUDIO_LANGUAGE', label: t('filter.field.audioLanguage') }
 ];
 const libraryOptions = (): SelectOption[] => namedOptions(store.libraries.value);
 const genreOptions = (): SelectOption[] => valueOptions(store.genres.value);
 const tagOptions = (): SelectOption[] => valueOptions(store.tags.value);
-const supportedMediaTypeOptions: SelectOption[] = mediaTypeOptions();
+const actorOptions = (): SelectOption[] => valueOptions(store.actors.value);
+const directorOptions = (): SelectOption[] => valueOptions(store.directors.value);
+const originalLanguageOptions = (): SelectOption[] => valueOptions(store.originalLanguages.value);
+const audioLanguageOptions = (): SelectOption[] => valueOptions(store.audioLanguages.value);
+const supportedMediaTypeOptions: SelectOption[] = [
+  ...mediaTypeOptions(),
+  { value: 'Episode', label: t('filter.value.episodes') }
+];
 const playedOptions: SelectOption[] = [
   { value: 'false', label: t('filter.value.unplayed') },
   { value: 'true', label: t('filter.value.played') }
@@ -49,7 +60,7 @@ function operatorOptions(field: FilterField): SelectOption[] {
     { value: 'GTE', label: t('filter.operator.gte') },
     { value: 'LTE', label: t('filter.operator.lte') }
   ];
-  if (field === 'GENRE' || field === 'TAG') return [
+  if (['GENRE', 'TAG', 'ACTOR', 'DIRECTOR', 'ORIGINAL_LANGUAGE', 'AUDIO_LANGUAGE'].includes(field)) return [
     { value: 'CONTAINS_ANY', label: t('filter.operator.containsAny') },
     { value: 'CONTAINS_ALL', label: t('filter.operator.containsAll') },
     { value: 'NOT_EQUALS', label: t('filter.operator.containsNone') }
@@ -103,6 +114,14 @@ function numberLimits(field: FilterField): { min: number; max: number; step: num
         :options="genreOptions()" />
       <ConfigMultiPicker v-else-if="filter.Field === 'TAG'" v-model="filter.Values" :label="t('filter.valueLabel')"
         :options="tagOptions()" />
+      <ConfigMultiPicker v-else-if="filter.Field === 'ACTOR'" v-model="filter.Values" :label="t('filter.valueLabel')"
+        :help-text="t('filter.metadataMissingHelp')" :options="actorOptions()" />
+      <ConfigMultiPicker v-else-if="filter.Field === 'DIRECTOR'" v-model="filter.Values" :label="t('filter.valueLabel')"
+        :help-text="t('filter.metadataMissingHelp')" :options="directorOptions()" />
+      <ConfigMultiPicker v-else-if="filter.Field === 'ORIGINAL_LANGUAGE'" v-model="filter.Values" :label="t('filter.valueLabel')"
+        :help-text="t('filter.metadataMissingHelp')" :options="originalLanguageOptions()" />
+      <ConfigMultiPicker v-else-if="filter.Field === 'AUDIO_LANGUAGE'" v-model="filter.Values" :label="t('filter.valueLabel')"
+        :help-text="t('filter.metadataMissingHelp')" :options="audioLanguageOptions()" />
       <ConfigMultiPicker v-else-if="filter.Field === 'MEDIA_TYPE'" v-model="filter.Values"
         :label="t('filter.valueLabel')" :options="supportedMediaTypeOptions" />
       <ConfigSelect v-else-if="filter.Field === 'PLAYED'" :model-value="filter.Values[0] || 'false'"

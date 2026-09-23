@@ -21,6 +21,7 @@ public sealed class FeaturedPreparedCache
     private readonly FeaturedDismissalStore _dismissalStore;
     private readonly FeaturedCandidateCache _candidateCache;
     private readonly FeaturedRecommendationCandidates _recommendations;
+    private readonly FeaturedMediaMetadataService _mediaMetadata;
     private readonly FeaturedPersonalizationService _personalization;
     private readonly FeaturedItemDtoFactory _itemDtoFactory;
     private readonly ILogger<FeaturedPreparedCache> _logger;
@@ -33,6 +34,7 @@ public sealed class FeaturedPreparedCache
         FeaturedDismissalStore dismissalStore,
         FeaturedCandidateCache candidateCache,
         FeaturedRecommendationCandidates recommendations,
+        FeaturedMediaMetadataService mediaMetadata,
         FeaturedPersonalizationService personalization,
         FeaturedItemDtoFactory itemDtoFactory,
         ILogger<FeaturedPreparedCache> logger)
@@ -44,6 +46,7 @@ public sealed class FeaturedPreparedCache
         _dismissalStore = dismissalStore;
         _candidateCache = candidateCache;
         _recommendations = recommendations;
+        _mediaMetadata = mediaMetadata;
         _personalization = personalization;
         _itemDtoFactory = itemDtoFactory;
         _logger = logger;
@@ -251,7 +254,7 @@ public sealed class FeaturedPreparedCache
         FeaturedPersonalizationContext personalization = _personalization.Resolve(config, user.Id);
         FeaturedDismissalSnapshot dismissals = _dismissalStore.GetSnapshot(user.Id);
         IReadOnlyDictionary<Guid, DateTimeOffset> recentHistory = _historyStore.GetRecentItems(user.Id, personalization.RepeatCooldownHours);
-        FeaturedRuleEngine engine = new(config, _userManager, _libraryManager, _userDataManager, _candidateCache, _recommendations);
+        FeaturedRuleEngine engine = new(config, _userManager, _libraryManager, _userDataManager, _candidateCache, _recommendations, _mediaMetadata);
         FeaturedSelection selection = engine.SelectItems(user, [], recentHistory, GetPoolSize(config), personalization, dismissals);
         if (config.Debug) _logger.LogInformation("{RuleEngineTiming}", selection.Timing.FormatReport());
         StorePreparedItems(user, config, personalization, selection, dismissals,

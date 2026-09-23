@@ -28,6 +28,10 @@ export interface FeaturedConfigOptions {
   playlists?: Array<{ id: string; name: string }>;
   genres?: string[];
   tags?: string[];
+  actors?: string[];
+  directors?: string[];
+  originalLanguages?: string[];
+  audioLanguages?: string[];
 }
 
 export interface ParentalRating {

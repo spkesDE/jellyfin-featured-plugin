@@ -19,6 +19,7 @@ public sealed partial class FeaturedController : ControllerBase
     private readonly FeaturedDismissalStore _dismissalStore;
     private readonly FeaturedCandidateCache _candidateCache;
     private readonly FeaturedRecommendationCandidates _recommendations;
+    private readonly FeaturedMediaMetadataService _mediaMetadata;
     private readonly FeaturedPreparedCache _preparedCache;
     private readonly FeaturedPersonalizationService _personalization;
     private readonly FeaturedPreferenceOptionsCache _preferenceOptionsCache;
@@ -33,6 +34,7 @@ public sealed partial class FeaturedController : ControllerBase
         FeaturedDismissalStore dismissalStore,
         FeaturedCandidateCache candidateCache,
         FeaturedRecommendationCandidates recommendations,
+        FeaturedMediaMetadataService mediaMetadata,
         FeaturedPreparedCache preparedCache,
         FeaturedPersonalizationService personalization,
         FeaturedPreferenceOptionsCache preferenceOptionsCache,
@@ -46,6 +48,7 @@ public sealed partial class FeaturedController : ControllerBase
         _dismissalStore = dismissalStore;
         _candidateCache = candidateCache;
         _recommendations = recommendations;
+        _mediaMetadata = mediaMetadata;
         _preparedCache = preparedCache;
         _personalization = personalization;
         _preferenceOptionsCache = preferenceOptionsCache;

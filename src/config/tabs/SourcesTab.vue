@@ -25,6 +25,8 @@ const sourceOptions: SelectOption[] = [
   { value: 'LATEST_RELEASES', label: t('source.type.latest_releases') },
   { value: 'RANDOM', label: t('source.type.random') },
   { value: 'UNPLAYED', label: t('source.type.unplayed') },
+  { value: 'CONTINUE_WATCHING', label: t('source.type.continue_watching') },
+  { value: 'NEXT_UP', label: t('source.type.next_up') },
   { value: 'RECOMMENDATIONS', label: t('source.type.recommendations') },
   { value: 'MANUAL_LISTS', label: t('source.type.manual_lists') }
 ];

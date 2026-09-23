@@ -36,11 +36,18 @@ internal sealed partial class FeaturedRuleEngine
             FeaturedSourceTypes.Collections => GetFolderCandidates(rule.CollectionIds),
             FeaturedSourceTypes.Playlists => GetFolderCandidates(rule.PlaylistIds),
             FeaturedSourceTypes.Recommendations => _recommendations.GetMovieRecommendations(activeUser, candidateLimit),
+            FeaturedSourceTypes.ContinueWatching => _mediaMetadata.GetContinueWatching(activeUser, candidateLimit),
+            FeaturedSourceTypes.NextUp => _mediaMetadata.GetNextUp(activeUser, candidateLimit),
             _ => QueryStandardCandidates(rule, userScoped ? activeUser : null, candidateLimit)
         };
 
         List<BaseItem> sourceOrder = candidates.ToList();
-        List<BaseItem> normalized = NormalizeAndRequery(sourceOrder, userScoped ? activeUser : null, candidateLimit);
+        bool preserveEpisodes = rule.Type is FeaturedSourceTypes.ContinueWatching or FeaturedSourceTypes.NextUp;
+        List<BaseItem> normalized = NormalizeAndRequery(
+            sourceOrder,
+            userScoped ? activeUser : null,
+            candidateLimit,
+            preserveEpisodes);
         return rule.Type switch
         {
             FeaturedSourceTypes.Libraries => normalized
@@ -59,7 +66,7 @@ internal sealed partial class FeaturedRuleEngine
                     && item.PremiereDate.Value >= DateTime.UtcNow.AddDays(-rule.RecentDays))
                 .OrderByDescending(item => item.PremiereDate)
                 .ToList(),
-            FeaturedSourceTypes.Recommendations => normalized
+            FeaturedSourceTypes.Recommendations or FeaturedSourceTypes.ContinueWatching or FeaturedSourceTypes.NextUp => normalized
                 .OrderBy(item => sourceOrder.FindIndex(candidate => candidate.Id == item.Id))
                 .ToList(),
             _ => normalized
@@ -179,19 +186,21 @@ internal sealed partial class FeaturedRuleEngine
     private List<BaseItem> NormalizeAndRequery(
         IEnumerable<BaseItem> items,
         Jellyfin.Database.Implementations.Entities.User? queryUser,
-        int limit)
+        int limit,
+        bool preserveEpisodes = false)
     {
         List<Guid> ids = [];
         foreach (BaseItem original in items)
         {
             BaseItem? item = original;
-            if (item is Episode or Season || item.GetBaseItemKind() is BaseItemKind.Episode or BaseItemKind.Season)
+            if (!preserveEpisodes
+                && (item is Episode or Season || item.GetBaseItemKind() is BaseItemKind.Episode or BaseItemKind.Season))
             {
                 item = item.GetParent();
                 if (item?.GetBaseItemKind() == BaseItemKind.Season) item = item.GetParent();
             }
 
-            if (item != null && IsSupportedItemType(item) && !ids.Contains(item.Id))
+            if (item != null && IsSupportedItemType(item, preserveEpisodes) && !ids.Contains(item.Id))
             {
                 ids.Add(item.Id);
             }
@@ -201,11 +210,15 @@ internal sealed partial class FeaturedRuleEngine
 
         if (ids.Count == 0) return [];
         InternalItemsQuery query = CreateCandidateQuery(queryUser, false);
+        if (preserveEpisodes) query.IncludeItemTypes = [.. FeaturedMediaTypes.All, BaseItemKind.Episode];
         query.ItemIds = [.. ids];
         query.Limit = limit;
         return _libraryManager.GetItemList(query).ToList();
     }
 
     private static bool IsUserScopedSource(FeaturedSourceRule rule)
-        => rule.Type is FeaturedSourceTypes.Unplayed or FeaturedSourceTypes.Recommendations;
+        => rule.Type is FeaturedSourceTypes.Unplayed
+            or FeaturedSourceTypes.Recommendations
+            or FeaturedSourceTypes.ContinueWatching
+            or FeaturedSourceTypes.NextUp;
 }

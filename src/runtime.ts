@@ -124,11 +124,6 @@ function removePlaceholder(container: Element): void {
   placeholders.delete(container);
 }
 
-function removeEpisodeItems(response: FeaturedResponse): FeaturedResponse {
-  const items = response.items?.filter((item) => !['episode', 'season'].includes(item.mediaType.toLowerCase())) ?? [];
-  return items.length === response.items?.length ? response : { ...response, items };
-}
-
 function preloadImage(url: string): Promise<void> {
   return new Promise((resolve) => {
     const image = new Image();
@@ -172,7 +167,7 @@ async function mount(container: Element): Promise<void> {
   container.setAttribute('data-featured-loading', 'true');
   const placeholder = createPlaceholder(container);
   try {
-    const response = removeEpisodeItems(await requestJson<FeaturedResponse>('featured/items'));
+    const response = await requestJson<FeaturedResponse>('featured/items');
     setUserSettingsMenuEnabled(response.personalizationEnabled || response.dismissalsEnabled);
     schedulePresetRefresh(response.nextPresetChange);
     if (
@@ -205,10 +200,10 @@ async function mount(container: Element): Promise<void> {
 
     const carousel = new FeaturedCarousel(
       response,
-      async (excludedItemIds) => removeEpisodeItems(await requestJson<FeaturedResponse>('featured/items/batch', {
+      async (excludedItemIds) => await requestJson<FeaturedResponse>('featured/items/batch', {
         method: 'POST',
         body: { excludedItemIds }
-      })),
+      }),
       response.trackDisplayedItems
         ? async (itemId) => await requestJson('featured/items/displayed', {
             method: 'POST',

@@ -24,6 +24,10 @@ export async function loadLibrariesAndCollections(): Promise<{
   playlists: ConfigPlaylist[];
   genres: string[];
   tags: string[];
+  actors: string[];
+  directors: string[];
+  originalLanguages: string[];
+  audioLanguages: string[];
 }> {
   try {
     const api = getApiClient();
@@ -51,9 +55,18 @@ export async function loadLibrariesAndCollections(): Promise<{
     );
     const genres = mergeStrings(filterPayload.Genres, configOptions.genres);
     const tags = mergeStrings(filterPayload.Tags, configOptions.tags);
-    return { libraries, collections, playlists, genres, tags };
+    return {
+      libraries, collections, playlists, genres, tags,
+      actors: mergeStrings(configOptions.actors),
+      directors: mergeStrings(configOptions.directors),
+      originalLanguages: mergeStrings(configOptions.originalLanguages),
+      audioLanguages: mergeStrings(configOptions.audioLanguages)
+    };
   } catch {
-    return { libraries: [], collections: [], playlists: [], genres: [], tags: [] };
+    return {
+      libraries: [], collections: [], playlists: [], genres: [], tags: [],
+      actors: [], directors: [], originalLanguages: [], audioLanguages: []
+    };
   }
 }
 
