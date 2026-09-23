@@ -636,7 +636,6 @@
 .ec-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: .7rem;
   margin-top: 1.2rem;
 }
 
@@ -886,6 +885,7 @@
 }
 
 @media (hover: hover) and (pointer: fine) {
+
   .ec-root.ec-controls-hover .ec-controls,
   .ec-root.ec-controls-hover .ec-trailer-controls {
     opacity: 0;
@@ -1249,7 +1249,8 @@
   }
 }
 
-@media (max-width: 700px), (hover: none) and (pointer: coarse) {
+@media (max-width: 700px),
+(hover: none) and (pointer: coarse) {
   .ec-root.ec-hero {
     --ec-content-height: clamp(0px, calc(var(--ec-height) + 1.25rem + var(--ec-media-padding, 0px)), var(--ec-height));
     --ec-hero-overlap-offset: calc(1.25rem + var(--ec-media-padding, 0px));
