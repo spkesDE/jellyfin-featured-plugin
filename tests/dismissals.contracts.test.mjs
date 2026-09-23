@@ -47,6 +47,7 @@ test('dismissal UI offers metadata-aware scopes, undo, and settings management',
   assert.match(render, /createDismissalControl\(item, 'metadata'\)[\s\S]*?createDismissalControl\(item\)/);
   assert.match(render, /dismissalButtonPlacement === 'metadata'[\s\S]*?dismissalButtonPlacement === 'actions'/);
   assert.match(dismissals, /button-flat detailButton emby-button ec-dismissal-button ec-dismissal-button-meta/);
+  assert.match(dismissals, /button\.style\.color = 'var\(--ec-on-media-color, #fff\)'/);
   assert.match(dismissals, /ec-button ec-button-secondary ec-dismissal-button raised emby-button/);
   assert.match(dismissals, /detailButton-icon visibility_off/);
   assert.match(dismissals, /actionSheet actionsheet-not-fullscreen[\s\S]*?listItem listItem-button actionSheetMenuItem emby-button/);

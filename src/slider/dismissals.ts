@@ -151,6 +151,7 @@ export function createDismissalControl(item: FeaturedItem, variant: 'action' | '
 
   if (variant === 'metadata') {
     button.className = 'button-flat detailButton emby-button ec-dismissal-button ec-dismissal-button-meta';
+    button.style.color = 'var(--ec-on-media-color, #fff)';
   } else {
     button.className = 'ec-button ec-button-secondary ec-dismissal-button raised emby-button';
   }
