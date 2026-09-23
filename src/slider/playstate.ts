@@ -9,6 +9,11 @@ function updateButton(button: HTMLButtonElement, played: boolean): void {
   button.setAttribute('aria-label', t(played ? 'carousel.markUnplayed' : 'carousel.markPlayed'));
   button.title = t(played ? 'carousel.markUnplayed' : 'carousel.markPlayed');
   button.dataset.played = String(played);
+  if (button.classList.contains('ec-playstate-button-meta')) {
+    button.style.color = played
+      ? 'var(--ec-playstate-active-color, #52b54b)'
+      : 'var(--ec-on-media-color, #fff)';
+  }
   const icon = button.querySelector<HTMLElement>('.material-icons');
   if (icon) {
     icon.classList.toggle('playstatebutton-icon-played', played);
