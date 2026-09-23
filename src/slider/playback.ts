@@ -142,7 +142,7 @@ function updateButton(button: HTMLButtonElement, target: PlaybackTarget, customP
 export function createPlaybackButton(item: FeaturedItem, customPlayText?: string | null): HTMLButtonElement {
   const button = document.createElement('button');
   button.type = 'button';
-  button.className = 'raised button-submit emby-button';
+  button.className = 'ec-button raised button-submit emby-button';
   button.textContent = customPlayText || `▶ ${t('carousel.play')}`;
   button.setAttribute('aria-label', t('carousel.play'));
 
