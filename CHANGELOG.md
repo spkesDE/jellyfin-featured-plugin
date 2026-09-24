@@ -1,5 +1,22 @@
 # Changelog
 
+## v12.6.0.0 - 2026-09-24
+
+### Features
+
+- feat(playback): add direct play and resume
+- feat(recommendations): add persistent dismissal feedback
+- feat(sources): add continuation and metadata filters
+
+### Fixes
+
+- fix(playback): restore play button hover state
+- fix(styles): adjust max-width calculation for better responsiveness
+- fix(styles): remove gap from actions and adjust media query formatting
+- fix(preferences): remove dismissal cooldown hint
+- fix(dismissals): preserve metadata icon color
+- fix(playback): update playback button class for styling consistency
+- fix(playstate): preserve metadata icon color on hover
 ## v12.5.1.0 - 2026-09-22
 
 ### Fixes
