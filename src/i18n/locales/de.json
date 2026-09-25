@@ -123,7 +123,7 @@
   "source.minimumItems": "Mindesteinträge",
   "source.minimumItemsHelp": "Reserviert bis zu so viele Plätze für diese Quelle, bevor übrige Plätze nach Gewicht verteilt werden. 0 deaktiviert das Minimum.",
   "source.maximumItems": "Maximale Einträge",
-  "source.maximumItemsHelp": "Begrenzt, wie viele Einträge diese Quelle zu einem Feed beitragen darf. 0 bedeutet unbegrenzt.",
+  "source.maximumItemsHelp": "Begrenzt bei mehreren verfügbaren Quellen, wie viele Einträge diese Quelle zu einem Feed beiträgt. Ist sie die einzige verfügbare Quelle, füllt sie den Feed weiter auf. 0 bedeutet unbegrenzt.",
   "source.fallback": "Fallback-Quelle",
   "source.fallbackHelp": "Verwendet diese Quelle erst, wenn die aktivierten Primärquellen den angeforderten Feed nicht füllen können.",
   "source.allowBackgroundTrailers": "Hintergrund-Trailer automatisch abspielen",

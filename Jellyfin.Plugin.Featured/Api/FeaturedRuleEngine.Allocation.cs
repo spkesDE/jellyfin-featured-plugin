@@ -5,14 +5,19 @@ namespace Jellyfin.Plugin.Featured.Api;
 
 internal sealed partial class FeaturedRuleEngine
 {
-    private static void AllocateQuotas(List<FeaturedRulePool> pools, int requestedCount)
+    private static void AllocateQuotas(
+        List<FeaturedRulePool> pools,
+        int requestedCount,
+        bool enforceSourceMaximum)
     {
         if (requestedCount <= 0 || pools.Count == 0) return;
 
         foreach (FeaturedRulePool pool in pools)
         {
             int available = pool.Items.Count + pool.Stats.Returned;
-            int maximum = pool.Rule.MaximumItems > 0 ? Math.Min(pool.Rule.MaximumItems, available) : available;
+            int maximum = enforceSourceMaximum && pool.Rule.MaximumItems > 0
+                ? Math.Min(pool.Rule.MaximumItems, available)
+                : available;
             pool.Quota = Math.Min(maximum, Math.Max(pool.Stats.Returned, pool.Rule.MinimumItems));
         }
 
@@ -33,7 +38,7 @@ internal sealed partial class FeaturedRuleEngine
         {
             FeaturedRulePool? next = pools
                 .Where(pool => pool.Quota < pool.Items.Count + pool.Stats.Returned
-                    && (pool.Rule.MaximumItems == 0 || pool.Quota < pool.Rule.MaximumItems))
+                    && (!enforceSourceMaximum || pool.Rule.MaximumItems == 0 || pool.Quota < pool.Rule.MaximumItems))
                 .OrderBy(pool => (double)(pool.Quota + 1) / pool.Rule.Weight)
                 .ThenBy(pool => pool.Index)
                 .FirstOrDefault();
@@ -56,18 +61,21 @@ internal sealed partial class FeaturedRuleEngine
         FeaturedDiversityTracker diversity,
         Dictionary<Guid, FeaturedItemSelectionReason> itemReasons,
         bool enforceDiversity,
+        bool enforceSourceMaximum,
         bool cooldownRelaxed = false)
     {
         while (result.Count < requestedCount)
         {
             int resultCountBeforePass = result.Count;
-            AllocateQuotas(pools, requestedCount - result.Count);
+            AllocateQuotas(pools, requestedCount - result.Count, enforceSourceMaximum);
             while (result.Count < requestedCount)
             {
                 FeaturedRulePool? pool = pools
                     .Where(candidate => candidate.Items.Count > 0
                         && candidate.Stats.Returned < candidate.Quota
-                        && (candidate.Rule.MaximumItems == 0 || candidate.Stats.Returned < candidate.Rule.MaximumItems))
+                        && (!enforceSourceMaximum
+                            || candidate.Rule.MaximumItems == 0
+                            || candidate.Stats.Returned < candidate.Rule.MaximumItems))
                     .OrderBy(candidate => (double)(candidate.Stats.Returned + 1) / Math.Max(1, candidate.Quota))
                     .ThenBy(candidate => candidate.Index)
                     .FirstOrDefault();

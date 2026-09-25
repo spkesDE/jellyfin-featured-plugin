@@ -19,6 +19,8 @@ public abstract class FeaturedPreparedCacheTestBase : IDisposable
     protected readonly string _temporaryPath = Path.Combine(Path.GetTempPath(), "Jellyfin.Featured.Tests", Guid.NewGuid().ToString("N"));
     protected readonly ILibraryManager _previousLibraryManager;
     protected readonly IUserManager _userManager;
+    protected readonly ILibraryManager _libraryManagerService;
+    protected readonly IUserDataManager _userDataManager;
     protected readonly UserDataManagerStub _userData;
     protected readonly LibraryManagerStub _libraryManager;
     protected readonly FeaturedDisplayHistoryStore _historyStore;
@@ -39,10 +41,12 @@ public abstract class FeaturedPreparedCacheTestBase : IDisposable
         _userManager = userManager;
 
         ILibraryManager libraryManager = DispatchProxy.Create<ILibraryManager, LibraryManagerStub>();
+        _libraryManagerService = libraryManager;
         _libraryManager = (LibraryManagerStub)libraryManager;
         BaseItem.LibraryManager = libraryManager;
 
         IUserDataManager userDataManager = DispatchProxy.Create<IUserDataManager, UserDataManagerStub>();
+        _userDataManager = userDataManager;
         _userData = (UserDataManagerStub)userDataManager;
         IApplicationPaths paths = DispatchProxy.Create<IApplicationPaths, ApplicationPathsStub>();
         ((ApplicationPathsStub)paths).PluginConfigurationsPath = _temporaryPath;

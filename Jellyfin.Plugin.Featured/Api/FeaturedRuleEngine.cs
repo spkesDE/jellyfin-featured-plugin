@@ -165,25 +165,37 @@ internal sealed partial class FeaturedRuleEngine
         phaseStarted = Stopwatch.GetTimestamp();
         List<FeaturedRulePool> primaryPools = pools.Where(pool => !pool.Rule.IsFallback).ToList();
         List<FeaturedRulePool> fallbackPools = pools.Where(pool => pool.Rule.IsFallback).ToList();
-        FillFromPools(primaryPools, requestedCount, result, selectedKeys, diversity, itemReasons, enforceDiversity: true);
-        FillFromPools(fallbackPools, requestedCount, result, selectedKeys, diversity, itemReasons, enforceDiversity: true);
+        int availableSourceCount = pools.Count(pool => pool.Items.Count > 0
+            || (_config.RelaxRepeatCooldownWhenNeeded && pool.CooldownItems.Count > 0));
+        // A source maximum constrains the mix, not the total feed when no alternative source can contribute.
+        bool enforceSourceMaximum = availableSourceCount > 1;
+        FillFromPools(primaryPools, requestedCount, result, selectedKeys, diversity, itemReasons,
+            enforceDiversity: true, enforceSourceMaximum: enforceSourceMaximum);
+        FillFromPools(fallbackPools, requestedCount, result, selectedKeys, diversity, itemReasons,
+            enforceDiversity: true, enforceSourceMaximum: enforceSourceMaximum);
 
         // Diversity is best-effort: never return an unnecessarily short feed.
         RestoreDeferred(primaryPools);
-        FillFromPools(primaryPools, requestedCount, result, selectedKeys, diversity, itemReasons, enforceDiversity: false);
+        FillFromPools(primaryPools, requestedCount, result, selectedKeys, diversity, itemReasons,
+            enforceDiversity: false, enforceSourceMaximum: enforceSourceMaximum);
         RestoreDeferred(fallbackPools);
-        FillFromPools(fallbackPools, requestedCount, result, selectedKeys, diversity, itemReasons, enforceDiversity: false);
+        FillFromPools(fallbackPools, requestedCount, result, selectedKeys, diversity, itemReasons,
+            enforceDiversity: false, enforceSourceMaximum: enforceSourceMaximum);
 
         if (_config.RelaxRepeatCooldownWhenNeeded && result.Count < requestedCount)
         {
             ActivateCooldownItems(primaryPools);
-            FillFromPools(primaryPools, requestedCount, result, selectedKeys, diversity, itemReasons, enforceDiversity: true, cooldownRelaxed: true);
+            FillFromPools(primaryPools, requestedCount, result, selectedKeys, diversity, itemReasons,
+                enforceDiversity: true, enforceSourceMaximum: enforceSourceMaximum, cooldownRelaxed: true);
             ActivateCooldownItems(fallbackPools);
-            FillFromPools(fallbackPools, requestedCount, result, selectedKeys, diversity, itemReasons, enforceDiversity: true, cooldownRelaxed: true);
+            FillFromPools(fallbackPools, requestedCount, result, selectedKeys, diversity, itemReasons,
+                enforceDiversity: true, enforceSourceMaximum: enforceSourceMaximum, cooldownRelaxed: true);
             RestoreDeferred(primaryPools);
-            FillFromPools(primaryPools, requestedCount, result, selectedKeys, diversity, itemReasons, enforceDiversity: false, cooldownRelaxed: true);
+            FillFromPools(primaryPools, requestedCount, result, selectedKeys, diversity, itemReasons,
+                enforceDiversity: false, enforceSourceMaximum: enforceSourceMaximum, cooldownRelaxed: true);
             RestoreDeferred(fallbackPools);
-            FillFromPools(fallbackPools, requestedCount, result, selectedKeys, diversity, itemReasons, enforceDiversity: false, cooldownRelaxed: true);
+            FillFromPools(fallbackPools, requestedCount, result, selectedKeys, diversity, itemReasons,
+                enforceDiversity: false, enforceSourceMaximum: enforceSourceMaximum, cooldownRelaxed: true);
         }
 
         diagnostics.AddRange(pools.Select(pool => pool.Stats));

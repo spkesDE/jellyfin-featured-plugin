@@ -123,7 +123,7 @@
   "source.minimumItems": "Minimum items",
   "source.minimumItemsHelp": "Reserves up to this many slots for the source before remaining slots are distributed by weight. 0 disables the minimum.",
   "source.maximumItems": "Maximum items",
-  "source.maximumItemsHelp": "Limits how many items this source may contribute to one feed. 0 means unlimited.",
+  "source.maximumItemsHelp": "With multiple available sources, limits how many items this source contributes to one feed. If it is the only available source, it continues filling the feed. 0 means unlimited.",
   "source.fallback": "Fallback source",
   "source.fallbackHelp": "Uses this source only when enabled primary sources cannot fill the requested feed.",
   "source.allowBackgroundTrailers": "Autoplay background trailers",
