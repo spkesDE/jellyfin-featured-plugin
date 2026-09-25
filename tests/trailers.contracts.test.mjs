@@ -104,7 +104,7 @@ test('proper trailer support keeps resolution and playback source independent', 
   assert.match(styles, /--ec-hero-slide-background:\s*linear-gradient\(to bottom,[^;]*#000 54%[^;]*transparent 80%/);
   assert.match(styles, /\.ec-root\.ec-hero \.ec-slide\s*\{[^}]*background:\s*var\(--ec-hero-slide-background\)/);
   assert.match(styles, /\.ec-media\s*\{[^}]*height:\s*var\(--ec-height\)[^}]*inset:\s*0[^}]*position:\s*absolute[^}]*width:\s*100%/);
-  assert.match(styles, /--ec-hero-media-mask:\s*linear-gradient\(to bottom,[^;]*#000 18%[^;]*transparent 85%/);
+  assert.match(styles, /--ec-hero-media-mask:\s*linear-gradient\(to bottom,[^;]*#000 18%[^;]*rgba\(0, 0, 0, \.15\) 85%/);
   assert.match(styles, /\.ec-root\.ec-hero \.ec-media\s*\{[^}]*-webkit-mask-image:\s*var\(--ec-hero-media-mask\)[^}]*mask-image:\s*var\(--ec-hero-media-mask\)/);
   assert.match(styles, /\.ec-root\.ec-hero \.ec-slide::after\s*\{[^}]*-webkit-mask-image:\s*var\(--ec-hero-media-mask\)[^}]*mask-image:\s*var\(--ec-hero-media-mask\)/);
   assert.match(styles, /\.ec-slide\.ec-trailer-active \.ec-backdrop\s*\{[\s\S]*?opacity:\s*0/);

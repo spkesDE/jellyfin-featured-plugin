@@ -37,9 +37,9 @@ public sealed class HeroDisplaySettingsTests
 
         PluginConfiguration normalized = PluginConfigurationNormalizer.Normalize(config);
 
-        Assert.Equal(40, normalized.HeroFadeStart);
-        Assert.Equal(90, normalized.HeroFadeEnd);
-        Assert.Equal("balanced", normalized.HeroFadeCurve);
+        Assert.Equal(50, normalized.HeroFadeStart);
+        Assert.Equal(100, normalized.HeroFadeEnd);
+        Assert.Equal("custom", normalized.HeroFadeCurve);
     }
 
     [Fact]
@@ -65,8 +65,35 @@ public sealed class HeroDisplaySettingsTests
         FeaturedPresetLayoutSettings layout = PluginConfigurationNormalizer.Normalize(config).Presets[0].Layout;
 
         Assert.Equal("fullscreen", layout.HeroHeightMode);
-        Assert.Equal(40, layout.HeroFadeStart);
-        Assert.Equal(90, layout.HeroFadeEnd);
+        Assert.Equal(50, layout.HeroFadeStart);
+        Assert.Equal(100, layout.HeroFadeEnd);
         Assert.Equal("soft", layout.HeroFadeCurve);
+    }
+
+    [Fact]
+    public void Normalize_SanitizesCustomFadePointsAndKeepsEndpoints()
+    {
+        PluginConfiguration config = new()
+        {
+            HeroFadeCurve = "custom",
+            HeroFadePoints =
+            [
+                new HeroFadePoint { Position = 100, Fade = 25 },
+                new HeroFadePoint { Position = 65, Fade = 120 },
+                new HeroFadePoint { Position = 35, Fade = -20 },
+                new HeroFadePoint { Position = 35, Fade = 80 },
+                new HeroFadePoint { Position = 0, Fade = 90 }
+            ]
+        };
+
+        PluginConfiguration normalized = PluginConfigurationNormalizer.Normalize(config);
+
+        Assert.Equal("custom", normalized.HeroFadeCurve);
+        Assert.Collection(
+            normalized.HeroFadePoints,
+            point => Assert.Equal((0, 0), (point.Position, point.Fade)),
+            point => Assert.Equal((35, 0), (point.Position, point.Fade)),
+            point => Assert.Equal((65, 100), (point.Position, point.Fade)),
+            point => Assert.Equal((100, 100), (point.Position, point.Fade)));
     }
 }

@@ -1,4 +1,7 @@
-import type { HeroFadeCurve, HeroHeightMode } from '../types/config';
+import type { HeroFadeCurve, HeroFadePoint, HeroHeightMode } from '../types/config';
+import type { HeroFadeDisplayPoint } from '../types/display';
+
+type HeroFadePointInput = HeroFadePoint | HeroFadeDisplayPoint;
 
 export interface HeroLayoutSettings {
   heroHeightMode: HeroHeightMode;
@@ -10,6 +13,7 @@ export interface HeroLayoutSettings {
   heroFadeStart: number;
   heroFadeEnd: number;
   heroFadeCurve: HeroFadeCurve;
+  heroFadePoints: HeroFadePointInput[];
   mediaPadding: number;
   useHeroLayout: boolean;
 }
@@ -23,26 +27,72 @@ export function getHeroDesktopHeight(mode: HeroHeightMode, customHeight: number)
   return 500;
 }
 
-const FADE_STOP_OFFSETS = [0.16, 0.3, 0.5, 0.7, 0.92];
-const FADE_CURVE_OPACITIES: Record<HeroFadeCurve, number[]> = {
-  soft: [0.82, 0.62, 0.4, 0.2, 0.06],
-  balanced: [0.92, 0.72, 0.48, 0.24, 0.08],
-  strong: [0.98, 0.88, 0.68, 0.4, 0.14]
+const HERO_FADE_PRESETS: Record<Exclude<HeroFadeCurve, 'custom'>, HeroFadePoint[]> = {
+  soft: [
+    { Position: 0, Fade: 0 }, { Position: 16, Fade: 18 }, { Position: 30, Fade: 38 },
+    { Position: 50, Fade: 60 }, { Position: 70, Fade: 80 }, { Position: 92, Fade: 94 },
+    { Position: 100, Fade: 100 }
+  ],
+  balanced: [
+    { Position: 0, Fade: 0 }, { Position: 16, Fade: 8 }, { Position: 30, Fade: 28 },
+    { Position: 50, Fade: 52 }, { Position: 70, Fade: 76 }, { Position: 92, Fade: 92 },
+    { Position: 100, Fade: 100 }
+  ],
+  strong: [
+    { Position: 0, Fade: 0 }, { Position: 16, Fade: 2 }, { Position: 30, Fade: 12 },
+    { Position: 50, Fade: 32 }, { Position: 70, Fade: 60 }, { Position: 92, Fade: 86 },
+    { Position: 100, Fade: 100 }
+  ]
 };
 
-export function createHeroFadeMask(start: number, end: number, curve: HeroFadeCurve): string {
+function pointPosition(point: HeroFadePointInput): number {
+  return 'Position' in point ? point.Position : point.position;
+}
+
+function pointFade(point: HeroFadePointInput): number {
+  return 'Fade' in point ? point.Fade : point.fade;
+}
+
+export function getHeroFadePoints(curve: HeroFadeCurve, customPoints: HeroFadePointInput[] = []): HeroFadePoint[] {
+  if (curve !== 'custom') return HERO_FADE_PRESETS[curve].map((point) => ({ ...point }));
+  const interior = customPoints
+    .map((point) => ({ Position: pointPosition(point), Fade: pointFade(point) }))
+    .filter((point) => Number.isFinite(point.Position) && Number.isFinite(point.Fade)
+      && point.Position > 0 && point.Position < 100)
+    .map((point) => ({
+      Position: Math.round(Math.max(1, Math.min(99, point.Position))),
+      Fade: Math.round(Math.max(0, Math.min(100, point.Fade)))
+    }))
+    .sort((left, right) => left.Position - right.Position)
+    .filter((point, index, points) => index === 0 || point.Position !== points[index - 1].Position)
+    .slice(0, 10);
+  return [{ Position: 0, Fade: 0 }, ...interior, { Position: 100, Fade: 100 }];
+}
+
+export function createHeroFadeMask(
+  start: number,
+  end: number,
+  curve: HeroFadeCurve,
+  strength = 85,
+  customPoints: HeroFadePointInput[] = []
+): string {
   const safeStart = Number.isFinite(start) ? Math.max(0, Math.min(100, start)) : 40;
   const safeEnd = Number.isFinite(end) ? Math.max(0, Math.min(100, end)) : 90;
+  const normalizedStrength = Number.isFinite(strength) ? Math.max(0, Math.min(100, strength)) / 100 : 0.85;
+  if (normalizedStrength === 0) return 'none';
   const normalizedStart = safeEnd > safeStart ? safeStart : 40;
   const normalizedEnd = safeEnd > safeStart ? safeEnd : 90;
   const span = normalizedEnd - normalizedStart;
-  const opacities = FADE_CURVE_OPACITIES[curve] || FADE_CURVE_OPACITIES.balanced;
-  const intermediate = FADE_STOP_OFFSETS.map((offset, index) => {
-    const position = Math.round((normalizedStart + (span * offset)) * 100) / 100;
-    const opacity = String(opacities[index]).replace(/^0/, '');
+  const fadeOpacity = (fade: number): string => {
+    const adjusted = Math.round((1 - ((fade / 100) * normalizedStrength)) * 1000) / 1000;
+    return String(adjusted).replace(/^0(?=\.)/, '');
+  };
+  const stops = getHeroFadePoints(curve, customPoints).slice(1).map((point) => {
+    const position = Math.round((normalizedStart + (span * point.Position / 100)) * 100) / 100;
+    const opacity = fadeOpacity(point.Fade);
     return `rgba(0,0,0,${opacity}) ${position}%`;
   });
-  return `linear-gradient(to bottom, #000 0%, #000 ${normalizedStart}%, ${intermediate.join(', ')}, transparent ${normalizedEnd}%)`;
+  return `linear-gradient(to bottom, #000 0%, #000 ${normalizedStart}%, ${stops.join(', ')})`;
 }
 
 export function getHeroOverlap(height: number, mode?: HeroHeightMode): number {
@@ -76,7 +126,9 @@ export function applyHeroLayoutVariables(element: HTMLElement, settings: HeroLay
     element.style.setProperty('--ec-hero-media-mask', createHeroFadeMask(
       settings.heroFadeStart,
       settings.heroFadeEnd,
-      settings.heroFadeCurve
+      settings.heroFadeCurve,
+      settings.heroGradientStrength,
+      settings.heroFadePoints
     ));
   } else {
     element.style.setProperty('--ec-radius', `${settings.heroBorderRadius}px`);

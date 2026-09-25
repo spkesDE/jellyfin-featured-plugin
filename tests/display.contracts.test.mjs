@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
+import { Buffer } from 'node:buffer';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
+import { transform } from 'esbuild';
 
 const read = async (path) => await readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 
@@ -166,20 +168,69 @@ test('vertical hero fade generates and applies the runtime mask', async () => {
     read('src/styles/featured.css')
   ]);
 
-  assert.match(layout, /FADE_STOP_OFFSETS = \[0\.16, 0\.3, 0\.5, 0\.7, 0\.92\]/);
-  assert.match(layout, /balanced: \[0\.92, 0\.72, 0\.48, 0\.24, 0\.08\]/);
-  assert.match(layout, /normalizedStart \+ \(span \* offset\)/);
+  assert.match(layout, /HERO_FADE_PRESETS:[\s\S]*?soft:[\s\S]*?balanced:[\s\S]*?strong:/);
+  assert.match(layout, /getHeroFadePoints\(curve: HeroFadeCurve, customPoints:/);
+  assert.match(layout, /normalizedStrength === 0\) return 'none'/);
+  assert.match(layout, /1 - \(\(fade \/ 100\) \* normalizedStrength\)/);
+  assert.match(layout, /normalizedStart \+ \(span \* point\.Position \/ 100\)/);
   assert.match(styles, /-webkit-mask-image:\s*var\(--ec-hero-media-mask\)/);
   assert.match(styles, /mask-image:\s*var\(--ec-hero-media-mask\)/);
   assert.match(layout, /setProperty\('--ec-hero-media-mask', createHeroFadeMask/);
 });
 
+test('full-strength hero fade emits a valid transparent endpoint', async () => {
+  const source = await read('src/slider/layout.ts');
+  const compiled = await transform(source, { format: 'esm', loader: 'ts', target: 'es2020' });
+  const moduleUrl = `data:text/javascript;base64,${Buffer.from(compiled.code).toString('base64')}`;
+  const { createHeroFadeMask, getHeroFadePoints } = await import(moduleUrl);
+
+  const mask = createHeroFadeMask(55, 95, 'soft', 100);
+  assert.match(mask, /rgba\(0,0,0,0\) 95%\)$/);
+  assert.doesNotMatch(mask, /rgba\(0,0,0,\)/);
+  assert.equal(createHeroFadeMask(55, 95, 'soft', 0), 'none');
+  assert.equal(
+    createHeroFadeMask(20, 80, 'custom', 100, [
+      { Position: 0, Fade: 0 }, { Position: 50, Fade: 25 }, { Position: 100, Fade: 100 }
+    ]),
+    'linear-gradient(to bottom, #000 0%, #000 20%, rgba(0,0,0,.75) 50%, rgba(0,0,0,0) 80%)'
+  );
+  assert.deepEqual(getHeroFadePoints('custom', [
+    { Position: 100, Fade: 100 }, { Position: 45, Fade: 70 }, { Position: 0, Fade: 0 }
+  ]), [
+    { Position: 0, Fade: 0 }, { Position: 45, Fade: 70 }, { Position: 100, Fade: 100 }
+  ]);
+});
+
+test('gradient strength only controls the vertical fade', async () => {
+  const [styles, configStyles] = await Promise.all([
+    read('src/styles/featured.css'),
+    read('src/config/config.css')
+  ]);
+
+  assert.match(styles, /--ec-media-shade:\s*linear-gradient\(0deg,[^;]*var\(--ec-gradient-strength\)[^;]*transparent 45%\)/);
+  assert.doesNotMatch(styles, /--ec-media-shade:[^;]*linear-gradient\(90deg/);
+  assert.match(styles, /\.ec-root\.ec-hero\s*\{[^}]*--ec-media-shade:\s*none/);
+  assert.match(configStyles, /--ec-preview-shade:\s*linear-gradient\(0deg,[^;]*var\(--ec-preview-gradient, \.85\)[^;]*transparent 45%\)/);
+  assert.doesNotMatch(configStyles, /--ec-preview-shade:[^;]*linear-gradient\(90deg/);
+  assert.match(configStyles, /\.ec-configPreview\.is-hero\s*\{[^}]*--ec-preview-shade:\s*none/);
+});
+
 test('vertical hero fade is editable and rendered in the banner preview', async () => {
-  const [displayTab, preview] = await Promise.all([
+  const [displayTab, editor, preview] = await Promise.all([
     read('src/config/tabs/DisplayTab.vue'),
+    read('src/config/components/HeroFadeCurveEditor.vue'),
     read('src/config/components/BannerPreview.vue')
   ]);
 
-  assert.match(preview, /createHeroFadeMask\([\s\S]*?HeroFadeStart[\s\S]*?HeroFadeEnd[\s\S]*?HeroFadeCurve/);
-  assert.match(displayTab, /v-model="store\.config\.HeroFadeStart"[\s\S]*?v-model="store\.config\.HeroFadeEnd"[\s\S]*?v-model="store\.config\.HeroFadeCurve"/);
+  assert.match(preview, /createHeroFadeMask\([\s\S]*?HeroFadeStart[\s\S]*?HeroFadeEnd[\s\S]*?HeroFadeCurve[\s\S]*?HeroGradientStrength[\s\S]*?HeroFadePoints/);
+  assert.match(displayTab, /v-model:curve="store\.config\.HeroFadeCurve"[\s\S]*?v-model:points="store\.config\.HeroFadePoints"[\s\S]*?v-model:strength="store\.config\.HeroGradientStrength"[\s\S]*?v-model:start="store\.config\.HeroFadeStart"[\s\S]*?v-model:end="store\.config\.HeroFadeEnd"/);
+  assert.doesNotMatch(displayTab, /display\.(?:gradientStrength|fadeStart|fadeEnd)/);
+  assert.match(editor, /function commitCustom[\s\S]*?function updateSelected[\s\S]*?function drag/);
+  assert.match(editor, /@pointermove="drag"/);
+  assert.doesNotMatch(editor, /presetOptions|selectPreset|selectCustom/);
+  assert.match(editor, /selectedActualPosition[\s\S]*?relativePosition\(Number\(value\)\)/);
+  assert.match(editor, /emit\('update:start'[\s\S]*?emit\('update:end'/);
+  assert.match(editor, /kind === 'endPoint'[\s\S]*?emit\('update:strength'/);
+  assert.match(editor, /@selectstart\.prevent[\s\S]*?@dragstart\.prevent/);
+  assert.match(editor, /fadeAddPoint[\s\S]*?fadeRemovePoint/);
 });

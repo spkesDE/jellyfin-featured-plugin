@@ -6,6 +6,7 @@ import ConfigCheckbox from '../components/ConfigCheckbox.vue';
 import ConfigNumber from '../components/ConfigNumber.vue';
 import ConfigSelect, { type SelectOption } from '../components/ConfigSelect.vue';
 import ConfigText from '../components/ConfigText.vue';
+import HeroFadeCurveEditor from '../components/HeroFadeCurveEditor.vue';
 import { t } from '../../i18n';
 import { useConfigStore } from '../libs/store';
 
@@ -93,11 +94,6 @@ const heightModeOptions: SelectOption[] = [
   { value: 'fullscreen', label: t('option.heightFullscreen') },
   { value: 'custom', label: t('option.heightCustom') }
 ];
-const fadeCurveOptions: SelectOption[] = [
-  { value: 'soft', label: t('option.fadeSoft') },
-  { value: 'balanced', label: t('option.fadeBalanced') },
-  { value: 'strong', label: t('option.fadeStrong') }
-];
 const textPositionOptions: SelectOption[] = [
   { value: 'left', label: t('option.left') },
   { value: 'center', label: t('option.center') },
@@ -129,12 +125,13 @@ const placementOptions: SelectOption[] = [
           </div>
           <ConfigNumber v-if="!store.config.UseHeroLayout" v-model="store.config.HeroBorderRadius" :label="t('display.borderRadius')" :min="0" :max="48" :step="1" />
           <template v-if="store.config.UseHeroLayout">
-            <ConfigNumber v-model="store.config.HeroGradientStrength" :label="t('display.gradientStrength')" :min="0" :max="100" :step="5" />
-            <div class="jmp-compactGrid">
-              <ConfigNumber v-model="store.config.HeroFadeStart" :label="t('display.fadeStart')" :min="0" :max="Math.max(0, store.config.HeroFadeEnd - 1)" :step="1" />
-              <ConfigNumber v-model="store.config.HeroFadeEnd" :label="t('display.fadeEnd')" :min="Math.min(100, store.config.HeroFadeStart + 1)" :max="100" :step="1" />
-            </div>
-            <ConfigSelect v-model="store.config.HeroFadeCurve" :label="t('display.fadeCurve')" :options="fadeCurveOptions" />
+            <HeroFadeCurveEditor
+              v-model:curve="store.config.HeroFadeCurve"
+              v-model:points="store.config.HeroFadePoints"
+              v-model:strength="store.config.HeroGradientStrength"
+              v-model:start="store.config.HeroFadeStart"
+              v-model:end="store.config.HeroFadeEnd"
+            />
           </template>
           <div class="jmp-compactGrid">
             <ConfigSelect v-model="store.config.HeroTextPosition" :label="t('display.textPosition')" :options="textPositionOptions" />

@@ -28,7 +28,9 @@ const previewStyle = computed(() => ({
   '--ec-preview-fade': createHeroFadeMask(
     store.config.HeroFadeStart,
     store.config.HeroFadeEnd,
-    store.config.HeroFadeCurve
+    store.config.HeroFadeCurve,
+    store.config.HeroGradientStrength,
+    store.config.HeroFadePoints
   )
 }));
 const mockStyle = computed(() => ({

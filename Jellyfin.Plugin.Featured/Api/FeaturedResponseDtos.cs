@@ -45,6 +45,9 @@ public abstract class FeaturedDisplaySettingsDto
         HeroFadeStart = config.HeroFadeStart;
         HeroFadeEnd = config.HeroFadeEnd;
         HeroFadeCurve = config.HeroFadeCurve;
+        HeroFadePoints = config.HeroFadePoints
+            .Select(point => new HeroFadePointDto(point.Position, point.Fade))
+            .ToArray();
         HeroTextPosition = config.HeroTextPosition;
         TransitionEffect = config.TransitionEffect;
         HeroBackdropPosition = config.HeroBackdropPosition;
@@ -94,6 +97,7 @@ public abstract class FeaturedDisplaySettingsDto
     public int HeroFadeStart { get; }
     public int HeroFadeEnd { get; }
     public string HeroFadeCurve { get; }
+    public IReadOnlyList<HeroFadePointDto> HeroFadePoints { get; }
     public string HeroTextPosition { get; }
     public string TransitionEffect { get; }
     public string HeroBackdropPosition { get; }
@@ -115,6 +119,8 @@ public abstract class FeaturedDisplaySettingsDto
 
     private static string? NullIfEmpty(string? value) => string.IsNullOrWhiteSpace(value) ? null : value;
 }
+
+public sealed record HeroFadePointDto(int Position, int Fade);
 
 public sealed class FeaturedRuntimeConfigurationDto : FeaturedDisplaySettingsDto
 {

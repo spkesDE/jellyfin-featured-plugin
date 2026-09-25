@@ -128,13 +128,21 @@ public sealed class PluginConfiguration : BasePluginConfiguration
 
     public int HeroBorderRadius { get; set; }
 
-    public int HeroGradientStrength { get; set; } = 85;
+    public int HeroGradientStrength { get; set; } = 100;
 
-    public int HeroFadeStart { get; set; } = 40;
+    public int HeroFadeStart { get; set; } = 50;
 
-    public int HeroFadeEnd { get; set; } = 90;
+    public int HeroFadeEnd { get; set; } = 100;
 
-    public string HeroFadeCurve { get; set; } = "balanced";
+    public string HeroFadeCurve { get; set; } = "custom";
+
+    public HeroFadePoint[] HeroFadePoints { get; set; } =
+    [
+        new() { Position = 0, Fade = 0 },
+        new() { Position = 30, Fade = 41 },
+        new() { Position = 76, Fade = 67 },
+        new() { Position = 100, Fade = 100 }
+    ];
 
     public string HeroTextPosition { get; set; } = "left";
 
@@ -249,10 +257,17 @@ public sealed class FeaturedPresetLayoutSettings
     public int TabletBannerHeight { get; set; } = 400;
     public int MobileBannerHeight { get; set; } = 340;
     public int HeroBorderRadius { get; set; }
-    public int HeroGradientStrength { get; set; } = 85;
-    public int HeroFadeStart { get; set; } = 40;
-    public int HeroFadeEnd { get; set; } = 90;
-    public string HeroFadeCurve { get; set; } = "balanced";
+    public int HeroGradientStrength { get; set; } = 100;
+    public int HeroFadeStart { get; set; } = 50;
+    public int HeroFadeEnd { get; set; } = 100;
+    public string HeroFadeCurve { get; set; } = "custom";
+    public HeroFadePoint[] HeroFadePoints { get; set; } =
+    [
+        new() { Position = 0, Fade = 0 },
+        new() { Position = 30, Fade = 41 },
+        new() { Position = 76, Fade = 67 },
+        new() { Position = 100, Fade = 100 }
+    ];
     public string HeroTextPosition { get; set; } = "left";
     public string TransitionEffect { get; set; } = "slide";
     public string HeroBackdropPosition { get; set; } = "center";
@@ -264,6 +279,12 @@ public sealed class FeaturedPresetLayoutSettings
     public bool ShowPaginationDots { get; set; } = true;
     public string? Heading { get; set; }
     public string? PlayButtonText { get; set; }
+}
+
+public sealed class HeroFadePoint
+{
+    public int Position { get; set; }
+    public int Fade { get; set; }
 }
 
 public sealed class FeaturedPresetTrailerSettings

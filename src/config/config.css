@@ -157,7 +157,7 @@
                 #FeaturedConfigPage .ec-configPreview {
                     --ec-preview-background: #181b22 radial-gradient(circle at 72% 28%, #465267 0, #222936 35%, #11151d 72%);
                     --ec-preview-content-inline-inset: 8%;
-                    --ec-preview-shade: linear-gradient(90deg, rgb(4 6 10 / var(--ec-preview-gradient, .85)), rgb(4 6 10 / calc(var(--ec-preview-gradient, .85) * .48)) 56%, transparent);
+                    --ec-preview-shade: linear-gradient(0deg, rgb(4 6 10 / calc(var(--ec-preview-gradient, .85) * .74)), transparent 45%);
                     background: var(--ec-preview-background);
                     border-radius: var(--ec-preview-radius, 0);
                     color: #fff;
@@ -177,6 +177,7 @@
                 }
 
                 #FeaturedConfigPage .ec-configPreview.is-hero {
+                    --ec-preview-shade: none;
                     background: transparent;
                     margin: 0;
                 }

@@ -13,7 +13,7 @@
   --ec-mobile-height: 340px;
   --ec-radius: 0px;
   --ec-gradient-strength: .85;
-  --ec-media-shade: linear-gradient(90deg, rgb(5 7 12 / var(--ec-gradient-strength)) 0%, rgb(5 7 12 / calc(var(--ec-gradient-strength) * .74)) 30%, rgb(5 7 12 / calc(var(--ec-gradient-strength) * .16)) 66%, rgb(5 7 12 / calc(var(--ec-gradient-strength) * .42)) 100%), linear-gradient(0deg, rgb(5 7 12 / calc(var(--ec-gradient-strength) * .74)), transparent 45%);
+  --ec-media-shade: linear-gradient(0deg, rgb(5 7 12 / calc(var(--ec-gradient-strength) * .74)), transparent 45%);
   --ec-on-media-color: #fff;
   --ec-slide-transition: transform .62s cubic-bezier(.22, .61, .36, 1), opacity .46s ease;
   box-sizing: border-box;
@@ -1098,7 +1098,8 @@
   --ec-desktop-content-height: clamp(0px, calc(var(--ec-height) - var(--ec-hero-overlap, 150px) + 52px + var(--ec-media-padding, 0px)), var(--ec-height));
   --ec-desktop-overlap-offset: calc((var(--ec-hero-overlap, 150px) * -1) + 52px + var(--ec-media-padding, 0px));
   --ec-hero-content-padding-top: clamp(5em, 10vw, 9rem);
-  --ec-hero-media-mask: linear-gradient(to bottom, #000 18%, rgba(0, 0, 0, .92) 36%, rgba(0, 0, 0, .58) 53%, rgba(0, 0, 0, .22) 70%, transparent 85%);
+  --ec-hero-media-mask: linear-gradient(to bottom, #000 18%, rgba(0, 0, 0, .932) 36%, rgba(0, 0, 0, .762) 53%, rgba(0, 0, 0, .354) 70%, rgba(0, 0, 0, .15) 85%);
+  --ec-media-shade: none;
   --ec-hero-overlap-offset: var(--ec-desktop-overlap-offset);
   --ec-hero-slide-background: linear-gradient(to bottom, #000 0%, #000 54%, rgba(0, 0, 0, .88) 60%, rgba(0, 0, 0, .58) 67%, rgba(0, 0, 0, .24) 73%, transparent 80%);
 }

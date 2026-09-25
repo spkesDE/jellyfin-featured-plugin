@@ -229,6 +229,9 @@ internal static class FeaturedPresetResolver
         config.HeroFadeStart = preset.Layout.HeroFadeStart;
         config.HeroFadeEnd = preset.Layout.HeroFadeEnd;
         config.HeroFadeCurve = preset.Layout.HeroFadeCurve;
+        config.HeroFadePoints = preset.Layout.HeroFadePoints
+            .Select(point => new HeroFadePoint { Position = point.Position, Fade = point.Fade })
+            .ToArray();
         config.HeroTextPosition = preset.Layout.HeroTextPosition;
         config.TransitionEffect = preset.Layout.TransitionEffect;
         config.HeroBackdropPosition = preset.Layout.HeroBackdropPosition;

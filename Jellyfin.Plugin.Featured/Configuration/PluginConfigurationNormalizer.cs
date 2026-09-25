@@ -200,11 +200,12 @@ internal static class PluginConfigurationNormalizer
         config.HeroFadeEnd = Math.Clamp(config.HeroFadeEnd, 0, 100);
         if (config.HeroFadeEnd <= config.HeroFadeStart)
         {
-            config.HeroFadeStart = 40;
-            config.HeroFadeEnd = 90;
+            config.HeroFadeStart = 50;
+            config.HeroFadeEnd = 100;
         }
 
         config.HeroFadeCurve = NormalizeHeroFadeCurve(config.HeroFadeCurve);
+        config.HeroFadePoints = NormalizeHeroFadePoints(config.HeroFadePoints);
     }
 
     private static void NormalizeHeroFade(FeaturedPresetLayoutSettings layout)
@@ -213,15 +214,33 @@ internal static class PluginConfigurationNormalizer
         layout.HeroFadeEnd = Math.Clamp(layout.HeroFadeEnd, 0, 100);
         if (layout.HeroFadeEnd <= layout.HeroFadeStart)
         {
-            layout.HeroFadeStart = 40;
-            layout.HeroFadeEnd = 90;
+            layout.HeroFadeStart = 50;
+            layout.HeroFadeEnd = 100;
         }
 
         layout.HeroFadeCurve = NormalizeHeroFadeCurve(layout.HeroFadeCurve);
+        layout.HeroFadePoints = NormalizeHeroFadePoints(layout.HeroFadePoints);
     }
 
     private static string NormalizeHeroFadeCurve(string? curve)
-        => curve is "soft" or "strong" ? curve : "balanced";
+        => curve is "soft" or "balanced" or "strong" ? curve : "custom";
+
+    private static HeroFadePoint[] NormalizeHeroFadePoints(HeroFadePoint[]? points)
+    {
+        HeroFadePoint[] interior = (points ?? [])
+            .Where(point => point is not null && point.Position > 0 && point.Position < 100)
+            .Select(point => new HeroFadePoint
+            {
+                Position = Math.Clamp(point.Position, 1, 99),
+                Fade = Math.Clamp(point.Fade, 0, 100)
+            })
+            .OrderBy(point => point.Position)
+            .GroupBy(point => point.Position)
+            .Select(group => group.First())
+            .Take(10)
+            .ToArray();
+        return [new HeroFadePoint { Position = 0, Fade = 0 }, .. interior, new HeroFadePoint { Position = 100, Fade = 100 }];
+    }
 
     private static void NormalizePresetTrailers(FeaturedPresetTrailerSettings trailers)
     {

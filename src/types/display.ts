@@ -1,5 +1,10 @@
 import type { FeatureControlPlacement, HeroBackdropPosition, HeroFadeCurve, HeroHeightMode, HeroTextPosition, TrailerVolumeSliderDirection, TransitionEffect } from './config';
 
+export interface HeroFadeDisplayPoint {
+  position: number;
+  fade: number;
+}
+
 export interface FeaturedDisplaySettings {
   showAutoplayButton: boolean;
   enableBackgroundTrailers: boolean;
@@ -37,6 +42,7 @@ export interface FeaturedDisplaySettings {
   heroFadeStart: number;
   heroFadeEnd: number;
   heroFadeCurve: HeroFadeCurve;
+  heroFadePoints: HeroFadeDisplayPoint[];
   heroTextPosition: HeroTextPosition;
   transitionEffect: TransitionEffect;
   heroBackdropPosition: HeroBackdropPosition;

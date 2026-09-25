@@ -32,10 +32,10 @@ test('critical C# and TypeScript defaults stay in parity', async () => {
     HeroHeightMode: "'standard'",
     TabletBannerHeight: '400',
     MobileBannerHeight: '340',
-    HeroGradientStrength: '85',
-    HeroFadeStart: '40',
-    HeroFadeEnd: '90',
-    HeroFadeCurve: "'balanced'",
+    HeroGradientStrength: '100',
+    HeroFadeStart: '50',
+    HeroFadeEnd: '100',
+    HeroFadeCurve: "'custom'",
     HeroTextPosition: "'left'",
     TransitionEffect: "'slide'",
     HeroBackdropPosition: "'center'",
@@ -67,6 +67,9 @@ test('critical C# and TypeScript defaults stay in parity', async () => {
     const csharpValue = value.startsWith("'") ? `"${value.slice(1, -1)}"` : value;
     assert.match(backend, new RegExp(`public\\s+\\w+\\s+${name}\\s*\\{[^}]+\\}\\s*=\\s*${csharpValue.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*;`));
     assert.match(frontend, new RegExp(`\\b${name}:\\s*${value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*,`));
+  }
+  for (const source of [backend, frontend]) {
+    assert.match(source, /HeroFadePoints[\s\S]*?Position\s*[=:]\s*0,?\s*Fade\s*[=:]\s*0[\s\S]*?Position\s*[=:]\s*30,?\s*Fade\s*[=:]\s*41[\s\S]*?Position\s*[=:]\s*76,?\s*Fade\s*[=:]\s*67[\s\S]*?Position\s*[=:]\s*100,?\s*Fade\s*[=:]\s*100/);
   }
 });
 
@@ -179,9 +182,14 @@ test('vertical hero fade flows through backend display contracts', async () => {
     assert.match(defaults, new RegExp(`${property}: config\\.${property}`));
     assert.match(resolver, new RegExp(`config\\.${property} = preset\\.Layout\\.${property}`));
   }
+  assert.match(configuration, /HeroFadePoint\[\] HeroFadePoints/);
+  assert.match(responses, /IReadOnlyList<HeroFadePointDto> HeroFadePoints/);
+  assert.match(defaults, /HeroFadePoints: cloneJsonValue\(config\.HeroFadePoints\)/);
+  assert.match(resolver, /config\.HeroFadePoints = preset\.Layout\.HeroFadePoints/);
+  assert.match(normalizer, /NormalizeHeroFadePoints[\s\S]*?Math\.Clamp\(point\.Position, 1, 99\)[\s\S]*?Math\.Clamp\(point\.Fade, 0, 100\)/);
   assert.match(normalizer, /HeroFadeStart = Math\.Clamp\([^;]+, 0, 100\)/);
   assert.match(normalizer, /HeroFadeEnd = Math\.Clamp\([^;]+, 0, 100\)/);
-  assert.match(normalizer, /HeroFadeEnd <= [^\n]*HeroFadeStart[\s\S]*?HeroFadeStart = 40;[\s\S]*?HeroFadeEnd = 90;/);
+  assert.match(normalizer, /HeroFadeEnd <= [^\n]*HeroFadeStart[\s\S]*?HeroFadeStart = 50;[\s\S]*?HeroFadeEnd = 100;/);
 });
 
 test('configuration discovery uses the authenticated server options fallback', async () => {

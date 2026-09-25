@@ -5,13 +5,18 @@ export type FrontendInjectionMethod = 'automatic' | 'file-transformation' | 'jav
 export type TransitionEffect = 'slide' | 'fade';
 export type HeroBackdropPosition = 'top' | 'center' | 'bottom';
 export type HeroHeightMode = 'auto' | 'compact' | 'standard' | 'cinematic' | 'fullscreen' | 'custom';
-export type HeroFadeCurve = 'soft' | 'balanced' | 'strong';
+export type HeroFadeCurve = 'soft' | 'balanced' | 'strong' | 'custom';
 export type HeroTextPosition = 'left' | 'center' | 'right';
 export type TrailerSourcePriority = 'prefer_local' | 'prefer_remote' | 'local_only' | 'remote_only' | 'automatic';
 export type MultipleTrailerMode = 'first' | 'random';
 export type TrailerVolumeSliderDirection = 'side' | 'up' | 'down';
 export type FeatureControlPlacement = 'metadata' | 'actions';
 export type PresetScheduleType = 'one_time' | 'weekly' | 'annual';
+
+export interface HeroFadePoint {
+  Position: number;
+  Fade: number;
+}
 
 import type { FeaturedDisplaySettings } from './display';
 
@@ -104,6 +109,7 @@ export interface FeaturedPluginConfig {
   HeroFadeStart: number;
   HeroFadeEnd: number;
   HeroFadeCurve: HeroFadeCurve;
+  HeroFadePoints: HeroFadePoint[];
   HeroTextPosition: HeroTextPosition;
   TransitionEffect: TransitionEffect;
   HeroBackdropPosition: HeroBackdropPosition;
@@ -180,6 +186,7 @@ export interface FeaturedPresetLayoutSettings {
   HeroFadeStart: number;
   HeroFadeEnd: number;
   HeroFadeCurve: HeroFadeCurve;
+  HeroFadePoints: HeroFadePoint[];
   HeroTextPosition: HeroTextPosition;
   TransitionEffect: TransitionEffect;
   HeroBackdropPosition: HeroBackdropPosition;

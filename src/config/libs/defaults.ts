@@ -1,4 +1,4 @@
-import type { FeaturedFilterRule, FeaturedManualList, FeaturedPluginConfig, FeaturedPreset, FeaturedSourceRule, FeaturedUserProfile, SourceType } from '../../types/config';
+import type { FeaturedFilterRule, FeaturedManualList, FeaturedPluginConfig, FeaturedPreset, FeaturedSourceRule, FeaturedUserProfile, HeroFadePoint, SourceType } from '../../types/config';
 import type { RuntimeConfig } from '../../types/config';
 import type { FeaturedDisplaySettings } from '../../types/display';
 import type { FeaturedResponse } from '../../types/featured';
@@ -67,6 +67,7 @@ export function createPresetFromConfig(config: FeaturedPluginConfig, name = 'Fea
       MobileBannerHeight: config.MobileBannerHeight, HeroBorderRadius: config.HeroBorderRadius,
       HeroGradientStrength: config.HeroGradientStrength, HeroFadeStart: config.HeroFadeStart,
       HeroFadeEnd: config.HeroFadeEnd, HeroFadeCurve: config.HeroFadeCurve,
+      HeroFadePoints: cloneJsonValue(config.HeroFadePoints),
       HeroTextPosition: config.HeroTextPosition,
       TransitionEffect: config.TransitionEffect, HeroBackdropPosition: config.HeroBackdropPosition,
       BannerHeight: config.BannerHeight, ShowYear: config.ShowYear, ShowRuntime: config.ShowRuntime,
@@ -176,10 +177,16 @@ export const CONFIG_DEFAULTS: FeaturedPluginConfig = {
   TabletBannerHeight: 400,
   MobileBannerHeight: 340,
   HeroBorderRadius: 0,
-  HeroGradientStrength: 85,
-  HeroFadeStart: 40,
-  HeroFadeEnd: 90,
-  HeroFadeCurve: 'balanced',
+  HeroGradientStrength: 100,
+  HeroFadeStart: 50,
+  HeroFadeEnd: 100,
+  HeroFadeCurve: 'custom',
+  HeroFadePoints: [
+    { Position: 0, Fade: 0 },
+    { Position: 30, Fade: 41 },
+    { Position: 76, Fade: 67 },
+    { Position: 100, Fade: 100 }
+  ],
   HeroTextPosition: 'left',
   TransitionEffect: 'slide',
   HeroBackdropPosition: 'center',
@@ -238,6 +245,7 @@ export function createDisplaySettings(config: FeaturedPluginConfig): FeaturedDis
     heroFadeStart: config.HeroFadeStart,
     heroFadeEnd: config.HeroFadeEnd,
     heroFadeCurve: config.HeroFadeCurve,
+    heroFadePoints: config.HeroFadePoints.map((point) => ({ position: point.Position, fade: point.Fade })),
     heroTextPosition: config.HeroTextPosition,
     transitionEffect: config.TransitionEffect,
     heroBackdropPosition: config.HeroBackdropPosition,
@@ -295,10 +303,11 @@ export function normalizeConfig(value: unknown): FeaturedPluginConfig {
     ? value as Partial<FeaturedPluginConfig> & LegacyTrailerFallback
     : {};
   const config = { ...createDefaultConfig(), ...source };
-  const fade = normalizeHeroFade(config.HeroFadeStart, config.HeroFadeEnd, config.HeroFadeCurve);
+  const fade = normalizeHeroFade(config.HeroFadeStart, config.HeroFadeEnd, config.HeroFadeCurve, config.HeroFadePoints);
   config.HeroFadeStart = fade.start;
   config.HeroFadeEnd = fade.end;
   config.HeroFadeCurve = fade.curve;
+  config.HeroFadePoints = fade.points;
   config.HeroHeightMode = ['auto', 'compact', 'standard', 'cinematic', 'fullscreen', 'custom'].includes(String(config.HeroHeightMode))
     ? config.HeroHeightMode : 'standard';
   if (config.TrailerSourcePriority === 'prefer_local' && source.FallBackToRemoteTrailers === false) {
@@ -372,11 +381,13 @@ export function normalizeConfig(value: unknown): FeaturedPluginConfig {
         const layoutFade = normalizeHeroFade(
           normalized.Layout.HeroFadeStart,
           normalized.Layout.HeroFadeEnd,
-          normalized.Layout.HeroFadeCurve
+          normalized.Layout.HeroFadeCurve,
+          normalized.Layout.HeroFadePoints
         );
         normalized.Layout.HeroFadeStart = layoutFade.start;
         normalized.Layout.HeroFadeEnd = layoutFade.end;
         normalized.Layout.HeroFadeCurve = layoutFade.curve;
+        normalized.Layout.HeroFadePoints = layoutFade.points;
         normalized.Layout.HeroHeightMode = ['auto', 'compact', 'standard', 'cinematic', 'fullscreen', 'custom']
           .includes(String(normalized.Layout.HeroHeightMode)) ? normalized.Layout.HeroHeightMode : 'standard';
         return normalized;
@@ -411,19 +422,38 @@ export function normalizeConfig(value: unknown): FeaturedPluginConfig {
   return config;
 }
 
-function normalizeHeroFade(startValue: unknown, endValue: unknown, curveValue: unknown): {
-  start: number; end: number; curve: 'soft' | 'balanced' | 'strong'
+function normalizeHeroFade(startValue: unknown, endValue: unknown, curveValue: unknown, pointsValue: unknown): {
+  start: number; end: number; curve: 'soft' | 'balanced' | 'strong' | 'custom'; points: HeroFadePoint[]
 } {
-  const startNumber = typeof startValue === 'number' && Number.isFinite(startValue) ? startValue : 40;
-  const endNumber = typeof endValue === 'number' && Number.isFinite(endValue) ? endValue : 90;
+  const startNumber = typeof startValue === 'number' && Number.isFinite(startValue) ? startValue : 50;
+  const endNumber = typeof endValue === 'number' && Number.isFinite(endValue) ? endValue : 100;
   const start = Math.max(0, Math.min(100, startNumber));
   const end = Math.max(0, Math.min(100, endNumber));
-  if (end <= start) return { start: 40, end: 90, curve: normalizeHeroFadeCurve(curveValue) };
-  return { start, end, curve: normalizeHeroFadeCurve(curveValue) };
+  const curve = normalizeHeroFadeCurve(curveValue);
+  const points = normalizeHeroFadePoints(pointsValue);
+  if (end <= start) return { start: 50, end: 100, curve, points };
+  return { start, end, curve, points };
 }
 
-function normalizeHeroFadeCurve(value: unknown): 'soft' | 'balanced' | 'strong' {
-  return value === 'soft' || value === 'strong' ? value : 'balanced';
+function normalizeHeroFadeCurve(value: unknown): 'soft' | 'balanced' | 'strong' | 'custom' {
+  return value === 'soft' || value === 'balanced' || value === 'strong' ? value : 'custom';
+}
+
+function normalizeHeroFadePoints(value: unknown): HeroFadePoint[] {
+  const interior = Array.isArray(value)
+    ? value
+      .map((point) => point && typeof point === 'object' ? point as Partial<HeroFadePoint> : {})
+      .filter((point) => Number.isFinite(Number(point.Position))
+        && Number(point.Position) > 0 && Number(point.Position) < 100)
+      .map((point) => ({
+        Position: Math.round(Math.max(1, Math.min(99, Number(point.Position) || 0))),
+        Fade: Math.round(Math.max(0, Math.min(100, Number(point.Fade) || 0)))
+      }))
+      .sort((left, right) => left.Position - right.Position)
+      .filter((point, index, points) => index === 0 || point.Position !== points[index - 1].Position)
+      .slice(0, 10)
+    : [];
+  return [{ Position: 0, Fade: 0 }, ...interior, { Position: 100, Fade: 100 }];
 }
 
 function normalizeFilters(value: unknown): FeaturedFilterRule[] {
