@@ -18,6 +18,7 @@ declare global {
       showLoadingMsg(): void;
       hideLoadingMsg(): void;
       processPluginConfigurationUpdateResult(result: unknown): void;
+      alert?(message: string | { message: string }): void | Promise<void>;
       confirm?(message: string): void;
     };
   }

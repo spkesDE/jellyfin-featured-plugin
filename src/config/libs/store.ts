@@ -2,7 +2,7 @@ import { computed, inject, reactive, ref, type ComputedRef, type InjectionKey, t
 import { cloneJsonValue } from '../../core/clone';
 import { getApiClient, requestJson } from '../../core/apiClient';
 import { t } from '../../i18n';
-import type { FeaturedFilterRule, FeaturedManualList, FeaturedPluginConfig, FeaturedPreset, SourceType } from '../../types/config';
+import type { FeaturedFilterRule, FeaturedManualList, FeaturedPluginConfig, FeaturedPreset, FrontendInjectionMethod, SourceType } from '../../types/config';
 import type { FeaturedDiagnostics, FeaturedFeedPreview, FeaturedResponse, FeaturedSearchItem } from '../../types/featured';
 import { createDefaultConfig, createFilterRule, createManualList, createPresetFromConfig, createSourceRule, createUserProfile, normalizeConfig, refreshPresetFromConfig } from './defaults';
 import { loadLibrariesAndCollections, loadRatings, loadUsers } from './jellyfinApi';
@@ -29,6 +29,7 @@ export interface ConfigStore {
   diagnostics: Ref<FeaturedDiagnostics | null>;
   diagnosticsError: Ref<string | null>;
   diagnosticsLoading: Ref<boolean>;
+  injectionMethodsAvailable: Ref<Record<FrontendInjectionMethod, boolean>>;
   feedPreview: Ref<FeaturedFeedPreview | null>;
   feedPreviewOpen: Ref<boolean>;
   feedPreviewLoading: Ref<boolean>;
@@ -82,6 +83,12 @@ export function createConfigStore(): ConfigStore {
   const diagnostics = ref<FeaturedDiagnostics | null>(null);
   const diagnosticsError = ref<string | null>(null);
   const diagnosticsLoading = ref(false);
+  const injectionMethodsAvailable = ref<Record<FrontendInjectionMethod, boolean>>({
+    automatic: true,
+    'file-transformation': false,
+    'javascript-injector': false,
+    direct: false
+  });
   const feedPreview = ref<FeaturedFeedPreview | null>(null);
   const feedPreviewOpen = ref(false);
   const feedPreviewLoading = ref(false);
@@ -166,6 +173,9 @@ export function createConfigStore(): ConfigStore {
       configLoadPromise = null;
     });
     configLoadPromise = primaryLoad;
+    void requestJson<Record<FrontendInjectionMethod, boolean>>('featured/config/injection-methods')
+      .then((availability) => { injectionMethodsAvailable.value = availability; })
+      .catch(() => undefined);
     void primaryLoad.then(() => loadSupportingData()).catch(() => undefined);
     return primaryLoad;
   }
@@ -317,7 +327,7 @@ export function createConfigStore(): ConfigStore {
   }
   return {
     config, users, libraries, collections, playlists, genres, tags, actors, directors, originalLanguages, audioLanguages,
-    ratings, preview, diagnostics, diagnosticsError, diagnosticsLoading,
+    ratings, preview, diagnostics, diagnosticsError, diagnosticsLoading, injectionMethodsAvailable,
     feedPreview, feedPreviewOpen, feedPreviewLoading, feedPreviewError, feedPreviewPresetId, feedPreviewUserId,
     activeTab, loading, saveState, parentalRatingValue,
     loadConfig, saveConfig, runDiagnostics, openFeedPreview, closeFeedPreview, runFeedPreview, selectTab: (tab) => {

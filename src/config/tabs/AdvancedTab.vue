@@ -1,18 +1,50 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import ConfigCard from '../components/ConfigCard.vue';
 import ConfigCheckbox from '../components/ConfigCheckbox.vue';
 import ConfigSelect, { type SelectOption } from '../components/ConfigSelect.vue';
-import { t } from '../../i18n';
+import { t, type TranslationKey } from '../../i18n';
 import { useConfigStore } from '../libs/store';
 
 const store = useConfigStore();
 const diagnosticsOpen = ref(false);
-const injectionOptions: SelectOption[] = [
+const injectionOptions = computed<SelectOption[]>(() => [
   { value: 'automatic', label: t('advanced.automatic') },
-  { value: 'file-transformation', label: t('advanced.fileTransformation') },
-  { value: 'javascript-injector', label: t('advanced.javascriptInjector') }
-];
+  {
+    value: 'file-transformation',
+    label: optionLabel('advanced.fileTransformation', store.injectionMethodsAvailable.value['file-transformation']),
+    disabled: !store.injectionMethodsAvailable.value['file-transformation']
+  },
+  {
+    value: 'javascript-injector',
+    label: optionLabel('advanced.javascriptInjector', store.injectionMethodsAvailable.value['javascript-injector']),
+    disabled: !store.injectionMethodsAvailable.value['javascript-injector']
+  },
+  {
+    value: 'direct',
+    label: optionLabel('advanced.directInjection', store.injectionMethodsAvailable.value.direct),
+    disabled: !store.injectionMethodsAvailable.value.direct
+  }
+]);
+
+function optionLabel(key: TranslationKey, available: boolean): string {
+  const label = t(key);
+  return available ? label : `${label} ${t('advanced.unavailable')}`;
+}
+
+function showRestartReminder(): void {
+  const message = t('advanced.injectionRestartRequired');
+  if (window.Dashboard?.alert) window.Dashboard.alert(message);
+  else window.alert(message);
+}
+
+watch(
+  () => store.config.FrontendInjectionMethod,
+  (method, previousMethod) => {
+    if (method !== previousMethod && !store.loading.value) showRestartReminder();
+  },
+  { flush: 'sync' }
+);
 
 watch(
   () => [store.diagnostics.value, store.diagnosticsError.value],

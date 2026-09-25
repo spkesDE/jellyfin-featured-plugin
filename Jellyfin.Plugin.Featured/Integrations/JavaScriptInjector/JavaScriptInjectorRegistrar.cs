@@ -13,6 +13,8 @@ internal static class JavaScriptInjectorRegistrar
     private const string AssemblyName = "Jellyfin.Plugin.JavaScriptInjector";
     private const string InterfaceTypeName = "Jellyfin.Plugin.JavaScriptInjector.PluginInterface";
 
+    internal static bool IsAvailable() => FindRegisterMethod() is not null;
+
     internal static bool TryRegister(ILogger logger) => TrySetEnabled(logger, true);
 
     internal static bool TrySetEnabled(ILogger logger, bool enabled)
@@ -25,10 +27,7 @@ internal static class JavaScriptInjectorRegistrar
                 return false;
             }
 
-            Assembly? assembly = AssemblyLoadContext.All
-                .SelectMany(context => context.Assemblies)
-                .FirstOrDefault(candidate => candidate.FullName?.Contains(AssemblyName, StringComparison.OrdinalIgnoreCase) ?? false);
-            MethodInfo? registerMethod = assembly?.GetType(InterfaceTypeName)?.GetMethod("RegisterScript");
+            MethodInfo? registerMethod = FindRegisterMethod();
             if (registerMethod is null)
             {
                 logger.LogDebug("JavaScript Injector is not available for Jellyfin Featured.");
@@ -63,6 +62,14 @@ internal static class JavaScriptInjectorRegistrar
         }
     }
 
+    private static MethodInfo? FindRegisterMethod()
+    {
+        Assembly? assembly = AssemblyLoadContext.All
+            .SelectMany(context => context.Assemblies)
+            .FirstOrDefault(candidate => candidate.FullName?.Contains(AssemblyName, StringComparison.OrdinalIgnoreCase) ?? false);
+        return assembly?.GetType(InterfaceTypeName)?.GetMethod("RegisterScript");
+    }
+
     private static string BuildLoaderScript()
     {
         string basePath = string.Empty;
@@ -84,6 +91,7 @@ internal static class JavaScriptInjectorRegistrar
                 const script = document.createElement('script');
                 script.async = false;
                 script.dataset.plugin = 'Featured';
+                script.dataset.injectionMethod = 'javascript-injector';
                 script.src = {{scriptUrl}};
                 (document.head || document.documentElement).appendChild(script);
             })();

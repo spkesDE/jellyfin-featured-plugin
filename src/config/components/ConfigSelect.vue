@@ -5,6 +5,7 @@ import ConfigHelpTooltip from './ConfigHelpTooltip.vue';
 export interface SelectOption {
   value: string;
   label: string;
+  disabled?: boolean;
 }
 
 defineProps<{
@@ -40,7 +41,7 @@ const focused = ref(false);
       @blur="focused = false"
       @change="emit('update:modelValue', ($event.target as HTMLSelectElement).value)"
     >
-      <option v-for="option in options" :key="option.value" :value="option.value">
+      <option v-for="option in options" :key="option.value" :value="option.value" :disabled="option.disabled">
         {{ option.label }}
       </option>
     </select>

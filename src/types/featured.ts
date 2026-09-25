@@ -160,6 +160,7 @@ export interface FeaturedPreferencesBootstrapResponse {
 export interface FeaturedDiagnostics {
   frontendInjection: boolean;
   frontendInjectionMethod: string;
+  frontendInjectionMethodsAvailable: Record<string, boolean>;
   jellyfinVersion: string;
   pluginVersion: string;
   currentUser: string;

@@ -53,6 +53,11 @@ export function installMockJellyfin(): void {
         return {
           frontendInjection: true,
           frontendInjectionMethod: 'file-transformation',
+          frontendInjectionMethodsAvailable: {
+            'file-transformation': true,
+            'javascript-injector': false,
+            direct: true
+          },
           jellyfinVersion: '12.0.0.0',
           pluginVersion: '12.1.0.0',
           currentUser: 'Administrator',
@@ -69,6 +74,14 @@ export function installMockJellyfin(): void {
           basePath: '/',
           cache: 'disabled',
           rules: []
+        };
+      }
+      if (url.includes('featured/config/injection-methods')) {
+        return {
+          automatic: true,
+          'file-transformation': true,
+          'javascript-injector': false,
+          direct: true
         };
       }
       if (url.includes('featured/config/preview')) {
@@ -129,6 +142,7 @@ export function installMockJellyfin(): void {
   window.Dashboard = {
     showLoadingMsg: () => undefined,
     hideLoadingMsg: () => undefined,
-    processPluginConfigurationUpdateResult: () => undefined
+    processPluginConfigurationUpdateResult: () => undefined,
+    alert: (message) => window.alert(typeof message === 'string' ? message : message.message)
   };
 }

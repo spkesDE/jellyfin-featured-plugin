@@ -55,6 +55,7 @@ internal static class PluginConfigurationNormalizer
         {
             FrontendInjectionMethods.FileTransformation => FrontendInjectionMethods.FileTransformation,
             FrontendInjectionMethods.JavaScriptInjector => FrontendInjectionMethods.JavaScriptInjector,
+            FrontendInjectionMethods.Direct => FrontendInjectionMethods.Direct,
             _ => FrontendInjectionMethods.Automatic
         };
 

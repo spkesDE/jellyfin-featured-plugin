@@ -12,6 +12,25 @@ namespace Jellyfin.Plugin.Featured.Api;
 
 public sealed partial class FeaturedController
 {
+    [HttpGet("config/injection-methods")]
+    [Authorize]
+    [Produces(MediaTypeNames.Application.Json)]
+    public ActionResult<Dictionary<string, object>> GetFrontendInjectionMethods()
+    {
+        Jellyfin.Database.Implementations.Entities.User? activeUser = GetActiveUser();
+        if (activeUser == null) return NotFound();
+        if (!activeUser.HasPermission(PermissionKind.IsAdministrator)) return Forbid();
+
+        FrontendInjectionAvailability availability = _frontendInjectionAvailability.GetAvailability();
+        return Ok(new Dictionary<string, object>
+        {
+            [FrontendInjectionMethods.Automatic] = true,
+            [FrontendInjectionMethods.FileTransformation] = availability.FileTransformation,
+            [FrontendInjectionMethods.JavaScriptInjector] = availability.JavaScriptInjector,
+            [FrontendInjectionMethods.Direct] = availability.Direct
+        });
+    }
+
     [HttpGet("config/options")]
     [Authorize]
     [Produces(MediaTypeNames.Application.Json)]

@@ -34,6 +34,7 @@ public sealed partial class FeaturedController
                 _dismissalStore.GetSnapshot(activeUser.Id));
             LogRuleEngineTiming(selection.Timing);
             DateTimeOffset now = DateTimeOffset.UtcNow;
+            FrontendInjectionAvailability injectionAvailability = _frontendInjectionAvailability.GetAvailability();
             HashSet<string> referencedManualListIds = _config.SourceRules
                 .Where(rule => rule.Enabled && rule.Type == FeaturedSourceTypes.ManualLists)
                 .SelectMany(rule => rule.ManualListIds)
@@ -42,6 +43,12 @@ public sealed partial class FeaturedController
             {
                 ["frontendInjection"] = FrontendRegistration.LastRegistrationSucceeded,
                 ["frontendInjectionMethod"] = FrontendRegistration.ActiveMethod,
+                ["frontendInjectionMethodsAvailable"] = new Dictionary<string, bool>
+                {
+                    [FrontendInjectionMethods.FileTransformation] = injectionAvailability.FileTransformation,
+                    [FrontendInjectionMethods.JavaScriptInjector] = injectionAvailability.JavaScriptInjector,
+                    [FrontendInjectionMethods.Direct] = injectionAvailability.Direct
+                },
                 ["jellyfinVersion"] = typeof(ILibraryManager).Assembly.GetName().Version?.ToString() ?? "unknown",
                 ["pluginVersion"] = Plugin.Instance?.Version.ToString() ?? "unknown",
                 ["currentUser"] = activeUser.Username,

@@ -45,7 +45,7 @@ public static class Transformations
             basePath = "/" + network.BaseUrl.Trim().Trim('/');
         }
 
-        return $"<script FileTransformation=\"true\" plugin=\"Featured\" defer=\"defer\" src=\"{basePath}/featured/script\"></script>";
+        return $"<script FileTransformation=\"true\" data-injection-method=\"file-transformation\" plugin=\"Featured\" defer=\"defer\" src=\"{basePath}/featured/script\"></script>";
     }
 }
 

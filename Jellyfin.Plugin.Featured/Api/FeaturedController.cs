@@ -24,6 +24,7 @@ public sealed partial class FeaturedController : ControllerBase
     private readonly FeaturedPersonalizationService _personalization;
     private readonly FeaturedPreferenceOptionsCache _preferenceOptionsCache;
     private readonly FeaturedItemDtoFactory _itemDtoFactory;
+    private readonly FrontendInjectionAvailabilityService _frontendInjectionAvailability;
     private readonly ILogger<FeaturedController> _logger;
 
     public FeaturedController(
@@ -39,6 +40,7 @@ public sealed partial class FeaturedController : ControllerBase
         FeaturedPersonalizationService personalization,
         FeaturedPreferenceOptionsCache preferenceOptionsCache,
         FeaturedItemDtoFactory itemDtoFactory,
+        FrontendInjectionAvailabilityService frontendInjectionAvailability,
         ILogger<FeaturedController> logger)
     {
         _userManager = userManager;
@@ -53,6 +55,7 @@ public sealed partial class FeaturedController : ControllerBase
         _personalization = personalization;
         _preferenceOptionsCache = preferenceOptionsCache;
         _itemDtoFactory = itemDtoFactory;
+        _frontendInjectionAvailability = frontendInjectionAvailability;
         _logger = logger;
         PluginConfiguration baseConfig = PluginConfigurationNormalizer.Normalize(Plugin.Instance?.Configuration);
         _presetResolution = FeaturedPresetResolver.Resolve(baseConfig, DateTimeOffset.UtcNow);
