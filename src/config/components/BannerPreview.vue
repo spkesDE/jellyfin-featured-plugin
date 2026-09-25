@@ -2,7 +2,7 @@
 import { computed } from 'vue';
 import { t } from '../../i18n';
 import { heroImageUrl, logoUrl } from '../../slider/images';
-import { createHeroFadeMask, getHeroDesktopHeight, getHeroOverlap } from '../../slider/layout';
+import { createHeroFadeMask, getHeroDesktopHeight } from '../../slider/layout';
 import { useConfigStore } from '../libs/store';
 import type { FeaturedItem } from '../../types/featured';
 
@@ -11,16 +11,25 @@ defineEmits<{ focusSection: [section: string] }>();
 const manualItems = computed(() => store.config.ManualLists
   .filter((list) => list.Enabled)
   .flatMap((list) => list.Items));
+const backendItems = computed(() => store.preview.value?.items ?? []);
 const item = computed<FeaturedItem | null>(() => {
+  const candidates = backendItems.value;
+  if (candidates.length) {
+    if (store.config.TitleDisplayMode === 'logo') {
+      return candidates.find((candidate) => candidate.hasLogo && candidate.hasImage)
+        ?? candidates.find((candidate) => candidate.hasImage)
+        ?? candidates[0];
+    }
+    return candidates.find((candidate) => candidate.hasImage) ?? candidates[0];
+  }
   const manual = manualItems.value[0];
   return manual
     ? { id: manual.ItemId, name: manual.Name, hasLogo: false, hasImage: true, isFavorite: false, isPlayed: false, imageType: manual.ImageType, mediaType: manual.MediaType, overview: null, community_rating: undefined, critic_rating: undefined }
-    : store.preview.value?.items?.[0] ?? null;
+    : null;
 });
-const itemCount = computed(() => manualItems.value.length || store.preview.value?.items?.length || 5);
+const itemCount = computed(() => backendItems.value.length || manualItems.value.length || 5);
 const desktopHeight = computed(() => getHeroDesktopHeight(store.config.HeroHeightMode, store.config.BannerHeight));
-const previewScale = computed(() => store.config.UseHeroLayout ? 0.52 : 0.44);
-const heroOverlap = computed(() => getHeroOverlap(desktopHeight.value, store.config.HeroHeightMode));
+const previewScale = computed(() => store.config.UseHeroLayout ? 0.76 : 0.44);
 const previewStyle = computed(() => ({
   height: `${Math.max(190, Math.min(360, desktopHeight.value * previewScale.value))}px`,
   '--ec-preview-radius': store.config.UseHeroLayout ? '0px' : `${store.config.HeroBorderRadius}px`,
@@ -34,7 +43,7 @@ const previewStyle = computed(() => ({
   )
 }));
 const mockStyle = computed(() => ({
-  '--ec-preview-media-offset': `${Math.max(-90, Math.min(90, (store.config.MediaPadding + (store.config.UseHeroLayout ? 52 - heroOverlap.value : 0)) * previewScale.value))}px`
+  '--ec-preview-media-offset': `${Math.max(-90, Math.min(90, store.config.MediaPadding * previewScale.value))}px`
 }));
 const backdropStyle = computed(() => item.value ? ({
   backgroundImage: `url("${heroImageUrl(item.value.id, item.value.imageType, store.config.ReduceImageSize).replace(/"/g, '%22')}")`,
@@ -50,6 +59,14 @@ const mediaCards = [
   t('preview.music'),
   t('preview.liveTv')
 ];
+const libraryItems = computed(() => backendItems.value.filter((entry) => entry.hasImage));
+function mediaCardStyle(index: number): Record<string, string> | undefined {
+  const cards = libraryItems.value;
+  if (!cards.length) return undefined;
+  const cardItem = cards[(index + 1) % cards.length];
+  const image = heroImageUrl(cardItem.id, cardItem.imageType, true).replace(/"/g, '%22');
+  return { backgroundImage: `url("${image}")` };
+}
 </script>
 
 <template>
@@ -60,13 +77,33 @@ const mediaCards = [
     </div>
     <div class="ec-jellyfinMock" :style="mockStyle">
       <div class="ec-jellyfinMockHeader">
-        <span class="ec-mockIcon">☰</span>
-        <strong>Jellyfin</strong>
-        <div class="ec-jellyfinMockNav"><span>{{ t('preview.home') }}</span><span>{{ t('preview.favorites') }}</span></div>
+        <div class="ec-jellyfinMockBrand">
+          <svg class="ec-jellyfinMockBrandLogo" viewBox="0 0 72 72" role="img" aria-label="Jellyfin">
+            <defs>
+              <linearGradient id="ec-jellyfin-logo-inner" x1="12" y1="30" x2="72" y2="63" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#aa5cc3" />
+                <stop offset="1" stop-color="#00a4dc" />
+              </linearGradient>
+              <linearGradient id="ec-jellyfin-logo-outer" x1="12" y1="30" x2="72" y2="63" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#aa5cc3" />
+                <stop offset="1" stop-color="#00a4dc" />
+              </linearGradient>
+            </defs>
+            <path d="M24.2116 49.1581C22.6599 46.0424 32.8378 27.5879 35.9999 27.5879C39.1666 27.5895 49.3228 46.0764 47.7882 49.1581C46.2536 52.2398 25.7632 52.2738 24.2116 49.1581Z" fill="url(#ec-jellyfin-logo-inner)" />
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M0.481861 64.9951C-4.19479 55.6047 26.4765 0 36 0C45.5328 0 76.153 55.713 71.5274 64.9951C66.9018 74.2773 5.15852 74.3856 0.481861 64.9951ZM12.7358 56.847C15.8005 62.9995 56.2536 62.9314 59.2843 56.847C62.3149 50.761 42.2515 14.2605 36.0093 14.2605C29.767 14.2605 9.67118 50.6944 12.7358 56.847Z" fill="url(#ec-jellyfin-logo-outer)" />
+          </svg>
+          <strong>Jellyfin</strong>
+        </div>
+        <div class="ec-jellyfinMockNav">
+          <span class="is-active"><span class="material-icons" aria-hidden="true">home</span>{{ t('preview.home') }}</span>
+          <span><span class="material-icons" aria-hidden="true">favorite</span>{{ t('preview.favorites') }}</span>
+          <span><span class="material-icons" aria-hidden="true">movie</span>{{ t('preview.movies') }}</span>
+          <span><span class="material-icons" aria-hidden="true">tv</span>{{ t('preview.shows') }}</span>
+        </div>
         <div class="ec-jellyfinMockHeaderActions">
-          <span class="ec-mockIcon">⌕</span>
-          <span class="ec-mockIcon">⚙</span>
-          <span class="ec-mockIcon">●</span>
+          <span class="material-icons ec-mockIcon">cast</span>
+          <span class="material-icons ec-mockIcon">search</span>
+          <span class="ec-jellyfinMockAvatar">J</span>
         </div>
       </div>
       <div class="ec-jellyfinMockPage">
@@ -126,10 +163,9 @@ const mediaCards = [
           <div class="ec-jellyfinMockHeading">{{ t('preview.myMedia') }}</div>
           <div class="ec-jellyfinMockCards">
             <div v-for="(card, index) in mediaCards" :key="card" class="ec-jellyfinMockCard">
-              <div class="ec-jellyfinMockCardArt" :class="'art-' + (index + 1)">
-                <span class="ec-mockPlay">▶</span>
+              <div class="ec-jellyfinMockCardArt" :class="'art-' + (index + 1)" :style="mediaCardStyle(index)">
+                <span>{{ card }}</span>
               </div>
-              <span>{{ card }}</span>
             </div>
           </div>
         </div>
@@ -139,7 +175,6 @@ const mediaCards = [
 </template>
 
 <style scoped>
-.ec-jellyfinMockHeader { display: none !important; }
 .ec-configPreviewMetaControl { align-items: center; background: transparent; border: 0; color: inherit; display: inline-flex; padding: 0; }
 .ec-configPreviewMetaControl .material-icons { font-size: 1.15em; }
 </style>

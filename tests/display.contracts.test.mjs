@@ -30,6 +30,29 @@ test('critic ratings render as percentages without item-page-only icon classes',
   assert.match(render, /critic\.textContent = `\$\{Math\.round\(item\.critic_rating\)\}%`/);
 });
 
+test('settings preview mirrors the Jellyfin home layout with varied real library artwork', async () => {
+  const [preview, store, styles] = await Promise.all([
+    read('src/config/components/BannerPreview.vue'),
+    read('src/config/libs/store.ts'),
+    read('src/config/config.css')
+  ]);
+
+  assert.match(preview, /backendItems = computed[\s\S]*?store\.preview\.value\?\.items/);
+  assert.match(preview, /TitleDisplayMode === 'logo'[\s\S]*?candidate\.hasLogo && candidate\.hasImage/);
+  assert.match(preview, /UseHeroLayout \? 0\.76 : 0\.44/);
+  assert.match(preview, /mediaCardStyle[\s\S]*?heroImageUrl\(cardItem\.id, cardItem\.imageType/);
+  assert.match(preview, /ec-jellyfinMockBrandLogo[\s\S]*?ec-jellyfin-logo-inner[\s\S]*?#aa5cc3[\s\S]*?#00a4dc/);
+  assert.match(preview, /--ec-preview-media-offset[^\n]*store\.config\.MediaPadding \* previewScale\.value/);
+  assert.match(store, /targetCount = 5[\s\S]*?featured\/items\/batch[\s\S]*?excludedItemIds/);
+  assert.match(preview, /ec-jellyfinMockHeader[\s\S]*?ec-jellyfinMockNav[\s\S]*?ec-jellyfinMockHeaderActions/);
+  assert.doesNotMatch(preview, /ec-jellyfinMockHeader\s*\{\s*display:\s*none/);
+  assert.match(styles, /\.ec-jellyfinMockHeader\s*\{[\s\S]*?position:\s*absolute/);
+  assert.match(styles, /\.ec-jellyfinMockMedia\s*\{[\s\S]*?margin-top:\s*var\(--ec-preview-media-offset/);
+  assert.match(styles, /\.ec-configPreviewImageLogo\s*\{[\s\S]*?max-height:\s*clamp\(3\.5rem, 12cqw, 5\.25rem\)[\s\S]*?max-width:\s*min\(18rem, 68%\)/);
+  assert.match(styles, /\.ec-configPreview:not\(\.is-hero\)\s*\{[\s\S]*?margin:\s*3\.15rem 3\.3% 0/);
+  assert.match(styles, /@container \(max-width: 59\.99rem\)[\s\S]*?ec-jellyfinMockCard:nth-child\(n \+ 4\)[\s\S]*?display:\s*none/);
+});
+
 test('bootstrap and runtime placeholders share responsive and reduced-motion values', async () => {
   const [runtimeCss, bootstrap] = await Promise.all([
     read('src/styles/featured.css'),
@@ -48,7 +71,7 @@ test('touch layouts keep the first Jellyfin section below the hero', async () =>
     read('src/styles/featured.css'),
     read('Jellyfin.Plugin.Featured/Integrations/FrontendBootstrap.cs')
   ]);
-  assert.match(styles, /@media \(max-width: 700px\), \(hover: none\) and \(pointer: coarse\)[\s\S]*?--ec-hero-overlap-offset:\s*calc\(1\.25rem \+ var\(--ec-media-padding, 0px\)\)[\s\S]*?margin-bottom:\s*var\(--ec-hero-overlap-offset\)/);
+  assert.match(styles, /@media \(max-width: 700px\),\s*\(hover: none\) and \(pointer: coarse\)[\s\S]*?--ec-hero-overlap-offset:\s*calc\(1\.25rem \+ var\(--ec-media-padding, 0px\)\)[\s\S]*?margin-bottom:\s*var\(--ec-hero-overlap-offset\)/);
   assert.match(bootstrap, /@media\(max-width:700px\),\(hover:none\) and \(pointer:coarse\)[\s\S]*?\.ec-bootstrap-placeholder\.ec-bootstrap-hero\{margin-bottom:calc\(1\.25rem \+ var\(--ec-media-padding,0px\)\)\}/);
 });
 

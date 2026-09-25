@@ -145,8 +145,26 @@ export function createConfigStore(): ConfigStore {
     if (previewLoadPromise) return previewLoadPromise;
     if (preview.value && !force) return;
     previewLoadPromise = requestJson<FeaturedResponse>('featured/items')
-      .then((response) => {
-        preview.value = response.items?.length ? response : null;
+      .then(async (response) => {
+        const items = [...(response.items ?? [])];
+        const itemIds = new Set(items.map((entry) => entry.id));
+        const targetCount = 5;
+        for (let attempt = 0; items.length < targetCount && attempt < targetCount - 1; attempt += 1) {
+          let batch: FeaturedResponse;
+          try {
+            batch = await requestJson<FeaturedResponse>('featured/items/batch', {
+              method: 'POST',
+              body: { excludedItemIds: [...itemIds] }
+            });
+          } catch {
+            break;
+          }
+          const additions = (batch.items ?? []).filter((entry) => !itemIds.has(entry.id));
+          if (!additions.length) break;
+          additions.forEach((entry) => itemIds.add(entry.id));
+          items.push(...additions.slice(0, targetCount - items.length));
+        }
+        preview.value = items.length ? { ...response, items } : null;
       })
       .catch(() => {
         preview.value = null;

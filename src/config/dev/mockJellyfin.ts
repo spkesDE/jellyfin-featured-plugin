@@ -117,6 +117,7 @@ export function installMockJellyfin(): void {
             name: 'A Beautifully Long Movie Title for the Preview',
             mediaType: 'Movie',
             imageType: 'Backdrop',
+            hasImage: true,
             hasLogo: false,
             isFavorite: false,
             isPlayed: false,
@@ -125,6 +126,18 @@ export function installMockJellyfin(): void {
             critic_rating: 92,
             productionYear: 2026,
             runtimeMinutes: 124
+          }, {
+            id: 'preview-series', name: 'Northern Lights', mediaType: 'Series', imageType: 'Backdrop',
+            hasImage: true, hasLogo: true, isFavorite: true, isPlayed: false, productionYear: 2025
+          }, {
+            id: 'preview-drama', name: 'Cinema Club', mediaType: 'Movie', imageType: 'Backdrop',
+            hasImage: true, hasLogo: false, isFavorite: false, isPlayed: true, productionYear: 2024
+          }, {
+            id: 'preview-adventure', name: 'Beyond the Horizon', mediaType: 'Movie', imageType: 'Backdrop',
+            hasImage: true, hasLogo: false, isFavorite: false, isPlayed: false, productionYear: 2023
+          }, {
+            id: 'preview-friday', name: 'Friday Feature', mediaType: 'Movie', imageType: 'Backdrop',
+            hasImage: true, hasLogo: false, isFavorite: false, isPlayed: false, productionYear: 2026
           }]
         };
       }

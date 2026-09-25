@@ -108,45 +108,95 @@
                     border-radius: var(--ec-theme-radius);
                     box-shadow: 0 1rem 2.8rem rgba(0, 0, 0, .32);
                     color: var(--ec-theme-text-primary);
+                    container-type: inline-size;
                     overflow: hidden;
+                    position: relative;
                     width: 100%;
                 }
 
                 #FeaturedConfigPage .ec-jellyfinMockHeader {
                     align-items: center;
-                    background: var(--ec-theme-appbar);
+                    background: linear-gradient(180deg, rgba(7, 12, 22, .88), rgba(7, 12, 22, .54) 58%, transparent);
+                    box-sizing: border-box;
+                    color: #f7f8fb;
                     display: flex;
-                    gap: .8rem;
-                    height: 2.6rem;
-                    padding: 0 .85rem;
+                    gap: .7rem;
+                    height: 3.15rem;
+                    left: 0;
+                    padding: 0 3.3%;
+                    position: absolute;
+                    right: 0;
+                    top: 0;
+                    z-index: 8;
                 }
 
                 #FeaturedConfigPage .ec-mockIcon {
-                    font-size: 1.05rem;
-                    opacity: .72;
+                    font-size: .88rem;
+                    opacity: .82;
+                }
+
+                #FeaturedConfigPage .ec-jellyfinMockBrand {
+                    align-items: center;
+                    display: flex;
+                    gap: .38rem;
+                    min-width: 0;
+                }
+
+                #FeaturedConfigPage .ec-jellyfinMockBrandLogo {
+                    display: block;
+                    flex: 0 0 auto;
+                    height: 1.55rem;
+                    width: 1.55rem;
                 }
 
                 #FeaturedConfigPage .ec-jellyfinMockHeader strong {
-                    background: linear-gradient(105deg, var(--ec-theme-secondary), var(--ec-theme-primary));
-                    -webkit-background-clip: text;
-                    background-clip: text;
-                    color: transparent;
-                    font-size: .92rem;
+                    color: #fff;
+                    font-size: .82rem;
                 }
 
                 #FeaturedConfigPage .ec-jellyfinMockNav {
+                    align-items: center;
                     display: flex;
-                    font-size: .68rem;
-                    gap: 1rem;
-                    margin-left: 1rem;
-                    opacity: .78;
+                    font-size: .59rem;
+                    gap: .25rem;
+                    min-width: 0;
+                }
+
+                #FeaturedConfigPage .ec-jellyfinMockNav>span {
+                    align-items: center;
+                    border-radius: 999px;
+                    display: flex;
+                    gap: .22rem;
+                    padding: .34rem .48rem;
+                    white-space: nowrap;
+                }
+
+                #FeaturedConfigPage .ec-jellyfinMockNav>span.is-active {
+                    background: rgba(18, 28, 46, .88);
+                }
+
+                #FeaturedConfigPage .ec-jellyfinMockNav .material-icons {
+                    font-size: .72rem;
                 }
 
                 #FeaturedConfigPage .ec-jellyfinMockHeaderActions {
                     align-items: center;
                     display: flex;
-                    gap: .8rem;
+                    gap: .55rem;
                     margin-left: auto;
+                }
+
+                #FeaturedConfigPage .ec-jellyfinMockAvatar {
+                    align-items: center;
+                    background: linear-gradient(135deg, #8a4eb4, #00a4dc);
+                    border: 1px solid rgba(255, 255, 255, .72);
+                    border-radius: 50%;
+                    display: inline-flex;
+                    font-size: .56rem;
+                    font-weight: 800;
+                    height: 1.35rem;
+                    justify-content: center;
+                    width: 1.35rem;
                 }
 
                 #FeaturedConfigPage .ec-jellyfinMockPage {
@@ -172,7 +222,7 @@
                     border: 1px solid var(--ec-theme-divider);
                     border-radius: var(--ec-preview-radius, 0);
                     box-shadow: 0 .45rem 1.35rem rgba(0, 0, 0, .34);
-                    margin: .85rem 3.3% 0;
+                    margin: 3.15rem 3.3% 0;
                     width: 93.4%;
                 }
 
@@ -211,9 +261,9 @@
                 }
 
                 #FeaturedConfigPage .ec-configPreviewContent {
-                    bottom: 13%;
+                    bottom: 18%;
                     left: var(--ec-preview-content-inline-inset);
-                    max-width: 54%;
+                    max-width: 58%;
                     position: absolute;
                     z-index: 2;
                 }
@@ -249,8 +299,8 @@
 
                 #FeaturedConfigPage .ec-configPreviewImageLogo {
                     display: block;
-                    max-height: min(7.5rem, 35%);
-                    max-width: min(32rem, 100%);
+                    max-height: clamp(3.5rem, 12cqw, 5.25rem);
+                    max-width: min(18rem, 68%);
                     object-fit: contain;
                     object-position: left center;
                 }
@@ -376,19 +426,27 @@
                 }
 
                 #FeaturedConfigPage .ec-jellyfinMockMedia {
-                    padding: 0 3.3% .65rem;
+                    margin-top: var(--ec-preview-media-offset, -1rem);
+                    padding: 0 3.3% 1rem;
+                    position: relative;
+                    z-index: 5;
+                }
+
+                #FeaturedConfigPage .ec-jellyfinMockMedia .ec-jellyfinMockHeading {
+                    color: #fff;
+                    font-size: clamp(.82rem, 2.5cqw, 1.2rem);
+                    font-weight: 700;
+                    padding: .7rem 0 .5rem;
+                    text-shadow: 0 1px .3rem rgba(0, 0, 0, .75);
                 }
 
                 #FeaturedConfigPage .ec-jellyfinMockCards {
                     display: grid;
-                    gap: .65rem;
-                    grid-template-columns: repeat(5, minmax(0, 1fr));
+                    gap: .7rem;
+                    grid-template-columns: repeat(3, minmax(0, 1fr));
                 }
 
                 #FeaturedConfigPage .ec-jellyfinMockCard {
-                    display: grid;
-                    font-size: .62rem;
-                    gap: .3rem;
                     min-width: 0;
                 }
 
@@ -396,15 +454,36 @@
                     align-items: center;
                     aspect-ratio: 1.72;
                     background: linear-gradient(135deg, #34495e, #17202a);
-                    border-radius: .18rem;
+                    background-position: center;
+                    background-repeat: no-repeat;
+                    background-size: cover;
+                    border: 1px solid rgba(255, 255, 255, .12);
+                    border-radius: .55rem;
+                    box-shadow: 0 .35rem .9rem rgba(0, 0, 0, .38);
                     display: flex;
                     justify-content: center;
                     overflow: hidden;
+                    position: relative;
                 }
 
-                #FeaturedConfigPage .ec-mockPlay {
-                    font-size: 1rem;
-                    opacity: .42;
+                #FeaturedConfigPage .ec-jellyfinMockCardArt::after {
+                    background: linear-gradient(180deg, rgba(4, 8, 14, .08), rgba(4, 8, 14, .66));
+                    content: '';
+                    inset: 0;
+                    position: absolute;
+                }
+
+                #FeaturedConfigPage .ec-jellyfinMockCardArt>span {
+                    color: #fff;
+                    font-size: clamp(.72rem, 2.5cqw, 1.1rem);
+                    font-weight: 800;
+                    line-height: 1;
+                    overflow-wrap: anywhere;
+                    padding: .3rem;
+                    position: relative;
+                    text-align: center;
+                    text-shadow: 0 2px .35rem rgba(0, 0, 0, .9);
+                    z-index: 1;
                 }
 
                 #FeaturedConfigPage .ec-jellyfinMockCardArt.art-2 {
@@ -423,6 +502,24 @@
                     background: linear-gradient(135deg, #385d3d, #142419);
                 }
 
+                @container (min-width: 60rem) {
+                    #FeaturedConfigPage .ec-jellyfinMockCards {
+                        grid-template-columns: repeat(5, minmax(0, 1fr));
+                    }
+                }
+
+                @container (max-width: 59.99rem) {
+                    #FeaturedConfigPage .ec-jellyfinMockCard:nth-child(n + 4) {
+                        display: none;
+                    }
+                }
+
+                @container (max-width: 38rem) {
+                    #FeaturedConfigPage .ec-jellyfinMockNav>span:nth-child(n + 3) {
+                        display: none;
+                    }
+                }
+
                 @media (max-width: 650px) {
                     #FeaturedConfigPage .ec-jellyfinMockNav {
                         display: none;
@@ -430,10 +527,6 @@
 
                     #FeaturedConfigPage .ec-jellyfinMockCards {
                         grid-template-columns: repeat(3, minmax(0, 1fr));
-                    }
-
-                    #FeaturedConfigPage .ec-jellyfinMockCard:nth-child(n + 4) {
-                        display: none;
                     }
 
                     #FeaturedConfigPage .ec-configPreviewContent {
