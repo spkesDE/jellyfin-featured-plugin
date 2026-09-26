@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.Featured.Api;
@@ -8,66 +9,57 @@ public sealed class FeaturedPreferenceOptionsCache
 {
     internal static readonly TimeSpan EntryLifetime = TimeSpan.FromMinutes(10);
 
-    private readonly ConcurrentDictionary<Guid, Lazy<CacheEntry>> _entries = new();
+    private readonly IMemoryCache _cache;
     private readonly ConcurrentDictionary<Guid, byte> _queuedUsers = new();
     private readonly ILogger<FeaturedPreferenceOptionsCache> _logger;
 
-    public FeaturedPreferenceOptionsCache(ILogger<FeaturedPreferenceOptionsCache> logger)
+    public FeaturedPreferenceOptionsCache(IMemoryCache cache, ILogger<FeaturedPreferenceOptionsCache> logger)
     {
+        _cache = cache;
         _logger = logger;
     }
 
     public string[] GetOrCreate(Guid userId, Func<string[]> factory)
     {
-        while (true)
+        PreferenceOptionsCacheKey key = new(userId);
+        if (_cache.TryGetValue(key, out Lazy<string[]>? cached) && cached is not null)
         {
-            if (_entries.TryGetValue(userId, out Lazy<CacheEntry>? existing))
-            {
-                Stopwatch lookupTimer = Stopwatch.StartNew();
-                CacheEntry cached = existing.Value;
-                if (cached.ExpiresAt > DateTimeOffset.UtcNow)
-                {
-                    _logger.LogDebug(
-                        "Jellyfin Featured user-settings genre cache hit: {GenreCount} genres returned in {ElapsedMilliseconds:F1} ms.",
-                        cached.Genres.Length,
-                        lookupTimer.Elapsed.TotalMilliseconds);
-                    return [.. cached.Genres];
-                }
-
-                _logger.LogDebug("Jellyfin Featured user-settings genre cache entry expired.");
-                _entries.TryRemove(new KeyValuePair<Guid, Lazy<CacheEntry>>(userId, existing));
-            }
-
-            Lazy<CacheEntry> created = new(
-                () =>
-                {
-                    Stopwatch loadTimer = Stopwatch.StartNew();
-                    string[] genres = factory();
-                    _logger.LogInformation(
-                        "Jellyfin Featured user-settings genre cache miss: loaded {GenreCount} genres in {ElapsedMilliseconds:F1} ms.",
-                        genres.Length,
-                        loadTimer.Elapsed.TotalMilliseconds);
-                    return new CacheEntry(genres, DateTimeOffset.UtcNow.Add(EntryLifetime));
-                },
-                LazyThreadSafetyMode.ExecutionAndPublication);
-            Lazy<CacheEntry> selected = _entries.GetOrAdd(userId, created);
-            try
-            {
-                CacheEntry entry = selected.Value;
-                if (entry.ExpiresAt > DateTimeOffset.UtcNow) return [.. entry.Genres];
-                _entries.TryRemove(new KeyValuePair<Guid, Lazy<CacheEntry>>(userId, selected));
-            }
-            catch
-            {
-                _entries.TryRemove(new KeyValuePair<Guid, Lazy<CacheEntry>>(userId, selected));
-                throw;
-            }
+            Stopwatch lookupTimer = Stopwatch.StartNew();
+            string[] genres = EvaluateOrEvict(key, cached);
+            _logger.LogDebug(
+                "Jellyfin Featured user-settings genre cache hit: {GenreCount} genres returned in {ElapsedMilliseconds:F1} ms.",
+                genres.Length,
+                lookupTimer.Elapsed.TotalMilliseconds);
+            return [.. genres];
         }
+
+        Lazy<string[]> created = new(
+            () =>
+            {
+                Stopwatch loadTimer = Stopwatch.StartNew();
+                string[] genres = factory();
+                _logger.LogInformation(
+                    "Jellyfin Featured user-settings genre cache miss: loaded {GenreCount} genres in {ElapsedMilliseconds:F1} ms.",
+                    genres.Length,
+                    loadTimer.Elapsed.TotalMilliseconds);
+                return genres;
+            },
+            LazyThreadSafetyMode.ExecutionAndPublication);
+
+        Lazy<string[]> selected = _cache.GetOrCreate(
+            key,
+            entry =>
+            {
+                entry.AbsoluteExpirationRelativeToNow = EntryLifetime;
+                return created;
+            })!;
+        return [.. EvaluateOrEvict(key, selected)];
     }
 
     public void QueueWarmup(Guid userId, Func<string[]> factory)
     {
-        if (userId == Guid.Empty || HasFreshOrPendingEntry(userId) || !_queuedUsers.TryAdd(userId, 0)) return;
+        PreferenceOptionsCacheKey key = new(userId);
+        if (userId == Guid.Empty || _cache.TryGetValue(key, out _) || !_queuedUsers.TryAdd(userId, 0)) return;
 
         _logger.LogDebug("Queued Jellyfin Featured user-settings genre cache warmup.");
         _ = Task.Run(() =>
@@ -87,12 +79,18 @@ public sealed class FeaturedPreferenceOptionsCache
         });
     }
 
-    private bool HasFreshOrPendingEntry(Guid userId)
+    private string[] EvaluateOrEvict(PreferenceOptionsCacheKey key, Lazy<string[]> entry)
     {
-        if (!_entries.TryGetValue(userId, out Lazy<CacheEntry>? entry)) return false;
-        if (!entry.IsValueCreated) return true;
-        return entry.Value.ExpiresAt > DateTimeOffset.UtcNow;
+        try
+        {
+            return entry.Value;
+        }
+        catch
+        {
+            _cache.Remove(key);
+            throw;
+        }
     }
 
-    private sealed record CacheEntry(string[] Genres, DateTimeOffset ExpiresAt);
+    private readonly record struct PreferenceOptionsCacheKey(Guid UserId);
 }

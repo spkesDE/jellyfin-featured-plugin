@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Jellyfin.Data.Enums;
 using Jellyfin.Extensions;
 using MediaBrowser.Common.Configuration;
@@ -79,19 +78,17 @@ public sealed class FeaturedDismissalStore
 {
     private const int MaximumEntriesPerUser = 1000;
     private const string ConfigurationDirectoryName = "Jellyfin.Plugin.Featured";
-    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web) { WriteIndented = true };
     private readonly object _syncRoot = new();
-    private readonly ILogger<FeaturedDismissalStore> _logger;
-    private readonly string _filePath;
+    private readonly AtomicJsonFileStore<Dictionary<string, List<FeaturedDismissalEntry>>> _persistence;
     private Dictionary<string, List<FeaturedDismissalEntry>>? _entries;
 
     public FeaturedDismissalStore(IApplicationPaths applicationPaths, ILogger<FeaturedDismissalStore> logger)
     {
-        _logger = logger;
-        _filePath = Path.Combine(
+        string filePath = Path.Combine(
             applicationPaths.PluginConfigurationsPath,
             ConfigurationDirectoryName,
             "dismissals.json");
+        _persistence = new(filePath, "dismissals", logger);
     }
 
     internal IReadOnlyList<FeaturedDismissalEntry> Get(Guid userId)
@@ -173,39 +170,13 @@ public sealed class FeaturedDismissalStore
     private void EnsureLoaded()
     {
         if (_entries is not null) return;
-        if (!File.Exists(_filePath))
-        {
-            _entries = new(StringComparer.OrdinalIgnoreCase);
-            return;
-        }
-
-        try
-        {
-            Dictionary<string, List<FeaturedDismissalEntry>> loaded =
-                JsonSerializer.Deserialize<Dictionary<string, List<FeaturedDismissalEntry>>>(File.ReadAllText(_filePath), JsonOptions)
-                ?? [];
-            _entries = new Dictionary<string, List<FeaturedDismissalEntry>>(loaded, StringComparer.OrdinalIgnoreCase);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Could not read Jellyfin Featured dismissals; starting with an empty store.");
-            _entries = new(StringComparer.OrdinalIgnoreCase);
-        }
+        _entries = _persistence.Load(
+            () => new(StringComparer.OrdinalIgnoreCase),
+            loaded => new Dictionary<string, List<FeaturedDismissalEntry>>(loaded, StringComparer.OrdinalIgnoreCase));
     }
 
     private void Save()
     {
-        try
-        {
-            string directory = Path.GetDirectoryName(_filePath)!;
-            Directory.CreateDirectory(directory);
-            string temporaryPath = _filePath + ".tmp";
-            File.WriteAllText(temporaryPath, JsonSerializer.Serialize(_entries, JsonOptions));
-            File.Move(temporaryPath, _filePath, true);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Could not persist Jellyfin Featured dismissals.");
-        }
+        _persistence.Save(_entries!);
     }
 }

@@ -1,4 +1,3 @@
-using System.Text.Json;
 using MediaBrowser.Common.Configuration;
 using Microsoft.Extensions.Logging;
 
@@ -9,11 +8,9 @@ public sealed class FeaturedDisplayHistoryStore : IDisposable
     private const int MaximumEntriesPerUser = 500;
     private const string ConfigurationDirectoryName = "Jellyfin.Plugin.Featured";
     private static readonly TimeSpan PersistenceDelay = TimeSpan.FromSeconds(1);
-    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web) { WriteIndented = true };
     private readonly object _syncRoot = new();
     private readonly object _saveRoot = new();
-    private readonly ILogger<FeaturedDisplayHistoryStore> _logger;
-    private readonly string _filePath;
+    private readonly AtomicJsonFileStore<Dictionary<string, List<FeaturedDisplayHistoryEntry>>> _persistence;
     private readonly Timer _saveTimer;
     private Dictionary<string, List<FeaturedDisplayHistoryEntry>>? _entries;
     private bool _dirty;
@@ -22,11 +19,11 @@ public sealed class FeaturedDisplayHistoryStore : IDisposable
         IApplicationPaths applicationPaths,
         ILogger<FeaturedDisplayHistoryStore> logger)
     {
-        _logger = logger;
-        _filePath = Path.Combine(
+        string filePath = Path.Combine(
             applicationPaths.PluginConfigurationsPath,
             ConfigurationDirectoryName,
             "display-history.json");
+        _persistence = new(filePath, "display history", logger);
         _saveTimer = new Timer(
             _ => PersistPendingChanges(),
             null,
@@ -125,24 +122,9 @@ public sealed class FeaturedDisplayHistoryStore : IDisposable
     private void EnsureLoaded()
     {
         if (_entries is not null) return;
-        if (!File.Exists(_filePath))
-        {
-            _entries = new(StringComparer.OrdinalIgnoreCase);
-            return;
-        }
-
-        try
-        {
-            Dictionary<string, List<FeaturedDisplayHistoryEntry>> loaded =
-                JsonSerializer.Deserialize<Dictionary<string, List<FeaturedDisplayHistoryEntry>>>(File.ReadAllText(_filePath), JsonOptions)
-                ?? [];
-            _entries = new Dictionary<string, List<FeaturedDisplayHistoryEntry>>(loaded, StringComparer.OrdinalIgnoreCase);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Could not read the Jellyfin Featured display history; starting with an empty history.");
-            _entries = new(StringComparer.OrdinalIgnoreCase);
-        }
+        _entries = _persistence.Load(
+            () => new(StringComparer.OrdinalIgnoreCase),
+            loaded => new Dictionary<string, List<FeaturedDisplayHistoryEntry>>(loaded, StringComparer.OrdinalIgnoreCase));
     }
 
     private void QueueSave()
@@ -168,27 +150,10 @@ public sealed class FeaturedDisplayHistoryStore : IDisposable
                         StringComparer.OrdinalIgnoreCase);
                 }
 
-                Save(snapshot);
+                _persistence.Save(snapshot);
             }
         }
     }
-
-    private void Save(Dictionary<string, List<FeaturedDisplayHistoryEntry>> snapshot)
-    {
-        try
-        {
-            string directory = Path.GetDirectoryName(_filePath)!;
-            Directory.CreateDirectory(directory);
-            string temporaryPath = _filePath + ".tmp";
-            File.WriteAllText(temporaryPath, JsonSerializer.Serialize(snapshot, JsonOptions));
-            File.Move(temporaryPath, _filePath, true);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Could not persist the Jellyfin Featured display history.");
-        }
-    }
-
 }
 
 internal sealed record FeaturedDisplayHistoryEntry(string ItemId, DateTimeOffset DisplayedAt);

@@ -1,4 +1,3 @@
-using System.Text.Json;
 using MediaBrowser.Common.Configuration;
 using Microsoft.Extensions.Logging;
 
@@ -7,16 +6,14 @@ namespace Jellyfin.Plugin.Featured.Api;
 public sealed class FeaturedPreferenceStore
 {
     private const string ConfigurationDirectoryName = "Jellyfin.Plugin.Featured";
-    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web) { WriteIndented = true };
     private readonly object _syncRoot = new();
-    private readonly ILogger<FeaturedPreferenceStore> _logger;
-    private readonly string _filePath;
+    private readonly AtomicJsonFileStore<Dictionary<string, FeaturedUserPreferences>> _persistence;
     private Dictionary<string, FeaturedUserPreferences>? _preferences;
 
     public FeaturedPreferenceStore(IApplicationPaths applicationPaths, ILogger<FeaturedPreferenceStore> logger)
     {
-        _logger = logger;
-        _filePath = Path.Combine(applicationPaths.PluginConfigurationsPath, ConfigurationDirectoryName, "user-preferences.json");
+        string filePath = Path.Combine(applicationPaths.PluginConfigurationsPath, ConfigurationDirectoryName, "user-preferences.json");
+        _persistence = new(filePath, "user preferences", logger);
     }
 
     internal FeaturedUserPreferences? Get(Guid userId)
@@ -52,39 +49,14 @@ public sealed class FeaturedPreferenceStore
     private void EnsureLoaded()
     {
         if (_preferences is not null) return;
-        if (!File.Exists(_filePath))
-        {
-            _preferences = new(StringComparer.OrdinalIgnoreCase);
-            return;
-        }
-
-        try
-        {
-            Dictionary<string, FeaturedUserPreferences> loaded =
-                JsonSerializer.Deserialize<Dictionary<string, FeaturedUserPreferences>>(File.ReadAllText(_filePath), JsonOptions) ?? [];
-            _preferences = new Dictionary<string, FeaturedUserPreferences>(loaded, StringComparer.OrdinalIgnoreCase);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Could not read Jellyfin Featured user preferences; starting with empty preferences.");
-            _preferences = new(StringComparer.OrdinalIgnoreCase);
-        }
+        _preferences = _persistence.Load(
+            () => new(StringComparer.OrdinalIgnoreCase),
+            loaded => new Dictionary<string, FeaturedUserPreferences>(loaded, StringComparer.OrdinalIgnoreCase));
     }
 
     private void Save()
     {
-        try
-        {
-            string directory = Path.GetDirectoryName(_filePath)!;
-            Directory.CreateDirectory(directory);
-            string temporaryPath = _filePath + ".tmp";
-            File.WriteAllText(temporaryPath, JsonSerializer.Serialize(_preferences, JsonOptions));
-            File.Move(temporaryPath, _filePath, true);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Could not persist Jellyfin Featured user preferences.");
-        }
+        _persistence.Save(_preferences!);
     }
 }
 

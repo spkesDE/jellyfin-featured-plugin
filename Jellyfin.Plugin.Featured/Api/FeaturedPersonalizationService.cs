@@ -84,29 +84,29 @@ public sealed class FeaturedPersonalizationService
             .Where(rule => rule.UserIds.Length == 0
                 || rule.UserIds.Any(value => Guid.TryParse(value, out Guid id) && id == userId))
             .Select(rule => new FeaturedSourceRule
-        {
-            Id = rule.Id,
-            Type = rule.Type,
-            Enabled = policy.AllowSourceSelection && personalized?.SourceEnabled.TryGetValue(rule.Id, out bool enabled) == true
+            {
+                Id = rule.Id,
+                Type = rule.Type,
+                Enabled = policy.AllowSourceSelection && personalized?.SourceEnabled.TryGetValue(rule.Id, out bool enabled) == true
                 ? enabled : rule.Enabled,
-            Weight = policy.AllowSourceWeights && personalized?.SourceWeights.TryGetValue(rule.Id, out int weight) == true
+                Weight = policy.AllowSourceWeights && personalized?.SourceWeights.TryGetValue(rule.Id, out int weight) == true
                 ? weight : rule.Weight,
-            MinimumItems = rule.MinimumItems,
-            MaximumItems = rule.MaximumItems,
-            IsFallback = rule.IsFallback,
-            AllowBackgroundTrailers = rule.AllowBackgroundTrailers,
-            UseTrickplayFallback = rule.UseTrickplayFallback,
-            UseMediaPreviewFallback = rule.UseMediaPreviewFallback,
-            UserIds = rule.UserIds,
-            EditorUserId = rule.EditorUserId,
-            LibraryIds = rule.LibraryIds,
-            CollectionIds = rule.CollectionIds,
-            PlaylistIds = rule.PlaylistIds,
-            ManualListIds = rule.ManualListIds,
-            Tags = rule.Tags,
-            RecentDays = rule.RecentDays,
-            Filters = rule.Filters
-        }).ToArray();
+                MinimumItems = rule.MinimumItems,
+                MaximumItems = rule.MaximumItems,
+                IsFallback = rule.IsFallback,
+                AllowBackgroundTrailers = rule.AllowBackgroundTrailers,
+                UseTrickplayFallback = rule.UseTrickplayFallback,
+                UseMediaPreviewFallback = rule.UseMediaPreviewFallback,
+                UserIds = rule.UserIds,
+                EditorUserId = rule.EditorUserId,
+                LibraryIds = rule.LibraryIds,
+                CollectionIds = rule.CollectionIds,
+                PlaylistIds = rule.PlaylistIds,
+                ManualListIds = rule.ManualListIds,
+                Tags = rule.Tags,
+                RecentDays = rule.RecentDays,
+                Filters = rule.Filters
+            }).ToArray();
         string[] excludedGenres = policy.AllowPreferredGenres && personalized?.ExcludedGenres is not null
             ? personalized.ExcludedGenres : [];
         int defaultCooldownHours = config.RepeatCooldownDays * 24;

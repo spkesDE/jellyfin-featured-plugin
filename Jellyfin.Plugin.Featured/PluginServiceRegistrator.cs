@@ -11,6 +11,7 @@ public sealed class PluginServiceRegistrator : IPluginServiceRegistrator
 {
     public void RegisterServices(IServiceCollection serviceCollection, IServerApplicationHost applicationHost)
     {
+        serviceCollection.AddMemoryCache();
         serviceCollection.AddSingleton<FeaturedDisplayHistoryStore>();
         serviceCollection.AddSingleton<FeaturedPreferenceStore>();
         serviceCollection.AddSingleton<FeaturedDismissalStore>();
@@ -21,6 +22,8 @@ public sealed class PluginServiceRegistrator : IPluginServiceRegistrator
         serviceCollection.AddSingleton<FeaturedCandidateCache>();
         serviceCollection.AddSingleton<FeaturedRecommendationCandidates>();
         serviceCollection.AddSingleton<FeaturedMediaMetadataService>();
+        serviceCollection.AddSingleton<FeaturedRuleEngineFactory>();
+        serviceCollection.AddSingleton<FeaturedFeedService>();
         serviceCollection.AddSingleton<FeaturedPreparedCache>();
         serviceCollection.AddSingleton<FrontendInjectionAvailabilityService>();
         serviceCollection.AddSingleton<IScheduledTask, RefreshFeaturedCacheTask>();
