@@ -4,6 +4,10 @@
 
 ### Features
 
+- feat(cache): show a user-scoped five-item startup cache while fresh featured data loads
+- perf(rule-engine): avoid redundant candidate ID re-queries and split metadata timing
+- perf(cache): warm source candidates at startup when final feeds require live mixing
+- perf(runtime): coalesce rapid remount requests and label initial, remount, and batch timings
 - feat(injection): add resilient direct fallback
 - feat(display): add interactive hero fade editor
 - feat(config): mirror Jellyfin in banner preview
