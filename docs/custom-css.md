@@ -1,6 +1,9 @@
 # Custom CSS and theming
 
-Jellyfin Featured picks up Jellyfin's active colors automatically. Want to change them? Add any of the `--ec-*` variables below under **Dashboard > General > Custom CSS**. The plugin leaves your values alone when it loads, so you normally won't need `!important`.
+Jellyfin Featured uses Jellyfin's colors by default. Add the `--ec-*` variables below under **Dashboard > General > Custom CSS** to override them.
+
+> [!NOTE]
+> You do not need Custom CSS for the plugin to match your theme. `!important` is normally not required.
 
 ## Quick example
 
@@ -26,7 +29,8 @@ Jellyfin Featured picks up Jellyfin's active colors automatically. Want to chang
 }
 ```
 
-Use `:root` to change everything. Use `.ec-root` for just the carousel, `.ec-preferences-backdrop` for the user settings dialog, or `#FeaturedConfigPage` for the admin page and its preview.
+> [!TIP]
+> Use `:root` everywhere, `.ec-root` for the banner, `.ec-preferences-backdrop` for user settings, or `#FeaturedConfigPage` for the admin page and preview.
 
 ## Theme variables
 
@@ -52,7 +56,7 @@ Use `:root` to change everything. Use `.ec-root` for just the carousel, `.ec-pre
 | `--ec-theme-error-contrast` | Text on error backgrounds |
 | `--ec-theme-radius` | Default control and surface radius |
 
-If you don't set these, Featured uses Jellyfin's `--jf-palette-*` and `--jf-card-borderRadius` values. Built-in defaults cover themes that don't provide them.
+Variables you do not set keep their Jellyfin or default value.
 
 ## Component variables
 
@@ -76,11 +80,11 @@ If you don't set these, Featured uses Jellyfin's `--jf-palette-*` and `--jf-card
 | `--ec-dialog-header-background` | Preferences dialog header |
 | `--ec-dialog-footer-background` | Preferences dialog action footer |
 
-If you leave a component variable out, it simply uses the matching theme value. Button changes also show up in the admin-page preview.
+Component variables you do not set use the matching theme value. Button changes also appear in the admin preview.
 
 ## Direct selectors
 
-You can target the `ec-*` classes directly from Custom CSS. Starting rules with `.ec-root` or `.ec-preferences-backdrop` helps keep them away from the rest of Jellyfin.
+You can also use the `ec-*` classes directly. Start with `.ec-root` or `.ec-preferences-backdrop` so the rule does not affect the rest of Jellyfin.
 
 | Area | Selectors |
 | --- | --- |
@@ -92,7 +96,7 @@ You can target the `ec-*` classes directly from Custom CSS. Starting rules with 
 | Preferences | `.ec-preferences-backdrop`, `.ec-preferences-dialog`, `.ec-preferences-header`, `.ec-preferences-content`, `.ec-preferences-actions` |
 | Preference fields | `.ec-preference-source`, `.ec-preference-genre`, `.ec-preference-genre-marker`, `.ec-preference-boosts` |
 
-For active and special states, use `.ec-hero`, `.ec-ready`, `.ec-trailer-active`, `.ec-controls-hover`, `.is-active`, and `[data-genre-state="preferred"]` / `[data-genre-state="excluded"]`.
+State selectors: `.ec-hero`, `.ec-ready`, `.ec-trailer-active`, `.ec-controls-hover`, `.is-active`, `[data-genre-state="preferred"]`, and `[data-genre-state="excluded"]`.
 
 For example:
 
@@ -111,4 +115,5 @@ For example:
 }
 ```
 
-We'll keep the variables and selectors listed above working across 12.x, so your Custom CSS should survive regular updates. Jellyfin's own classes and other internal markup may still change.
+> [!WARNING]
+> Use `--ec-*` variables and `.ec-*` selectors where possible. Jellyfin's own classes can change after an update.

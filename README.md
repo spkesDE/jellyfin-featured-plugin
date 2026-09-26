@@ -6,198 +6,107 @@
   <a href="./LICENSE"><img alt="License" src="https://img.shields.io/github/license/spkesDE/jellyfin-featured-plugin?color=00A4DC&amp;cacheSeconds=3600" /></a>
   <a href="https://github.com/spkesDE/jellyfin-featured-plugin/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/spkesDE/jellyfin-featured-plugin?color=AA5CC3&amp;cacheSeconds=3600" /></a>
   <img alt="Jellyfin version" src="https://img.shields.io/badge/Jellyfin-12.x-AA5CC3?labelColor=555&amp;logo=jellyfin&amp;logoColor=00A4DC&amp;cacheSeconds=3600" />
-  <a href="https://github.com/spkesDE/jellyfin-featured-plugin/actions/workflows/ci.yml"><img alt="Build" src="https://img.shields.io/github/actions/workflow/status/spkesDE/jellyfin-featured-plugin/ci.yml?branch=main&amp;color=00A4DC&amp;cacheSeconds=3600" /></a>
   <img alt="Downloads" src="https://img.shields.io/github/downloads/spkesDE/jellyfin-featured-plugin/total?color=AA5CC3&amp;cacheSeconds=3600" />
 </p>
 
-Jellyfin Featured adds a large, rotating banner to your Jellyfin home page. Use it to highlight favourites, new additions, collections, playlists, or anything else you want people on your server to discover.
+Jellyfin Featured adds a rotating hero banner to the Jellyfin home page.
 
-## What you can do
+## Features
 
-- Fill the banner from libraries, collections, playlists, favourites, tags, recent additions, new releases, unplayed titles or your own hand-picked list.
-- Mix several sources and decide how often each one should appear.
-- Narrow the selection by genre, year, age rating, play status, runtime and more.
-- Give each Jellyfin user more of what they like, including favourites, unwatched titles, preferred genres and series they have already started.
-- Let users personalize their own source mix while the administrator keeps control of which settings may be changed.
-- Choose between a classic banner and a larger hero layout, then adjust the height, artwork, text, buttons and transitions.
-- Rotate titles automatically, load more while browsing, or play local, direct-video, and YouTube trailers in the background.
-- Schedule complete presets once, on selected weekdays, or as annual seasonal ranges in an explicit time zone.
-- Preview the generated feed and mixer diagnostics as any Jellyfin user before saving or enabling a preset.
-- Fast by design, prepared per-user caches and background warm-up keep normal page loads near-instant while avoiding repeated heavy library queries.
+- Use libraries, collections, playlists, favourites, tags, recent additions, or recommendations.
+- Mix sources and filter by genre, year, age rating, play status, runtime, people, or language.
+- Show different titles for each user based on favourites and watch history.
+- Change the layout, artwork, text, controls, transitions, and trailers.
+- Schedule presets for events, weekdays, or seasons.
+- Preview the banner as another Jellyfin user.
 
-Jellyfin Featured works in Jellyfin Web and clients that display the Jellyfin Web interface. Some native TV apps use their own home screen and cannot show the banner.
-
-## Requirements
-
-- Jellyfin Server 12
-- Recommended: [File Transformation](https://github.com/IAmParadox27/jellyfin-plugin-file-transformation) or [JavaScript Injector](https://github.com/n00bcodr/Jellyfin-JavaScript-Injector)
-- Without a companion plugin, the Jellyfin service account needs write access to `jellyfin-web/index.html` for direct fallback injection.
+> [!NOTE]
+> The banner only appears in Jellyfin Web and clients that use the Jellyfin Web interface. Native apps with their own home screen cannot show it.
 
 ## Installation
 
-Install Jellyfin Featured first. File Transformation is the recommended companion, JavaScript Injector also works, and direct `index.html` injection is available as a fallback when neither helper is installed.
-
-### Jellyfin Featured
-
 1. In Jellyfin, open `Dashboard -> Catalog -> Settings`.
-2. Add the following plugin repository:
+2. Add this plugin repository:
 
    ```text
    https://raw.githubusercontent.com/spkesDE/jellyfin-featured-plugin/main/manifest.json
    ```
 
-3. Save the repository, return to the plugin catalog, and install `Jellyfin Featured`.
+3. Install **Jellyfin Featured** from the plugin catalog.
 4. Restart Jellyfin.
 
-### File Transformation
+> [!IMPORTANT]
+> For the frontend, install either [File Transformation](https://github.com/IAmParadox27/jellyfin-plugin-file-transformation) or [JavaScript Injector](https://github.com/n00bcodr/Jellyfin-JavaScript-Injector). Both are supported.
 
-1. Add the File Transformation repository:
+### Frontend helper repositories
 
-   ```text
-   https://www.iamparadox.dev/jellyfin/plugins/manifest.json
-   ```
+**File Transformation:**
 
-2. Install `File Transformation`.
-3. Restart Jellyfin.
+```text
+https://www.iamparadox.dev/jellyfin/plugins/manifest.json
+```
 
-### JavaScript Injector (alternative)
+**JavaScript Injector:**
 
-1. Add the JavaScript Injector repository:
+```text
+https://raw.githubusercontent.com/n00bcodr/jellyfin-plugins/main/manifest.json
+```
 
-   ```text
-   https://raw.githubusercontent.com/n00bcodr/jellyfin-plugins/main/manifest.json
-   ```
+> [!TIP]
+> Keep the injection method set to `Automatic`. The plugin will use whichever frontend helper is installed.
 
-2. Install `JavaScript Injector`.
-3. Restart Jellyfin.
-
-That is all the setup JavaScript Injector needs. You do not have to copy or paste any scripts.
-
-Leave the injection method set to `Automatic` unless you need to force a specific method. Jellyfin Featured checks Jellyfin's active plugins and chooses File Transformation, JavaScript Injector, or direct `index.html` injection in that order. Methods whose required plugin or web file is unavailable are disabled in the settings.
-
-Direct injection modifies `jellyfin-web/index.html` and therefore needs write permission for the account running Jellyfin. Jellyfin updates may replace that file; the plugin injects it again on the next server start.
-
-Restart Jellyfin after changing the frontend injection method.
+> [!WARNING]
+> If neither helper is installed, the plugin writes its loader to `jellyfin-web/index.html` at startup. The Jellyfin service account needs write access. After a Jellyfin update, the loader is added again on the next start.
 
 ## Setup
 
-1. Open the Jellyfin admin dashboard.
-2. Open the `Jellyfin Featured` plugin settings.
-3. Choose where the featured titles should come from.
-4. Add any filters you want and adjust how often each source should appear.
-5. Choose a layout and customise the banner to your taste.
-6. Save the configuration.
-7. Refresh Jellyfin Web.
+1. Open `Dashboard -> Plugins -> Jellyfin Featured`.
+2. Select the content you want to feature.
+3. Adjust filters and appearance if needed.
+4. Save, then refresh Jellyfin Web.
 
-A random selection is enabled by default, so you should see the banner without having to create any rules first.
+> [!NOTE]
+> The default setup uses a random selection. No source rules are needed for the first start.
 
-## Content Sources
+Users can open **Featured settings** from their Jellyfin user menu. Administrators decide which personalization options users may change.
 
-| Source | Best for |
-| --- | --- |
-| Libraries | Titles from selected Jellyfin libraries |
-| Collections | Curated groups and franchises |
-| Favourites | Items marked as favourites |
-| Tags | Anything grouped with a Jellyfin tag |
-| Playlists | Existing Jellyfin playlists |
-| Recently Added | Newly added library content |
-| Latest Releases | Recently released media |
-| Random | A changing mix of eligible titles |
-| Unplayed | Content the user has not watched or played |
-| Continue Watching | Resumable movies, episodes, videos and audiobooks for the current viewer |
-| Next Up | The next episode from each series the current viewer is watching |
-| Manual Lists | Your own hand-picked and ordered selection |
-| Jellyfin Movie Recommendations | Suggestions based on the viewer's recently watched and liked movies |
+## Trailers
 
-You can combine as many sources as you like. Give a source more weight if you want its titles to appear more often. Filters can apply to the whole banner or only to one source.
+Background trailers can use local files, direct video links, or YouTube. Trailer order, mute, delay, and mobile playback can be changed in the plugin settings.
 
-Viewers can mark or unmark a title as a favourite directly from the banner. The current viewer's favourite state is shown on each slide, and changing it refreshes favourite-dependent feeds.
-Administrators can hide the favourite button under `Display`, and viewers can hide it for their own account in `Featured settings` when the administrator leaves it enabled.
-
-The movie recommendations source uses Jellyfin 12's recommendation providers. It is specific to each viewer and may be empty without movie watch history; pair it with another source or a fallback rule.
-
-You can also set minimums or maximums for individual sources and mark a source as a fallback. Feed-diversity settings help prevent one genre or film series from dominating the banner. A repeat cooldown keeps recently shown titles out of the rotation for a while.
-
-Filters can include or exclude actors, directors, original-language metadata, and available audio-track languages. Original language and audio language are separate fields. For predictable handling of incomplete libraries, missing metadata does not satisfy an inclusion rule and remains eligible under an exclusion rule.
-
-## Display Options
-
-The default hero layout is designed to work without much tweaking. If you want a different look, you can change the banner height, artwork position, text alignment, gradients, corners, spacing, and transition style. Separate height settings are available for desktop, tablet, and mobile screens.
-
-You can also choose which details and controls are shown, including the title or logo, description, rating, year, runtime, buttons, arrows, and page dots. Autoplay, background trailers, and the number of featured titles are optional.
-
-Featured automatically inherits Jellyfin's active theme palette. Primary and secondary buttons, focus states, dialogs, form surfaces, text, dividers, errors, and corner styling follow Jellyfin's `--jf-palette-*` and `--jf-card-borderRadius` variables. Common legacy accent variables are supported as fallbacks. Text and navigation drawn directly over artwork remain high-contrast so custom light themes do not make the hero unreadable.
-
-Want to go further? Every part of the 12.3 theming update can be changed with `--ec-*` variables and direct `.ec-*` selectors, including both button styles, banner corners, and the preferences dialog. See [Custom CSS and theming](./docs/custom-css.md) for the full list and ready-to-use examples.
-
-## Trailer Support
-
-Jellyfin Featured can play local trailers and supported online trailers in the background. You can choose which type to prefer, start trailers muted, add a delay, adjust start and end points, and decide whether they should play on mobile devices.
-
-If a title needs a specific trailer, add a manual override in the `Trailers` tab. Unsupported online trailers can still be opened with a trailer button.
-
-Trailer candidates fall back in the configured order when playback fails. YouTube playback can still be unavailable when a video owner disables embedding, a video is private or removed, or browser/network privacy controls block the player. See [Trailer behavior and troubleshooting](./docs/trailer-behavior.md) for details.
-
-## Personalization
-
-Administrators choose which options users may change under `User Profiles`. These can include content sources, source shares, preferred genres, favourites, unwatched titles, in-progress series, and the repeat cooldown.
-
-When personalization is enabled, users can open `Featured settings` from Jellyfin's user menu or settings page. Their choices affect only their own account. `Reset to server defaults` restores the experience chosen by the administrator.
-
-## Presets and Scheduling
-
-Presets let you prepare a complete Featured experience for an occasion such as a Christmas season, recurring weekend mornings, Friday movie nights, or a one-off event.
-
-First configure the sources, filters, layout, personalization, and trailers you want. Then open `Presets & Schedule`, capture the current settings, choose a one-time, weekly, or annual schedule, and enable the preset. Recurring schedules use an explicit IANA time zone, follow daylight-saving changes, and may cross midnight or the end of the year. Outside every active period, Jellyfin Featured automatically returns to your normal settings.
-
-If two presets overlap, use the priority setting to choose which one should be shown. `Update from current settings` refreshes an existing preset without changing its name or schedule. Use `Preview feed` to inspect the exact item order, per-source contribution, duplicate removal, cooldown exclusions, and diversity decisions. The preview can run as another Jellyfin user or force any preset without saving or enabling it first.
-
-## Languages
-
-The plugin interface currently includes English and German. It follows the Jellyfin/browser language automatically and falls back to English when the selected language or an individual translation is unavailable.
-
-[![Translation status](./docs/i18n-status.svg)](./src/i18n/locales)
-
-See the [translation contribution workflow](./CONTRIBUTING.md#translation-workflow) to add a language or improve existing strings.
-
-## Caching and repeat protection
-
-Candidate Cache, Prepared Cache, and Repeat Cooldown solve different problems. In short, candidates avoid repeated library discovery, prepared entries make normal requests fast, and repeat cooldown records displayed titles so they can be excluded for longer. See [Cache behavior](./docs/cache-behavior.md) for the full distinction and cache diagnostics.
+> [!WARNING]
+> Some YouTube videos block embedded playback. See [Trailer behavior and troubleshooting](./docs/trailer-behavior.md).
 
 ## Troubleshooting
 
-If the featured carousel does not appear:
+If the banner does not appear:
 
-1. Make sure `Jellyfin Featured` is installed and enabled. If direct injection cannot write to `jellyfin-web/index.html`, install either `File Transformation` or `JavaScript Injector`.
-2. Restart Jellyfin after installing or updating plugins.
-3. Hard-refresh Jellyfin Web in your browser.
-4. Make sure at least one content source is enabled and contains something the banner can show.
-5. Temporarily remove your filters to check whether they are hiding every title.
-6. Leave the injection method on `Automatic`, or select one of the available methods explicitly. Unavailable helper plugins are shown as disabled.
-7. If the problem remains, enable debug logging in the plugin settings and check the Jellyfin log.
+1. Confirm that Jellyfin Featured and your frontend helper are installed and enabled.
+2. Restart Jellyfin, then hard-refresh the browser.
+3. Check that at least one content source returns titles.
+4. Temporarily disable filters.
+5. Keep the injection method on `Automatic`.
+6. Turn on debug logging in the plugin settings and check the Jellyfin log.
 
-If the banner appears in a browser but not in a TV app, that app probably uses its own home screen and cannot display Jellyfin Featured.
+If it works in a browser but not in a TV app, that app probably uses its own home screen.
 
-For details about recent releases, see the [changelog](./CHANGELOG.md).
+> [!TIP]
+> When reporting a problem, include the Jellyfin version, plugin version, selected injection method, and relevant log lines.
 
-## License
+## More information
 
-This project is licensed under the [MIT License](./LICENSE).
+> [!TIP]
+> Like Jellyfin Featured? Check out my other plugin: [**Jellyfin Media Preview**](https://github.com/spkesDE/jellyfin-media-preview-plugin).
 
-## Credits
+- [Custom CSS and theming](./docs/custom-css.md)
+- [Cache behavior](./docs/cache-behavior.md)
+- [Changelog](./CHANGELOG.md)
+- [Contributing and translations](./CONTRIBUTING.md)
 
-Jellyfin Featured is a remake of the original [Jellyfin Editor's Choice plugin](https://github.com/lachlandcp/jellyfin-editors-choice-plugin) by [lachlandcp](https://github.com/lachlandcp). Thanks to the original project for the idea and foundation.
+The interface is available in English and German and follows the Jellyfin or browser language automatically.
 
-## More Jellyfin plugins
+## License and credits
 
-Check out my other plugin: [Jellyfin Media Preview](https://github.com/spkesDE/jellyfin-media-preview-plugin).
+Licensed under the [MIT License](./LICENSE).
 
-## Star History
-
-<a href="https://www.star-history.com/?repos=spkesde%2Fjellyfin-featured-plugin&type=date&legend=top-left">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=spkesde/jellyfin-featured-plugin&type=date&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=spkesde/jellyfin-featured-plugin&type=date&legend=top-left" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=spkesde/jellyfin-featured-plugin&type=date&legend=top-left" />
- </picture>
-</a>
+Jellyfin Featured is a remake of the original [Jellyfin Editor's Choice plugin](https://github.com/lachlandcp/jellyfin-editors-choice-plugin) by [lachlandcp](https://github.com/lachlandcp).
