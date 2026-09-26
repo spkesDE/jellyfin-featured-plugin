@@ -16,6 +16,26 @@ namespace Jellyfin.Plugin.Featured.Tests;
 public sealed class FeaturedPreparedCacheTests : FeaturedPreparedCacheTestBase
 {
     [Fact]
+    public async Task StartupRefreshWarmsCandidatesWhenFinalMixMustStayLive()
+    {
+        _libraryManager.Candidates.AddRange(CreateItems(6));
+        PluginConfiguration config = PluginConfigurationNormalizer.Normalize(new PluginConfiguration
+        {
+            MaximumItemsPerGenre = 1
+        });
+
+        await _cache.RefreshAllAsync(new Progress<double>(), CancellationToken.None, config);
+        await _cache.RefreshAllAsync(new Progress<double>(), CancellationToken.None, config);
+
+        FeaturedPersonalizationContext personalization = _personalization.Resolve(config, _user.Id);
+        Assert.False(TryGet(config, personalization, [], 5, out _, out string status));
+        Assert.Equal("bypass (live mixing required)", status);
+        Assert.Contains("prepared-cache: 0 users", _cache.GetStatus(), StringComparison.Ordinal);
+        Assert.Contains("1 misses", _candidateCache.GetStatus(), StringComparison.Ordinal);
+        Assert.Contains("1 hits", _candidateCache.GetStatus(), StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task RefreshAllThenSameEffectiveRequestReturnsHit()
     {
         _libraryManager.Candidates.AddRange(CreateItems(6));

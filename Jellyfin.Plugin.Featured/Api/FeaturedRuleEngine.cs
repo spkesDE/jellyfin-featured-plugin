@@ -60,6 +60,9 @@ internal sealed partial class FeaturedRuleEngine
             .Where(rule => rule.Enabled && IsSourceVisibleToUser(rule, activeUser.Id))
             .Select(rule => (rule, GetSourceCandidates(rule, activeUser, requestedCount)))
             .ToList();
+        double sourceCandidatesMilliseconds = ElapsedMilliseconds(phaseStarted);
+
+        phaseStarted = Stopwatch.GetTimestamp();
         List<BaseItem> distinctCandidates = candidatesByRule
             .SelectMany(candidateSet => candidateSet.Items)
             .DistinctBy(item => item.Id)
@@ -68,7 +71,7 @@ internal sealed partial class FeaturedRuleEngine
             .Concat(candidatesByRule.SelectMany(candidateSet => candidateSet.Rule.Filters))
             .ToArray();
         FeaturedMediaMetadataSnapshot metadata = _mediaMetadata.BuildSnapshot(distinctCandidates, metadataFilters, activeUser);
-        double sourceCandidatesMilliseconds = ElapsedMilliseconds(phaseStarted);
+        double metadataSnapshotMilliseconds = ElapsedMilliseconds(phaseStarted);
 
         phaseStarted = Stopwatch.GetTimestamp();
         HashSet<Guid> allowedItemIds = FeaturedUserAccess.GetAllowedItemIds(distinctCandidates, activeUser);
@@ -202,6 +205,7 @@ internal sealed partial class FeaturedRuleEngine
         double poolAllocationMilliseconds = ElapsedMilliseconds(phaseStarted);
         FeaturedRuleEngineTiming timing = new(
             sourceCandidatesMilliseconds,
+            metadataSnapshotMilliseconds,
             allowedItemsAccessMilliseconds,
             userDataBatchMilliseconds,
             globalFiltersMilliseconds,

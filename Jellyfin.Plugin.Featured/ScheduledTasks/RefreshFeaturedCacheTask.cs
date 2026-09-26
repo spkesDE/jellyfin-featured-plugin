@@ -16,7 +16,7 @@ public sealed class RefreshFeaturedCacheTask : IScheduledTask, IConfigurableSche
 
     public string Key => "RefreshPreparedFeaturedCache";
 
-    public string Description => "Prepares featured items for every Jellyfin user so page requests do not need to query the library.";
+    public string Description => "Prepares featured candidates and items for every Jellyfin user so page requests do not need to query the library.";
 
     public string Category => "Jellyfin Featured";
 

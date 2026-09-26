@@ -10,6 +10,27 @@ namespace Jellyfin.Plugin.Featured.Tests;
 public sealed class FeaturedRuleEngineAllocationTests : FeaturedPreparedCacheTestBase
 {
     [Fact]
+    public void StandardSourceUsesItsFilteredLibraryResultWithoutRequeryingIds()
+    {
+        PluginConfiguration config = CreateConfig(
+            new FeaturedSourceRule
+            {
+                Id = "random-source",
+                Type = FeaturedSourceTypes.Random
+            });
+        _libraryManager.Candidates.AddRange(CreateItems(5));
+
+        FeaturedSelection selection = CreateEngine(config).SelectItems(
+            _user,
+            [],
+            new Dictionary<Guid, DateTimeOffset>(),
+            5);
+
+        Assert.Equal(5, selection.Items.Count);
+        Assert.Equal(1, _libraryManager.GetItemListCalls);
+    }
+
+    [Fact]
     public void UserWithOnlyOneEnabledSourceFillsFeedPastItsMixerMaximum()
     {
         PluginConfiguration config = CreateConfig(

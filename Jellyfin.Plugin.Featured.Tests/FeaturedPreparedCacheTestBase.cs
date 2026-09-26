@@ -26,6 +26,7 @@ public abstract class FeaturedPreparedCacheTestBase : IDisposable
     protected readonly FeaturedDisplayHistoryStore _historyStore;
     protected readonly FeaturedPersonalizationService _personalization;
     protected readonly FeaturedPreparedCache _cache;
+    protected readonly FeaturedCandidateCache _candidateCache;
     protected readonly User _user;
 
     protected FeaturedPreparedCacheTestBase()
@@ -59,13 +60,14 @@ public abstract class FeaturedPreparedCacheTestBase : IDisposable
             libraryManager,
             DispatchProxy.Create<IMediaSourceManager, EmptyServiceStub>(),
             DispatchProxy.Create<ITVSeriesManager, EmptyServiceStub>());
+        _candidateCache = new FeaturedCandidateCache();
         _cache = new FeaturedPreparedCache(
             userManager,
             libraryManager,
             userDataManager,
             _historyStore,
             new FeaturedDismissalStore(paths, NullLogger<FeaturedDismissalStore>.Instance),
-            new FeaturedCandidateCache(),
+            _candidateCache,
             new FeaturedRecommendationCandidates(
                 DispatchProxy.Create<ISimilarItemsManager, SimilarItemsManagerStub>(),
                 NullLogger<FeaturedRecommendationCandidates>.Instance),
@@ -88,7 +90,7 @@ public abstract class FeaturedPreparedCacheTestBase : IDisposable
         IReadOnlyList<BaseItem> items)
         => _cache.StoreRequestPool(_user, config, personalization,
             new FeaturedSelection(items.ToList(), [], false,
-                new FeaturedRuleEngineTiming(0, 0, 0, 0, 0, 0, 0, 0),
+                new FeaturedRuleEngineTiming(0, 0, 0, 0, 0, 0, 0, 0, 0),
                 new Dictionary<Guid, FeaturedItemSelectionReason>()));
 
     protected bool TryGet(
@@ -164,11 +166,17 @@ public abstract class FeaturedPreparedCacheTestBase : IDisposable
     {
         public List<BaseItem> Candidates { get; } = [];
 
+        public int GetItemListCalls { get; private set; }
+
         public Dictionary<Guid, List<Folder>> CollectionFolders { get; } = [];
 
         protected override object? Invoke(MethodInfo? targetMethod, object?[]? args)
         {
-            if (targetMethod?.Name == nameof(ILibraryManager.GetItemList)) return Candidates.ToList();
+            if (targetMethod?.Name == nameof(ILibraryManager.GetItemList))
+            {
+                GetItemListCalls++;
+                return Candidates.ToList();
+            }
             if (targetMethod?.Name == nameof(ILibraryManager.GetCollectionFolders)
                 && args is [{ } item, ..])
             {

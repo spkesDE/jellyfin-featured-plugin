@@ -40,7 +40,7 @@ public sealed class FeaturedPreparedItemTests : FeaturedPreparedCacheTestBase
         };
         _cache.StoreRequestPool(_user, config, personalization,
             new FeaturedSelection(source, [], false,
-                new FeaturedRuleEngineTiming(0, 0, 0, 0, 0, 0, 0, 0), reasons));
+                new FeaturedRuleEngineTiming(0, 0, 0, 0, 0, 0, 0, 0, 0), reasons));
 
         Assert.True(TryGet(config, personalization, [], 2, out List<FeaturedItemDto> items, out _));
         Assert.Null(items.Single(item => item.Id == source[0].Id.ToString()).Trailer);

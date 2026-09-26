@@ -43,11 +43,19 @@ internal sealed partial class FeaturedRuleEngine
 
         List<BaseItem> sourceOrder = candidates.ToList();
         bool preserveEpisodes = rule.Type is FeaturedSourceTypes.ContinueWatching or FeaturedSourceTypes.NextUp;
-        List<BaseItem> normalized = NormalizeAndRequery(
-            sourceOrder,
-            userScoped ? activeUser : null,
-            candidateLimit,
-            preserveEpisodes);
+        bool requiresRequery = rule.Type is FeaturedSourceTypes.Favourites
+            or FeaturedSourceTypes.Collections
+            or FeaturedSourceTypes.Playlists
+            or FeaturedSourceTypes.Recommendations
+            or FeaturedSourceTypes.ContinueWatching
+            or FeaturedSourceTypes.NextUp;
+        List<BaseItem> normalized = requiresRequery
+            ? NormalizeAndRequery(
+                sourceOrder,
+                userScoped ? activeUser : null,
+                candidateLimit,
+                preserveEpisodes)
+            : NormalizeWithoutRequery(sourceOrder, candidateLimit);
         return rule.Type switch
         {
             FeaturedSourceTypes.Libraries => normalized
@@ -215,6 +223,15 @@ internal sealed partial class FeaturedRuleEngine
         query.Limit = limit;
         return _libraryManager.GetItemList(query).ToList();
     }
+
+    private static List<BaseItem> NormalizeWithoutRequery(
+        IEnumerable<BaseItem> items,
+        int limit)
+        => items
+            .Where(IsSupportedItemType)
+            .DistinctBy(item => item.Id)
+            .Take(limit)
+            .ToList();
 
     private static bool IsUserScopedSource(FeaturedSourceRule rule)
         => rule.Type is FeaturedSourceTypes.Unplayed

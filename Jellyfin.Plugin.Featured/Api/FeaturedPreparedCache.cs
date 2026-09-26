@@ -9,6 +9,7 @@ namespace Jellyfin.Plugin.Featured.Api;
 
 public sealed class FeaturedPreparedCache
 {
+    private const int LiveInfiniteBatchSize = 5;
     private const int MinimumPoolSize = 100;
     private const int MaximumPoolSize = 250;
     private readonly ConcurrentDictionary<Guid, PreparedEntry> _entries = new();
@@ -157,9 +158,14 @@ public sealed class FeaturedPreparedCache
         });
     }
 
-    internal async Task RefreshAllAsync(IProgress<double> progress, CancellationToken cancellationToken)
+    internal async Task RefreshAllAsync(
+        IProgress<double> progress,
+        CancellationToken cancellationToken,
+        PluginConfiguration? configurationOverride = null)
     {
-        PluginConfiguration config = GetCurrentConfiguration();
+        PluginConfiguration config = configurationOverride is null
+            ? GetCurrentConfiguration()
+            : PluginConfigurationNormalizer.Normalize(configurationOverride);
         if (!config.EnablePreparedCache)
         {
             Clear();
@@ -245,18 +251,24 @@ public sealed class FeaturedPreparedCache
 
     private void RefreshUser(Jellyfin.Database.Implementations.Entities.User user, PluginConfiguration config)
     {
-        if (RequiresLiveMixing(config))
-        {
-            _entries.TryRemove(user.Id, out _);
-            return;
-        }
-
+        bool requiresLiveMixing = RequiresLiveMixing(config);
         FeaturedPersonalizationContext personalization = _personalization.Resolve(config, user.Id);
         FeaturedDismissalSnapshot dismissals = _dismissalStore.GetSnapshot(user.Id);
         IReadOnlyDictionary<Guid, DateTimeOffset> recentHistory = _historyStore.GetRecentItems(user.Id, personalization.RepeatCooldownHours);
         FeaturedRuleEngine engine = new(config, _userManager, _libraryManager, _userDataManager, _candidateCache, _recommendations, _mediaMetadata);
-        FeaturedSelection selection = engine.SelectItems(user, [], recentHistory, GetPoolSize(config), personalization, dismissals);
+        int requestedCount = requiresLiveMixing
+            ? GetLiveRequestSize(config)
+            : GetPoolSize(config);
+        FeaturedSelection selection = engine.SelectItems(user, [], recentHistory, requestedCount, personalization, dismissals);
         if (config.Debug) _logger.LogInformation("{RuleEngineTiming}", selection.Timing.FormatReport());
+        if (requiresLiveMixing)
+        {
+            // The final order must remain request-specific, but the expensive source
+            // candidate queries are safe to share with the first live request.
+            _entries.TryRemove(user.Id, out _);
+            return;
+        }
+
         StorePreparedItems(user, config, personalization, selection, dismissals,
             eagerlyBuildDtos: true, replaceExisting: true);
     }
@@ -313,6 +325,9 @@ public sealed class FeaturedPreparedCache
 
     private static int GetPoolSize(PluginConfiguration config)
         => Math.Clamp(Math.Max(MinimumPoolSize, config.RandomMediaCount * 12), MinimumPoolSize, MaximumPoolSize);
+
+    private static int GetLiveRequestSize(PluginConfiguration config)
+        => config.EnableInfiniteLoading ? LiveInfiniteBatchSize : config.RandomMediaCount;
 
     private static bool RequiresLiveMixing(PluginConfiguration config)
         => config.RelaxRepeatCooldownWhenNeeded

@@ -40,6 +40,7 @@ internal sealed record FeaturedItemSelectionReason(
 
 internal sealed record FeaturedRuleEngineTiming(
     double SourceCandidatesMilliseconds,
+    double MetadataSnapshotMilliseconds,
     double AllowedItemsAccessMilliseconds,
     double UserDataBatchMilliseconds,
     double GlobalFiltersMilliseconds,
@@ -52,6 +53,7 @@ internal sealed record FeaturedRuleEngineTiming(
         Rule engine timing
         ------------------------------
         source candidates       {SourceCandidatesMilliseconds,8:0.0} ms
+        metadata snapshot       {MetadataSnapshotMilliseconds,8:0.0} ms
         allowed-items access    {AllowedItemsAccessMilliseconds,8:0.0} ms
         user-data batch         {UserDataBatchMilliseconds,8:0.0} ms
         global filters          {GlobalFiltersMilliseconds,8:0.0} ms
