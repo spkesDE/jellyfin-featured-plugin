@@ -1,19 +1,10 @@
-using System.Text.RegularExpressions;
 using MediaBrowser.Common.Configuration;
-using MediaBrowser.Common.Net;
 using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.Featured;
 
 internal static class DirectScriptInjector
 {
-    private static readonly Regex ScriptMarkerRegex = new(
-        "<script\\b(?=[^>]*\\bplugin=([\"'])Featured\\1)[^>]*>\\s*</script>",
-        RegexOptions.IgnoreCase | RegexOptions.Compiled);
-    private static readonly Regex BootstrapRegex = new(
-        Regex.Escape(FrontendBootstrap.StartMarker) + ".*?" + Regex.Escape(FrontendBootstrap.EndMarker),
-        RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
-
     internal static bool IsAvailable(IApplicationPaths applicationPaths)
     {
         if (string.IsNullOrWhiteSpace(applicationPaths.WebPath))
@@ -50,7 +41,7 @@ internal static class DirectScriptInjector
         {
             PluginConfiguration configuration = PluginConfigurationNormalizer.Normalize(Plugin.Instance?.Configuration);
             string contents = File.ReadAllText(indexFile);
-            string stripped = Strip(contents);
+            string stripped = FrontendInjectionMarkup.Strip(contents);
             int headClosing = stripped.LastIndexOf("</head>", StringComparison.OrdinalIgnoreCase);
             int bodyClosing = stripped.LastIndexOf("</body>", StringComparison.OrdinalIgnoreCase);
             if (bodyClosing < 0)
@@ -66,7 +57,9 @@ internal static class DirectScriptInjector
                 bodyClosing = stripped.LastIndexOf("</body>", StringComparison.OrdinalIgnoreCase);
             }
 
-            string updated = stripped.Insert(bodyClosing, BuildScriptTag());
+            string updated = stripped.Insert(
+                bodyClosing,
+                FrontendInjectionMarkup.BuildScriptTag("DirectInjection", "direct"));
             if (!string.Equals(contents, updated, StringComparison.Ordinal))
             {
                 File.WriteAllText(indexFile, updated);
@@ -97,7 +90,7 @@ internal static class DirectScriptInjector
         try
         {
             string contents = File.ReadAllText(indexFile);
-            string updated = Strip(contents);
+            string updated = FrontendInjectionMarkup.Strip(contents);
             if (!string.Equals(contents, updated, StringComparison.Ordinal))
             {
                 File.WriteAllText(indexFile, updated);
@@ -109,9 +102,6 @@ internal static class DirectScriptInjector
             logger.LogWarning(ex, "Could not remove the previous direct Jellyfin Featured injection from {IndexFile}.", indexFile);
         }
     }
-
-    private static string Strip(string contents)
-        => BootstrapRegex.Replace(ScriptMarkerRegex.Replace(contents, string.Empty), string.Empty);
 
     private static string? GetIndexFile(
         IApplicationPaths applicationPaths,
@@ -142,15 +132,4 @@ internal static class DirectScriptInjector
         return indexFile;
     }
 
-    private static string BuildScriptTag()
-    {
-        string basePath = string.Empty;
-        NetworkConfiguration? network = Plugin.Instance?.ServerConfigurationManager.GetNetworkConfiguration();
-        if (!string.IsNullOrWhiteSpace(network?.BaseUrl))
-        {
-            basePath = "/" + network.BaseUrl.Trim().Trim('/');
-        }
-
-        return $"<script DirectInjection=\"true\" data-injection-method=\"direct\" plugin=\"Featured\" defer=\"defer\" src=\"{basePath}/featured/script\"></script>";
-    }
 }
