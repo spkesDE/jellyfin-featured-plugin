@@ -9,6 +9,14 @@
   "imageUrl": "https://raw.githubusercontent.com/spkesDE/jellyfin-featured-plugin/main/logo.png",
   "versions": [
     {
+      "version": "12.7.0.0",
+      "changelog": "- feat(injection): add resilient direct fallback\n- feat(display): add interactive hero fade editor\n- feat(config): mirror Jellyfin in banner preview\n- fix(sources): fill feed from sole available source\n- docs(injection): document automatic fallback order\n- docs: update documentation\n",
+      "targetAbi": "12.1.0.0",
+      "sourceUrl": "https://github.com/spkesDE/jellyfin-featured-plugin/releases/download/v12.7.0.0/Featured.zip",
+      "checksum": "2ff97c01bde6e7e428fe22c33e8a6147",
+      "timestamp": "2026-09-26 08:26:36"
+    },
+    {
       "version": "12.6.0.0",
       "changelog": "- feat(playback): add direct play and resume\n- feat(recommendations): add persistent dismissal feedback\n- feat(sources): add continuation and metadata filters\n- fix(playback): restore play button hover state\n- fix(styles): adjust max-width calculation for better responsiveness\n- fix(styles): remove gap from actions and adjust media query formatting\n- fix(preferences): remove dismissal cooldown hint\n- fix(dismissals): preserve metadata icon color\n- fix(playback): update playback button class for styling consistency\n- fix(playstate): preserve metadata icon color on hover\n",
       "targetAbi": "12.1.0.0",

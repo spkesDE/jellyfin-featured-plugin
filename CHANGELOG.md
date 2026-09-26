@@ -1,5 +1,21 @@
 # Changelog
 
+## v12.7.0.0 - 2026-09-26
+
+### Features
+
+- feat(injection): add resilient direct fallback
+- feat(display): add interactive hero fade editor
+- feat(config): mirror Jellyfin in banner preview
+
+### Fixes
+
+- fix(sources): fill feed from sole available source
+
+### Documentation
+
+- docs(injection): document automatic fallback order
+- docs: update documentation
 ## v12.6.0.0 - 2026-09-24
 
 ### Features
