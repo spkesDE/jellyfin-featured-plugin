@@ -87,11 +87,17 @@ export class FeaturedCarousel {
   private heroContentObserver: ResizeObserver | null = null;
   private heroParentObserver: MutationObserver | null = null;
 
-  constructor(response: FeaturedResponse, loadItems?: FeaturedItemLoader, reportDisplayed?: FeaturedItemDisplayReporter) {
+  constructor(
+    response: FeaturedResponse,
+    loadItems?: FeaturedItemLoader,
+    reportDisplayed?: FeaturedItemDisplayReporter,
+    alreadyDisplayedItemId?: string
+  ) {
     this.response = response;
     this.items = [...response.items];
     this.loadItems = loadItems;
     this.reportDisplayed = reportDisplayed;
+    this.lastReportedItemId = alreadyDisplayedItemId ?? null;
     this.seenItemIds = new Set(this.items.map((item) => item.id));
     this.hasMore = response.infiniteLoading && response.hasMore;
     this.autoplayEnabled = response.autoplay;
@@ -246,6 +252,10 @@ export class FeaturedCarousel {
     this.show(0, false);
     this.updateAutoplayButton();
     this.restartTimer();
+  }
+
+  getActiveItem(): FeaturedItem | undefined {
+    return this.items[this.index];
   }
 
   destroy(): void {

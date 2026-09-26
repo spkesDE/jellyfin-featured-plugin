@@ -18,9 +18,11 @@ public sealed partial class FeaturedController
     [HttpGet("items")]
     [Authorize]
     [Produces(MediaTypeNames.Application.Json)]
-    public ActionResult<FeaturedItemsResponseDto> GetItems([FromQuery] string? excludeItemIds = null)
+    public ActionResult<FeaturedItemsResponseDto> GetItems(
+        [FromQuery] string? excludeItemIds = null,
+        [FromQuery] string? requestKind = null)
     {
-        return BuildItemsResponse(ParseExcludedItemIds(excludeItemIds));
+        return BuildItemsResponse(ParseExcludedItemIds(excludeItemIds), NormalizeRequestKind(requestKind));
     }
 
     [HttpPost("items/batch")]
@@ -32,7 +34,7 @@ public sealed partial class FeaturedController
             .Where(id => id != Guid.Empty)
             .Take(MaximumExcludedItemIds)
             .ToHashSet();
-        return BuildItemsResponse(excludedIds);
+        return BuildItemsResponse(excludedIds, "batch");
     }
 
     [HttpPost("items/displayed")]
@@ -79,7 +81,9 @@ public sealed partial class FeaturedController
         return Ok(new { ok = true });
     }
 
-    private ActionResult<FeaturedItemsResponseDto> BuildItemsResponse(HashSet<Guid> excludedIds)
+    private ActionResult<FeaturedItemsResponseDto> BuildItemsResponse(
+        HashSet<Guid> excludedIds,
+        string requestKind)
     {
         long requestStarted = Stopwatch.GetTimestamp();
         long checkpoint = requestStarted;
@@ -215,6 +219,7 @@ public sealed partial class FeaturedController
                     FormatServerTiming("serialization", serializationMilliseconds),
                     FormatServerTiming("total", totalMilliseconds));
                 LogRequestTiming(
+                    requestKind,
                     userConfigMilliseconds,
                     personalizationMilliseconds,
                     historyMilliseconds,
@@ -279,6 +284,7 @@ public sealed partial class FeaturedController
             : FormattableString.Invariant($"{name};dur={milliseconds:0.###};desc=\"{description}\"");
 
     private void LogRequestTiming(
+        string requestKind,
         double userConfig,
         double personalization,
         double history,
@@ -290,7 +296,7 @@ public sealed partial class FeaturedController
         double total)
     {
         string report = FormattableString.Invariant($"""
-            Featured request timing
+            Featured request timing ({requestKind.ToUpperInvariant()})
             -----------------------
             user/config       {userConfig,8:0.0} ms
             personalization   {personalization,8:0.0} ms
@@ -320,4 +326,7 @@ public sealed partial class FeaturedController
                 .Where(id => id != Guid.Empty)
                 .ToHashSet();
     }
+
+    private static string NormalizeRequestKind(string? value)
+        => string.Equals(value, "remount", StringComparison.OrdinalIgnoreCase) ? "remount" : "initial";
 }

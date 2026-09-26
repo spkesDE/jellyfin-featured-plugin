@@ -6,8 +6,16 @@ import { applyHeroLayoutVariables } from './slider/layout';
 import type { FeaturedResponse } from './types/featured';
 import { cancelAdminNavigationRefresh, isUserSettingsMenu, scheduleAdminNavigationRefresh, setUserSettingsMenuEnabled } from './admin/navigation';
 import { CONSOLE_PREFIX, USER_PREFERENCES_CHANGED_EVENT } from './constants';
+import {
+  clearFeaturedCache,
+  getFeaturedCacheScope,
+  keepCurrentItem,
+  readFeaturedCache,
+  saveFeaturedCache
+} from './core/featuredCache';
 
 const HOME_SELECTOR = '#indexPage:not(.hide) #homeTab.is-active .homeSectionsContainer, #homeTab.is-active .homeSectionsContainer';
+const FRESH_RESPONSE_REUSE_MS = 30_000;
 const instances = new Map<Element, FeaturedCarousel>();
 const placeholders = new Map<Element, HTMLElement>();
 const pendingContainers = new Set<Element>();
@@ -22,6 +30,10 @@ let routeEventHandler: (() => void) | null = null;
 let originalHistoryPushState: History['pushState'] | null = null;
 let originalHistoryReplaceState: History['replaceState'] | null = null;
 let presetRefreshTimer: number | null = null;
+let freshResponseGeneration = 0;
+let recentFreshResponse: { scope: string; response: FeaturedResponse; receivedAt: number } | null = null;
+let pendingFreshResponse: { scope: string; promise: Promise<FeaturedResponse> } | null = null;
+const requestedFreshScopes = new Set<string>();
 
 type HistoryMethodName = 'pushState' | 'replaceState';
 
@@ -73,6 +85,8 @@ function schedulePresetRefresh(nextPresetChange?: string): void {
 }
 
 function refreshForPresetBoundary(): void {
+  clearFeaturedCache();
+  clearFreshResponseMemory();
   lifecycleToken += 1;
   instances.forEach((instance) => instance.destroy());
   instances.clear();
@@ -82,6 +96,8 @@ function refreshForPresetBoundary(): void {
 }
 
 function refreshForPreferenceChange(): void {
+  clearFeaturedCache();
+  clearFreshResponseMemory();
   lifecycleToken += 1;
   instances.forEach((instance) => instance.destroy());
   instances.clear();
@@ -152,6 +168,81 @@ async function preloadFeaturedArtwork(response: FeaturedResponse): Promise<void>
   await Promise.all(urls.map(preloadImage));
 }
 
+function clearFreshResponseMemory(): void {
+  freshResponseGeneration += 1;
+  recentFreshResponse = null;
+  pendingFreshResponse = null;
+}
+
+function getFreshFeaturedResponse(): Promise<FeaturedResponse> {
+  const scope = getFeaturedCacheScope();
+  const now = Date.now();
+  if (scope && recentFreshResponse?.scope === scope
+    && now - recentFreshResponse.receivedAt <= FRESH_RESPONSE_REUSE_MS) {
+    log('Reused the recent featured response after a remount.');
+    return Promise.resolve(recentFreshResponse.response);
+  }
+  if (scope && pendingFreshResponse?.scope === scope) {
+    log('Joined an in-flight featured request after a remount.');
+    return pendingFreshResponse.promise;
+  }
+
+  const requestScope = scope ?? 'unknown';
+  const requestKind = requestedFreshScopes.has(requestScope) ? 'remount' : 'initial';
+  requestedFreshScopes.add(requestScope);
+  const generation = freshResponseGeneration;
+  const promise = requestJson<FeaturedResponse>('featured/items', {
+    query: { requestKind }
+  }).then((response) => {
+    if (scope && generation === freshResponseGeneration && response.items?.length) {
+      recentFreshResponse = { scope, response, receivedAt: Date.now() };
+    }
+    return response;
+  }).finally(() => {
+    if (pendingFreshResponse?.promise === promise) pendingFreshResponse = null;
+  });
+  if (scope) pendingFreshResponse = { scope, promise };
+  return promise;
+}
+
+function createCarousel(response: FeaturedResponse, alreadyDisplayedItemId?: string): FeaturedCarousel {
+  return new FeaturedCarousel(
+    response,
+    async (excludedItemIds) => await requestJson<FeaturedResponse>('featured/items/batch', {
+      method: 'POST',
+      body: { excludedItemIds }
+    }),
+    response.trackDisplayedItems
+      ? async (itemId) => await requestJson('featured/items/displayed', {
+          method: 'POST',
+          body: { itemId }
+        })
+      : undefined,
+    alreadyDisplayedItemId
+  );
+}
+
+function attachCarousel(
+  container: Element,
+  carousel: FeaturedCarousel,
+  response: FeaturedResponse,
+  replaced?: FeaturedCarousel
+): void {
+  if (replaced) {
+    replaced.root.replaceWith(carousel.root);
+    replaced.destroy();
+  } else {
+    const placeholder = placeholders.get(container);
+    if (placeholder?.isConnected) placeholder.replaceWith(carousel.root);
+    else container.prepend(carousel.root);
+  }
+  carousel.startHeroLayoutGuard();
+  placeholders.delete(container);
+  instances.set(container, carousel);
+  resetMountFailures();
+  container.closest('#homeTab')?.classList.toggle('ec-hero-page', response.useHeroLayout);
+}
+
 async function mount(container: Element): Promise<void> {
   if (
     instances.has(container) ||
@@ -166,16 +257,37 @@ async function mount(container: Element): Promise<void> {
   pendingContainers.add(container);
   container.setAttribute('data-featured-loading', 'true');
   const placeholder = createPlaceholder(container);
+  let cachedCarousel: FeaturedCarousel | undefined;
   try {
-    const response = await requestJson<FeaturedResponse>('featured/items');
+    const freshResponse = getFreshFeaturedResponse();
+    const cachedResponse = readFeaturedCache();
+    if (cachedResponse?.items.length && !(cachedResponse.hideOnTvLayout && isTvLayout())) {
+      try {
+        setUserSettingsMenuEnabled(cachedResponse.personalizationEnabled || cachedResponse.dismissalsEnabled);
+        schedulePresetRefresh(cachedResponse.nextPresetChange);
+        cachedCarousel = createCarousel(cachedResponse);
+        attachCarousel(container, cachedCarousel, cachedResponse);
+        log(`Mounted ${cachedResponse.items.length} cached featured items.`);
+      } catch (error) {
+        cachedCarousel?.destroy();
+        if (instances.get(container) === cachedCarousel) instances.delete(container);
+        cachedCarousel = undefined;
+        clearFeaturedCache();
+        console.warn(`${CONSOLE_PREFIX} Could not restore cached featured items.`, error);
+      }
+    }
+
+    const response = await freshResponse;
     setUserSettingsMenuEnabled(response.personalizationEnabled || response.dismissalsEnabled);
     schedulePresetRefresh(response.nextPresetChange);
     if (
       mountToken !== lifecycleToken ||
       !container.isConnected ||
       !isActiveHomeContainer(container) ||
-      instances.has(container) ||
-      Array.from(container.querySelectorAll(':scope > .ec-root')).some((root) => root !== placeholder) ||
+      (instances.has(container) && instances.get(container) !== cachedCarousel) ||
+      Array.from(container.querySelectorAll(':scope > .ec-root')).some((root) => (
+        root !== placeholder && root !== cachedCarousel?.root
+      )) ||
       !response.items?.length ||
       (response.hideOnTvLayout && isTvLayout())
     ) {
@@ -186,41 +298,37 @@ async function mount(container: Element): Promise<void> {
         );
         recordMountFailure();
       }
+      if (!response.items?.length || (response.hideOnTvLayout && isTvLayout())) {
+        clearFeaturedCache();
+        if (cachedCarousel && instances.get(container) === cachedCarousel) {
+          cachedCarousel.destroy();
+          instances.delete(container);
+          cachedCarousel = undefined;
+        }
+      }
       return;
     }
 
-    await preloadFeaturedArtwork(response);
+    saveFeaturedCache(response);
+    if (!cachedCarousel) await preloadFeaturedArtwork(response);
     if (
       mountToken !== lifecycleToken ||
       !container.isConnected ||
       !isActiveHomeContainer(container) ||
-      instances.has(container) ||
-      Array.from(container.querySelectorAll(':scope > .ec-root')).some((root) => root !== placeholder)
+      (instances.has(container) && instances.get(container) !== cachedCarousel) ||
+      Array.from(container.querySelectorAll(':scope > .ec-root')).some((root) => (
+        root !== placeholder && root !== cachedCarousel?.root
+      ))
     ) return;
 
-    const carousel = new FeaturedCarousel(
-      response,
-      async (excludedItemIds) => await requestJson<FeaturedResponse>('featured/items/batch', {
-        method: 'POST',
-        body: { excludedItemIds }
-      }),
-      response.trackDisplayedItems
-        ? async (itemId) => await requestJson('featured/items/displayed', {
-            method: 'POST',
-            body: { itemId }
-          })
-        : undefined
-    );
-    if (placeholder.isConnected) placeholder.replaceWith(carousel.root);
-    else container.prepend(carousel.root);
-    carousel.startHeroLayoutGuard();
-    placeholders.delete(container);
-    instances.set(container, carousel);
-    resetMountFailures();
-    container.closest('#homeTab')?.classList.toggle('ec-hero-page', response.useHeroLayout);
+    const currentItem = cachedCarousel?.getActiveItem();
+    const displayResponse = keepCurrentItem(response, currentItem);
+    const carousel = createCarousel(displayResponse, currentItem?.id);
+    attachCarousel(container, carousel, displayResponse, cachedCarousel);
+    cachedCarousel = undefined;
     log(`Mounted ${response.items.length} featured items.`);
   } catch (error) {
-    recordMountFailure();
+    if (!instances.has(container)) recordMountFailure();
     console.warn(`${CONSOLE_PREFIX} Could not load featured items.`, error);
   } finally {
     const lifecycleChanged = mountToken !== lifecycleToken;
