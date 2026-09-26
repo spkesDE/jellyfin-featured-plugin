@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Collections.Concurrent;
 using System.Text.Json;
 using MediaBrowser.Controller.Entities;
@@ -12,7 +11,7 @@ public sealed class FeaturedPreparedCache
     private const int LiveInfiniteBatchSize = 5;
     private const int MinimumPoolSize = 100;
     private const int MaximumPoolSize = 250;
-    private readonly ConcurrentDictionary<Guid, PreparedEntry> _entries = new();
+    private readonly ConcurrentDictionary<Guid, FeaturedPreparedEntry> _entries = new();
     private readonly ConcurrentDictionary<Guid, byte> _queuedUsers = new();
     private readonly SemaphoreSlim _refreshGate = new(1, 1);
     private readonly IUserManager _userManager;
@@ -78,7 +77,7 @@ public sealed class FeaturedPreparedCache
             return false;
         }
 
-        if (!_entries.TryGetValue(user.Id, out PreparedEntry? entry))
+        if (!_entries.TryGetValue(user.Id, out FeaturedPreparedEntry? entry))
         {
             status = _queuedUsers.ContainsKey(user.Id) ? "refreshing" : "miss (no entry)";
             return false;
@@ -126,7 +125,7 @@ public sealed class FeaturedPreparedCache
 
     internal void RemoveDisplayedItem(Guid userId, Guid itemId)
     {
-        if (!_entries.TryGetValue(userId, out PreparedEntry? entry)) return;
+        if (!_entries.TryGetValue(userId, out FeaturedPreparedEntry? entry)) return;
         int remaining = entry.Remove(itemId);
 
         PluginConfiguration config = GetCurrentConfiguration();
@@ -283,32 +282,16 @@ public sealed class FeaturedPreparedCache
         bool replaceExisting)
     {
         string fingerprint = GetConfigurationFingerprint(config, personalization, dismissals);
-        IReadOnlyDictionary<Guid, UserItemData> userData = _userDataManager.GetUserDataBatch(selection.Items, user);
-        PreparedItem[] items = selection.Items
-            .Select(item =>
-            {
-                userData.TryGetValue(item.Id, out UserItemData? data);
-                return new PreparedItem(
-                    item.Id,
-                    new Lazy<FeaturedItemDto>(
-                        () => _itemDtoFactory.Create(item, user, config, personalization,
-                            !selection.ItemReasons.TryGetValue(item.Id, out FeaturedItemSelectionReason? reason)
-                            || reason.AllowBackgroundTrailers,
-                            selection.ItemReasons.TryGetValue(item.Id, out reason)
-                            && reason.UseTrickplayFallback,
-                            selection.ItemReasons.TryGetValue(item.Id, out reason)
-                            && reason.UseMediaPreviewFallback,
-                            data?.IsFavorite == true,
-                            data?.Played == true),
-                        LazyThreadSafetyMode.ExecutionAndPublication));
-            })
+        PreparedItem[] items = _itemDtoFactory
+            .CreateBatch(selection.Items, user, config, personalization, selection.ItemReasons)
+            .Select(projection => new PreparedItem(projection.Id, projection.Dto))
             .ToArray();
         if (eagerlyBuildDtos)
         {
             foreach (PreparedItem item in items) _ = item.Dto.Value;
         }
 
-        PreparedEntry replacement = new(items, fingerprint, DateTimeOffset.UtcNow);
+        FeaturedPreparedEntry replacement = new(items, fingerprint, DateTimeOffset.UtcNow);
         if (replaceExisting)
         {
             _entries[user.Id] = replacement;
@@ -347,104 +330,4 @@ public sealed class FeaturedPreparedCache
         FeaturedDismissalSnapshot dismissals)
         => JsonSerializer.Serialize(config) + personalization.Fingerprint + dismissals.Fingerprint;
 
-    private sealed record PreparedItem(Guid Id, Lazy<FeaturedItemDto> Dto);
-
-    private sealed class PreparedEntry
-    {
-        private readonly object _sync = new();
-        private PreparedItem[] _items;
-        private Queue<PreparedItem> _remaining;
-
-        internal PreparedEntry(
-            PreparedItem[] items,
-            string configurationFingerprint,
-            DateTimeOffset generatedAt)
-        {
-            _items = items;
-            _remaining = CreateShuffledBag(items);
-            ConfigurationFingerprint = configurationFingerprint;
-            GeneratedAt = generatedAt;
-        }
-
-        internal string ConfigurationFingerprint { get; }
-
-        internal DateTimeOffset GeneratedAt { get; }
-
-        internal int Count
-        {
-            get
-            {
-                lock (_sync) return _items.Length;
-            }
-        }
-
-        internal int RemainingCount
-        {
-            get
-            {
-                lock (_sync) return _remaining.Count;
-            }
-        }
-
-        internal bool TryTake(
-            HashSet<Guid> excludedIds,
-            int count,
-            out List<FeaturedItemDto> items,
-            out double dtoCreationMilliseconds,
-            out int eligibleCount)
-        {
-            lock (_sync)
-            {
-                items = [];
-                dtoCreationMilliseconds = 0;
-                eligibleCount = _items.Count(item => !excludedIds.Contains(item.Id));
-                if (eligibleCount < count) return false;
-
-                if (_remaining.Count(item => !excludedIds.Contains(item.Id)) < count)
-                {
-                    _remaining = CreateShuffledBag(_items);
-                }
-
-                int candidatesToInspect = _remaining.Count;
-                for (int index = 0; index < candidatesToInspect && items.Count < count; index++)
-                {
-                    PreparedItem candidate = _remaining.Dequeue();
-                    if (excludedIds.Contains(candidate.Id))
-                    {
-                        _remaining.Enqueue(candidate);
-                    }
-                    else
-                    {
-                        long started = Stopwatch.GetTimestamp();
-                        items.Add(candidate.Dto.Value);
-                        dtoCreationMilliseconds += Stopwatch.GetElapsedTime(started).TotalMilliseconds;
-                    }
-                }
-
-                return items.Count == count;
-            }
-        }
-
-        internal int Remove(Guid itemId)
-        {
-            lock (_sync)
-            {
-                _items = _items.Where(item => item.Id != itemId).ToArray();
-                _remaining = new Queue<PreparedItem>(_remaining.Where(item => item.Id != itemId));
-                return _items.Length;
-            }
-        }
-
-        private static Queue<PreparedItem> CreateShuffledBag(IEnumerable<PreparedItem> source)
-        {
-            PreparedItem[] items = source.ToArray();
-            for (int index = items.Length - 1; index > 0; index--)
-            {
-                int swapIndex = Random.Shared.Next(index + 1);
-                (items[index], items[swapIndex]) = (items[swapIndex], items[index]);
-            }
-
-            return new Queue<PreparedItem>(items);
-        }
-    }
 }

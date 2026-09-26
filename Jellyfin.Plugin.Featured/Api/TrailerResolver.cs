@@ -100,13 +100,7 @@ public sealed class TrailerResolver
     {
         List<T> candidates = source.ToList();
         if (multipleMode != FeaturedMultipleTrailerModes.Random) return candidates;
-        for (int index = candidates.Count - 1; index > 0; index--)
-        {
-            int swapIndex = Random.Shared.Next(index + 1);
-            (candidates[index], candidates[swapIndex]) = (candidates[swapIndex], candidates[index]);
-        }
-
-        return candidates;
+        return CollectionRandomizer.ShuffledCopy(candidates);
     }
 
     private static string GetCandidateKey(FeaturedTrailerDto trailer)

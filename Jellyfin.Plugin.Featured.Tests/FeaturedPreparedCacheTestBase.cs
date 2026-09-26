@@ -55,7 +55,7 @@ public abstract class FeaturedPreparedCacheTestBase : IDisposable
         _historyStore = new FeaturedDisplayHistoryStore(paths, NullLogger<FeaturedDisplayHistoryStore>.Instance);
         FeaturedPreferenceStore preferenceStore = new(paths, NullLogger<FeaturedPreferenceStore>.Instance);
         _personalization = new FeaturedPersonalizationService(preferenceStore);
-        FeaturedItemDtoFactory dtoFactory = new(new TrailerResolver(libraryManager));
+        FeaturedItemDtoFactory dtoFactory = new(new TrailerResolver(libraryManager), userDataManager);
         FeaturedMediaMetadataService mediaMetadata = new(
             libraryManager,
             DispatchProxy.Create<IMediaSourceManager, EmptyServiceStub>(),

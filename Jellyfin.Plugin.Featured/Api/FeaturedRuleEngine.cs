@@ -246,8 +246,11 @@ internal sealed partial class FeaturedRuleEngine
         FeaturedUserProfile? profile,
         IReadOnlyDictionary<Guid, UserItemData>? userDataById)
     {
-        if (profile is null) return items.OrderBy(_ => Random.Shared.Next()).ToList();
-        return items
+        BaseItem[] randomizedItems = CollectionRandomizer.ShuffledCopy(items);
+        if (profile is null) return randomizedItems.ToList();
+
+        // OrderBy is stable, so pre-shuffling preserves random ordering among equal profile scores.
+        return randomizedItems
             .Select(item =>
             {
                 UserItemData? data = null;
@@ -255,7 +258,6 @@ internal sealed partial class FeaturedRuleEngine
                 return new { Item = item, Score = GetProfileScore(item, data, profile) };
             })
             .OrderByDescending(candidate => candidate.Score)
-            .ThenBy(_ => Random.Shared.Next())
             .Select(candidate => candidate.Item)
             .ToList();
     }

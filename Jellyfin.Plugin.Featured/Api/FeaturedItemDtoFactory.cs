@@ -1,15 +1,48 @@
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Entities.Movies;
+using MediaBrowser.Controller.Library;
 
 namespace Jellyfin.Plugin.Featured.Api;
 
 public sealed class FeaturedItemDtoFactory
 {
     private readonly TrailerResolver _trailerResolver;
+    private readonly IUserDataManager _userDataManager;
 
-    public FeaturedItemDtoFactory(TrailerResolver trailerResolver)
+    public FeaturedItemDtoFactory(TrailerResolver trailerResolver, IUserDataManager userDataManager)
     {
         _trailerResolver = trailerResolver;
+        _userDataManager = userDataManager;
+    }
+
+    internal IReadOnlyList<FeaturedItemProjection> CreateBatch(
+        IEnumerable<BaseItem> source,
+        Jellyfin.Database.Implementations.Entities.User activeUser,
+        PluginConfiguration config,
+        FeaturedPersonalizationContext personalization,
+        IReadOnlyDictionary<Guid, FeaturedItemSelectionReason> reasons)
+    {
+        List<BaseItem> items = source.ToList();
+        IReadOnlyDictionary<Guid, UserItemData> userData = _userDataManager.GetUserDataBatch(items, activeUser);
+        return items.Select(item =>
+        {
+            userData.TryGetValue(item.Id, out UserItemData? data);
+            reasons.TryGetValue(item.Id, out FeaturedItemSelectionReason? reason);
+            return new FeaturedItemProjection(
+                item.Id,
+                new Lazy<FeaturedItemDto>(
+                    () => Create(
+                        item,
+                        activeUser,
+                        config,
+                        personalization,
+                        reason?.AllowBackgroundTrailers ?? true,
+                        reason?.UseTrickplayFallback == true,
+                        reason?.UseMediaPreviewFallback == true,
+                        data?.IsFavorite == true,
+                        data?.Played == true),
+                    LazyThreadSafetyMode.ExecutionAndPublication));
+        }).ToArray();
     }
 
     internal FeaturedItemDto Create(
@@ -106,3 +139,5 @@ public sealed class FeaturedItemDtoFactory
         };
     }
 }
+
+internal sealed record FeaturedItemProjection(Guid Id, Lazy<FeaturedItemDto> Dto);
