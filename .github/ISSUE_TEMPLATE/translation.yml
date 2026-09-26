@@ -1,6 +1,6 @@
 name: Translation / localization
 description: Request a new language or report a translation issue
-title: "[i18n]: "
+title: '[i18n]: '
 labels:
   - documentation
 body:

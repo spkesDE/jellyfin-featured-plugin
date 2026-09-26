@@ -20,11 +20,17 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v7
         with:
-          node-version: "22"
+          node-version: '22'
           cache: npm
 
       - name: Install frontend dependencies
         run: npm ci
+
+      - name: Verify formatting
+        run: npm run format:check
+
+      - name: Lint frontend
+        run: npm run lint
 
       - name: Typecheck frontend
         run: npm run typecheck
@@ -38,7 +44,7 @@ jobs:
       - name: Set up .NET
         uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: "10.0.x"
+          dotnet-version: '10.0.x'
 
       - name: Restore
         run: dotnet restore JellyfinFeatured.sln

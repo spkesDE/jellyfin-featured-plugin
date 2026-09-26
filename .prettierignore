@@ -1,0 +1,13 @@
+dist/
+release/
+node_modules/
+**/bin/
+**/obj/
+.git/
+.vs/
+.vscode/
+package-lock.json
+docs/i18n-status.svg
+banner.png
+logo.png
+logo-beta.png
