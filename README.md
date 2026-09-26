@@ -30,13 +30,12 @@ Jellyfin Featured works in Jellyfin Web and clients that display the Jellyfin We
 ## Requirements
 
 - Jellyfin Server 12
-- One of these companion plugins:
-  - [File Transformation](https://github.com/IAmParadox27/jellyfin-plugin-file-transformation), or
-  - [JavaScript Injector](https://github.com/n00bcodr/Jellyfin-JavaScript-Injector)
+- Recommended: [File Transformation](https://github.com/IAmParadox27/jellyfin-plugin-file-transformation) or [JavaScript Injector](https://github.com/n00bcodr/Jellyfin-JavaScript-Injector)
+- Without a companion plugin, the Jellyfin service account needs write access to `jellyfin-web/index.html` for direct fallback injection.
 
 ## Installation
 
-You need Jellyfin Featured and one companion plugin. File Transformation is recommended, but JavaScript Injector works as well.
+Install Jellyfin Featured first. File Transformation is the recommended companion, JavaScript Injector also works, and direct `index.html` injection is available as a fallback when neither helper is installed.
 
 ### Jellyfin Featured
 
@@ -74,7 +73,9 @@ You need Jellyfin Featured and one companion plugin. File Transformation is reco
 
 That is all the setup JavaScript Injector needs. You do not have to copy or paste any scripts.
 
-Only one companion plugin is required. If both are installed, leave the injection method set to `Automatic`; Jellyfin Featured will use File Transformation. You can also choose either plugin yourself in the settings.
+Leave the injection method set to `Automatic` unless you need to force a specific method. Jellyfin Featured checks Jellyfin's active plugins and chooses File Transformation, JavaScript Injector, or direct `index.html` injection in that order. Methods whose required plugin or web file is unavailable are disabled in the settings.
+
+Direct injection modifies `jellyfin-web/index.html` and therefore needs write permission for the account running Jellyfin. Jellyfin updates may replace that file; the plugin injects it again on the next server start.
 
 Restart Jellyfin after changing the frontend injection method.
 
@@ -167,12 +168,12 @@ Candidate Cache, Prepared Cache, and Repeat Cooldown solve different problems. I
 
 If the featured carousel does not appear:
 
-1. Make sure `Jellyfin Featured` and either `File Transformation` or `JavaScript Injector` are installed and enabled.
+1. Make sure `Jellyfin Featured` is installed and enabled. If direct injection cannot write to `jellyfin-web/index.html`, install either `File Transformation` or `JavaScript Injector`.
 2. Restart Jellyfin after installing or updating plugins.
 3. Hard-refresh Jellyfin Web in your browser.
 4. Make sure at least one content source is enabled and contains something the banner can show.
 5. Temporarily remove your filters to check whether they are hiding every title.
-6. If both injection plugins are installed, leave the injection method on `Automatic` or select one explicitly.
+6. Leave the injection method on `Automatic`, or select one of the available methods explicitly. Unavailable helper plugins are shown as disabled.
 7. If the problem remains, enable debug logging in the plugin settings and check the Jellyfin log.
 
 If the banner appears in a browser but not in a TV app, that app probably uses its own home screen and cannot display Jellyfin Featured.

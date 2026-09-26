@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- feat(injection): add direct Jellyfin Web injection as the final automatic fallback
+- feat(injection): report the selected injector and initialization lifecycle in the browser debug console
+
+### Fixes
+
+- fix(injection): select only active, supported companion plugins after Jellyfin plugin discovery completes
+
 ## v12.6.0.0 - 2026-09-24
 
 ### Features
