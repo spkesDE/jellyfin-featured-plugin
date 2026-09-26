@@ -37,7 +37,7 @@ internal static class FeaturedPresetResolver
         }
 
         PluginConfiguration effective = Clone(source);
-        Apply(effective, active.Preset);
+        FeaturedConfigurationMappings.ApplyPreset(effective, active.Preset);
         return new FeaturedPresetResolution(effective, active.Preset.Id, active.Preset.Name, nextChange);
     }
 
@@ -58,7 +58,7 @@ internal static class FeaturedPresetResolver
         if (preset is null) throw new ArgumentException("The requested preset does not exist.", nameof(presetId));
 
         PluginConfiguration effective = Clone(source);
-        Apply(effective, preset);
+        FeaturedConfigurationMappings.ApplyPreset(effective, preset);
         return new FeaturedPresetResolution(effective, preset.Id, preset.Name, null);
     }
 
@@ -187,77 +187,6 @@ internal static class FeaturedPresetResolver
     private static PluginConfiguration Clone(PluginConfiguration source)
         => JsonSerializer.Deserialize<PluginConfiguration>(JsonSerializer.Serialize(source, CloneOptions), CloneOptions)
             ?? new PluginConfiguration();
-
-    private static void Apply(PluginConfiguration config, FeaturedPreset preset)
-    {
-        config.SourceRules = preset.SourceRules;
-        config.GlobalFilters = preset.GlobalFilters;
-        config.PersonalizationPolicy = preset.PersonalizationPolicy;
-
-        config.RepeatCooldownDays = preset.Mixer.RepeatCooldownDays;
-        config.RelaxRepeatCooldownWhenNeeded = preset.Mixer.RelaxRepeatCooldownWhenNeeded;
-        config.MaximumItemsPerGenre = preset.Mixer.MaximumItemsPerGenre;
-        config.MaximumItemsPerFranchise = preset.Mixer.MaximumItemsPerFranchise;
-        config.RandomMediaCount = preset.Mixer.RandomMediaCount;
-
-        config.EnableInfiniteLoading = preset.Layout.EnableInfiniteLoading;
-        config.EnableAutoplay = preset.Layout.EnableAutoplay;
-        config.ShowAutoplayButton = preset.Layout.ShowAutoplayButton;
-        config.AutoplayInterval = preset.Layout.AutoplayInterval;
-        config.ShowPlayButton = preset.Layout.ShowPlayButton;
-        config.ShowFavoriteButton = preset.Layout.ShowFavoriteButton;
-        config.FavoriteButtonPlacement = preset.Layout.FavoriteButtonPlacement;
-        config.ShowPlaystateButton = preset.Layout.ShowPlaystateButton;
-        config.PlaystateButtonPlacement = preset.Layout.PlaystateButtonPlacement;
-        config.ShowDismissalButton = preset.Layout.ShowDismissalButton;
-        config.DismissalButtonPlacement = preset.Layout.DismissalButtonPlacement;
-        config.ShowNavigationArrows = preset.Layout.ShowNavigationArrows;
-        config.ShowControlsOnHoverOnly = preset.Layout.ShowControlsOnHoverOnly;
-        config.InteractOnWholeBanner = preset.Layout.InteractOnWholeBanner;
-        config.ShowSlidePosition = preset.Layout.ShowSlidePosition;
-        config.MediaPadding = preset.Layout.MediaPadding;
-        config.TitleDisplayMode = preset.Layout.TitleDisplayMode;
-        config.ShowRating = preset.Layout.ShowRating;
-        config.ShowDescription = preset.Layout.ShowDescription;
-        config.HideOnTvLayout = preset.Layout.HideOnTvLayout;
-        config.UseHeroLayout = preset.Layout.UseHeroLayout;
-        config.HeroHeightMode = preset.Layout.HeroHeightMode;
-        config.TabletBannerHeight = preset.Layout.TabletBannerHeight;
-        config.MobileBannerHeight = preset.Layout.MobileBannerHeight;
-        config.HeroBorderRadius = preset.Layout.HeroBorderRadius;
-        config.HeroGradientStrength = preset.Layout.HeroGradientStrength;
-        config.HeroFadeStart = preset.Layout.HeroFadeStart;
-        config.HeroFadeEnd = preset.Layout.HeroFadeEnd;
-        config.HeroFadeCurve = preset.Layout.HeroFadeCurve;
-        config.HeroFadePoints = preset.Layout.HeroFadePoints
-            .Select(point => new HeroFadePoint { Position = point.Position, Fade = point.Fade })
-            .ToArray();
-        config.HeroTextPosition = preset.Layout.HeroTextPosition;
-        config.TransitionEffect = preset.Layout.TransitionEffect;
-        config.HeroBackdropPosition = preset.Layout.HeroBackdropPosition;
-        config.BannerHeight = preset.Layout.BannerHeight;
-        config.ShowYear = preset.Layout.ShowYear;
-        config.ShowRuntime = preset.Layout.ShowRuntime;
-        config.ShowSecondaryButton = preset.Layout.ShowSecondaryButton;
-        config.SecondaryButtonText = preset.Layout.SecondaryButtonText;
-        config.ShowPaginationDots = preset.Layout.ShowPaginationDots;
-        config.Heading = preset.Layout.Heading;
-        config.PlayButtonText = preset.Layout.PlayButtonText;
-
-        config.EnableBackgroundTrailers = preset.Trailers.EnableBackgroundTrailers;
-        config.TrailerSourcePriority = preset.Trailers.TrailerSourcePriority;
-        config.StartTrailersMuted = preset.Trailers.StartTrailersMuted;
-        config.ShowTrailerControls = preset.Trailers.ShowTrailerControls;
-        config.TrailerVolumeSliderDirection = preset.Trailers.TrailerVolumeSliderDirection;
-        config.HideYouTubeTrailerUntilControlsFade = preset.Trailers.HideYouTubeTrailerUntilControlsFade;
-        config.WaitForTrailerToFinish = preset.Trailers.WaitForTrailerToFinish;
-        config.TrailerDelayMilliseconds = preset.Trailers.TrailerDelayMilliseconds;
-        config.TrailerStartOffsetSeconds = preset.Trailers.TrailerStartOffsetSeconds;
-        config.TrailerEndOffsetSeconds = preset.Trailers.TrailerEndOffsetSeconds;
-        config.MultipleTrailerMode = preset.Trailers.MultipleTrailerMode;
-        config.AllowTrailersOnMobile = preset.Trailers.AllowTrailersOnMobile;
-        config.TrailerOverrides = preset.Trailers.Overrides;
-    }
 
     private sealed record PresetCandidate(FeaturedPreset Preset, int Index, ScheduleWindow? Window);
     private sealed record ScheduleWindow(DateTimeOffset Start, DateTimeOffset End);

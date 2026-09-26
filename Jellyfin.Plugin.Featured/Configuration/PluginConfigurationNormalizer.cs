@@ -82,28 +82,24 @@ internal static class PluginConfigurationNormalizer
         config.MaximumItemsPerFranchise = Math.Clamp(config.MaximumItemsPerFranchise, 0, 100);
         config.RandomMediaCount = Math.Clamp(config.RandomMediaCount, 1, 100);
         config.AutoplayInterval = Math.Clamp(config.AutoplayInterval, 1, 3600);
-        config.TrailerSourcePriority = config.TrailerSourcePriority switch
-        {
-            FeaturedTrailerSourcePriorities.PreferRemote => FeaturedTrailerSourcePriorities.PreferRemote,
-            FeaturedTrailerSourcePriorities.LocalOnly => FeaturedTrailerSourcePriorities.LocalOnly,
-            FeaturedTrailerSourcePriorities.RemoteOnly => FeaturedTrailerSourcePriorities.RemoteOnly,
-            FeaturedTrailerSourcePriorities.Automatic => FeaturedTrailerSourcePriorities.Automatic,
-            _ => FeaturedTrailerSourcePriorities.PreferLocal
-        };
-        if (config.TrailerSourcePriority == FeaturedTrailerSourcePriorities.PreferLocal
-            && config.FallBackToRemoteTrailers == false)
-        {
-            config.TrailerSourcePriority = FeaturedTrailerSourcePriorities.LocalOnly;
-        }
+        TrailerValues trailers = NormalizeTrailerValues(
+            config.TrailerSourcePriority,
+            config.FallBackToRemoteTrailers,
+            config.TrailerDelayMilliseconds,
+            config.TrailerStartOffsetSeconds,
+            config.TrailerEndOffsetSeconds,
+            config.MultipleTrailerMode,
+            config.TrailerVolumeSliderDirection,
+            config.TrailerOverrides);
+        config.TrailerSourcePriority = trailers.SourcePriority;
+        config.TrailerDelayMilliseconds = trailers.DelayMilliseconds;
+        config.TrailerStartOffsetSeconds = trailers.StartOffsetSeconds;
+        config.TrailerEndOffsetSeconds = trailers.EndOffsetSeconds;
+        config.MultipleTrailerMode = trailers.MultipleMode;
+        config.TrailerVolumeSliderDirection = trailers.VolumeSliderDirection;
+        config.TrailerOverrides = trailers.Overrides;
+        // The nullable boolean only exists to migrate configurations saved before source priorities.
         config.FallBackToRemoteTrailers = null;
-        config.TrailerDelayMilliseconds = Math.Clamp(config.TrailerDelayMilliseconds, 0, 30000);
-        config.TrailerStartOffsetSeconds = Math.Clamp(config.TrailerStartOffsetSeconds, 0, 3600);
-        config.TrailerEndOffsetSeconds = Math.Clamp(config.TrailerEndOffsetSeconds, 0, 3600);
-        config.MultipleTrailerMode = config.MultipleTrailerMode == FeaturedMultipleTrailerModes.Random
-            ? FeaturedMultipleTrailerModes.Random
-            : FeaturedMultipleTrailerModes.First;
-        config.TrailerVolumeSliderDirection = NormalizeTrailerVolumeSliderDirection(config.TrailerVolumeSliderDirection);
-        config.TrailerOverrides = NormalizeTrailerOverrides(config.TrailerOverrides);
         config.BannerHeight = Math.Clamp(config.BannerHeight, 240, 900);
         config.TabletBannerHeight = Math.Clamp(config.TabletBannerHeight, 240, 700);
         config.MobileBannerHeight = Math.Clamp(config.MobileBannerHeight, 220, 600);
@@ -196,34 +192,44 @@ internal static class PluginConfigurationNormalizer
 
     private static void NormalizeHeroFade(PluginConfiguration config)
     {
-        config.HeroFadeStart = Math.Clamp(config.HeroFadeStart, 0, 100);
-        config.HeroFadeEnd = Math.Clamp(config.HeroFadeEnd, 0, 100);
-        if (config.HeroFadeEnd <= config.HeroFadeStart)
-        {
-            config.HeroFadeStart = 50;
-            config.HeroFadeEnd = 100;
-        }
-
-        config.HeroFadeCurve = NormalizeHeroFadeCurve(config.HeroFadeCurve);
-        config.HeroFadePoints = NormalizeHeroFadePoints(config.HeroFadePoints);
+        HeroFadeValues fade = NormalizeHeroFadeValues(
+            config.HeroFadeStart,
+            config.HeroFadeEnd,
+            config.HeroFadeCurve,
+            config.HeroFadePoints);
+        config.HeroFadeStart = fade.Start;
+        config.HeroFadeEnd = fade.End;
+        config.HeroFadeCurve = fade.Curve;
+        config.HeroFadePoints = fade.Points;
     }
 
     private static void NormalizeHeroFade(FeaturedPresetLayoutSettings layout)
     {
-        layout.HeroFadeStart = Math.Clamp(layout.HeroFadeStart, 0, 100);
-        layout.HeroFadeEnd = Math.Clamp(layout.HeroFadeEnd, 0, 100);
-        if (layout.HeroFadeEnd <= layout.HeroFadeStart)
-        {
-            layout.HeroFadeStart = 50;
-            layout.HeroFadeEnd = 100;
-        }
-
-        layout.HeroFadeCurve = NormalizeHeroFadeCurve(layout.HeroFadeCurve);
-        layout.HeroFadePoints = NormalizeHeroFadePoints(layout.HeroFadePoints);
+        HeroFadeValues fade = NormalizeHeroFadeValues(
+            layout.HeroFadeStart,
+            layout.HeroFadeEnd,
+            layout.HeroFadeCurve,
+            layout.HeroFadePoints);
+        layout.HeroFadeStart = fade.Start;
+        layout.HeroFadeEnd = fade.End;
+        layout.HeroFadeCurve = fade.Curve;
+        layout.HeroFadePoints = fade.Points;
     }
 
-    private static string NormalizeHeroFadeCurve(string? curve)
-        => curve is "soft" or "balanced" or "strong" ? curve : "custom";
+    private static HeroFadeValues NormalizeHeroFadeValues(
+        int start,
+        int end,
+        string? curve,
+        HeroFadePoint[]? points)
+    {
+        start = Math.Clamp(start, 0, 100);
+        end = Math.Clamp(end, 0, 100);
+        if (end <= start) (start, end) = (50, 100);
+
+        // Named presets were removed; persisted names now select the same editable custom curve.
+        _ = curve;
+        return new HeroFadeValues(start, end, "custom", NormalizeHeroFadePoints(points));
+    }
 
     private static HeroFadePoint[] NormalizeHeroFadePoints(HeroFadePoint[]? points)
     {
@@ -244,7 +250,36 @@ internal static class PluginConfigurationNormalizer
 
     private static void NormalizePresetTrailers(FeaturedPresetTrailerSettings trailers)
     {
-        trailers.TrailerSourcePriority = trailers.TrailerSourcePriority switch
+        TrailerValues normalized = NormalizeTrailerValues(
+            trailers.TrailerSourcePriority,
+            trailers.FallBackToRemoteTrailers,
+            trailers.TrailerDelayMilliseconds,
+            trailers.TrailerStartOffsetSeconds,
+            trailers.TrailerEndOffsetSeconds,
+            trailers.MultipleTrailerMode,
+            trailers.TrailerVolumeSliderDirection,
+            trailers.Overrides);
+        trailers.TrailerSourcePriority = normalized.SourcePriority;
+        trailers.TrailerDelayMilliseconds = normalized.DelayMilliseconds;
+        trailers.TrailerStartOffsetSeconds = normalized.StartOffsetSeconds;
+        trailers.TrailerEndOffsetSeconds = normalized.EndOffsetSeconds;
+        trailers.MultipleTrailerMode = normalized.MultipleMode;
+        trailers.TrailerVolumeSliderDirection = normalized.VolumeSliderDirection;
+        trailers.Overrides = normalized.Overrides;
+        trailers.FallBackToRemoteTrailers = null;
+    }
+
+    private static TrailerValues NormalizeTrailerValues(
+        string? sourcePriority,
+        bool? fallBackToRemoteTrailers,
+        int delayMilliseconds,
+        int startOffsetSeconds,
+        int endOffsetSeconds,
+        string? multipleMode,
+        string? volumeSliderDirection,
+        FeaturedTrailerOverride[]? overrides)
+    {
+        sourcePriority = sourcePriority switch
         {
             FeaturedTrailerSourcePriorities.PreferRemote => FeaturedTrailerSourcePriorities.PreferRemote,
             FeaturedTrailerSourcePriorities.LocalOnly => FeaturedTrailerSourcePriorities.LocalOnly,
@@ -252,20 +287,21 @@ internal static class PluginConfigurationNormalizer
             FeaturedTrailerSourcePriorities.Automatic => FeaturedTrailerSourcePriorities.Automatic,
             _ => FeaturedTrailerSourcePriorities.PreferLocal
         };
-        if (trailers.TrailerSourcePriority == FeaturedTrailerSourcePriorities.PreferLocal
-            && trailers.FallBackToRemoteTrailers == false)
+        if (sourcePriority == FeaturedTrailerSourcePriorities.PreferLocal && fallBackToRemoteTrailers == false)
         {
-            trailers.TrailerSourcePriority = FeaturedTrailerSourcePriorities.LocalOnly;
+            sourcePriority = FeaturedTrailerSourcePriorities.LocalOnly;
         }
-        trailers.FallBackToRemoteTrailers = null;
-        trailers.TrailerDelayMilliseconds = Math.Clamp(trailers.TrailerDelayMilliseconds, 0, 30000);
-        trailers.TrailerStartOffsetSeconds = Math.Clamp(trailers.TrailerStartOffsetSeconds, 0, 3600);
-        trailers.TrailerEndOffsetSeconds = Math.Clamp(trailers.TrailerEndOffsetSeconds, 0, 3600);
-        trailers.MultipleTrailerMode = trailers.MultipleTrailerMode == FeaturedMultipleTrailerModes.Random
-            ? FeaturedMultipleTrailerModes.Random
-            : FeaturedMultipleTrailerModes.First;
-        trailers.TrailerVolumeSliderDirection = NormalizeTrailerVolumeSliderDirection(trailers.TrailerVolumeSliderDirection);
-        trailers.Overrides = NormalizeTrailerOverrides(trailers.Overrides);
+
+        return new TrailerValues(
+            sourcePriority,
+            Math.Clamp(delayMilliseconds, 0, 30000),
+            Math.Clamp(startOffsetSeconds, 0, 3600),
+            Math.Clamp(endOffsetSeconds, 0, 3600),
+            multipleMode == FeaturedMultipleTrailerModes.Random
+                ? FeaturedMultipleTrailerModes.Random
+                : FeaturedMultipleTrailerModes.First,
+            NormalizeTrailerVolumeSliderDirection(volumeSliderDirection),
+            NormalizeTrailerOverrides(overrides));
     }
 
     private static FeaturedSourceRule NormalizeSourceRule(FeaturedSourceRule rule)
@@ -477,4 +513,15 @@ internal static class PluginConfigurationNormalizer
 
     private static string NormalizeTrailerVolumeSliderDirection(string? _)
         => "down";
+
+    private sealed record HeroFadeValues(int Start, int End, string Curve, HeroFadePoint[] Points);
+
+    private sealed record TrailerValues(
+        string SourcePriority,
+        int DelayMilliseconds,
+        int StartOffsetSeconds,
+        int EndOffsetSeconds,
+        string MultipleMode,
+        string VolumeSliderDirection,
+        FeaturedTrailerOverride[] Overrides);
 }
