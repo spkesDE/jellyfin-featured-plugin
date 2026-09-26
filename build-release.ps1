@@ -172,6 +172,7 @@ $stageDir = Join-RepoPath @($releaseRoot, $pluginName)
 $zipPath = Join-RepoPath @($releaseRoot, "$pluginName.zip")
 $bundlePath = Join-RepoPath @($repoRoot, "dist", "featured.bundle.js")
 $configBundlePath = Join-RepoPath @($repoRoot, "dist", "config.bundle.js")
+$bootstrapBundlePath = Join-RepoPath @($repoRoot, "dist", "bootstrap.bundle.js")
 $verifyScript = Join-RepoPath @($repoRoot, "scripts", "verify-embedded-bundle.ps1")
 $syncFrontendVersionScript = Join-RepoPath @($repoRoot, "scripts", "sync-frontend-version.mjs")
 
@@ -264,8 +265,13 @@ try {
         throw "Configuration bundle not found: $configBundlePath"
     }
 
+    if (-not (Test-Path -LiteralPath $bootstrapBundlePath)) {
+        throw "Bootstrap bundle not found: $bootstrapBundlePath"
+    }
+
     Run "node" @("--check", $bundlePath) "Frontend bundle syntax check failed."
     Run "node" @("--check", $configBundlePath) "Configuration bundle syntax check failed."
+    Run "node" @("--check", $bootstrapBundlePath) "Bootstrap bundle syntax check failed."
 
     Step "Building plugin"
 
@@ -314,7 +320,9 @@ try {
             "-BundlePath",
             $bundlePath,
             "-ConfigBundlePath",
-            $configBundlePath
+            $configBundlePath,
+            "-BootstrapBundlePath",
+            $bootstrapBundlePath
         ) "Embedded frontend bundle verification failed."
     } else {
         Run $powerShellExe @(
@@ -326,7 +334,9 @@ try {
             "-BundlePath",
             $bundlePath,
             "-ConfigBundlePath",
-            $configBundlePath
+            $configBundlePath,
+            "-BootstrapBundlePath",
+            $bootstrapBundlePath
         ) "Embedded frontend bundle verification failed."
     }
 

@@ -21,7 +21,7 @@ public sealed class HeroDisplaySettingsTests
         Assert.Equal("fullscreen", normalized.HeroHeightMode);
         Assert.Equal(0, normalized.HeroFadeStart);
         Assert.Equal(100, normalized.HeroFadeEnd);
-        Assert.Equal("strong", normalized.HeroFadeCurve);
+        Assert.Equal("custom", normalized.HeroFadeCurve);
         Assert.Equal(52, FeaturedLayout.GetHeroOverlap(FeaturedLayout.GetDesktopHeight(normalized), normalized.HeroHeightMode));
     }
 
@@ -67,7 +67,7 @@ public sealed class HeroDisplaySettingsTests
         Assert.Equal("fullscreen", layout.HeroHeightMode);
         Assert.Equal(50, layout.HeroFadeStart);
         Assert.Equal(100, layout.HeroFadeEnd);
-        Assert.Equal("soft", layout.HeroFadeCurve);
+        Assert.Equal("custom", layout.HeroFadeCurve);
     }
 
     [Fact]

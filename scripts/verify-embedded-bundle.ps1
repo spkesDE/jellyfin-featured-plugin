@@ -6,7 +6,10 @@ param(
     [string]$BundlePath,
 
     [Parameter(Mandatory = $false)]
-    [string]$ConfigBundlePath
+    [string]$ConfigBundlePath,
+
+    [Parameter(Mandatory = $false)]
+    [string]$BootstrapBundlePath
 )
 
 $ErrorActionPreference = "Stop"
@@ -20,7 +23,10 @@ function Verify-Bundle {
         [string]$Path,
 
         [Parameter(Mandatory = $true)]
-        [string]$ResourceName
+        [string]$ResourceName,
+
+        [Parameter(Mandatory = $true)]
+        [string]$ExpectedMarker
     )
 
     $resolvedBundlePath = (Resolve-Path -LiteralPath $Path).Path
@@ -56,15 +62,32 @@ function Verify-Bundle {
 
     $strictUtf8 = New-Object System.Text.UTF8Encoding($false, $true)
     $resourceText = $strictUtf8.GetString($resourceBytes).TrimEnd()
-    if (-not $resourceText.StartsWith('"use strict";') -or -not $resourceText.EndsWith("})();")) {
-        throw "Embedded frontend bundle failed content boundary validation."
+    if (
+        [string]::IsNullOrWhiteSpace($resourceText) -or
+        $resourceText.IndexOf([char]0) -ge 0 -or
+        $resourceText.IndexOf($ExpectedMarker, [System.StringComparison]::Ordinal) -lt 0
+    ) {
+        throw "Embedded frontend bundle failed content validation. Expected marker: $ExpectedMarker"
     }
 
     Write-Host "Verified embedded frontend bundle: $($resourceBytes.Length) bytes, SHA-256 $resourceHash"
 }
 
-Verify-Bundle -Path $BundlePath -ResourceName "Jellyfin.Plugin.Featured.dist.featured.bundle.js"
+Verify-Bundle `
+    -Path $BundlePath `
+    -ResourceName "Jellyfin.Plugin.Featured.dist.featured.bundle.js" `
+    -ExpectedMarker "JellyfinFeaturedPluginConfig"
 
 if (-not [string]::IsNullOrWhiteSpace($ConfigBundlePath)) {
-    Verify-Bundle -Path $ConfigBundlePath -ResourceName "Jellyfin.Plugin.Featured.dist.config.bundle.js"
+    Verify-Bundle `
+        -Path $ConfigBundlePath `
+        -ResourceName "Jellyfin.Plugin.Featured.dist.config.bundle.js" `
+        -ExpectedMarker "FeaturedConfigApp"
+}
+
+if (-not [string]::IsNullOrWhiteSpace($BootstrapBundlePath)) {
+    Verify-Bundle `
+        -Path $BootstrapBundlePath `
+        -ResourceName "Jellyfin.Plugin.Featured.dist.bootstrap.bundle.js" `
+        -ExpectedMarker "JellyfinFeaturedBootstrapSettings"
 }

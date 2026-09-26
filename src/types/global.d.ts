@@ -1,4 +1,4 @@
-import type { RuntimeConfig } from './config';
+import type { HeroHeightMode, RuntimeConfig } from './config';
 import type { JellyfinApiClient } from './jellyfin';
 
 declare global {
@@ -11,6 +11,18 @@ declare global {
     };
     JellyfinFeaturedPluginConfig?: RuntimeConfig;
     JellyfinFeaturedBootstrap?: { stop(): void };
+    JellyfinFeaturedBootstrapSettings?: {
+      hero: boolean;
+      hideOnTv: boolean;
+      heightMode: HeroHeightMode;
+      desktopHeight: number;
+      tabletHeight: number;
+      mobileHeight: number;
+      radius: number;
+      mediaPadding: number;
+      heroOverlap: number;
+      heading: string;
+    };
     ApiClient?: JellyfinApiClient;
     apiClient?: JellyfinApiClient;
     Emby?: { Page?: { showItem?: (id: string) => void } };

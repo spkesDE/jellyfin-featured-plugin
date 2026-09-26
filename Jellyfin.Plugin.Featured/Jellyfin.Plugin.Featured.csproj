@@ -23,5 +23,6 @@
     <EmbeddedResource Include="Configuration\configPage.html" />
     <EmbeddedResource Include="..\dist\featured.bundle.js" Link="dist\featured.bundle.js" LogicalName="Jellyfin.Plugin.Featured.dist.featured.bundle.js" />
     <EmbeddedResource Include="..\dist\config.bundle.js" Link="dist\config.bundle.js" LogicalName="Jellyfin.Plugin.Featured.dist.config.bundle.js" />
+    <EmbeddedResource Include="..\dist\bootstrap.bundle.js" Link="dist\bootstrap.bundle.js" LogicalName="Jellyfin.Plugin.Featured.dist.bootstrap.bundle.js" />
   </ItemGroup>
 </Project>

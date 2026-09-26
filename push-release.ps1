@@ -41,6 +41,26 @@ if ($branch -ne "main") {
     throw "Releases must be created from the main branch. Current branch: $branch"
 }
 
+# Release builds run the write-mode formatter intentionally. Starting from a clean
+# tree lets us commit formatting separately from version and manifest changes.
+& npm run format
+if ($LASTEXITCODE -ne 0) {
+    throw "Failed to format repository sources before the release."
+}
+
+$formatStatus = git status --porcelain
+if ($formatStatus) {
+    git add --all
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to stage formatted sources."
+    }
+
+    git commit -m "chore(format): Format code for build v$version"
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to commit formatted sources."
+    }
+}
+
 function Test-TagExists {
     param(
         [Parameter(Mandatory = $true)]

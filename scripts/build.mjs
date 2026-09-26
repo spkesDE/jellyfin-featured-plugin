@@ -1,149 +1,121 @@
-import * as esbuild from 'esbuild';
-import { createHash } from 'node:crypto';
+import vue from '@vitejs/plugin-vue';
 import { readFile, rm } from 'node:fs/promises';
 import path from 'node:path';
-import { compileScript, compileStyle, compileTemplate, parse } from '@vue/compiler-sfc';
+import { build } from 'vite';
 
 const isWatch = process.argv.includes('--watch');
-const isProduction = !isWatch;
 const browserTarget = 'chrome79';
+const buildMode = isWatch ? 'development' : 'production';
+const browserBundleFiles = ['featured.bundle.js', 'config.bundle.js', 'bootstrap.bundle.js'];
 
-const cssTextPlugin = {
-  name: 'css-text',
-  setup(build) {
-    build.onLoad({ filter: /\.css$/ }, async (args) => {
-      const source = await readFile(args.path, 'utf8');
-      const result = await esbuild.transform(source, { loader: 'css', minify: isProduction, target: browserTarget });
-      return { contents: `export default ${JSON.stringify(result.code.trim())};`, loader: 'js' };
-    });
-  }
-};
+function injectEmittedCss(styleId) {
+  return {
+    name: 'jellyfin-featured-inject-emitted-css',
+    enforce: 'post',
+    generateBundle(_options, bundle) {
+      const cssAssets = Object.entries(bundle).filter(
+        ([, output]) => output.type === 'asset' && output.fileName.endsWith('.css')
+      );
+      if (!cssAssets.length) return;
 
-const vueSfcPlugin = {
-  name: 'vue-sfc',
-  setup(build) {
-    let compileQueue = Promise.resolve();
-    build.onLoad({ filter: /\.vue$/ }, async (args) => {
-      const compile = async () => {
-        const source = await readFile(args.path, 'utf8');
-        const { descriptor, errors } = parse(source, { filename: args.path });
-        if (errors.length) {
-          return { errors: errors.map((error) => ({ text: error instanceof Error ? error.message : String(error) })) };
-        }
-        const id = createHash('sha256').update(args.path).digest('hex').slice(0, 12);
-        const scopeId = `data-v-${id}`;
-        const hasScopedStyles = descriptor.styles.some((style) => style.scoped);
-        const compiledStyles = descriptor.styles.map((style) => compileStyle({
-          source: style.content,
-          filename: args.path,
-          id: scopeId,
-          scoped: style.scoped,
-          isProd: isProduction
-        }));
-        const styleErrors = compiledStyles.flatMap((style) => style.errors);
-        if (styleErrors.length) {
-          return { errors: styleErrors.map((error) => ({ text: error.message })) };
-        }
-        const transformedCss = compiledStyles.length
-          ? await esbuild.transform(compiledStyles.map((style) => style.code).join('\n'), { loader: 'css', minify: isProduction, target: browserTarget })
-          : null;
-        const styleCode = transformedCss?.code.trim()
-          ? [
-              `const __styleId = ${JSON.stringify(`jellyfin-featured-${id}`)};`,
-              'if (!document.getElementById(__styleId)) {',
-              '  const __style = document.createElement("style");',
-              '  __style.id = __styleId;',
-              `  __style.textContent = ${JSON.stringify(transformedCss.code.trim())};`,
-              '  (document.head || document.documentElement).appendChild(__style);',
-              '}'
-            ].join('\n')
-          : '';
-        if (!descriptor.script && !descriptor.scriptSetup) {
-          const compiledTemplate = compileTemplate({
-            source: descriptor.template?.content ?? '',
-            filename: args.path,
-            id,
-            scoped: hasScopedStyles,
-            isProd: isProduction
-          });
-          if (compiledTemplate.errors.length) {
-            return { errors: compiledTemplate.errors.map((error) => ({ text: typeof error === 'string' ? error : error.message })) };
-          }
-          return {
-            contents: [
-              compiledTemplate.code,
-              'const __script = {};',
-              '__script.render = render;',
-              hasScopedStyles ? `__script.__scopeId = ${JSON.stringify(scopeId)};` : '',
-              styleCode,
-              'export default __script;'
-            ].filter(Boolean).join('\n'),
-            loader: 'js',
-            resolveDir: path.dirname(args.path)
-          };
-        }
-        const compiledScript = compileScript(descriptor, {
-          id,
-          inlineTemplate: true,
-          genDefaultAs: '__script',
-          isProd: isProduction,
-          templateOptions: { scoped: hasScopedStyles, isProd: isProduction }
-        });
-        return {
-          contents: [
-            compiledScript.content,
-            hasScopedStyles ? `__script.__scopeId = ${JSON.stringify(scopeId)};` : '',
-            styleCode,
-            'export default __script;'
-          ].filter(Boolean).join('\n'),
-          loader: descriptor.script?.lang === 'js' ? 'js' : 'ts',
-          resolveDir: path.dirname(args.path)
-        };
-      };
-      const result = compileQueue.then(compile);
-      compileQueue = result.then(() => undefined, () => undefined);
-      return result;
-    });
-  }
-};
+      const css = cssAssets
+        .map(([, asset]) => (typeof asset.source === 'string' ? asset.source : new TextDecoder().decode(asset.source)))
+        .join('\n');
+      for (const [fileName] of cssAssets) delete bundle[fileName];
 
-const sharedOptions = {
-  bundle: true,
-  format: 'iife',
-  target: browserTarget,
-  minify: isProduction,
-  sourcemap: !isProduction,
-  legalComments: 'inline'
-};
+      const injection = [
+        `const __styleId=${JSON.stringify(styleId)};`,
+        'if(!document.getElementById(__styleId)){',
+        'const __style=document.createElement("style");',
+        '__style.id=__styleId;',
+        `__style.textContent=${JSON.stringify(css)};`,
+        '(document.head||document.documentElement).appendChild(__style);',
+        '}'
+      ].join('');
 
-const contexts = await Promise.all([
-  esbuild.context({
-    ...sharedOptions,
-    entryPoints: ['src/main.ts'],
-    globalName: 'JellyfinFeaturedBundle',
-    outfile: 'dist/featured.bundle.js',
-    plugins: [cssTextPlugin]
-  }),
-  esbuild.context({
-    ...sharedOptions,
-    entryPoints: ['src/config/main.ts'],
-    globalName: 'JellyfinFeaturedConfigBundle',
-    outfile: 'dist/config.bundle.js',
-    plugins: [vueSfcPlugin, cssTextPlugin]
-  })
+      for (const output of Object.values(bundle)) {
+        if (output.type === 'chunk' && output.isEntry) output.code = injection + output.code;
+      }
+    }
+  };
+}
+
+function bundleOptions({ entry, fileName, globalName, plugins = [] }) {
+  return {
+    configFile: false,
+    mode: buildMode,
+    logLevel: isWatch ? 'info' : 'warn',
+    define: {
+      'process.env.NODE_ENV': JSON.stringify(buildMode)
+    },
+    plugins,
+    build: {
+      target: browserTarget,
+      outDir: 'dist',
+      emptyOutDir: false,
+      minify: !isWatch,
+      sourcemap: isWatch,
+      cssCodeSplit: false,
+      lib: {
+        entry: path.resolve(entry),
+        name: globalName,
+        formats: ['iife'],
+        fileName: () => fileName
+      },
+      rollupOptions: {
+        output: {
+          entryFileNames: fileName
+        },
+        watch: isWatch ? {} : undefined
+      }
+    }
+  };
+}
+
+await Promise.all([
+  build(
+    bundleOptions({
+      entry: 'src/main.ts',
+      fileName: 'featured.bundle.js',
+      globalName: 'JellyfinFeaturedBundle'
+    })
+  ),
+  build(
+    bundleOptions({
+      entry: 'src/config/main.ts',
+      fileName: 'config.bundle.js',
+      globalName: 'JellyfinFeaturedConfigBundle',
+      plugins: [vue(), injectEmittedCss('jellyfin-featured-component-styles')]
+    })
+  ),
+  build(
+    bundleOptions({
+      entry: 'src/bootstrap.ts',
+      fileName: 'bootstrap.bundle.js',
+      globalName: 'JellyfinFeaturedBootstrapBundle'
+    })
+  )
 ]);
 
-if (isWatch) {
-  await Promise.all(contexts.map((context) => context.watch()));
-} else {
-  await Promise.all(contexts.map((context) => context.rebuild()));
-  await Promise.all(contexts.map((context) => context.dispose()));
-  const configBundle = await readFile('dist/config.bundle.js', 'utf8');
-  if (!configBundle.includes('jellyfin-featured-') || !configBundle.includes('[data-v-')) {
+if (!isWatch) {
+  const bundleSources = await Promise.all(
+    browserBundleFiles.map(async (fileName) => ({
+      fileName,
+      source: await readFile(path.join('dist', fileName), 'utf8')
+    }))
+  );
+  const configBundle = bundleSources.find(({ fileName }) => fileName === 'config.bundle.js')?.source ?? '';
+  if (!configBundle.includes('jellyfin-featured-component-styles') || !configBundle.includes('[data-v-')) {
     throw new Error('The production configuration bundle is missing compiled Vue component styles.');
+  }
+  for (const { fileName, source } of bundleSources) {
+    if (/\bprocess(?:\.env|\[)/.test(source)) {
+      throw new Error(`${fileName} contains a Node.js process reference that is unavailable in Jellyfin clients.`);
+    }
   }
   await Promise.all([
     rm('dist/featured.bundle.js.map', { force: true }),
-    rm('dist/config.bundle.js.map', { force: true })
+    rm('dist/config.bundle.js.map', { force: true }),
+    rm('dist/bootstrap.bundle.js.map', { force: true })
   ]);
 }
