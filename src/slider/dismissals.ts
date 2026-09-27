@@ -141,7 +141,10 @@ function showScopePicker(item: FeaturedItem, options: FeaturedDismissalOption[],
   else dialog.setAttribute('open', '');
 }
 
-export function createDismissalControl(item: FeaturedItem, variant: 'action' | 'metadata' = 'action'): HTMLButtonElement {
+export function createDismissalControl(
+  item: FeaturedItem,
+  variant: 'action' | 'metadata' = 'action'
+): HTMLButtonElement {
   const options = item.dismissalOptions ?? [];
   const button = document.createElement('button');
   button.type = 'button';

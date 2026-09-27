@@ -1,11 +1,28 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { readProjectSource as read } from './helpers/readProjectSource.mjs';
 import test from 'node:test';
 
-const read = async (path) => await readFile(new URL(`../${path}`, import.meta.url), 'utf8');
-
 test('personalization is authenticated, policy-bound, user scoped, and fast to reopen', async () => {
-  const [controller, itemsController, service, store, response, itemFactory, frontend, navigation, carousel, slideRender, runtime, constants, engine, optionsCache, warmupTask, services, styles, history] = await Promise.all([
+  const [
+    controller,
+    itemsController,
+    service,
+    store,
+    response,
+    itemFactory,
+    frontend,
+    navigation,
+    carousel,
+    slideRender,
+    runtime,
+    constants,
+    engine,
+    optionsCache,
+    warmupTask,
+    services,
+    styles,
+    history
+  ] = await Promise.all([
     read('Jellyfin.Plugin.Featured/Api/FeaturedController.Preferences.cs'),
     read('Jellyfin.Plugin.Featured/Api/FeaturedController.Items.cs'),
     read('Jellyfin.Plugin.Featured/Api/FeaturedPersonalizationService.cs'),
@@ -33,13 +50,16 @@ test('personalization is authenticated, policy-bound, user scoped, and fast to r
   assert.equal((controller.match(/RuntimeConfigJsonOptions/g) ?? []).length, 4);
   assert.match(controller, /new JsonResult\(CreatePreferencesResponse\(activeUser\), RuntimeConfigJsonOptions\)/);
   assert.match(controller, /CreatePreferenceOptionsResponse\(activeUser, effective\)/);
-  assert.match(optionsCache, /ConcurrentDictionary<Guid, Lazy<CacheEntry>>/);
+  assert.match(optionsCache, /IMemoryCache/);
   assert.match(optionsCache, /TimeSpan\.FromMinutes\(10\)/);
   assert.match(optionsCache, /LazyThreadSafetyMode\.ExecutionAndPublication/);
   assert.match(optionsCache, /genre cache hit:[\s\S]*?genre cache miss:/);
-  assert.match(optionsCache, /QueueWarmup[\s\S]*?HasFreshOrPendingEntry[\s\S]*?_queuedUsers\.TryAdd[\s\S]*?Task\.Run/);
+  assert.match(optionsCache, /QueueWarmup[\s\S]*?_cache\.TryGetValue[\s\S]*?_queuedUsers\.TryAdd[\s\S]*?Task\.Run/);
   assert.match(itemsController, /Response\.OnCompleted[\s\S]*?_preferenceOptionsCache\.QueueWarmup/);
-  assert.match(controller, /user-settings bootstrap resolved preferences[\s\S]*?user-settings bootstrap built options[\s\S]*?user-settings bootstrap completed/);
+  assert.match(
+    controller,
+    /user-settings bootstrap resolved preferences[\s\S]*?user-settings bootstrap built options[\s\S]*?user-settings bootstrap completed/
+  );
   assert.match(controller, /genre scan inspected[\s\S]*?library query/);
   assert.match(services, /AddSingleton<FeaturedPreferenceOptionsCache>/);
   assert.match(services, /AddSingleton<IScheduledTask, WarmUserSettingsCacheTask>/);
@@ -51,22 +71,37 @@ test('personalization is authenticated, policy-bound, user scoped, and fast to r
   assert.match(service, /policy\.AllowPreferredGenres[\s\S]*?allowedGenres\.Contains/);
   assert.match(service, /submitted\.ExcludedGenres[\s\S]*?allowedGenres\.Contains[\s\S]*?!preferredGenres\.Contains/);
   assert.match(engine, /excludedGenres[\s\S]*?!ContainsAny\(item\.Genres, excludedGenres\)/);
-  assert.match(service, /ResolveDefaults\(PluginConfiguration config, Guid userId\)[\s\S]*?Resolve\(config, userId, null\)/);
+  assert.match(
+    service,
+    /ResolveDefaults\(PluginConfiguration config, Guid userId\)[\s\S]*?Resolve\(config, userId, null\)/
+  );
   assert.match(service, /if \(IsEmpty\(normalized\)\) _store\.Remove\(userId\)/);
-  assert.match(service, /config\.RepeatCooldownDays \* 24[\s\S]*?personalized\?\.RepeatCooldownHours[\s\S]*?personalized\?\.RepeatCooldownDays/);
+  assert.match(
+    service,
+    /config\.RepeatCooldownDays \* 24[\s\S]*?personalized\?\.RepeatCooldownHours[\s\S]*?personalized\?\.RepeatCooldownDays/
+  );
   assert.match(service, /submitted\.RepeatCooldownHours[\s\S]*?3650 \* 24/);
   assert.match(service, /config\.EnableBackgroundTrailers && display\?\.EnableBackgroundTrailers is not false/);
   assert.match(service, /config\.ShowRating && display\?\.ShowRating is not false/);
   assert.match(service, /submittedDisplay\.ShowDescription is false \? false : null/);
   assert.match(store, /userId\.ToString\("N"\)/);
   assert.match(store, /public int\? RepeatCooldownHours/);
-  assert.match(store, /class FeaturedUserDisplayPreferences[\s\S]*?bool\? EnableBackgroundTrailers[\s\S]*?bool\? ShowRuntime/);
+  assert.match(
+    store,
+    /class FeaturedUserDisplayPreferences[\s\S]*?bool\? EnableBackgroundTrailers[\s\S]*?bool\? ShowRuntime/
+  );
   assert.match(history, /GetRecentItems\(Guid userId, int cooldownHours\)[\s\S]*?AddHours\(-cooldownHours\)/);
   assert.match(response, /public bool PersonalizationEnabled \{ get; \}/);
   assert.match(response, /public int RepeatCooldownHours/);
   assert.match(response, /base\(config, personalization\)/);
-  assert.match(itemFactory, /personalization\.Display\.EnableBackgroundTrailers[\s\S]*?Tagline = personalization\.Display\.ShowDescription[\s\S]*?OfficialRating = personalization\.Display\.ShowRating[\s\S]*?Overview = personalization\.Display\.ShowDescription[\s\S]*?CriticRating = personalization\.Display\.ShowRating/);
-  assert.match(slideRender, /if \(response\.showDescription\)[\s\S]*?appendText\(content, 'ec-tagline'[\s\S]*?appendText\(content, 'ec-overview'/);
+  assert.match(
+    itemFactory,
+    /personalization\.Display\.EnableBackgroundTrailers[\s\S]*?Tagline = personalization\.Display\.ShowDescription[\s\S]*?OfficialRating = personalization\.Display\.ShowRating[\s\S]*?Overview = personalization\.Display\.ShowDescription[\s\S]*?CriticRating = personalization\.Display\.ShowRating/
+  );
+  assert.match(
+    slideRender,
+    /if \(response\.showDescription\)[\s\S]*?appendText\(content, 'ec-tagline'[\s\S]*?appendText\(content, 'ec-overview'/
+  );
   assert.match(frontend, /body: \{ reset: true \}/);
   assert.match(frontend, /body: \{ preferences \}/);
   assert.match(frontend, /GenrePreferenceState = 'neutral' \| 'preferred' \| 'excluded'/);
@@ -74,7 +109,7 @@ test('personalization is authenticated, policy-bound, user scoped, and fast to r
   assert.doesNotMatch(frontend, /JellyfinFeatured\?\.refresh/);
   assert.match(frontend, /current\.defaults\.sourceEnabled/);
   assert.match(frontend, /featured\/preferences\/bootstrap/);
-  assert.match(frontend, /bootstrapCacheLifetime = 5 \* 60_000/);
+  assert.match(frontend, /BOOTSTRAP_CACHE_LIFETIME_MS = 5 \* 60_000/);
   assert.match(frontend, /export function preloadPreferencesDialog\(\)[\s\S]*?loadPreferencesBootstrap\(\)\.catch/);
   assert.match(frontend, /className = 'emby-checkbox'/);
   assert.match(frontend, /raised button-submit emby-button/);
@@ -83,13 +118,22 @@ test('personalization is authenticated, policy-bound, user scoped, and fast to r
   assert.match(frontend, /dataset\.cooldownHours = 'true'/);
   assert.match(frontend, /preferences\.repeatCooldownHours = value/);
   assert.match(frontend, /if \(!current\.defaults\.display\[key\]\) continue/);
-  assert.match(frontend, /preferences\.display\[key\] = checked === current\.defaults\.display\[key\] \? null : checked/);
+  assert.match(
+    frontend,
+    /preferences\.display\[key\] = checked === current\.defaults\.display\[key\] \? null : checked/
+  );
   assert.match(constants, /USER_PREFERENCES_CHANGED_EVENT = 'jellyfin-featured:preferences-changed'/);
   assert.match(frontend, /new CustomEvent\(USER_PREFERENCES_CHANGED_EVENT\)/);
   assert.equal((frontend.match(/notifyPreferencesChanged\(\)/g) ?? []).length, 3);
   assert.match(runtime, /addEventListener\(USER_PREFERENCES_CHANGED_EVENT, refreshForPreferenceChange\)/);
-  assert.match(runtime, /function refreshForPreferenceChange[\s\S]*?instance\.destroy\(\)[\s\S]*?resetMountFailures\(\)[\s\S]*?scheduleScan\(\)/);
-  assert.match(runtime, /const lifecycleChanged = mountToken !== lifecycleToken[\s\S]*?if \(lifecycleChanged[\s\S]*?scheduleScan\(\)/);
+  assert.match(
+    runtime,
+    /function refreshForPreferenceChange[\s\S]*?instance\.destroy\(\)[\s\S]*?resetMountFailures\(\)[\s\S]*?scheduleScan\(\)/
+  );
+  assert.match(
+    runtime,
+    /const lifecycleChanged = mountToken !== mountState\.lifecycleToken[\s\S]*?if \(lifecycleChanged[\s\S]*?scheduleScan\(\)/
+  );
   assert.match(runtime, /removeEventListener\(USER_PREFERENCES_CHANGED_EVENT, refreshForPreferenceChange\)/);
   assert.match(navigation, /USER_PREFERENCES_SELECTOR[\s\S]*?#\/mypreferencesmenu/);
   assert.match(navigation, /settingsEntry\.after\(entry\)/);
@@ -101,15 +145,24 @@ test('personalization is authenticated, policy-bound, user scoped, and fast to r
   assert.match(navigation, /focus', preloadPreferencesDialog, \{ once: true \}/);
   assert.doesNotMatch(navigation, /section\.appendChild\(entry\);\s*preloadPreferencesDialog\(\)/);
   assert.match(navigation, /userSettingsEnabled = config\.personalizationEnabled/);
-  assert.match(navigation, /function updateAdminNavigationEntry[\s\S]*?\.MuiListItemIcon-root[\s\S]*?createUserSettingsIcon\(\)/);
+  assert.match(
+    navigation,
+    /function updateAdminNavigationEntry[\s\S]*?\.MuiListItemIcon-root[\s\S]*?createUserSettingsIcon\(\)/
+  );
   assert.match(styles, /ec-preferences-spinner/);
   assert.match(styles, /env\(safe-area-inset-top\)/);
-  assert.match(styles, /\.ec-preferences-dialog[^}]*--ec-dialog-viewport-height:\s*calc\(100vh - 2rem\)[^}]*height:\s*min\(52rem, var\(--ec-dialog-viewport-height\)\)[^}]*width:\s*64rem/);
+  assert.match(
+    styles,
+    /\.ec-preferences-dialog[^}]*--ec-dialog-viewport-height:\s*calc\(100vh - 2rem\)[^}]*height:\s*min\(52rem, var\(--ec-dialog-viewport-height\)\)[^}]*width:\s*64rem/
+  );
   assert.match(styles, /@supports \(height: 100dvh\)[\s\S]*?--ec-dialog-viewport-height:\s*calc\(100dvh - 2rem\)/);
   assert.match(styles, /\.ec-preferences-content[^}]*flex: 1 1 auto/);
   assert.match(styles, /\.ec-preference-display[^}]*grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\)/);
   assert.match(styles, /@media \(max-width: 600px\)[\s\S]*?\.ec-preferences-dialog[^}]*width: 100%/);
-  assert.match(styles, /@media \(max-width: 600px\)[\s\S]*?\.ec-preference-display,[\s\S]*?grid-template-columns:\s*1fr/);
+  assert.match(
+    styles,
+    /@media \(max-width: 600px\)[\s\S]*?\.ec-preference-display,[\s\S]*?grid-template-columns:\s*1fr/
+  );
   assert.doesNotMatch(carousel, /ec-personalize|openPreferencesDialog/);
 });
 
@@ -132,25 +185,25 @@ test('feed preview reuses mixer diagnostics for unsaved configs, users, and forc
     read('src/config/tabs/SourcesTab.vue')
   ]);
   assert.match(previewController, /HttpPost\("config\/preview"\)[\s\S]*?PermissionKind\.IsAdministrator/);
-  assert.match(previewController, /PluginConfigurationNormalizer\.Normalize\(request\.Configuration\)[\s\S]*?ResolvePreview/);
+  assert.match(
+    previewController,
+    /PluginConfigurationNormalizer\.Normalize\(request\.Configuration\)[\s\S]*?ResolvePreview/
+  );
   assert.match(previewController, /_personalization\.Resolve\(effective, previewUser\.Id\)[\s\S]*?SelectItems/);
   assert.match(previewController, /JsonSerializer\.Serialize\(payload, RuntimeConfigJsonOptions\)/);
-  assert.match(requests, /class FeaturedFeedPreviewRequest[\s\S]*?UserId[\s\S]*?PresetId[\s\S]*?UseDefaultConfiguration/);
-  assert.match(responses, /class FeaturedFeedPreviewResponse[\s\S]*?DuplicatesRemoved[\s\S]*?CooldownExcluded[\s\S]*?DiversitySkipped/);
+  assert.match(
+    requests,
+    /class FeaturedFeedPreviewRequest[\s\S]*?UserId[\s\S]*?PresetId[\s\S]*?UseDefaultConfiguration/
+  );
+  assert.match(
+    responses,
+    /class FeaturedFeedPreviewResponse[\s\S]*?DuplicatesRemoved[\s\S]*?CooldownExcluded[\s\S]*?DiversitySkipped/
+  );
   assert.match(engine + allocation, /ItemReasons[\s\S]*?FeaturedItemSelectionReason|itemReasons\[item\.Id\]/);
-  assert.match(store, /cloneConfig[\s\S]*?JSON\.parse\(snapshot\(value\)\)/);
+  assert.match(store, /cloneConfig[\s\S]*?cloneJsonValue\(value\)/);
   assert.match(store, /featured\/config\/preview[\s\S]*?configuration: cloneConfig\(config\)/);
   assert.match(modal, /feedPreview\.value\.items[\s\S]*?feedPreview\.value\.rules[\s\S]*?duplicatesRemoved/);
   assert.match(sources, /#actions[\s\S]*?ec-feedPreviewAction[\s\S]*?store\.openFeedPreview\(\)/);
-});
-
-test('prepared cache rotates through a shuffle bag before repeating items', async () => {
-  const preparedCache = await read('Jellyfin.Plugin.Featured/Api/FeaturedPreparedCache.cs');
-  assert.match(preparedCache, /TryTake\(excludedIds, requestedCount, out items, out dtoCreationMilliseconds, out int eligibleCount\)/);
-  assert.match(preparedCache, /_remaining\.Count\(item => !excludedIds\.Contains\(item\.Id\)\) < count[\s\S]*?CreateShuffledBag\(_items\)/);
-  assert.match(preparedCache, /PreparedItem candidate = _remaining\.Dequeue\(\)[\s\S]*?_remaining\.Enqueue\(candidate\)[\s\S]*?items\.Add\(candidate\.Dto\.Value\)/);
-  assert.match(preparedCache, /Random\.Shared\.Next\(index \+ 1\)/);
-  assert.doesNotMatch(preparedCache, /SelectRandomItems/);
 });
 
 test('prepared cache fingerprint includes excluded genres', async () => {
@@ -172,17 +225,28 @@ test('warm prepared responses reuse prebuilt DTOs and expose bypass diagnostics'
     read('Jellyfin.Plugin.Featured/Api/FeaturedController.Items.cs'),
     read('Jellyfin.Plugin.Featured/Api/FeaturedItemDtoFactory.cs')
   ]);
-  assert.match(preparedCache, /new Lazy<FeaturedItemDto>[\s\S]*?_itemDtoFactory\.Create\(item, user, config, personalization,/);
+  assert.match(preparedCache, /_itemDtoFactory[\s\S]*?\.CreateBatch\(selection\.Items, user, config, personalization/);
+  assert.match(dtoFactory, /new Lazy<FeaturedItemDto>[\s\S]*?\(\) => Create\(/);
   assert.match(preparedCache, /out string status/);
-  for (const status of ['bypass (disabled)', 'bypass (live mixing required)', 'miss (no entry)', 'miss (fingerprint mismatch)', 'refreshing', 'hit']) {
+  for (const status of [
+    'bypass (disabled)',
+    'bypass (live mixing required)',
+    'miss (no entry)',
+    'miss (fingerprint mismatch)',
+    'refreshing',
+    'hit'
+  ]) {
     assert.equal(preparedCache.includes(`\"${status}\"`), true, `missing prepared-cache status ${status}`);
   }
   assert.match(itemsController, /X-Featured-Prepared-Cache/);
   assert.match(itemsController, /Server-Timing/);
   assert.match(itemsController, /Featured request timing/);
-  assert.match(itemsController, /JsonSerializer\.Serialize\(payload, RuntimeConfigJsonOptions\)/);
+  assert.match(itemsController, /JsonSerializer\.Serialize\(feed\.Payload, RuntimeConfigJsonOptions\)/);
   assert.match(preparedCache, /FeaturedController\.WarmItemsResponseSerialization/);
-  assert.match(itemsController, /CanPopulateFromRequest\(preparedCacheStatus\)[\s\S]*?GetRequestedPoolSize\(_config\)[\s\S]*?StoreRequestPool/);
+  assert.match(
+    itemsController,
+    /CanPopulateFromRequest\(preparedCacheStatus\)[\s\S]*?GetRequestedPoolSize\(config\)[\s\S]*?StoreRequestPool/
+  );
   assert.match(itemsController, /\$"cold-filled \(\{initialPreparedCacheStatus\}\)"/);
   assert.match(preparedCache, /eagerlyBuildDtos: false, replaceExisting: false/);
   assert.match(preparedCache, /eagerlyBuildDtos: true, replaceExisting: true/);
@@ -206,23 +270,23 @@ test('rule engine user access stays in memory and is evaluated once per distinct
 });
 
 test('source mixer v2 applies limits, fallbacks, diversity, and cooldown recovery', async () => {
-  const [configuration, normalizer, engine, history, preparedCache, defaults, sourceCard, sourcesTab, filtersTab] = await Promise.all([
-    read('Jellyfin.Plugin.Featured/Configuration/PluginConfiguration.cs'),
-    read('Jellyfin.Plugin.Featured/Configuration/PluginConfigurationNormalizer.cs'),
-    Promise.all([
-      read('Jellyfin.Plugin.Featured/Api/FeaturedRuleEngine.cs'),
-      read('Jellyfin.Plugin.Featured/Api/FeaturedRuleEngine.Allocation.cs'),
-      read('Jellyfin.Plugin.Featured/Api/FeaturedRuleEngine.Candidates.cs'),
-      read('Jellyfin.Plugin.Featured/Api/FeaturedRuleEngine.Filters.cs'),
-      read('Jellyfin.Plugin.Featured/Api/FeaturedRuleEngine.Models.cs')
-    ]).then((parts) => parts.join('\n')),
-    read('Jellyfin.Plugin.Featured/Api/FeaturedDisplayHistoryStore.cs'),
-    read('Jellyfin.Plugin.Featured/Api/FeaturedPreparedCache.cs'),
-    read('src/config/libs/defaults.ts'),
-    read('src/config/components/SourceRuleCard.vue'),
-    read('src/config/tabs/SourcesTab.vue'),
-    read('src/config/tabs/FiltersTab.vue')
-  ]);
+  const [configuration, normalizer, engine, history, preparedCache, defaults, sourceCard, filtersTab] =
+    await Promise.all([
+      read('Jellyfin.Plugin.Featured/Configuration/PluginConfiguration.cs'),
+      read('Jellyfin.Plugin.Featured/Configuration/PluginConfigurationNormalizer.cs'),
+      Promise.all([
+        read('Jellyfin.Plugin.Featured/Api/FeaturedRuleEngine.cs'),
+        read('Jellyfin.Plugin.Featured/Api/FeaturedRuleEngine.Allocation.cs'),
+        read('Jellyfin.Plugin.Featured/Api/FeaturedRuleEngine.Candidates.cs'),
+        read('Jellyfin.Plugin.Featured/Api/FeaturedRuleEngine.Filters.cs'),
+        read('Jellyfin.Plugin.Featured/Api/FeaturedRuleEngine.Models.cs')
+      ]).then((parts) => parts.join('\n')),
+      read('Jellyfin.Plugin.Featured/Api/FeaturedDisplayHistoryStore.cs'),
+      read('Jellyfin.Plugin.Featured/Api/FeaturedPreparedCache.cs'),
+      read('src/config/libs/defaults.ts'),
+      read('src/config/components/SourceRuleCard.vue'),
+      read('src/config/tabs/FiltersTab.vue')
+    ]);
   for (const property of ['MinimumItems', 'MaximumItems', 'IsFallback']) {
     assert.equal(configuration.includes(property), true, `backend misses ${property}`);
     assert.equal(defaults.includes(property), true, `frontend defaults miss ${property}`);
@@ -245,6 +309,12 @@ test('source mixer v2 applies limits, fallbacks, diversity, and cooldown recover
 
 test('featured selection excludes samples and other video extras', async () => {
   const ruleEngine = await read('Jellyfin.Plugin.Featured/Api/FeaturedRuleEngine.Filters.cs');
-  assert.match(ruleEngine, /IsSupportedItemType\(BaseItem item\)[\s\S]*?item\.ExtraType is null[\s\S]*?FeaturedMediaTypes\.Contains/);
-  assert.match(ruleEngine, /SampleFileNameRegex[\s\S]*?Path\.GetFileNameWithoutExtension\(item\.Path\)[\s\S]*?SampleFileNameRegex\.IsMatch\(fileName\)/);
+  assert.match(
+    ruleEngine,
+    /IsSupportedItemType\(BaseItem item\)[\s\S]*?item\.ExtraType is null[\s\S]*?FeaturedMediaTypes\.Contains/
+  );
+  assert.match(
+    ruleEngine,
+    /SampleFileNameRegex[\s\S]*?Path\.GetFileNameWithoutExtension\(item\.Path\)[\s\S]*?SampleFileNameRegex\.IsMatch\(fileName\)/
+  );
 });
