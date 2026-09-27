@@ -41,15 +41,16 @@ export function readFeaturedCache(): FeaturedResponse | null {
     const serialized = window.localStorage.getItem(key);
     if (!serialized) return null;
     const entry = JSON.parse(serialized) as Partial<FeaturedCacheEntry>;
-    const valid = entry.schemaVersion === CACHE_SCHEMA_VERSION
-      && entry.pluginVersion === PLUGIN_VERSION
-      && typeof entry.storedAt === 'number'
-      && typeof entry.expiresAt === 'number'
-      && entry.expiresAt > Date.now()
-      && entry.response !== null
-      && typeof entry.response === 'object'
-      && Array.isArray(entry.response.items)
-      && entry.response.items.length > 0;
+    const valid =
+      entry.schemaVersion === CACHE_SCHEMA_VERSION &&
+      entry.pluginVersion === PLUGIN_VERSION &&
+      typeof entry.storedAt === 'number' &&
+      typeof entry.expiresAt === 'number' &&
+      entry.expiresAt > Date.now() &&
+      entry.response !== null &&
+      typeof entry.response === 'object' &&
+      Array.isArray(entry.response.items) &&
+      entry.response.items.length > 0;
     if (valid) return entry.response as FeaturedResponse;
     window.localStorage.removeItem(key);
   } catch {
@@ -89,7 +90,9 @@ export function clearFeaturedCache(): void {
 export function keepCurrentItem(response: FeaturedResponse, currentItem?: FeaturedItem): FeaturedResponse {
   if (!currentItem || !response.items.length) return response;
   const freshCurrentItem = response.items.find((item) => item.id === currentItem.id) ?? currentItem;
-  const items = [freshCurrentItem, ...response.items.filter((item) => item.id !== currentItem.id)]
-    .slice(0, response.items.length);
+  const items = [freshCurrentItem, ...response.items.filter((item) => item.id !== currentItem.id)].slice(
+    0,
+    response.items.length
+  );
   return { ...response, items };
 }

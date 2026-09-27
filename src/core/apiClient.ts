@@ -18,15 +18,19 @@ export async function requestJson<T>(path: string, options: JsonRequestOptions =
 
   if (apiClient?.ajax) {
     try {
-      return await Promise.resolve(apiClient.ajax({
-        type: method,
-        url,
-        dataType: 'json',
-        ...(options.body === undefined ? {} : {
-          contentType: 'application/json',
-          data: JSON.stringify(options.body)
+      return (await Promise.resolve(
+        apiClient.ajax({
+          type: method,
+          url,
+          dataType: 'json',
+          ...(options.body === undefined
+            ? {}
+            : {
+                contentType: 'application/json',
+                data: JSON.stringify(options.body)
+              })
         })
-      })) as T;
+      )) as T;
     } catch (error) {
       throw await createRequestError(path, error);
     }
@@ -35,13 +39,15 @@ export async function requestJson<T>(path: string, options: JsonRequestOptions =
   const response = await fetch(url, {
     method,
     credentials: 'same-origin',
-    ...(options.body === undefined ? {} : {
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(options.body)
-    })
+    ...(options.body === undefined
+      ? {}
+      : {
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(options.body)
+        })
   });
   if (!response.ok) throw new Error(`${path} returned HTTP ${response.status}`);
-  return await response.json() as T;
+  return (await response.json()) as T;
 }
 
 async function createRequestError(path: string, error: unknown): Promise<Error> {
@@ -80,7 +86,11 @@ function parseErrorDetail(body: string): string {
   } catch {
     // Plain-text and HTML errors are compacted below.
   }
-  return body.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 300);
+  return body
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 300);
 }
 
 export function getAccessToken(): string | undefined {
@@ -91,7 +101,5 @@ export function getAccessToken(): string | undefined {
 
 export function getCurrentUserId(): string | undefined {
   const apiClient = getApiClient();
-  return apiClient?.getCurrentUserId?.()
-    || apiClient?.getCurrentUser?.()?.Id
-    || apiClient?._serverInfo?.UserId;
+  return apiClient?.getCurrentUserId?.() || apiClient?.getCurrentUser?.()?.Id || apiClient?._serverInfo?.UserId;
 }

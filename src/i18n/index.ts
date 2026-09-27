@@ -23,7 +23,7 @@ function reportMissingTranslation(language: string, key: TranslationKey, hasEngl
   );
 }
 
-export function getUiLanguage(): string {
+function getUiLanguage(): string {
   const requested = document.documentElement.lang || navigator.languages?.[0] || navigator.language || 'en';
   const locale = requested.trim().replace(/_/g, '-').toLowerCase();
   const language = locale.split('-')[0];
@@ -37,7 +37,7 @@ export function t(key: TranslationKey, values: TranslationValues = {}): string {
   const english = getTranslation(en, key);
   if (!localized) reportMissingTranslation(language, key, english !== undefined);
   const template = localized ?? english ?? key;
-  return template.replace(/\{([^{}]+)\}/g, (placeholder, name: string) => (
+  return template.replace(/\{([^{}]+)\}/g, (placeholder, name: string) =>
     Object.prototype.hasOwnProperty.call(values, name) ? String(values[name]) : placeholder
-  ));
+  );
 }

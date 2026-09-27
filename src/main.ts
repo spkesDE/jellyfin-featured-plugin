@@ -1,5 +1,4 @@
-import styles from './styles/featured.css';
-import webosOverrides from './styles/webos-overrides.css';
+import styles from './styles/featured.css?inline';
 import { injectJellyfinThemeTokens } from './styles/jellyfin-theme';
 import { installAdaptiveHeroOverview } from './slider/heroOverviewFit';
 import { destroy, refresh, start } from './runtime';
@@ -7,10 +6,11 @@ import { CONSOLE_PREFIX, PLUGIN_VERSION } from './constants';
 
 const STYLE_ID = 'jellyfin-featured-styles';
 const loaderScript = document.currentScript as HTMLScriptElement | null;
-const injectionMethod = loaderScript?.dataset.injectionMethod
-  || (loaderScript?.hasAttribute('FileTransformation') ? 'file-transformation' : null)
-  || (loaderScript?.hasAttribute('DirectInjection') ? 'direct' : null)
-  || 'unknown';
+const injectionMethod =
+  loaderScript?.dataset.injectionMethod ||
+  (loaderScript?.hasAttribute('FileTransformation') ? 'file-transformation' : null) ||
+  (loaderScript?.hasAttribute('DirectInjection') ? 'direct' : null) ||
+  'unknown';
 const existingApi = window.JellyfinFeatured;
 
 console.debug(`${CONSOLE_PREFIX} Loading v${PLUGIN_VERSION}; frontend injection method: ${injectionMethod}.`);
@@ -29,7 +29,7 @@ if (existingApi) {
   if (!document.getElementById(STYLE_ID)) {
     const style = document.createElement('style');
     style.id = STYLE_ID;
-    style.textContent = `${styles}\n${webosOverrides}`;
+    style.textContent = styles;
     document.head.appendChild(style);
   }
 

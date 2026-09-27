@@ -1,8 +1,6 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { readProjectSource as read } from './helpers/readProjectSource.mjs';
 import test from 'node:test';
-
-const read = async (path) => await readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 
 test('startup cache is scoped, bounded, expiring, and storage-safe', async () => {
   const cache = await read('src/core/featuredCache.ts');
@@ -34,24 +32,33 @@ test('cached items paint before revalidation and preserve the visible item', asy
 
 test('startup cache is invalidated for preferences and preset boundaries', async () => {
   const runtime = await read('src/runtime.ts');
-  assert.match(runtime, /function refreshForPresetBoundary\(\): void \{\s*clearFeaturedCache\(\)/);
-  assert.match(runtime, /function refreshForPreferenceChange\(\): void \{\s*clearFeaturedCache\(\)/);
+  assert.match(runtime, /refreshForPresetBoundary[\s\S]*?resetMountedContent\(false\)/);
+  assert.match(runtime, /refreshForPreferenceChange[\s\S]*?resetMountedContent\(true\)/);
+  assert.match(
+    runtime,
+    /function resetMountedContent[\s\S]*?clearFeaturedCache\(\)[\s\S]*?clearFreshResponseMemory\(\)/
+  );
 });
 
 test('rapid remounts reuse or join the same fresh response', async () => {
   const runtime = await read('src/runtime.ts');
-  assert.match(runtime, /FRESH_RESPONSE_REUSE_MS = 30_000/);
-  assert.match(runtime, /recentFreshResponse\?\.scope === scope[\s\S]*?FRESH_RESPONSE_REUSE_MS/);
-  assert.match(runtime, /pendingFreshResponse\?\.scope === scope[\s\S]*?return pendingFreshResponse\.promise/);
-  assert.match(runtime, /requestKind = requestedFreshScopes\.has\(requestScope\) \? 'remount' : 'initial'/);
+  assert.match(runtime, /new FreshResponseCache<FeaturedResponse>\([\s\S]*?30_000/);
+  assert.match(runtime, /this\.recent\?\.scope === scope[\s\S]*?this\.reuseMilliseconds/);
+  assert.match(runtime, /this\.pending\?\.scope === scope[\s\S]*?return this\.pending\.promise/);
+  assert.match(
+    runtime,
+    /requestKind: FreshRequestKind = this\.requestedScopes\.has\(requestScope\) \? 'remount' : 'initial'/
+  );
   assert.match(runtime, /query: \{ requestKind \}/);
-  assert.match(runtime, /function refreshForPresetBoundary[\s\S]*?clearFreshResponseMemory\(\)/);
-  assert.match(runtime, /function refreshForPreferenceChange[\s\S]*?clearFreshResponseMemory\(\)/);
+  assert.match(runtime, /resetMountedContent[\s\S]*?clearFreshResponseMemory\(\)/);
 });
 
 test('server timing distinguishes initial, remount, and batch requests', async () => {
   const controller = await read('Jellyfin.Plugin.Featured/Api/FeaturedController.Items.cs');
-  assert.match(controller, /BuildItemsResponse\(ParseExcludedItemIds\(excludeItemIds\), NormalizeRequestKind\(requestKind\)\)/);
+  assert.match(
+    controller,
+    /BuildItemsResponse\(ParseExcludedItemIds\(excludeItemIds\), NormalizeRequestKind\(requestKind\)\)/
+  );
   assert.match(controller, /BuildItemsResponse\(excludedIds, "batch"\)/);
   assert.match(controller, /Featured request timing \(\{requestKind\.ToUpperInvariant\(\)\}\)/);
 });

@@ -4,7 +4,12 @@ import { FeaturedCarousel } from './slider/carousel';
 import { heroImageUrl, logoUrl } from './slider/images';
 import { applyHeroLayoutVariables } from './slider/layout';
 import type { FeaturedResponse } from './types/featured';
-import { cancelAdminNavigationRefresh, isUserSettingsMenu, scheduleAdminNavigationRefresh, setUserSettingsMenuEnabled } from './admin/navigation';
+import {
+  cancelAdminNavigationRefresh,
+  isUserSettingsMenu,
+  scheduleAdminNavigationRefresh,
+  setUserSettingsMenuEnabled
+} from './admin/navigation';
 import { CONSOLE_PREFIX, USER_PREFERENCES_CHANGED_EVENT } from './constants';
 import {
   clearFeaturedCache,
@@ -13,29 +18,39 @@ import {
   readFeaturedCache,
   saveFeaturedCache
 } from './core/featuredCache';
+import { FreshResponseCache } from './core/freshResponseCache';
+import { RuntimeCoordinator } from './core/runtimeCoordinator';
+import { shouldScheduleRuntimeScan } from './core/runtimeMutationPolicy';
 
-const HOME_SELECTOR = '#indexPage:not(.hide) #homeTab.is-active .homeSectionsContainer, #homeTab.is-active .homeSectionsContainer';
-const FRESH_RESPONSE_REUSE_MS = 30_000;
-const instances = new Map<Element, FeaturedCarousel>();
-const placeholders = new Map<Element, HTMLElement>();
-const pendingContainers = new Set<Element>();
-let mountFailureAttempts = 0;
-let nextMountAttemptAt = 0;
-let observer: MutationObserver | null = null;
-let scheduled = false;
-let removeInactiveOnNextScan = false;
-let lifecycleToken = 0;
-let routeEventsBound = false;
-let routeEventHandler: (() => void) | null = null;
-let originalHistoryPushState: History['pushState'] | null = null;
-let originalHistoryReplaceState: History['replaceState'] | null = null;
-let presetRefreshTimer: number | null = null;
-let freshResponseGeneration = 0;
-let recentFreshResponse: { scope: string; response: FeaturedResponse; receivedAt: number } | null = null;
-let pendingFreshResponse: { scope: string; promise: Promise<FeaturedResponse> } | null = null;
-const requestedFreshScopes = new Set<string>();
+/**
+ * Runtime lifecycle invariants:
+ * - the mount state's lifecycle token invalidates asynchronous work from an older lifecycle;
+ * - each container has at most one pending mount and one mounted carousel/placeholder;
+ * - mount backoff survives preset boundaries, but an explicit preference change resets it;
+ * - RouteObserver owns and restores every patched history method.
+ */
 
-type HistoryMethodName = 'pushState' | 'replaceState';
+const HOME_SELECTOR =
+  '#indexPage:not(.hide) #homeTab.is-active .homeSectionsContainer, #homeTab.is-active .homeSectionsContainer';
+const ARTWORK_PRELOAD_TIMEOUT_MS = 4000;
+const runtimeCoordinator = new RuntimeCoordinator<FeaturedCarousel>({
+  scan,
+  routeChanged: scheduleFullRefresh,
+  mutationsObserved: handleMutations,
+  presetBoundaryReached: refreshForPresetBoundary
+});
+const mountState = runtimeCoordinator.mounts;
+const { instances, placeholders, pendingContainers } = mountState;
+const freshResponseCache = new FreshResponseCache<FeaturedResponse>(
+  30_000,
+  (response) => Boolean(response.items?.length),
+  (kind) =>
+    log(
+      kind === 'recent'
+        ? 'Reused the recent featured response after a remount.'
+        : 'Joined an in-flight featured request after a remount.'
+    )
+);
 
 function log(message: string, ...details: unknown[]): void {
   if (config.debug) console.debug(`${CONSOLE_PREFIX} ${message}`, ...details);
@@ -50,60 +65,40 @@ function isActiveHomeContainer(container: Element): boolean {
 }
 
 function canAttemptMount(): boolean {
-  return nextMountAttemptAt <= Date.now();
+  return mountState.canAttemptMount();
 }
 
 function recordMountFailure(): void {
-  mountFailureAttempts += 1;
-  const retryDelay = Math.min(300_000, 10_000 * (3 ** Math.min(mountFailureAttempts - 1, 3)));
-  nextMountAttemptAt = Date.now() + retryDelay;
+  const retryDelay = mountState.recordMountFailure();
   log(`Mount failed; retrying in ${Math.round(retryDelay / 1000)} seconds.`);
 }
 
 function resetMountFailures(): void {
-  mountFailureAttempts = 0;
-  nextMountAttemptAt = 0;
+  mountState.resetMountFailures();
 }
 
 function schedulePresetRefresh(nextPresetChange?: string): void {
-  if (presetRefreshTimer !== null) window.clearTimeout(presetRefreshTimer);
-  presetRefreshTimer = null;
-  if (!nextPresetChange) return;
-  const boundary = new Date(nextPresetChange).getTime();
-  if (!Number.isFinite(boundary)) return;
-  const remaining = boundary - Date.now();
-  if (remaining <= 0) {
-    presetRefreshTimer = window.setTimeout(refreshForPresetBoundary, 250);
-    return;
-  }
-  const delay = Math.min(remaining + 250, 2_147_000_000);
-  presetRefreshTimer = window.setTimeout(() => {
-    presetRefreshTimer = null;
-    if (Date.now() < boundary) schedulePresetRefresh(nextPresetChange);
-    else refreshForPresetBoundary();
-  }, delay);
+  runtimeCoordinator.schedulePresetRefresh(nextPresetChange);
 }
 
 function refreshForPresetBoundary(): void {
-  clearFeaturedCache();
-  clearFreshResponseMemory();
-  lifecycleToken += 1;
-  instances.forEach((instance) => instance.destroy());
-  instances.clear();
-  placeholders.forEach((placeholder) => placeholder.remove());
-  placeholders.clear();
-  scheduleScan();
+  resetMountedContent(false);
 }
 
 function refreshForPreferenceChange(): void {
+  resetMountedContent(true);
+}
+
+function resetMountedContent(resetBackoff: boolean): void {
   clearFeaturedCache();
   clearFreshResponseMemory();
-  lifecycleToken += 1;
+  runtimeCoordinator.schedulePresetRefresh();
+  mountState.beginLifecycle();
   instances.forEach((instance) => instance.destroy());
   instances.clear();
   placeholders.forEach((placeholder) => placeholder.remove());
   placeholders.clear();
-  resetMountFailures();
+  if (resetBackoff) resetMountFailures();
   scheduleScan();
 }
 
@@ -150,7 +145,7 @@ function preloadImage(url: string): Promise<void> {
       window.clearTimeout(timeout);
       resolve();
     };
-    const timeout = window.setTimeout(finish, 4000);
+    const timeout = window.setTimeout(finish, ARTWORK_PRELOAD_TIMEOUT_MS);
     image.onload = finish;
     image.onerror = finish;
     image.src = url;
@@ -169,54 +164,30 @@ async function preloadFeaturedArtwork(response: FeaturedResponse): Promise<void>
 }
 
 function clearFreshResponseMemory(): void {
-  freshResponseGeneration += 1;
-  recentFreshResponse = null;
-  pendingFreshResponse = null;
+  freshResponseCache.clear();
 }
 
 function getFreshFeaturedResponse(): Promise<FeaturedResponse> {
   const scope = getFeaturedCacheScope();
-  const now = Date.now();
-  if (scope && recentFreshResponse?.scope === scope
-    && now - recentFreshResponse.receivedAt <= FRESH_RESPONSE_REUSE_MS) {
-    log('Reused the recent featured response after a remount.');
-    return Promise.resolve(recentFreshResponse.response);
-  }
-  if (scope && pendingFreshResponse?.scope === scope) {
-    log('Joined an in-flight featured request after a remount.');
-    return pendingFreshResponse.promise;
-  }
-
-  const requestScope = scope ?? 'unknown';
-  const requestKind = requestedFreshScopes.has(requestScope) ? 'remount' : 'initial';
-  requestedFreshScopes.add(requestScope);
-  const generation = freshResponseGeneration;
-  const promise = requestJson<FeaturedResponse>('featured/items', {
-    query: { requestKind }
-  }).then((response) => {
-    if (scope && generation === freshResponseGeneration && response.items?.length) {
-      recentFreshResponse = { scope, response, receivedAt: Date.now() };
-    }
-    return response;
-  }).finally(() => {
-    if (pendingFreshResponse?.promise === promise) pendingFreshResponse = null;
-  });
-  if (scope) pendingFreshResponse = { scope, promise };
-  return promise;
+  return freshResponseCache.get(scope, (requestKind) =>
+    requestJson<FeaturedResponse>('featured/items', { query: { requestKind } })
+  );
 }
 
 function createCarousel(response: FeaturedResponse, alreadyDisplayedItemId?: string): FeaturedCarousel {
   return new FeaturedCarousel(
     response,
-    async (excludedItemIds) => await requestJson<FeaturedResponse>('featured/items/batch', {
-      method: 'POST',
-      body: { excludedItemIds }
-    }),
+    async (excludedItemIds) =>
+      await requestJson<FeaturedResponse>('featured/items/batch', {
+        method: 'POST',
+        body: { excludedItemIds }
+      }),
     response.trackDisplayedItems
-      ? async (itemId) => await requestJson('featured/items/displayed', {
-          method: 'POST',
-          body: { itemId }
-        })
+      ? async (itemId) =>
+          await requestJson('featured/items/displayed', {
+            method: 'POST',
+            body: { itemId }
+          })
       : undefined,
     alreadyDisplayedItemId
   );
@@ -251,9 +222,10 @@ async function mount(container: Element): Promise<void> {
     container.hasAttribute('data-featured-loading') ||
     container.querySelector(':scope > .ec-root') ||
     (config.hideOnTvLayout && isTvLayout())
-  ) return;
+  )
+    return;
 
-  const mountToken = lifecycleToken;
+  const mountToken = mountState.lifecycleToken;
   pendingContainers.add(container);
   container.setAttribute('data-featured-loading', 'true');
   const placeholder = createPlaceholder(container);
@@ -281,21 +253,20 @@ async function mount(container: Element): Promise<void> {
     setUserSettingsMenuEnabled(response.personalizationEnabled || response.dismissalsEnabled);
     schedulePresetRefresh(response.nextPresetChange);
     if (
-      mountToken !== lifecycleToken ||
+      mountToken !== mountState.lifecycleToken ||
       !container.isConnected ||
       !isActiveHomeContainer(container) ||
       (instances.has(container) && instances.get(container) !== cachedCarousel) ||
-      Array.from(container.querySelectorAll(':scope > .ec-root')).some((root) => (
-        root !== placeholder && root !== cachedCarousel?.root
-      )) ||
+      Array.from(container.querySelectorAll(':scope > .ec-root')).some(
+        (root) => root !== placeholder && root !== cachedCarousel?.root
+      ) ||
       !response.items?.length ||
       (response.hideOnTvLayout && isTvLayout())
     ) {
       if (!response.items?.length) {
-        console.warn(
-          `${CONSOLE_PREFIX} The items response contained no usable items.`,
-          { responseKeys: Object.keys(response ?? {}) }
-        );
+        console.warn(`${CONSOLE_PREFIX} The items response contained no usable items.`, {
+          responseKeys: Object.keys(response ?? {})
+        });
         recordMountFailure();
       }
       if (!response.items?.length || (response.hideOnTvLayout && isTvLayout())) {
@@ -312,14 +283,15 @@ async function mount(container: Element): Promise<void> {
     saveFeaturedCache(response);
     if (!cachedCarousel) await preloadFeaturedArtwork(response);
     if (
-      mountToken !== lifecycleToken ||
+      mountToken !== mountState.lifecycleToken ||
       !container.isConnected ||
       !isActiveHomeContainer(container) ||
       (instances.has(container) && instances.get(container) !== cachedCarousel) ||
-      Array.from(container.querySelectorAll(':scope > .ec-root')).some((root) => (
-        root !== placeholder && root !== cachedCarousel?.root
-      ))
-    ) return;
+      Array.from(container.querySelectorAll(':scope > .ec-root')).some(
+        (root) => root !== placeholder && root !== cachedCarousel?.root
+      )
+    )
+      return;
 
     const currentItem = cachedCarousel?.getActiveItem();
     const displayResponse = keepCurrentItem(response, currentItem);
@@ -331,15 +303,16 @@ async function mount(container: Element): Promise<void> {
     if (!instances.has(container)) recordMountFailure();
     console.warn(`${CONSOLE_PREFIX} Could not load featured items.`, error);
   } finally {
-    const lifecycleChanged = mountToken !== lifecycleToken;
+    const lifecycleChanged = mountToken !== mountState.lifecycleToken;
     if (!instances.has(container)) {
       if (
-        mountToken === lifecycleToken
-        && container.isConnected
-        && isActiveHomeContainer(container)
-        && !(config.hideOnTvLayout && isTvLayout())
-        && canAttemptMount()
-      ) recordMountFailure();
+        mountToken === mountState.lifecycleToken &&
+        container.isConnected &&
+        isActiveHomeContainer(container) &&
+        !(config.hideOnTvLayout && isTvLayout()) &&
+        canAttemptMount()
+      )
+        recordMountFailure();
       removePlaceholder(container);
       container.closest('#homeTab')?.classList.remove('ec-hero-page');
     }
@@ -349,7 +322,7 @@ async function mount(container: Element): Promise<void> {
   }
 }
 
-export function scan(removeInactive = false): void {
+function scan(removeInactive = false): void {
   for (const [container, placeholder] of placeholders) {
     if (!container.isConnected || !placeholder.isConnected) {
       placeholder.remove();
@@ -358,9 +331,8 @@ export function scan(removeInactive = false): void {
     }
   }
   for (const [container, instance] of instances) {
-    const rootWasUnexpectedlyRemoved = container.isConnected
-      && isActiveHomeContainer(container)
-      && !instance.root.isConnected;
+    const rootWasUnexpectedlyRemoved =
+      container.isConnected && isActiveHomeContainer(container) && !instance.root.isConnected;
     if (!container.isConnected || !instance.root.isConnected || (removeInactive && !isActiveHomeContainer(container))) {
       if (rootWasUnexpectedlyRemoved) recordMountFailure();
       instance.destroy();
@@ -379,16 +351,8 @@ export function scan(removeInactive = false): void {
   });
 }
 
-export function scheduleScan(removeInactive = false): void {
-  removeInactiveOnNextScan ||= removeInactive;
-  if (scheduled) return;
-  scheduled = true;
-  window.requestAnimationFrame(() => {
-    scheduled = false;
-    const shouldRemoveInactive = removeInactiveOnNextScan;
-    removeInactiveOnNextScan = false;
-    scan(shouldRemoveInactive);
-  });
+function scheduleScan(removeInactive = false): void {
+  runtimeCoordinator.scheduleScan(removeInactive);
 }
 
 function scheduleFullRefresh(): void {
@@ -396,41 +360,18 @@ function scheduleFullRefresh(): void {
   scheduleAdminNavigationRefresh();
 }
 
-function elementContainsHomeSurface(element: Element): boolean {
-  return element.matches('#indexPage, #homeTab, .homeSectionsContainer')
-    || element.querySelector('#indexPage, #homeTab, .homeSectionsContainer') !== null;
-}
-
-function mutationAffectsHome(mutation: MutationRecord): boolean {
-  const target = mutation.target instanceof Element ? mutation.target : mutation.target.parentElement;
-  if (!target || target.closest('.ec-root, .ec-bootstrap-placeholder')) return false;
-  if (mutation.type === 'attributes') {
-    return target.matches('#indexPage, #homeTab, .page');
-  }
-
-  const changedElements = [...mutation.addedNodes, ...mutation.removedNodes]
-    .filter((node): node is Element => node instanceof Element);
-  if (!changedElements.length) return false;
-  const isPluginElement = (element: Element): boolean => (
-    element.matches('.ec-root, .ec-bootstrap-placeholder')
-    || element.closest('.ec-root, .ec-bootstrap-placeholder') !== null
-  );
-  if (changedElements.every(isPluginElement)) return false;
-  if (target.closest('#indexPage, #homeTab, .homeSectionsContainer')) return true;
-  return changedElements.some(elementContainsHomeSurface);
-}
-
 function mutationAddsAdminNavigation(mutation: MutationRecord): boolean {
   if (mutation.type !== 'childList') return false;
-  return Array.from(mutation.addedNodes).some((node) => (
-    node instanceof Element
-    && (node.matches('ul[aria-labelledby="plugins-subheader"]')
-      || node.querySelector('ul[aria-labelledby="plugins-subheader"]') !== null
-      || isUserSettingsMenu(node)
-      || Array.from(node.querySelectorAll('ul[role="menu"]')).some(isUserSettingsMenu)
-      || node.matches('#myPreferencesMenuPage')
-      || node.querySelector('#myPreferencesMenuPage') !== null)
-  ));
+  return Array.from(mutation.addedNodes).some(
+    (node) =>
+      node instanceof Element &&
+      (node.matches('ul[aria-labelledby="plugins-subheader"]') ||
+        node.querySelector('ul[aria-labelledby="plugins-subheader"]') !== null ||
+        isUserSettingsMenu(node) ||
+        Array.from(node.querySelectorAll('ul[role="menu"]')).some(isUserSettingsMenu) ||
+        node.matches('#myPreferencesMenuPage') ||
+        node.querySelector('#myPreferencesMenuPage') !== null)
+  );
 }
 
 function trackedMountNeedsRecovery(): boolean {
@@ -443,85 +384,27 @@ function trackedMountNeedsRecovery(): boolean {
   return false;
 }
 
-function bindRouteEvents(): void {
-  if (routeEventsBound) return;
-
-  routeEventHandler = scheduleFullRefresh;
-  window.addEventListener('hashchange', scheduleFullRefresh, { passive: true });
-  window.addEventListener('popstate', scheduleFullRefresh, { passive: true });
-  document.addEventListener('viewshow', scheduleFullRefresh as EventListener, { passive: true });
-  document.addEventListener('pageshow', scheduleFullRefresh as EventListener, { passive: true });
-  routeEventsBound = true;
-
-  if (window.history && typeof window.history.pushState === 'function') {
-    originalHistoryPushState = window.history.pushState;
-    originalHistoryReplaceState = window.history.replaceState;
-    (['pushState', 'replaceState'] as HistoryMethodName[]).forEach((methodName) => {
-      const original = window.history[methodName];
-      window.history[methodName] = function patchedHistoryMethod(
-        this: History,
-        ...args: Parameters<History[HistoryMethodName]>
-      ) {
-        const result = original.apply(this, args as never);
-        window.setTimeout(scheduleFullRefresh, 0);
-        return result;
-      } as History[HistoryMethodName];
-    });
-  }
-}
-
-function unbindRouteEvents(): void {
-  if (routeEventHandler) {
-    window.removeEventListener('hashchange', routeEventHandler);
-    window.removeEventListener('popstate', routeEventHandler);
-    document.removeEventListener('viewshow', routeEventHandler as EventListener);
-    document.removeEventListener('pageshow', routeEventHandler as EventListener);
-  }
-  routeEventHandler = null;
-  routeEventsBound = false;
-
-  if (originalHistoryPushState) window.history.pushState = originalHistoryPushState;
-  if (originalHistoryReplaceState) window.history.replaceState = originalHistoryReplaceState;
-  originalHistoryPushState = null;
-  originalHistoryReplaceState = null;
-}
-
 export function start(): void {
-  if (observer) return;
+  if (runtimeCoordinator.isStarted) return;
   window.JellyfinFeaturedBootstrap?.stop();
-  lifecycleToken += 1;
-  observer = new MutationObserver((mutations) => {
-    const hasTrackedMount = instances.size > 0 || placeholders.size > 0 || pendingContainers.size > 0;
-    if (trackedMountNeedsRecovery() || (!hasTrackedMount && mutations.some(mutationAffectsHome))) scheduleScan();
-    if (mutations.some(mutationAddsAdminNavigation)) scheduleAdminNavigationRefresh();
-  });
-  observer.observe(document.getElementById('reactRoot') ?? document.body, {
-    attributes: true,
-    attributeFilter: ['class'],
-    childList: true,
-    subtree: true
-  });
-  bindRouteEvents();
+  mountState.beginLifecycle();
+  runtimeCoordinator.start(document.getElementById('reactRoot') ?? document.body);
   document.addEventListener(USER_PREFERENCES_CHANGED_EVENT, refreshForPreferenceChange);
   scheduleFullRefresh();
 }
 
+function handleMutations(mutations: MutationRecord[]): void {
+  const hasTrackedMount = mountState.hasTrackedMount();
+  if (shouldScheduleRuntimeScan(mutations, hasTrackedMount, trackedMountNeedsRecovery())) scheduleScan();
+  if (mutations.some(mutationAddsAdminNavigation)) scheduleAdminNavigationRefresh();
+}
+
 export function destroy(): void {
-  lifecycleToken += 1;
-  observer?.disconnect();
-  observer = null;
-  unbindRouteEvents();
+  mountState.beginLifecycle();
+  runtimeCoordinator.stop();
   document.removeEventListener(USER_PREFERENCES_CHANGED_EVENT, refreshForPreferenceChange);
   cancelAdminNavigationRefresh();
-  if (presetRefreshTimer !== null) window.clearTimeout(presetRefreshTimer);
-  presetRefreshTimer = null;
-  instances.forEach((instance) => instance.destroy());
-  instances.clear();
-  placeholders.forEach((placeholder) => placeholder.remove());
-  placeholders.clear();
-  pendingContainers.clear();
-  resetMountFailures();
-  removeInactiveOnNextScan = false;
+  mountState.clear((instance) => instance.destroy());
   document.querySelectorAll('[data-featured-loading]').forEach((element) => {
     element.removeAttribute('data-featured-loading');
   });
