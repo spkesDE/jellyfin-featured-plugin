@@ -1,5 +1,32 @@
-export type SourceType = 'LIBRARIES' | 'COLLECTIONS' | 'FAVOURITES' | 'TAGS' | 'PLAYLISTS' | 'RECENTLY_ADDED' | 'LATEST_RELEASES' | 'RANDOM' | 'UNPLAYED' | 'MANUAL_LISTS' | 'RECOMMENDATIONS' | 'CONTINUE_WATCHING' | 'NEXT_UP';
-export type FilterField = 'LIBRARY' | 'GENRE' | 'TAG' | 'MEDIA_TYPE' | 'PLAYED' | 'COMMUNITY_RATING' | 'CRITIC_RATING' | 'PRODUCTION_YEAR' | 'RUNTIME_MINUTES' | 'VIDEO_RESOLUTION' | 'ACTOR' | 'DIRECTOR' | 'ORIGINAL_LANGUAGE' | 'AUDIO_LANGUAGE';
+export type SourceType =
+  | 'LIBRARIES'
+  | 'COLLECTIONS'
+  | 'FAVOURITES'
+  | 'TAGS'
+  | 'PLAYLISTS'
+  | 'RECENTLY_ADDED'
+  | 'LATEST_RELEASES'
+  | 'RANDOM'
+  | 'UNPLAYED'
+  | 'MANUAL_LISTS'
+  | 'RECOMMENDATIONS'
+  | 'CONTINUE_WATCHING'
+  | 'NEXT_UP';
+export type FilterField =
+  | 'LIBRARY'
+  | 'GENRE'
+  | 'TAG'
+  | 'MEDIA_TYPE'
+  | 'PLAYED'
+  | 'COMMUNITY_RATING'
+  | 'CRITIC_RATING'
+  | 'PRODUCTION_YEAR'
+  | 'RUNTIME_MINUTES'
+  | 'VIDEO_RESOLUTION'
+  | 'ACTOR'
+  | 'DIRECTOR'
+  | 'ORIGINAL_LANGUAGE'
+  | 'AUDIO_LANGUAGE';
 export type FilterOperator = 'EQUALS' | 'NOT_EQUALS' | 'GTE' | 'LTE' | 'CONTAINS_ANY' | 'CONTAINS_ALL';
 export type FrontendInjectionMethod = 'automatic' | 'file-transformation' | 'javascript-injector' | 'direct';
 export type TransitionEffect = 'slide' | 'fade';
@@ -148,71 +175,78 @@ export interface FeaturedPreset {
   Trailers: FeaturedPresetTrailerSettings;
 }
 
-export interface FeaturedPresetMixerSettings {
-  RepeatCooldownDays: number;
-  RelaxRepeatCooldownWhenNeeded: boolean;
-  MaximumItemsPerGenre: number;
-  MaximumItemsPerFranchise: number;
-  RandomMediaCount: number;
-}
+export type FeaturedPresetMixerSettings = Pick<
+  FeaturedPluginConfig,
+  | 'RepeatCooldownDays'
+  | 'RelaxRepeatCooldownWhenNeeded'
+  | 'MaximumItemsPerGenre'
+  | 'MaximumItemsPerFranchise'
+  | 'RandomMediaCount'
+>;
 
-export interface FeaturedPresetLayoutSettings {
-  EnableInfiniteLoading: boolean;
-  EnableAutoplay: boolean;
-  ShowAutoplayButton: boolean;
-  AutoplayInterval: number;
-  ShowPlayButton: boolean;
-  ShowFavoriteButton: boolean;
-  FavoriteButtonPlacement: FeatureControlPlacement;
-  ShowPlaystateButton: boolean;
-  PlaystateButtonPlacement: FeatureControlPlacement;
-  ShowDismissalButton: boolean;
-  DismissalButtonPlacement: FeatureControlPlacement;
-  ShowNavigationArrows: boolean;
-  ShowControlsOnHoverOnly: boolean;
-  InteractOnWholeBanner: boolean;
-  ShowSlidePosition: boolean;
-  MediaPadding: number;
-  TitleDisplayMode: 'logo' | 'title';
-  ShowRating: boolean;
-  ShowDescription: boolean;
-  HideOnTvLayout: boolean;
-  UseHeroLayout: boolean;
-  HeroHeightMode: HeroHeightMode;
-  TabletBannerHeight: number;
-  MobileBannerHeight: number;
-  HeroBorderRadius: number;
-  HeroGradientStrength: number;
-  HeroFadeStart: number;
-  HeroFadeEnd: number;
-  HeroFadeCurve: HeroFadeCurve;
-  HeroFadePoints: HeroFadePoint[];
-  HeroTextPosition: HeroTextPosition;
-  TransitionEffect: TransitionEffect;
-  HeroBackdropPosition: HeroBackdropPosition;
-  BannerHeight: number;
-  ShowYear: boolean;
-  ShowRuntime: boolean;
-  ShowSecondaryButton: boolean;
+type FeaturedPresetLayoutSharedSettings = Pick<
+  FeaturedPluginConfig,
+  | 'EnableInfiniteLoading'
+  | 'EnableAutoplay'
+  | 'ShowAutoplayButton'
+  | 'AutoplayInterval'
+  | 'ShowPlayButton'
+  | 'ShowFavoriteButton'
+  | 'FavoriteButtonPlacement'
+  | 'ShowPlaystateButton'
+  | 'PlaystateButtonPlacement'
+  | 'ShowDismissalButton'
+  | 'DismissalButtonPlacement'
+  | 'ShowNavigationArrows'
+  | 'ShowControlsOnHoverOnly'
+  | 'InteractOnWholeBanner'
+  | 'ShowSlidePosition'
+  | 'MediaPadding'
+  | 'TitleDisplayMode'
+  | 'ShowRating'
+  | 'ShowDescription'
+  | 'HideOnTvLayout'
+  | 'UseHeroLayout'
+  | 'HeroHeightMode'
+  | 'TabletBannerHeight'
+  | 'MobileBannerHeight'
+  | 'HeroBorderRadius'
+  | 'HeroGradientStrength'
+  | 'HeroFadeStart'
+  | 'HeroFadeEnd'
+  | 'HeroFadeCurve'
+  | 'HeroFadePoints'
+  | 'HeroTextPosition'
+  | 'TransitionEffect'
+  | 'HeroBackdropPosition'
+  | 'BannerHeight'
+  | 'ShowYear'
+  | 'ShowRuntime'
+  | 'ShowSecondaryButton'
+  | 'ShowPaginationDots'
+>;
+
+export interface FeaturedPresetLayoutSettings extends FeaturedPresetLayoutSharedSettings {
   SecondaryButtonText: string | null;
-  ShowPaginationDots: boolean;
   Heading: string | null;
   PlayButtonText: string | null;
 }
 
-export interface FeaturedPresetTrailerSettings {
-  EnableBackgroundTrailers: boolean;
-  TrailerSourcePriority: TrailerSourcePriority;
-  StartTrailersMuted: boolean;
-  ShowTrailerControls: boolean;
-  TrailerVolumeSliderDirection: TrailerVolumeSliderDirection;
-  HideYouTubeTrailerUntilControlsFade: boolean;
-  WaitForTrailerToFinish: boolean;
-  TrailerDelayMilliseconds: number;
-  TrailerStartOffsetSeconds: number;
-  TrailerEndOffsetSeconds: number;
-  MultipleTrailerMode: MultipleTrailerMode;
-  AllowTrailersOnMobile: boolean;
+export interface FeaturedPresetTrailerSettings extends Pick<
+  FeaturedPluginConfig,
+  | 'EnableBackgroundTrailers'
+  | 'TrailerSourcePriority'
+  | 'StartTrailersMuted'
+  | 'ShowTrailerControls'
+  | 'TrailerVolumeSliderDirection'
+  | 'HideYouTubeTrailerUntilControlsFade'
+  | 'WaitForTrailerToFinish'
+  | 'TrailerDelayMilliseconds'
+  | 'TrailerStartOffsetSeconds'
+  | 'TrailerEndOffsetSeconds'
+  | 'MultipleTrailerMode'
+  | 'AllowTrailersOnMobile'
+> {
   Overrides: FeaturedTrailerOverride[];
 }
 

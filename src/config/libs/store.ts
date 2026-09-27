@@ -1,16 +1,55 @@
-import { computed, inject, reactive, ref, type ComputedRef, type InjectionKey, type Ref, type WritableComputedRef } from 'vue';
+import {
+  computed,
+  inject,
+  reactive,
+  ref,
+  type ComputedRef,
+  type InjectionKey,
+  type Ref,
+  type WritableComputedRef
+} from 'vue';
 import { cloneJsonValue } from '../../core/clone';
+import { createId } from '../../core/id';
 import { getApiClient, requestJson } from '../../core/apiClient';
 import { t } from '../../i18n';
-import type { FeaturedFilterRule, FeaturedManualList, FeaturedPluginConfig, FeaturedPreset, FrontendInjectionMethod, SourceType } from '../../types/config';
-import type { FeaturedDiagnostics, FeaturedFeedPreview, FeaturedResponse, FeaturedSearchItem } from '../../types/featured';
-import { createDefaultConfig, createFilterRule, createManualList, createPresetFromConfig, createSourceRule, createUserProfile, normalizeConfig, refreshPresetFromConfig } from './defaults';
+import type {
+  FeaturedFilterRule,
+  FeaturedManualList,
+  FeaturedPluginConfig,
+  FeaturedPreset,
+  FrontendInjectionMethod,
+  SourceType
+} from '../../types/config';
+import type {
+  FeaturedDiagnostics,
+  FeaturedFeedPreview,
+  FeaturedResponse,
+  FeaturedSearchItem
+} from '../../types/featured';
+import {
+  createDefaultConfig,
+  createFilterRule,
+  createManualList,
+  createPresetFromConfig,
+  createSourceRule,
+  createUserProfile,
+  normalizeConfig,
+  refreshPresetFromConfig
+} from './defaults';
 import { loadLibrariesAndCollections, loadRatings, loadUsers } from './jellyfinApi';
-import type { ConfigCollection, ConfigLibrary, ConfigPlaylist, ConfigRating, ConfigTab, ConfigUser, SaveState } from './types';
+import type {
+  ConfigCollection,
+  ConfigLibrary,
+  ConfigPlaylist,
+  ConfigRating,
+  ConfigTab,
+  ConfigUser,
+  SaveState
+} from './types';
 
 const PLUGIN_ID = '08880a95-8467-4538-bab9-da69c7f4793f';
 const snapshot = (value: FeaturedPluginConfig): string => JSON.stringify(value);
-const cloneConfig = (value: FeaturedPluginConfig): FeaturedPluginConfig => JSON.parse(snapshot(value)) as FeaturedPluginConfig;
+const cloneConfig = (value: FeaturedPluginConfig): FeaturedPluginConfig => cloneJsonValue(value);
 
 export interface ConfigStore {
   config: FeaturedPluginConfig;
@@ -119,25 +158,23 @@ export function createConfigStore(): ConfigStore {
 
   async function loadSupportingData(): Promise<void> {
     if (supportingDataPromise) return supportingDataPromise;
-    supportingDataPromise = Promise.all([
-      loadUsers(),
-      loadLibrariesAndCollections(),
-      loadRatings()
-    ]).then(([loadedUsers, discovery, loadedRatings]) => {
-      users.value = loadedUsers;
-      libraries.value = discovery.libraries;
-      collections.value = discovery.collections;
-      playlists.value = discovery.playlists;
-      genres.value = discovery.genres;
-      tags.value = discovery.tags;
-      actors.value = discovery.actors;
-      directors.value = discovery.directors;
-      originalLanguages.value = discovery.originalLanguages;
-      audioLanguages.value = discovery.audioLanguages;
-      ratings.value = loadedRatings;
-    }).finally(() => {
-      supportingDataPromise = null;
-    });
+    supportingDataPromise = Promise.all([loadUsers(), loadLibrariesAndCollections(), loadRatings()])
+      .then(([loadedUsers, discovery, loadedRatings]) => {
+        users.value = loadedUsers;
+        libraries.value = discovery.libraries;
+        collections.value = discovery.collections;
+        playlists.value = discovery.playlists;
+        genres.value = discovery.genres;
+        tags.value = discovery.tags;
+        actors.value = discovery.actors;
+        directors.value = discovery.directors;
+        originalLanguages.value = discovery.originalLanguages;
+        audioLanguages.value = discovery.audioLanguages;
+        ratings.value = loadedRatings;
+      })
+      .finally(() => {
+        supportingDataPromise = null;
+      });
     return supportingDataPromise;
   }
 
@@ -181,18 +218,23 @@ export function createConfigStore(): ConfigStore {
     if (!api?.getPluginConfiguration) return Promise.resolve();
     loading.value = true;
     window.Dashboard?.showLoadingMsg();
-    const primaryLoad = api.getPluginConfiguration(PLUGIN_ID).then((serverConfig) => {
-      Object.assign(config, normalizeConfig(serverConfig));
-      lastSaved.value = snapshot(config);
-      savedFeedback.value = false;
-    }).finally(() => {
-      loading.value = false;
-      window.Dashboard?.hideLoadingMsg();
-      configLoadPromise = null;
-    });
+    const primaryLoad = api
+      .getPluginConfiguration(PLUGIN_ID)
+      .then((serverConfig) => {
+        Object.assign(config, normalizeConfig(serverConfig));
+        lastSaved.value = snapshot(config);
+        savedFeedback.value = false;
+      })
+      .finally(() => {
+        loading.value = false;
+        window.Dashboard?.hideLoadingMsg();
+        configLoadPromise = null;
+      });
     configLoadPromise = primaryLoad;
     void requestJson<Record<FrontendInjectionMethod, boolean>>('featured/config/injection-methods')
-      .then((availability) => { injectionMethodsAvailable.value = availability; })
+      .then((availability) => {
+        injectionMethodsAvailable.value = availability;
+      })
       .catch(() => undefined);
     void primaryLoad.then(() => loadSupportingData()).catch(() => undefined);
     return primaryLoad;
@@ -208,7 +250,9 @@ export function createConfigStore(): ConfigStore {
       lastSaved.value = snapshot(config);
       savedFeedback.value = true;
       if (feedbackTimer) window.clearTimeout(feedbackTimer);
-      feedbackTimer = window.setTimeout(() => { savedFeedback.value = false; }, 1400);
+      feedbackTimer = window.setTimeout(() => {
+        savedFeedback.value = false;
+      }, 1400);
       window.Dashboard?.processPluginConfigurationUpdateResult(result);
       if (activeTab.value === 'display') void loadPreview(true);
     } finally {
@@ -294,20 +338,30 @@ export function createConfigStore(): ConfigStore {
   function addManualItem(list: FeaturedManualList, item: FeaturedSearchItem): void {
     if (list.Items.some((candidate) => candidate.ItemId === item.id)) return;
     list.Items.push({
-      Id: globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(16).slice(2)}`,
-      ItemId: item.id, Name: item.name, MediaType: item.mediaType, ProductionYear: item.productionYear ?? null,
-      ImageType: item.imageType, Position: list.Items.length, StartsAt: null, EndsAt: null
+      Id: createId(),
+      ItemId: item.id,
+      Name: item.name,
+      MediaType: item.mediaType,
+      ProductionYear: item.productionYear ?? null,
+      ImageType: item.imageType,
+      Position: list.Items.length,
+      StartsAt: null,
+      EndsAt: null
     });
   }
   function removeManualItem(list: FeaturedManualList, index: number): void {
     list.Items.splice(index, 1);
-    list.Items.forEach((item, position) => { item.Position = position; });
+    list.Items.forEach((item, position) => {
+      item.Position = position;
+    });
   }
   function moveManualItem(list: FeaturedManualList, from: number, to: number): void {
     if (from < 0 || to < 0 || from >= list.Items.length || to >= list.Items.length || from === to) return;
     const [item] = list.Items.splice(from, 1);
     list.Items.splice(to, 0, item);
-    list.Items.forEach((candidate, position) => { candidate.Position = position; });
+    list.Items.forEach((candidate, position) => {
+      candidate.Position = position;
+    });
   }
   function addUserProfile(userId: string): void {
     if (!userId || config.UserProfiles.some((profile) => profile.UserId === userId)) return;
@@ -328,7 +382,7 @@ export function createConfigStore(): ConfigStore {
     const preset = config.Presets[index];
     if (!preset) return;
     const copy = cloneJsonValue(preset) as FeaturedPreset;
-    copy.Id = globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    copy.Id = createId();
     copy.Name = t('preset.copyName', { name: preset.Name });
     copy.Enabled = false;
     config.Presets.splice(index + 1, 0, copy);
@@ -344,18 +398,59 @@ export function createConfigStore(): ConfigStore {
     });
   }
   return {
-    config, users, libraries, collections, playlists, genres, tags, actors, directors, originalLanguages, audioLanguages,
-    ratings, preview, diagnostics, diagnosticsError, diagnosticsLoading, injectionMethodsAvailable,
-    feedPreview, feedPreviewOpen, feedPreviewLoading, feedPreviewError, feedPreviewPresetId, feedPreviewUserId,
-    activeTab, loading, saveState, parentalRatingValue,
-    loadConfig, saveConfig, runDiagnostics, openFeedPreview, closeFeedPreview, runFeedPreview, selectTab: (tab) => {
+    config,
+    users,
+    libraries,
+    collections,
+    playlists,
+    genres,
+    tags,
+    actors,
+    directors,
+    originalLanguages,
+    audioLanguages,
+    ratings,
+    preview,
+    diagnostics,
+    diagnosticsError,
+    diagnosticsLoading,
+    injectionMethodsAvailable,
+    feedPreview,
+    feedPreviewOpen,
+    feedPreviewLoading,
+    feedPreviewError,
+    feedPreviewPresetId,
+    feedPreviewUserId,
+    activeTab,
+    loading,
+    saveState,
+    parentalRatingValue,
+    loadConfig,
+    saveConfig,
+    runDiagnostics,
+    openFeedPreview,
+    closeFeedPreview,
+    runFeedPreview,
+    selectTab: (tab) => {
       activeTab.value = tab;
       if (tab === 'display') void loadPreview();
     },
-    addSource, removeSource, moveSource, addFilter, removeFilter,
-    addManualList, removeManualList, addManualItem, removeManualItem, moveManualItem,
-    addUserProfile, removeUserProfile,
-    addPreset, updatePresetSnapshot, duplicatePreset, removePreset,
+    addSource,
+    removeSource,
+    moveSource,
+    addFilter,
+    removeFilter,
+    addManualList,
+    removeManualList,
+    addManualItem,
+    removeManualItem,
+    moveManualItem,
+    addUserProfile,
+    removeUserProfile,
+    addPreset,
+    updatePresetSnapshot,
+    duplicatePreset,
+    removePreset,
     clearDisplayHistory
   };
 }

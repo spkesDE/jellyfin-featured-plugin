@@ -1,6 +1,6 @@
 import { t, type TranslationKey } from './i18n';
 
-export const FEATURED_MEDIA_TYPES = [
+const FEATURED_MEDIA_TYPES = [
   'Movie',
   'Series',
   'MusicVideo',
@@ -12,7 +12,7 @@ export const FEATURED_MEDIA_TYPES = [
   'PhotoAlbum'
 ] as const;
 
-export type FeaturedMediaType = typeof FEATURED_MEDIA_TYPES[number];
+type FeaturedMediaType = (typeof FEATURED_MEDIA_TYPES)[number];
 
 const MEDIA_TYPE_TRANSLATIONS: Record<FeaturedMediaType, TranslationKey> = {
   Movie: 'filter.value.movies',

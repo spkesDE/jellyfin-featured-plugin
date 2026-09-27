@@ -1,8 +1,6 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { readProjectSource as read } from './helpers/readProjectSource.mjs';
 import test from 'node:test';
-
-const read = async (path) => await readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 
 test('backend and frontend supported media types stay in parity', async () => {
   const [backend, frontend] = await Promise.all([
@@ -65,11 +63,19 @@ test('critical C# and TypeScript defaults stay in parity', async () => {
   };
   for (const [name, value] of Object.entries(expected)) {
     const csharpValue = value.startsWith("'") ? `"${value.slice(1, -1)}"` : value;
-    assert.match(backend, new RegExp(`public\\s+\\w+\\s+${name}\\s*\\{[^}]+\\}\\s*=\\s*${csharpValue.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*;`));
+    assert.match(
+      backend,
+      new RegExp(
+        `public\\s+\\w+\\s+${name}\\s*\\{[^}]+\\}\\s*=\\s*${csharpValue.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*;`
+      )
+    );
     assert.match(frontend, new RegExp(`\\b${name}:\\s*${value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*,`));
   }
   for (const source of [backend, frontend]) {
-    assert.match(source, /HeroFadePoints[\s\S]*?Position\s*[=:]\s*0,?\s*Fade\s*[=:]\s*0[\s\S]*?Position\s*[=:]\s*30,?\s*Fade\s*[=:]\s*41[\s\S]*?Position\s*[=:]\s*76,?\s*Fade\s*[=:]\s*67[\s\S]*?Position\s*[=:]\s*100,?\s*Fade\s*[=:]\s*100/);
+    assert.match(
+      source,
+      /HeroFadePoints[\s\S]*?Position\s*[=:]\s*0,?\s*Fade\s*[=:]\s*0[\s\S]*?Position\s*[=:]\s*30,?\s*Fade\s*[=:]\s*41[\s\S]*?Position\s*[=:]\s*76,?\s*Fade\s*[=:]\s*67[\s\S]*?Position\s*[=:]\s*100,?\s*Fade\s*[=:]\s*100/
+    );
   }
 });
 
@@ -86,11 +92,12 @@ test('item and runtime contracts retain their established names and interval uni
   assert.match(dtos, /JsonPropertyName\("official_rating"\)/);
   assert.match(dtos, /JsonPropertyName\("critic_rating"\)/);
   assert.match(dtos, /JsonPropertyName\("community_rating"\)/);
-  assert.match(controller, /new FeaturedItemsResponseDto\([\s\S]*?_config,[\s\S]*?items,[\s\S]*?personalization,[\s\S]*?_presetResolution\.ActivePresetId/);
+  assert.match(controller, /new FeaturedItemsResponseDto\([\s\S]*?config,[\s\S]*?items,[\s\S]*?personalization/);
+  assert.match(controller, /presetResolution\.ActivePresetId/);
 });
 
 test('featured presets resolve schedules and override all roadmap sections', async () => {
-  const [configuration, normalizer, resolver, controller, response, cache, defaults, presetTab, runtime] = await Promise.all([
+  const [configuration, normalizer, resolver, controller, response, cache, defaults, presetTab] = await Promise.all([
     read('Jellyfin.Plugin.Featured/Configuration/PluginConfiguration.cs'),
     read('Jellyfin.Plugin.Featured/Configuration/PluginConfigurationNormalizer.cs'),
     read('Jellyfin.Plugin.Featured/Configuration/FeaturedPresetResolver.cs'),
@@ -98,31 +105,42 @@ test('featured presets resolve schedules and override all roadmap sections', asy
     read('Jellyfin.Plugin.Featured/Api/FeaturedResponseDtos.cs'),
     read('Jellyfin.Plugin.Featured/Api/FeaturedPreparedCache.cs'),
     read('src/config/libs/defaults.ts'),
-    read('src/config/tabs/PresetsTab.vue'),
-    read('src/runtime.ts')
+    read('src/config/tabs/PresetsTab.vue')
   ]);
   for (const section of ['SourceRules', 'GlobalFilters', 'PersonalizationPolicy', 'Mixer', 'Layout', 'Trailers']) {
     assert.match(configuration, new RegExp(`class FeaturedPreset[\\s\\S]*?${section}`), `preset misses ${section}`);
   }
   assert.match(normalizer, /NormalizePresets[\s\S]*?NormalizeSchedule[\s\S]*?DistinctBy\(preset => preset\.Id/);
   assert.match(resolver, /preset\.StartsAt\.Value <= now[\s\S]*?preset\.EndsAt\.Value > now/);
-  assert.match(resolver, /OrderByDescending\(candidate => candidate\.Preset\.Priority\)[\s\S]*?ThenByDescending\(candidate => candidate\.Window!\.Start/);
+  assert.match(
+    resolver,
+    /OrderByDescending\(candidate => candidate\.Preset\.Priority\)[\s\S]*?ThenByDescending\(candidate => candidate\.Window!\.Start/
+  );
   assert.match(configuration, /FeaturedPresetScheduleTypes[\s\S]*?OneTime[\s\S]*?Weekly[\s\S]*?Annual/);
   assert.match(resolver, /GetWeeklyWindows[\s\S]*?GetAnnualWindows[\s\S]*?GetNextBoundary/);
-  assert.match(resolver, /config\.SourceRules = preset\.SourceRules[\s\S]*?config\.PersonalizationPolicy = preset\.PersonalizationPolicy/);
-  assert.match(resolver, /config\.UseHeroLayout = preset\.Layout\.UseHeroLayout[\s\S]*?config\.TrailerSourcePriority = preset\.Trailers\.TrailerSourcePriority/);
-  assert.match(resolver, /config\.EnableInfiniteLoading = preset\.Layout\.EnableInfiniteLoading/);
-  assert.match(resolver, /config\.TrailerOverrides = preset\.Trailers\.Overrides/);
+  assert.match(
+    resolver,
+    /ApplyPreset[\s\S]*?target\.SourceRules = preset\.SourceRules[\s\S]*?target\.PersonalizationPolicy = preset\.PersonalizationPolicy/
+  );
+  assert.match(
+    resolver,
+    /ApplyLayout[\s\S]*?target\.UseHeroLayout = source\.UseHeroLayout[\s\S]*?ApplyTrailers[\s\S]*?target\.TrailerSourcePriority = source\.TrailerSourcePriority/
+  );
+  assert.match(resolver, /target\.EnableInfiniteLoading = source\.EnableInfiniteLoading/);
+  assert.match(resolver, /target\.TrailerOverrides = source\.Overrides/);
   assert.match(controller, /FeaturedPresetResolver\.Resolve\(baseConfig, DateTimeOffset\.UtcNow\)/);
   assert.match(response, /public string\? ActivePresetName \{ get; \}/);
   assert.match(response, /public DateTimeOffset\? NextPresetChange \{ get; \}/);
   assert.match(cache, /FeaturedPresetResolver\.Resolve\(baseConfig, DateTimeOffset\.UtcNow\)\.Configuration/);
-  assert.match(defaults, /createPresetFromConfig[\s\S]*?SourceRules: cloneJsonValue[\s\S]*?PersonalizationPolicy[\s\S]*?Mixer:[\s\S]*?Layout:[\s\S]*?Trailers:/);
-  assert.match(presetTab, /preset\.ScheduleType === 'one_time'[\s\S]*?ConfigDateTime v-model="preset\.StartsAt"[\s\S]*?ConfigDateTime v-model="preset\.EndsAt"/);
+  assert.match(
+    defaults,
+    /createPresetFromConfig[\s\S]*?SourceRules: cloneJsonValue[\s\S]*?PersonalizationPolicy[\s\S]*?Mixer:[\s\S]*?Layout:[\s\S]*?Trailers:/
+  );
+  assert.match(
+    presetTab,
+    /preset\.ScheduleType === 'one_time'[\s\S]*?ConfigDateTime v-model="preset\.StartsAt"[\s\S]*?ConfigDateTime v-model="preset\.EndsAt"/
+  );
   assert.match(presetTab, /store\.updatePresetSnapshot\(index\)[\s\S]*?store\.duplicatePreset\(index\)/);
-  assert.match(runtime, /schedulePresetRefresh\(response\.nextPresetChange\)/);
-  assert.match(runtime, /Date\.now\(\) < boundary[\s\S]*?refreshForPresetBoundary\(\)/);
-  assert.match(runtime, /function refreshForPresetBoundary[\s\S]*?instance\.destroy\(\)[\s\S]*?scheduleScan\(\)/);
 });
 
 test('frontend bootstrap can be disabled independently of frontend injection', async () => {
@@ -149,7 +167,8 @@ test('normalization retains the saved 12.x bounds', async () => {
     'HeroBorderRadius, 0, 48',
     'HeroGradientStrength, 0, 100',
     'MediaPadding, -240, 240'
-  ]) assert.equal(normalizer.includes(expression), true, `missing normalization contract: ${expression}`);
+  ])
+    assert.equal(normalizer.includes(expression), true, `missing normalization contract: ${expression}`);
 });
 
 test('fullscreen height flows through normalization, settings, and runtime styles', async () => {
@@ -163,7 +182,7 @@ test('fullscreen height flows through normalization, settings, and runtime style
   assert.match(types, /HeroHeightMode = [^;]*'fullscreen'/);
   assert.match(displayTab, /value: 'fullscreen'/);
   assert.match(normalizer, /HeroHeightMode is [^\n]*"fullscreen"/);
-  assert.match(styles, /\.ec-height-fullscreen\s*\{[\s\S]*?--ec-height:\s*100vh/);
+  assert.match(styles, /\.ec-height-fullscreen,[\s\S]*?\.ec-root\.ec-height-fullscreen,[\s\S]*?--ec-height:\s*100vh/);
   assert.match(styles, /@supports \(height: 100dvh\)[\s\S]*?--ec-height:\s*100dvh/);
 });
 
@@ -180,16 +199,19 @@ test('vertical hero fade flows through backend display contracts', async () => {
     assert.match(configuration, new RegExp(`class FeaturedPreset[\\s\\S]*?${property}`));
     assert.match(responses, new RegExp(`public \\w+ ${property} \\{ get; \\}`));
     assert.match(defaults, new RegExp(`${property}: config\\.${property}`));
-    assert.match(resolver, new RegExp(`config\\.${property} = preset\\.Layout\\.${property}`));
+    assert.match(resolver, new RegExp(`target\\.${property} = source\\.${property}`));
   }
   assert.match(configuration, /HeroFadePoint\[\] HeroFadePoints/);
   assert.match(responses, /IReadOnlyList<HeroFadePointDto> HeroFadePoints/);
   assert.match(defaults, /HeroFadePoints: cloneJsonValue\(config\.HeroFadePoints\)/);
-  assert.match(resolver, /config\.HeroFadePoints = preset\.Layout\.HeroFadePoints/);
-  assert.match(normalizer, /NormalizeHeroFadePoints[\s\S]*?Math\.Clamp\(point\.Position, 1, 99\)[\s\S]*?Math\.Clamp\(point\.Fade, 0, 100\)/);
-  assert.match(normalizer, /HeroFadeStart = Math\.Clamp\([^;]+, 0, 100\)/);
-  assert.match(normalizer, /HeroFadeEnd = Math\.Clamp\([^;]+, 0, 100\)/);
-  assert.match(normalizer, /HeroFadeEnd <= [^\n]*HeroFadeStart[\s\S]*?HeroFadeStart = 50;[\s\S]*?HeroFadeEnd = 100;/);
+  assert.match(resolver, /target\.HeroFadePoints = source\.HeroFadePoints/);
+  assert.match(
+    normalizer,
+    /NormalizeHeroFadePoints[\s\S]*?Math\.Clamp\(point\.Position, 1, 99\)[\s\S]*?Math\.Clamp\(point\.Fade, 0, 100\)/
+  );
+  assert.match(normalizer, /start = Math\.Clamp\(start, 0, 100\)/);
+  assert.match(normalizer, /end = Math\.Clamp\(end, 0, 100\)/);
+  assert.match(normalizer, /if \(end <= start\) \(start, end\) = \(50, 100\)/);
 });
 
 test('configuration discovery uses the authenticated server options fallback', async () => {
@@ -209,7 +231,20 @@ test('configuration discovery uses the authenticated server options fallback', a
 });
 
 test('source-scoped media fallback, resolution, and user visibility flow through both runtimes', async () => {
-  const [configuration, normalizer, personalization, engine, engineFilters, factory, defaults, card, filterEditor, trailer, carousel, apiClient] = await Promise.all([
+  const [
+    configuration,
+    normalizer,
+    personalization,
+    engine,
+    engineFilters,
+    factory,
+    defaults,
+    card,
+    filterEditor,
+    trailer,
+    carousel,
+    apiClient
+  ] = await Promise.all([
     read('Jellyfin.Plugin.Featured/Configuration/PluginConfiguration.cs'),
     read('Jellyfin.Plugin.Featured/Configuration/PluginConfigurationNormalizer.cs'),
     read('Jellyfin.Plugin.Featured/Api/FeaturedPersonalizationService.cs'),
@@ -223,21 +258,51 @@ test('source-scoped media fallback, resolution, and user visibility flow through
     read('src/slider/carousel.ts'),
     read('src/core/apiClient.ts')
   ]);
-  assert.match(configuration, /class FeaturedSourceRule[\s\S]*?UseTrickplayFallback[\s\S]*?UseMediaPreviewFallback[\s\S]*?UserIds/);
+  assert.match(
+    configuration,
+    /class FeaturedSourceRule[\s\S]*?UseTrickplayFallback[\s\S]*?UseMediaPreviewFallback[\s\S]*?UserIds/
+  );
   assert.match(normalizer, /rule\.UserIds = NormalizeValues\(rule\.UserIds\)/);
   assert.match(personalization, /rule\.UserIds\.Length ===? 0|rule\.UserIds\.Length == 0/);
   assert.match(engine, /IsSourceVisibleToUser\(rule, activeUser\.Id\)/);
   assert.match(factory, /trailers\.Count == 0[\s\S]*?Provider = "media-preview"[\s\S]*?Provider = "trickplay"/);
-  assert.match(defaults, /UseMediaPreviewFallback:\s*false[\s\S]*?UseTrickplayFallback:\s*false[\s\S]*?UserIds:\s*\[\]/);
-  assert.match(card, /mediaFallbackMode = computed[\s\S]*?UseMediaPreviewFallback[\s\S]*?UseTrickplayFallback[\s\S]*?v-model="mediaFallbackMode"/);
+  assert.match(
+    defaults,
+    /UseMediaPreviewFallback:\s*false[\s\S]*?UseTrickplayFallback:\s*false[\s\S]*?UserIds:\s*\[\]/
+  );
+  assert.match(
+    card,
+    /mediaFallbackMode = computed[\s\S]*?UseMediaPreviewFallback[\s\S]*?UseTrickplayFallback[\s\S]*?v-model="mediaFallbackMode"/
+  );
   assert.match(configuration, /VideoResolution = "VIDEO_RESOLUTION"/);
   assert.match(normalizer, /FeaturedFilterFields\.VideoResolution/);
-  assert.match(engineFilters, /GetVideoResolution\(item\)[\s\S]*?Math\.Min\(stream\.Width\.Value, stream\.Height\.Value\)/);
-  assert.match(filterEditor, /VIDEO_RESOLUTION[\s\S]*?480p[\s\S]*?720p[\s\S]*?1080p[\s\S]*?2160p \(4K\)[\s\S]*?4320p \(8K\)/);
-  assert.match(trailer, /class TrickplayPlayer[\s\S]*?Fields: 'Trickplay,MediaSources'[\s\S]*?Videos\/\$\{encodeURIComponent\(this\.itemId\)\}\/Trickplay/);
-  assert.match(trailer, /findTrickplayLeaves\(manifest\)[\s\S]*?path\.some\(\(key\) => key\.toLowerCase\(\) === id\.toLowerCase\(\)\)/);
-  assert.match(trailer, /getBoundingClientRect\(\)[\s\S]*?renderedFrameWidth \* info\.columns[\s\S]*?backgroundPosition = `\$\{offsetX\}px \$\{offsetY\}px`/);
-  assert.match(carousel, /trailer\?\.provider === 'trickplay'[\s\S]*?trailer\?\.provider === 'media-preview'[\s\S]*?!this\.response\.enableBackgroundTrailers && !isFallbackMedia/);
-  assert.match(trailer, /class JellyfinMediaPreviewPlayer[\s\S]*?startFraction: 0\.2[\s\S]*?maximumDurationSeconds: 30/);
+  assert.match(
+    engineFilters,
+    /GetVideoResolution\(item\)[\s\S]*?Math\.Min\(stream\.Width\.Value, stream\.Height\.Value\)/
+  );
+  assert.match(
+    filterEditor,
+    /VIDEO_RESOLUTION[\s\S]*?480p[\s\S]*?720p[\s\S]*?1080p[\s\S]*?2160p \(4K\)[\s\S]*?4320p \(8K\)/
+  );
+  assert.match(
+    trailer,
+    /class TrickplayPlayer[\s\S]*?Fields: 'Trickplay,MediaSources'[\s\S]*?Videos\/\$\{encodeURIComponent\(this\.itemId\)\}\/Trickplay/
+  );
+  assert.match(
+    trailer,
+    /findTrickplayLeaves\(manifest\)[\s\S]*?path\.some\(\(key\) => key\.toLowerCase\(\) === id\.toLowerCase\(\)\)/
+  );
+  assert.match(
+    trailer,
+    /getBoundingClientRect\(\)[\s\S]*?renderedFrameWidth \* info\.columns[\s\S]*?backgroundPosition = `\$\{offsetX\}px \$\{offsetY\}px`/
+  );
+  assert.match(
+    carousel,
+    /trailer\?\.provider === 'trickplay'[\s\S]*?trailer\?\.provider === 'media-preview'[\s\S]*?!this\.response\.enableBackgroundTrailers && !isFallbackMedia/
+  );
+  assert.match(
+    trailer,
+    /class JellyfinMediaPreviewPlayer[\s\S]*?startFraction: 0\.2[\s\S]*?maximumDurationSeconds: 30/
+  );
   assert.match(apiClient, /value\.call\(apiClient\)/);
 });

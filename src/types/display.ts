@@ -1,4 +1,12 @@
-import type { FeatureControlPlacement, HeroBackdropPosition, HeroFadeCurve, HeroHeightMode, HeroTextPosition, TrailerVolumeSliderDirection, TransitionEffect } from './config';
+import type {
+  FeatureControlPlacement,
+  HeroBackdropPosition,
+  HeroFadeCurve,
+  HeroHeightMode,
+  HeroTextPosition,
+  TrailerVolumeSliderDirection,
+  TransitionEffect
+} from './config';
 
 export interface HeroFadeDisplayPoint {
   position: number;

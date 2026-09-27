@@ -1,6 +1,6 @@
 import { createApp } from 'vue';
 import App from './App.vue';
-import configCss from './config.css';
+import configCss from './config.css?inline';
 import { injectJellyfinThemeTokens } from '../styles/jellyfin-theme';
 
 const STYLE_ID = 'featuredConfigVueStyles';
