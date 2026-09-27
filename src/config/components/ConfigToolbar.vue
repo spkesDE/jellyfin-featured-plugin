@@ -18,7 +18,7 @@ const tabs: Array<{ id: ConfigTab; label: string }> = [
 
 async function handleKeydown(event: KeyboardEvent, tab: ConfigTab): Promise<void> {
   const currentIndex = tabs.findIndex((candidate) => candidate.id === tab);
-  let nextIndex = currentIndex;
+  let nextIndex: number;
   if (event.key === 'ArrowRight') nextIndex = (currentIndex + 1) % tabs.length;
   else if (event.key === 'ArrowLeft') nextIndex = (currentIndex - 1 + tabs.length) % tabs.length;
   else if (event.key === 'Home') nextIndex = 0;

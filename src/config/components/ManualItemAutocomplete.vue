@@ -21,12 +21,14 @@ const error = ref('');
 const searched = ref(false);
 let requestVersion = 0;
 
-const options = computed<AutoCompleteOption[]>(() => results.value.map((item) => ({
-  value: item.id,
-  label: item.name,
-  description: `${mediaTypeLabel(item.mediaType)}${item.productionYear ? ` · ${item.productionYear}` : ''}`,
-  icon: 'add_circle_outline'
-})));
+const options = computed<AutoCompleteOption[]>(() =>
+  results.value.map((item) => ({
+    value: item.id,
+    label: item.name,
+    description: `${mediaTypeLabel(item.mediaType)}${item.productionYear ? ` · ${item.productionYear}` : ''}`,
+    icon: 'add_circle_outline'
+  }))
+);
 
 function handleQueryChange(searchTerm: string): void {
   requestVersion += 1;
@@ -69,8 +71,18 @@ function select(option: AutoCompleteOption): void {
 </script>
 
 <template>
-  <AutoComplete :input-id="inputId" :label="t('manual.searchLabel')" :placeholder="t('manual.searchPlaceholder')"
-    :options="options" :loading="loading" :error="error" :searched="searched"
-    :loading-text="t('manual.searching')" :no-results-text="t('manual.noResults')"
-    @query-change="handleQueryChange" @search="search" @select="select" />
+  <AutoComplete
+    :input-id="inputId"
+    :label="t('manual.searchLabel')"
+    :placeholder="t('manual.searchPlaceholder')"
+    :options="options"
+    :loading="loading"
+    :error="error"
+    :searched="searched"
+    :loading-text="t('manual.searching')"
+    :no-results-text="t('manual.noResults')"
+    @query-change="handleQueryChange"
+    @search="search"
+    @select="select"
+  />
 </template>

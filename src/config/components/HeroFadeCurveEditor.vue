@@ -24,37 +24,34 @@ const height = 180;
 const inset = { left: 40, right: 14, top: 10, bottom: 28 };
 const selectedIndex = ref(1);
 const dragging = ref<
-  { kind: 'point'; index: number }
-  | { kind: 'start' }
-  | { kind: 'end' }
-  | { kind: 'endPoint' }
-  | null
+  { kind: 'point'; index: number } | { kind: 'start' } | { kind: 'end' } | { kind: 'endPoint' } | null
 >(null);
 const graph = ref<SVGSVGElement | null>(null);
 const basePoints = computed(() => getHeroFadePoints(props.curve, props.points));
 const effectiveStrength = computed(() => Math.max(0, Math.min(100, props.strength)) / 100);
 const selectedPoint = computed(() => basePoints.value[selectedIndex.value] ?? basePoints.value[1]);
-const canRemove = computed(() => selectedIndex.value > 0
-  && selectedIndex.value < basePoints.value.length - 1
-  && basePoints.value.length > 4);
+const canRemove = computed(
+  () => selectedIndex.value > 0 && selectedIndex.value < basePoints.value.length - 1 && basePoints.value.length > 4
+);
 
 const x = (position: number): number => inset.left + (position / 100) * (width - inset.left - inset.right);
-const yEffective = (fade: number): number => height - inset.bottom
-  - (fade / 100) * (height - inset.top - inset.bottom);
+const yEffective = (fade: number): number => height - inset.bottom - (fade / 100) * (height - inset.top - inset.bottom);
 const y = (fade: number): number => yEffective(fade * effectiveStrength.value);
-const actualPosition = (point: HeroFadePoint): number => props.start
-  + ((props.end - props.start) * point.Position / 100);
-const relativePosition = (position: number): number => ((position - props.start)
-  / Math.max(1, props.end - props.start)) * 100;
+const actualPosition = (point: HeroFadePoint): number =>
+  props.start + ((props.end - props.start) * point.Position) / 100;
+const relativePosition = (position: number): number =>
+  ((position - props.start) / Math.max(1, props.end - props.start)) * 100;
 const selectedActualPosition = computed(() => Math.round(actualPosition(selectedPoint.value)));
-const graphPoints = computed(() => basePoints.value.map((point) => ({
-  ...point,
-  ActualPosition: actualPosition(point),
-  EffectiveFade: point.Fade * effectiveStrength.value
-})));
-const path = computed(() => graphPoints.value
-  .map((point, index) => `${index ? 'L' : 'M'} ${x(point.ActualPosition)} ${y(point.Fade)}`)
-  .join(' '));
+const graphPoints = computed(() =>
+  basePoints.value.map((point) => ({
+    ...point,
+    ActualPosition: actualPosition(point),
+    EffectiveFade: point.Fade * effectiveStrength.value
+  }))
+);
+const path = computed(() =>
+  graphPoints.value.map((point, index) => `${index ? 'L' : 'M'} ${x(point.ActualPosition)} ${y(point.Fade)}`).join(' ')
+);
 const areaPath = computed(() => `${path.value} L ${x(props.end)} ${y(0)} L ${x(props.start)} ${y(0)} Z`);
 const gridValues = [0, 25, 50, 75, 100];
 
@@ -64,7 +61,10 @@ watch(basePoints, (points) => {
 
 function commitCustom(points: HeroFadePoint[]): void {
   emit('update:curve', 'custom');
-  emit('update:points', points.map((point) => ({ ...point })));
+  emit(
+    'update:points',
+    points.map((point) => ({ ...point }))
+  );
 }
 
 function updateSelected(position: number, fade: number): void {
@@ -119,7 +119,9 @@ function removePoint(): void {
   commitCustom(points);
 }
 
-function pointerCoordinates(event: PointerEvent): { bannerPosition: number; position: number; fade: number; effectiveFade: number } | null {
+function pointerCoordinates(
+  event: PointerEvent
+): { bannerPosition: number; position: number; fade: number; effectiveFade: number } | null {
   const element = graph.value;
   if (!element) return null;
   const rect = element.getBoundingClientRect();
@@ -175,7 +177,7 @@ function stopDrag(event: PointerEvent): void {
 
 <template>
   <section class="ec-fadeEditor" :aria-label="t('display.fadeEditor')">
-    <div class="ec-fadeEditorHeader">
+    <div class="ec-fadeEditorHeader ec-configSplitHeader">
       <div>
         <strong>{{ t('display.fadeEditor') }}</strong>
         <small>{{ t('display.fadeEditorHelp') }}</small>
@@ -200,11 +202,23 @@ function stopDrag(event: PointerEvent): void {
             <text :x="x(value)" :y="height - 10" text-anchor="middle">{{ value }}</text>
           </template>
         </g>
-        <g class="ec-fadeBoundaryTarget" role="button" tabindex="0" :aria-label="t('display.fadeStart')" @pointerdown="startBoundaryDrag('start', $event)">
+        <g
+          class="ec-fadeBoundaryTarget"
+          role="button"
+          tabindex="0"
+          :aria-label="t('display.fadeStart')"
+          @pointerdown="startBoundaryDrag('start', $event)"
+        >
           <line class="ec-fadeBoundaryHit" :x1="x(start)" :x2="x(start)" :y1="inset.top" :y2="height - inset.bottom" />
           <line class="ec-fadeBoundary" :x1="x(start)" :x2="x(start)" :y1="inset.top" :y2="height - inset.bottom" />
         </g>
-        <g class="ec-fadeBoundaryTarget" role="button" tabindex="0" :aria-label="t('display.fadeEnd')" @pointerdown="startBoundaryDrag('end', $event)">
+        <g
+          class="ec-fadeBoundaryTarget"
+          role="button"
+          tabindex="0"
+          :aria-label="t('display.fadeEnd')"
+          @pointerdown="startBoundaryDrag('end', $event)"
+        >
           <line class="ec-fadeBoundaryHit" :x1="x(end)" :x2="x(end)" :y1="inset.top" :y2="height - inset.bottom" />
           <line class="ec-fadeBoundary" :x1="x(end)" :x2="x(end)" :y1="inset.top" :y2="height - inset.bottom" />
         </g>
@@ -216,13 +230,24 @@ function stopDrag(event: PointerEvent): void {
           class="ec-fadePointTarget"
           role="button"
           tabindex="0"
-          :aria-label="t('display.fadePointLabel', { position: Math.round(point.ActualPosition), fade: Math.round(point.EffectiveFade) })"
+          :aria-label="
+            t('display.fadePointLabel', {
+              position: Math.round(point.ActualPosition),
+              fade: Math.round(point.EffectiveFade)
+            })
+          "
           @pointerdown="startDrag(index, $event)"
           @keydown.enter.prevent="selectedIndex = index"
           @keydown.space.prevent="selectedIndex = index"
         >
           <circle class="ec-fadePointHit" :cx="x(point.ActualPosition)" :cy="y(point.Fade)" r="14" />
-          <circle class="ec-fadePoint" :class="{ 'is-selected': index === selectedIndex }" :cx="x(point.ActualPosition)" :cy="y(point.Fade)" r="4.5" />
+          <circle
+            class="ec-fadePoint"
+            :class="{ 'is-selected': index === selectedIndex }"
+            :cx="x(point.ActualPosition)"
+            :cy="y(point.Fade)"
+            r="4.5"
+          />
         </g>
       </svg>
       <div class="ec-fadeAxisLabels" aria-hidden="true">
@@ -243,7 +268,7 @@ function stopDrag(event: PointerEvent): void {
           :disabled="selectedIndex <= 0 || selectedIndex >= basePoints.length - 1"
           :value="selectedActualPosition"
           @input="updatePosition(($event.target as HTMLInputElement).value)"
-        >
+        />
       </label>
       <label class="inputContainer">
         <span class="inputLabel">{{ t('display.fadePointAmount') }} (%)</span>
@@ -256,7 +281,7 @@ function stopDrag(event: PointerEvent): void {
           :disabled="selectedIndex <= 0 || selectedIndex >= basePoints.length - 1"
           :value="selectedPoint.Fade"
           @input="updateFade(($event.target as HTMLInputElement).value)"
-        >
+        />
       </label>
       <button
         type="button"
@@ -265,7 +290,9 @@ function stopDrag(event: PointerEvent): void {
         :title="t('display.fadeAddPoint')"
         :disabled="basePoints.length >= 12"
         @click="addPoint"
-      >+</button>
+      >
+        +
+      </button>
       <button
         type="button"
         class="raised emby-button ec-fadePointAction"
@@ -273,7 +300,9 @@ function stopDrag(event: PointerEvent): void {
         :title="t('display.fadeRemovePoint')"
         :disabled="!canRemove"
         @click="removePoint"
-      >−</button>
+      >
+        −
+      </button>
     </div>
   </section>
 </template>
@@ -284,35 +313,120 @@ function stopDrag(event: PointerEvent): void {
   border: 1px solid var(--ec-theme-divider);
   border-radius: var(--ec-theme-radius);
   display: grid;
-  gap: .7rem;
+  gap: 0.7rem;
   margin-bottom: 1rem;
-  padding: .85rem;
+  padding: 0.85rem;
 }
-.ec-fadeEditorHeader { align-items: flex-start; display: flex; gap: 1rem; justify-content: space-between; }
-.ec-fadeEditorHeader>div { display: grid; gap: .2rem; }
-.ec-fadeEditorHeader strong { font-weight: 500; }
-.ec-fadeEditorHeader small { color: var(--ec-theme-text-secondary); line-height: 1.35; }
-.ec-fadeGraph { min-width: 0; position: relative; }
-.ec-fadeGraph, .ec-fadeGraph * { -webkit-user-select: none; user-select: none; }
-.ec-fadeGraph svg { display: block; touch-action: none; width: 100%; }
-.ec-fadeGrid { pointer-events: none; }
-.ec-fadeGrid line { stroke: var(--ec-theme-divider); stroke-width: 1; }
-.ec-fadeGrid text { fill: var(--ec-theme-text-secondary); font-size: 10px; }
-.ec-fadeBoundaryTarget { cursor: ew-resize; }
-.ec-fadeBoundaryHit { stroke: transparent; stroke-width: 18; }
-.ec-fadeBoundary { stroke: var(--ec-theme-text-secondary); stroke-dasharray: 4 4; stroke-width: 1; }
-.ec-fadeArea { fill: rgba(0, 164, 220, .16); fill: color-mix(in srgb, var(--ec-theme-primary) 18%, transparent); pointer-events: none; }
-.ec-fadeLine { fill: none; pointer-events: none; stroke: var(--ec-theme-primary); stroke-linecap: round; stroke-linejoin: round; stroke-width: 2.25; }
-.ec-fadePointTarget { cursor: grab; }
-.ec-fadePointTarget:active { cursor: grabbing; }
-.ec-fadePointHit { fill: transparent; }
-.ec-fadePoint { fill: var(--ec-theme-paper); stroke: var(--ec-theme-primary); stroke-width: 2.25; }
-.ec-fadePoint.is-selected { fill: var(--ec-theme-primary); }
-.ec-fadeAxisLabels { color: var(--ec-theme-text-secondary); display: flex; font-size: .72rem; justify-content: space-between; padding: 0 .25rem 0 2.65rem; }
-.ec-fadePointControls { align-items: end; display: grid; gap: .7rem; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto auto; }
-.ec-fadePointControls .inputContainer { margin-bottom: 0; }
-.ec-fadePointAction { align-items: center; display: inline-flex; font-size: 1.35rem; height: 2.5rem; justify-content: center; margin: 0; min-width: 2.5rem; padding: 0; text-transform: none; width: 2.5rem; }
+.ec-fadeEditorHeader > div {
+  display: grid;
+  gap: 0.2rem;
+}
+.ec-fadeEditorHeader strong {
+  font-weight: 500;
+}
+.ec-fadeEditorHeader small {
+  color: var(--ec-theme-text-secondary);
+  line-height: 1.35;
+}
+.ec-fadeGraph {
+  min-width: 0;
+  position: relative;
+}
+.ec-fadeGraph,
+.ec-fadeGraph * {
+  -webkit-user-select: none;
+  user-select: none;
+}
+.ec-fadeGraph svg {
+  display: block;
+  touch-action: none;
+  width: 100%;
+}
+.ec-fadeGrid {
+  pointer-events: none;
+}
+.ec-fadeGrid line {
+  stroke: var(--ec-theme-divider);
+  stroke-width: 1;
+}
+.ec-fadeGrid text {
+  fill: var(--ec-theme-text-secondary);
+  font-size: 10px;
+}
+.ec-fadeBoundaryTarget {
+  cursor: ew-resize;
+}
+.ec-fadeBoundaryHit {
+  stroke: transparent;
+  stroke-width: 18;
+}
+.ec-fadeBoundary {
+  stroke: var(--ec-theme-text-secondary);
+  stroke-dasharray: 4 4;
+  stroke-width: 1;
+}
+.ec-fadeArea {
+  fill: rgba(0, 164, 220, 0.16);
+  fill: color-mix(in srgb, var(--ec-theme-primary) 18%, transparent);
+  pointer-events: none;
+}
+.ec-fadeLine {
+  fill: none;
+  pointer-events: none;
+  stroke: var(--ec-theme-primary);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2.25;
+}
+.ec-fadePointTarget {
+  cursor: grab;
+}
+.ec-fadePointTarget:active {
+  cursor: grabbing;
+}
+.ec-fadePointHit {
+  fill: transparent;
+}
+.ec-fadePoint {
+  fill: var(--ec-theme-paper);
+  stroke: var(--ec-theme-primary);
+  stroke-width: 2.25;
+}
+.ec-fadePoint.is-selected {
+  fill: var(--ec-theme-primary);
+}
+.ec-fadeAxisLabels {
+  color: var(--ec-theme-text-secondary);
+  display: flex;
+  font-size: 0.72rem;
+  justify-content: space-between;
+  padding: 0 0.25rem 0 2.65rem;
+}
+.ec-fadePointControls {
+  align-items: end;
+  display: grid;
+  gap: 0.7rem;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto auto;
+}
+.ec-fadePointControls .inputContainer {
+  margin-bottom: 0;
+}
+.ec-fadePointAction {
+  align-items: center;
+  display: inline-flex;
+  font-size: 1.35rem;
+  height: 2.5rem;
+  justify-content: center;
+  margin: 0;
+  min-width: 2.5rem;
+  padding: 0;
+  text-transform: none;
+  width: 2.5rem;
+}
 @media (max-width: 650px) {
-  .ec-fadePointControls { gap: .45rem; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto auto; }
+  .ec-fadePointControls {
+    gap: 0.45rem;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto auto;
+  }
 }
 </style>

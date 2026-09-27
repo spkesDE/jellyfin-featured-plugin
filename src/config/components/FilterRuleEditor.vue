@@ -52,19 +52,23 @@ const resolutionOptions: SelectOption[] = [
 ];
 
 function isNumeric(field: FilterField): boolean {
-  return ['COMMUNITY_RATING', 'CRITIC_RATING', 'PRODUCTION_YEAR', 'RUNTIME_MINUTES', 'VIDEO_RESOLUTION'].includes(field);
+  return ['COMMUNITY_RATING', 'CRITIC_RATING', 'PRODUCTION_YEAR', 'RUNTIME_MINUTES', 'VIDEO_RESOLUTION'].includes(
+    field
+  );
 }
 
 function operatorOptions(field: FilterField): SelectOption[] {
-  if (isNumeric(field)) return [
-    { value: 'GTE', label: t('filter.operator.gte') },
-    { value: 'LTE', label: t('filter.operator.lte') }
-  ];
-  if (['GENRE', 'TAG', 'ACTOR', 'DIRECTOR', 'ORIGINAL_LANGUAGE', 'AUDIO_LANGUAGE'].includes(field)) return [
-    { value: 'CONTAINS_ANY', label: t('filter.operator.containsAny') },
-    { value: 'CONTAINS_ALL', label: t('filter.operator.containsAll') },
-    { value: 'NOT_EQUALS', label: t('filter.operator.containsNone') }
-  ];
+  if (isNumeric(field))
+    return [
+      { value: 'GTE', label: t('filter.operator.gte') },
+      { value: 'LTE', label: t('filter.operator.lte') }
+    ];
+  if (['GENRE', 'TAG', 'ACTOR', 'DIRECTOR', 'ORIGINAL_LANGUAGE', 'AUDIO_LANGUAGE'].includes(field))
+    return [
+      { value: 'CONTAINS_ANY', label: t('filter.operator.containsAny') },
+      { value: 'CONTAINS_ALL', label: t('filter.operator.containsAll') },
+      { value: 'NOT_EQUALS', label: t('filter.operator.containsNone') }
+    ];
   return [
     { value: 'EQUALS', label: t('filter.operator.equals') },
     { value: 'NOT_EQUALS', label: t('filter.operator.notEquals') }
@@ -74,9 +78,7 @@ function operatorOptions(field: FilterField): SelectOption[] {
 function setField(filter: FeaturedFilterRule, value: string): void {
   filter.Field = value as FilterField;
   filter.Operator = operatorOptions(filter.Field)[0].value as FilterOperator;
-  filter.Values = filter.Field === 'PLAYED'
-    ? ['false']
-    : filter.Field === 'VIDEO_RESOLUTION' ? ['720'] : [];
+  filter.Values = filter.Field === 'PLAYED' ? ['false'] : filter.Field === 'VIDEO_RESOLUTION' ? ['720'] : [];
 }
 
 function setOperator(filter: FeaturedFilterRule, value: string): void {
@@ -93,7 +95,7 @@ function setNumericValue(filter: FeaturedFilterRule, value: number): void {
 }
 
 function numberLimits(field: FilterField): { min: number; max: number; step: number } {
-  if (field === 'COMMUNITY_RATING') return { min: 0, max: 10, step: .1 };
+  if (field === 'COMMUNITY_RATING') return { min: 0, max: 10, step: 0.1 };
   if (field === 'CRITIC_RATING') return { min: 0, max: 100, step: 1 };
   if (field === 'PRODUCTION_YEAR') return { min: 1880, max: 2200, step: 1 };
   return { min: 0, max: 1000, step: 1 };
@@ -103,36 +105,100 @@ function numberLimits(field: FilterField): { min: number; max: number; step: num
 <template>
   <div class="ec-filterEditor">
     <div v-for="(filter, index) in filters" :key="filter.Id" class="ec-filterRow">
-      <ConfigSelect :model-value="filter.Field" :label="t('filter.fieldLabel')" :options="fieldOptions"
-        @update:model-value="setField(filter, $event)" />
-      <ConfigSelect :model-value="filter.Operator" :label="t('filter.operatorLabel')"
-        :options="operatorOptions(filter.Field)" @update:model-value="setOperator(filter, $event)" />
+      <ConfigSelect
+        :model-value="filter.Field"
+        :label="t('filter.fieldLabel')"
+        :options="fieldOptions"
+        @update:model-value="setField(filter, $event)"
+      />
+      <ConfigSelect
+        :model-value="filter.Operator"
+        :label="t('filter.operatorLabel')"
+        :options="operatorOptions(filter.Field)"
+        @update:model-value="setOperator(filter, $event)"
+      />
 
-      <ConfigMultiPicker v-if="filter.Field === 'LIBRARY'" v-model="filter.Values" :label="t('filter.valueLabel')"
-        :help-text="t('filter.librariesHelp')" :options="libraryOptions()" />
-      <ConfigMultiPicker v-else-if="filter.Field === 'GENRE'" v-model="filter.Values" :label="t('filter.valueLabel')"
-        :options="genreOptions()" />
-      <ConfigMultiPicker v-else-if="filter.Field === 'TAG'" v-model="filter.Values" :label="t('filter.valueLabel')"
-        :options="tagOptions()" />
-      <ConfigMultiPicker v-else-if="filter.Field === 'ACTOR'" v-model="filter.Values" :label="t('filter.valueLabel')"
-        :help-text="t('filter.metadataMissingHelp')" :options="actorOptions()" />
-      <ConfigMultiPicker v-else-if="filter.Field === 'DIRECTOR'" v-model="filter.Values" :label="t('filter.valueLabel')"
-        :help-text="t('filter.metadataMissingHelp')" :options="directorOptions()" />
-      <ConfigMultiPicker v-else-if="filter.Field === 'ORIGINAL_LANGUAGE'" v-model="filter.Values" :label="t('filter.valueLabel')"
-        :help-text="t('filter.metadataMissingHelp')" :options="originalLanguageOptions()" />
-      <ConfigMultiPicker v-else-if="filter.Field === 'AUDIO_LANGUAGE'" v-model="filter.Values" :label="t('filter.valueLabel')"
-        :help-text="t('filter.metadataMissingHelp')" :options="audioLanguageOptions()" />
-      <ConfigMultiPicker v-else-if="filter.Field === 'MEDIA_TYPE'" v-model="filter.Values"
-        :label="t('filter.valueLabel')" :options="supportedMediaTypeOptions" />
-      <ConfigSelect v-else-if="filter.Field === 'PLAYED'" :model-value="filter.Values[0] || 'false'"
-        :label="t('filter.valueLabel')" :options="playedOptions" @update:model-value="filter.Values = [$event]" />
-      <ConfigSelect v-else-if="filter.Field === 'VIDEO_RESOLUTION'" :model-value="filter.Values[0] || '720'"
-        :label="t('filter.valueLabel')" :options="resolutionOptions" @update:model-value="filter.Values = [$event]" />
-      <ConfigNumber v-else :model-value="numericValue(filter)" :label="t('filter.valueLabel')"
-        v-bind="numberLimits(filter.Field)" @update:model-value="setNumericValue(filter, $event)" />
+      <ConfigMultiPicker
+        v-if="filter.Field === 'LIBRARY'"
+        v-model="filter.Values"
+        :label="t('filter.valueLabel')"
+        :help-text="t('filter.librariesHelp')"
+        :options="libraryOptions()"
+      />
+      <ConfigMultiPicker
+        v-else-if="filter.Field === 'GENRE'"
+        v-model="filter.Values"
+        :label="t('filter.valueLabel')"
+        :options="genreOptions()"
+      />
+      <ConfigMultiPicker
+        v-else-if="filter.Field === 'TAG'"
+        v-model="filter.Values"
+        :label="t('filter.valueLabel')"
+        :options="tagOptions()"
+      />
+      <ConfigMultiPicker
+        v-else-if="filter.Field === 'ACTOR'"
+        v-model="filter.Values"
+        :label="t('filter.valueLabel')"
+        :help-text="t('filter.metadataMissingHelp')"
+        :options="actorOptions()"
+      />
+      <ConfigMultiPicker
+        v-else-if="filter.Field === 'DIRECTOR'"
+        v-model="filter.Values"
+        :label="t('filter.valueLabel')"
+        :help-text="t('filter.metadataMissingHelp')"
+        :options="directorOptions()"
+      />
+      <ConfigMultiPicker
+        v-else-if="filter.Field === 'ORIGINAL_LANGUAGE'"
+        v-model="filter.Values"
+        :label="t('filter.valueLabel')"
+        :help-text="t('filter.metadataMissingHelp')"
+        :options="originalLanguageOptions()"
+      />
+      <ConfigMultiPicker
+        v-else-if="filter.Field === 'AUDIO_LANGUAGE'"
+        v-model="filter.Values"
+        :label="t('filter.valueLabel')"
+        :help-text="t('filter.metadataMissingHelp')"
+        :options="audioLanguageOptions()"
+      />
+      <ConfigMultiPicker
+        v-else-if="filter.Field === 'MEDIA_TYPE'"
+        v-model="filter.Values"
+        :label="t('filter.valueLabel')"
+        :options="supportedMediaTypeOptions"
+      />
+      <ConfigSelect
+        v-else-if="filter.Field === 'PLAYED'"
+        :model-value="filter.Values[0] || 'false'"
+        :label="t('filter.valueLabel')"
+        :options="playedOptions"
+        @update:model-value="filter.Values = [$event]"
+      />
+      <ConfigSelect
+        v-else-if="filter.Field === 'VIDEO_RESOLUTION'"
+        :model-value="filter.Values[0] || '720'"
+        :label="t('filter.valueLabel')"
+        :options="resolutionOptions"
+        @update:model-value="filter.Values = [$event]"
+      />
+      <ConfigNumber
+        v-else
+        :model-value="numericValue(filter)"
+        :label="t('filter.valueLabel')"
+        v-bind="numberLimits(filter.Field)"
+        @update:model-value="setNumericValue(filter, $event)"
+      />
 
-      <button type="button" class="paper-icon-button-light ec-ruleIconButton ec-removeFilter"
-        :title="t('filter.remove')" @click="store.removeFilter(filters, index)">
+      <button
+        type="button"
+        class="paper-icon-button-light ec-ruleIconButton ec-removeFilter"
+        :title="t('filter.remove')"
+        @click="store.removeFilter(filters, index)"
+      >
         <span class="material-icons" aria-hidden="true">close</span>
       </button>
     </div>
@@ -147,23 +213,23 @@ function numberLimits(field: FilterField): { min: number; max: number; step: num
 <style scoped>
 .ec-filterEditor {
   display: grid;
-  gap: .75rem;
+  gap: 0.75rem;
 }
 
 .ec-filterRow {
   align-items: end;
-  background: rgba(0, 0, 0, .12);
-  border: 1px solid rgba(255, 255, 255, .07);
-  border-radius: .65rem;
+  background: rgba(0, 0, 0, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 0.65rem;
   display: grid;
-  gap: .75rem;
+  gap: 0.75rem;
   grid-template-columns: minmax(10rem, 1fr) minmax(10rem, 1fr) minmax(12rem, 1.2fr) auto;
-  padding: .75rem;
+  padding: 0.75rem;
 }
 
-.ec-filterRow> :deep(.selectContainer),
-.ec-filterRow> :deep(.inputContainer),
-.ec-filterRow> :deep(.ec-multiPicker) {
+.ec-filterRow > :deep(.selectContainer),
+.ec-filterRow > :deep(.inputContainer),
+.ec-filterRow > :deep(.ec-multiPicker) {
   margin-bottom: 0;
 }
 

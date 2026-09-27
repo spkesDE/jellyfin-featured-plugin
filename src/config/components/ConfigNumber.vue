@@ -19,18 +19,10 @@ const focused = ref(false);
 <template>
   <div class="inputContainer">
     <div class="ec-numberLabelRow">
-      <label
-        class="inputLabel"
-        :class="focused ? 'inputLabelFocused' : 'inputLabelUnfocused'"
-        :for="fieldId"
-      >
+      <label class="inputLabel" :class="focused ? 'inputLabelFocused' : 'inputLabelUnfocused'" :for="fieldId">
         {{ label }}
       </label>
-      <ConfigHelpTooltip
-        v-if="helpText"
-        :text="helpText"
-        :label="`${label}: ${helpText}`"
-      />
+      <ConfigHelpTooltip v-if="helpText" :text="helpText" :label="`${label}: ${helpText}`" />
     </div>
     <input
       :id="fieldId"
@@ -43,8 +35,11 @@ const focused = ref(false);
       :value="Number(modelValue ?? 0)"
       @focus="focused = true"
       @blur="focused = false"
+      @keydown.stop
+      @keypress.stop
+      @keyup.stop
       @input="emit('update:modelValue', Number(($event.target as HTMLInputElement).value))"
-    >
+    />
   </div>
 </template>
 
@@ -52,7 +47,7 @@ const focused = ref(false);
 .ec-numberLabelRow {
   align-items: center;
   display: flex;
-  gap: .4rem;
+  gap: 0.4rem;
   width: fit-content;
 }
 </style>

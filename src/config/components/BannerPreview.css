@@ -1,0 +1,457 @@
+#FeaturedConfigPage .ec-configPreviewItem {
+  margin: 0 auto;
+  max-width: 64rem;
+  width: 100%;
+}
+
+#FeaturedConfigPage .ec-jellyfinMock {
+  background: var(--ec-theme-background);
+  border: 1px solid var(--ec-theme-divider);
+  border-radius: var(--ec-theme-radius);
+  box-shadow: 0 1rem 2.8rem rgba(0, 0, 0, 0.32);
+  color: var(--ec-theme-text-primary);
+  container-type: inline-size;
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+}
+
+#FeaturedConfigPage .ec-jellyfinMockHeader {
+  align-items: center;
+  background: linear-gradient(180deg, rgba(7, 12, 22, 0.88), rgba(7, 12, 22, 0.54) 58%, transparent);
+  box-sizing: border-box;
+  color: #f7f8fb;
+  display: flex;
+  gap: 0.7rem;
+  height: 3.15rem;
+  left: 0;
+  padding: 0 3.3%;
+  position: absolute;
+  right: 0;
+  top: 0;
+  z-index: 8;
+}
+
+#FeaturedConfigPage .ec-mockIcon {
+  font-size: 0.88rem;
+  opacity: 0.82;
+}
+
+#FeaturedConfigPage .ec-jellyfinMockBrand {
+  align-items: center;
+  display: flex;
+  gap: 0.38rem;
+  min-width: 0;
+}
+
+#FeaturedConfigPage .ec-jellyfinMockBrandLogo {
+  display: block;
+  flex: 0 0 auto;
+  height: 1.55rem;
+  width: 1.55rem;
+}
+
+#FeaturedConfigPage .ec-jellyfinMockHeader strong {
+  color: #fff;
+  font-size: 0.82rem;
+}
+
+#FeaturedConfigPage .ec-jellyfinMockNav {
+  align-items: center;
+  display: flex;
+  font-size: 0.59rem;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+#FeaturedConfigPage .ec-jellyfinMockNav > span {
+  align-items: center;
+  border-radius: 999px;
+  display: flex;
+  gap: 0.22rem;
+  padding: 0.34rem 0.48rem;
+  white-space: nowrap;
+}
+
+#FeaturedConfigPage .ec-jellyfinMockNav > span.is-active {
+  background: rgba(18, 28, 46, 0.88);
+}
+
+#FeaturedConfigPage .ec-jellyfinMockNav .material-icons {
+  font-size: 0.72rem;
+}
+
+#FeaturedConfigPage .ec-jellyfinMockHeaderActions {
+  align-items: center;
+  display: flex;
+  gap: 0.55rem;
+  margin-left: auto;
+}
+
+#FeaturedConfigPage .ec-jellyfinMockAvatar {
+  align-items: center;
+  background: linear-gradient(135deg, #8a4eb4, #00a4dc);
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: 50%;
+  display: inline-flex;
+  font-size: 0.56rem;
+  font-weight: 800;
+  height: 1.35rem;
+  justify-content: center;
+  width: 1.35rem;
+}
+
+#FeaturedConfigPage .ec-jellyfinMockPage {
+  background: var(--ec-theme-background);
+  overflow: hidden;
+}
+
+#FeaturedConfigPage .ec-configPreview {
+  --ec-preview-background: #181b22 radial-gradient(circle at 72% 28%, #465267 0, #222936 35%, #11151d 72%);
+  --ec-preview-content-inline-inset: 8%;
+  --ec-preview-shade: linear-gradient(
+    0deg,
+    rgb(4 6 10 / calc(var(--ec-preview-gradient, 0.85) * 0.74)),
+    transparent 45%
+  );
+  background: var(--ec-preview-background);
+  border-radius: var(--ec-preview-radius, 0);
+  color: #fff;
+  container-type: inline-size;
+  min-height: 170px;
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+}
+
+#FeaturedConfigPage .ec-configPreview:not(.is-hero) {
+  border: 1px solid var(--ec-theme-divider);
+  border-radius: var(--ec-preview-radius, 0);
+  box-shadow: 0 0.45rem 1.35rem rgba(0, 0, 0, 0.34);
+  margin: 3.15rem 3.3% 0;
+  width: 93.4%;
+}
+
+#FeaturedConfigPage .ec-configPreview.is-hero {
+  --ec-preview-shade: none;
+  background: transparent;
+  margin: 0;
+}
+
+#FeaturedConfigPage .ec-jellyfinMockHeading {
+  font-size: clamp(0.75rem, 1.5vw, 1rem);
+  font-weight: 500;
+  padding: 0.7rem 3.3% 0.4rem;
+}
+
+#FeaturedConfigPage .ec-configPreviewBackdrop {
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  inset: 0;
+  position: absolute;
+  transform: scale(1.01);
+  z-index: 0;
+}
+
+#FeaturedConfigPage .ec-configPreview.is-hero .ec-configPreviewBackdrop,
+#FeaturedConfigPage .ec-configPreview.is-hero .ec-configPreviewShade {
+  -webkit-mask-image: var(--ec-preview-fade);
+  mask-image: var(--ec-preview-fade);
+}
+
+#FeaturedConfigPage .ec-configPreviewShade {
+  background: var(--ec-preview-shade);
+  inset: 0;
+  position: absolute;
+}
+
+#FeaturedConfigPage .ec-configPreviewContent {
+  bottom: 18%;
+  left: var(--ec-preview-content-inline-inset);
+  max-width: 58%;
+  position: absolute;
+  z-index: 2;
+}
+
+#FeaturedConfigPage .ec-configPreview.text-center .ec-configPreviewContent {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  left: 23%;
+  text-align: center;
+}
+
+#FeaturedConfigPage .ec-configPreview.text-right .ec-configPreviewContent {
+  align-items: flex-end;
+  display: flex;
+  flex-direction: column;
+  left: auto;
+  right: var(--ec-preview-content-inline-inset);
+  text-align: right;
+}
+
+#FeaturedConfigPage .ec-configPreviewLogo {
+  display: -webkit-box;
+  font-size: clamp(1.25rem, 5cqw, 3.4rem);
+  font-weight: 900;
+  line-height: 0.96;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+#FeaturedConfigPage .ec-configPreviewImageLogo {
+  display: block;
+  max-height: clamp(3.5rem, 12cqw, 5.25rem);
+  max-width: min(18rem, 68%);
+  object-fit: contain;
+  object-position: left center;
+}
+
+#FeaturedConfigPage .ec-configPreviewMeta {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 0.78rem;
+  font-weight: 700;
+  gap: 0.7rem;
+  margin-top: 0.7rem;
+}
+
+#FeaturedConfigPage .ec-configPreviewText {
+  display: -webkit-box;
+  font-size: 0.75rem;
+  margin-top: 0.45rem;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+#FeaturedConfigPage .ec-configPreviewButton {
+  background: var(--ec-button-primary-background, var(--ec-theme-primary));
+  border: var(--ec-button-border, 0);
+  border-radius: var(--ec-button-radius, var(--ec-theme-radius));
+  box-shadow: var(--ec-button-shadow, none);
+  color: var(--ec-button-primary-color, var(--ec-theme-primary-contrast));
+  font-weight: 700;
+  margin-top: 0.65rem;
+  padding: 0.45rem 0.8rem;
+}
+
+#FeaturedConfigPage .ec-configPreviewButton + .ec-configPreviewButton {
+  margin-left: 0.4rem;
+}
+
+#FeaturedConfigPage .ec-configPreviewButton:hover,
+#FeaturedConfigPage .ec-configPreviewButton:focus-visible {
+  background: var(--ec-button-primary-hover-background, var(--ec-theme-primary-dark));
+}
+
+#FeaturedConfigPage .ec-configPreviewActions {
+  white-space: nowrap;
+}
+
+#FeaturedConfigPage .ec-configPreviewButton.is-secondary {
+  background: var(--ec-button-secondary-background, var(--ec-theme-contained));
+  color: var(--ec-button-secondary-color, var(--ec-theme-text-primary));
+}
+
+#FeaturedConfigPage .ec-configPreviewButton.is-secondary:hover,
+#FeaturedConfigPage .ec-configPreviewButton.is-secondary:focus-visible {
+  background: var(--ec-button-secondary-hover-background, var(--ec-theme-contained-hover));
+}
+
+#FeaturedConfigPage .ec-configPreviewButton.is-favorite {
+  align-items: center;
+  display: inline-flex;
+  justify-content: center;
+  min-width: 2.2rem;
+  padding-inline: 0.4rem;
+  vertical-align: middle;
+}
+
+#FeaturedConfigPage .ec-configPreviewDots {
+  display: flex;
+  gap: 0.3rem;
+}
+
+#FeaturedConfigPage .ec-configPreviewDots span {
+  background: rgba(255, 255, 255, 0.42);
+  border-radius: 50%;
+  height: 0.35rem;
+  width: 0.35rem;
+}
+
+#FeaturedConfigPage .ec-configPreviewDots span.is-active {
+  background: #fff;
+}
+
+#FeaturedConfigPage .ec-configPreviewNavigation {
+  align-items: center;
+  bottom: 0.55rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  left: 50%;
+  position: absolute;
+  transform: translateX(-50%);
+  z-index: 4;
+}
+
+#FeaturedConfigPage .ec-configPreview.is-hero .ec-configPreviewNavigation {
+  bottom: auto;
+  left: auto;
+  right: max(1rem, 3.3%);
+  top: 0.55rem;
+  transform: none;
+}
+
+#FeaturedConfigPage .ec-configPreviewControls {
+  align-items: center;
+  display: flex;
+  gap: 0.25rem;
+  mix-blend-mode: difference;
+}
+
+#FeaturedConfigPage .ec-configPreviewControls .ec-mockControl {
+  font-size: 1.2rem;
+  line-height: 1;
+  opacity: 0.58;
+  padding: 0.25rem;
+}
+
+#FeaturedConfigPage .ec-configPreviewStatus {
+  font-size: 0.62rem;
+  letter-spacing: 0.04em;
+  opacity: 0.58;
+  padding: 0 0.3rem;
+  white-space: nowrap;
+}
+
+#FeaturedConfigPage .ec-jellyfinMockMedia {
+  margin-top: var(--ec-preview-media-offset, -1rem);
+  padding: 0 3.3% 1rem;
+  position: relative;
+  z-index: 5;
+}
+
+#FeaturedConfigPage .ec-jellyfinMockMedia .ec-jellyfinMockHeading {
+  color: #fff;
+  font-size: clamp(0.82rem, 2.5cqw, 1.2rem);
+  font-weight: 700;
+  padding: 0.7rem 0 0.5rem;
+  text-shadow: 0 1px 0.3rem rgba(0, 0, 0, 0.75);
+}
+
+#FeaturedConfigPage .ec-jellyfinMockCards {
+  display: grid;
+  gap: 0.7rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+#FeaturedConfigPage .ec-jellyfinMockCard {
+  min-width: 0;
+}
+
+#FeaturedConfigPage .ec-jellyfinMockCardArt {
+  align-items: center;
+  aspect-ratio: 1.72;
+  background: linear-gradient(135deg, #34495e, #17202a);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0.55rem;
+  box-shadow: 0 0.35rem 0.9rem rgba(0, 0, 0, 0.38);
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+
+#FeaturedConfigPage .ec-jellyfinMockCardArt::after {
+  background: linear-gradient(180deg, rgba(4, 8, 14, 0.08), rgba(4, 8, 14, 0.66));
+  content: '';
+  inset: 0;
+  position: absolute;
+}
+
+#FeaturedConfigPage .ec-jellyfinMockCardArt > span {
+  color: #fff;
+  font-size: clamp(0.72rem, 2.5cqw, 1.1rem);
+  font-weight: 800;
+  line-height: 1;
+  overflow-wrap: anywhere;
+  padding: 0.3rem;
+  position: relative;
+  text-align: center;
+  text-shadow: 0 2px 0.35rem rgba(0, 0, 0, 0.9);
+  z-index: 1;
+}
+
+#FeaturedConfigPage .ec-jellyfinMockCardArt.art-2 {
+  background: linear-gradient(135deg, #59315f, #23172f);
+}
+
+#FeaturedConfigPage .ec-jellyfinMockCardArt.art-3 {
+  background: linear-gradient(135deg, #175a64, #102931);
+}
+
+#FeaturedConfigPage .ec-jellyfinMockCardArt.art-4 {
+  background: linear-gradient(135deg, #725124, #251c13);
+}
+
+#FeaturedConfigPage .ec-jellyfinMockCardArt.art-5 {
+  background: linear-gradient(135deg, #385d3d, #142419);
+}
+
+@container (min-width: 60rem) {
+  #FeaturedConfigPage .ec-jellyfinMockCards {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+@container (max-width: 59.99rem) {
+  #FeaturedConfigPage .ec-jellyfinMockCard:nth-child(n + 4) {
+    display: none;
+  }
+}
+
+@container (max-width: 38rem) {
+  #FeaturedConfigPage .ec-jellyfinMockNav > span:nth-child(n + 3) {
+    display: none;
+  }
+}
+
+@media (max-width: 650px) {
+  #FeaturedConfigPage .ec-jellyfinMockNav {
+    display: none;
+  }
+
+  #FeaturedConfigPage .ec-jellyfinMockCards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  #FeaturedConfigPage .ec-configPreviewContent {
+    left: 6%;
+    max-width: 72%;
+  }
+}
+#FeaturedConfigPage .jmp-appearancePreviewItem {
+  container-type: inline-size;
+  display: grid;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+#FeaturedConfigPage .jmp-appearancePreviewLabel {
+  align-items: center;
+  color: rgba(255, 255, 255, 0.82);
+  display: flex;
+  font-size: 0.82rem;
+  gap: 0.5rem;
+  justify-content: space-between;
+}

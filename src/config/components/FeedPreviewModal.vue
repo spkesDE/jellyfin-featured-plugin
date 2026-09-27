@@ -30,30 +30,54 @@ function handleKeydown(event: KeyboardEvent): void {
 
 onMounted(() => document.addEventListener('keydown', handleKeydown));
 onBeforeUnmount(() => document.removeEventListener('keydown', handleKeydown));
-watch(() => store.feedPreviewOpen.value, async (open) => {
-  if (!open) return;
-  await nextTick();
-  dialog.value?.focus();
-});
+watch(
+  () => store.feedPreviewOpen.value,
+  async (open) => {
+    if (!open) return;
+    await nextTick();
+    dialog.value?.focus();
+  }
+);
 </script>
 
 <template>
   <div v-if="store.feedPreviewOpen.value" class="ec-feedPreviewOverlay" @click.self="store.closeFeedPreview()">
-    <section ref="dialog" class="ec-feedPreviewDialog" role="dialog" aria-modal="true" aria-labelledby="ec-feedPreviewTitle" tabindex="-1">
-      <header class="ec-feedPreviewHeader">
+    <section
+      ref="dialog"
+      class="ec-feedPreviewDialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="ec-feedPreviewTitle"
+      tabindex="-1"
+    >
+      <header class="ec-feedPreviewHeader ec-configSplitHeader">
         <div>
           <h2 id="ec-feedPreviewTitle">{{ t('feedPreview.title') }}</h2>
           <p>{{ t('feedPreview.help') }}</p>
         </div>
-        <button type="button" class="ec-feedPreviewClose" :aria-label="t('feedPreview.close')" @click="store.closeFeedPreview()">
+        <button
+          type="button"
+          class="ec-feedPreviewClose"
+          :aria-label="t('feedPreview.close')"
+          @click="store.closeFeedPreview()"
+        >
           <span class="material-icons" aria-hidden="true">close</span>
         </button>
       </header>
 
       <div class="ec-feedPreviewControls">
         <ConfigSelect v-model="store.feedPreviewUserId.value" :label="t('feedPreview.user')" :options="userOptions" />
-        <ConfigSelect v-model="store.feedPreviewPresetId.value" :label="t('feedPreview.preset')" :options="presetOptions" />
-        <button type="button" class="raised button-submit emby-button ec-primaryAction" :disabled="store.feedPreviewLoading.value" @click="refresh">
+        <ConfigSelect
+          v-model="store.feedPreviewPresetId.value"
+          :label="t('feedPreview.preset')"
+          :options="presetOptions"
+        />
+        <button
+          type="button"
+          class="raised button-submit emby-button ec-primaryAction"
+          :disabled="store.feedPreviewLoading.value"
+          @click="refresh"
+        >
           <span class="material-icons" aria-hidden="true">refresh</span>
           {{ store.feedPreviewLoading.value ? t('feedPreview.loading') : t('feedPreview.refresh') }}
         </button>
@@ -87,13 +111,22 @@ watch(() => store.feedPreviewOpen.value, async (open) => {
 
         <h3>{{ t('feedPreview.diagnostics') }}</h3>
         <div class="ec-feedPreviewStats">
-          <div v-for="rule in (store.feedPreview.value.rules ?? [])" :key="rule.id">
+          <div v-for="rule in store.feedPreview.value.rules ?? []" :key="rule.id">
             <span>{{ sourceLabel(rule.type) }}</span>
             <strong>{{ t('feedPreview.selectedCount', { count: rule.returned }) }}</strong>
           </div>
-          <div><span>{{ t('feedPreview.duplicates') }}</span><strong>{{ store.feedPreview.value.duplicatesRemoved }}</strong></div>
-          <div><span>{{ t('feedPreview.cooldown') }}</span><strong>{{ store.feedPreview.value.cooldownExcluded }}</strong></div>
-          <div><span>{{ t('feedPreview.diversity') }}</span><strong>{{ store.feedPreview.value.diversitySkipped }}</strong></div>
+          <div>
+            <span>{{ t('feedPreview.duplicates') }}</span
+            ><strong>{{ store.feedPreview.value.duplicatesRemoved }}</strong>
+          </div>
+          <div>
+            <span>{{ t('feedPreview.cooldown') }}</span
+            ><strong>{{ store.feedPreview.value.cooldownExcluded }}</strong>
+          </div>
+          <div>
+            <span>{{ t('feedPreview.diversity') }}</span
+            ><strong>{{ store.feedPreview.value.diversitySkipped }}</strong>
+          </div>
         </div>
       </template>
     </section>
@@ -101,32 +134,142 @@ watch(() => store.feedPreviewOpen.value, async (open) => {
 </template>
 
 <style scoped>
-.ec-feedPreviewOverlay { align-items: center; background: rgba(0, 0, 0, .72); display: flex; inset: 0; justify-content: center; padding: 1rem; position: fixed; z-index: 9999; }
-.ec-feedPreviewDialog { background: var(--ec-theme-background, #181818); border: 1px solid var(--ec-theme-divider); border-radius: 1rem; box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, .5); box-sizing: border-box; max-height: calc(100vh - 2rem); max-width: 72rem; overflow: auto; padding: 1.5rem; width: 100%; }
-.ec-feedPreviewHeader { align-items: flex-start; display: flex; gap: 1rem; justify-content: space-between; }
-.ec-feedPreviewHeader h2 { margin: 0; }
-.ec-feedPreviewHeader p { margin: .25rem 0 0; opacity: .72; }
-.ec-feedPreviewClose { background: transparent; border: 0; color: inherit; cursor: pointer; padding: .35rem; }
-.ec-feedPreviewControls { align-items: end; display: grid; gap: 1rem; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) max-content; margin: 1.5rem 0; }
-.ec-feedPreviewControls > :deep(.selectContainer) { margin-bottom: 0; }
-.ec-feedPreviewControls > .ec-primaryAction { min-height: 2.7rem; white-space: nowrap; }
-.ec-feedPreviewItems { counter-reset: preview-item; display: grid; gap: .5rem; list-style: none; margin: 0 0 1.75rem; padding: 0; }
-.ec-feedPreviewItems li { counter-increment: preview-item; }
-.ec-feedPreviewItems li::before { color: var(--ec-theme-text-secondary); content: counter(preview-item) "."; font-weight: 700; text-align: right; }
-.ec-feedPreviewItems li { align-items: center; background: var(--ec-theme-action-hover); border-radius: .55rem; display: grid; gap: 1rem; grid-template-columns: 1.6rem minmax(0, 1fr) max-content; padding: .65rem .8rem; }
-.ec-feedPreviewItems li div { display: grid; flex: 1 1 auto; gap: .15rem; min-width: 0; }
-.ec-feedPreviewItems li div span, .ec-feedPreviewReason { font-size: .85rem; opacity: .72; }
-.ec-feedPreviewReason { text-align: right; }
-.ec-feedPreviewContext { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1.25rem; }
-.ec-feedPreviewContext span { background: var(--ec-theme-contained); border-radius: 999px; padding: .35rem .65rem; }
-.ec-feedPreviewStats { display: grid; gap: .5rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.ec-feedPreviewStats div { align-items: center; border-bottom: 1px solid var(--ec-theme-divider); display: flex; justify-content: space-between; padding: .55rem .25rem; }
-.ec-feedPreviewError { color: var(--ec-theme-error-light); }
-.ec-feedPreviewEmpty { opacity: .7; padding: 1.5rem 0; text-align: center; }
+.ec-feedPreviewOverlay {
+  align-items: center;
+  background: rgba(0, 0, 0, 0.72);
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  padding: 1rem;
+  position: fixed;
+  z-index: 9999;
+}
+.ec-feedPreviewDialog {
+  background: var(--ec-theme-background, #181818);
+  border: 1px solid var(--ec-theme-divider);
+  border-radius: 1rem;
+  box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.5);
+  box-sizing: border-box;
+  max-height: calc(100vh - 2rem);
+  max-width: 72rem;
+  overflow: auto;
+  padding: 1.5rem;
+  width: 100%;
+}
+.ec-feedPreviewHeader h2 {
+  margin: 0;
+}
+.ec-feedPreviewHeader p {
+  margin: 0.25rem 0 0;
+  opacity: 0.72;
+}
+.ec-feedPreviewClose {
+  background: transparent;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  padding: 0.35rem;
+}
+.ec-feedPreviewControls {
+  align-items: end;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) max-content;
+  margin: 1.5rem 0;
+}
+.ec-feedPreviewControls > :deep(.selectContainer) {
+  margin-bottom: 0;
+}
+.ec-feedPreviewControls > .ec-primaryAction {
+  min-height: 2.7rem;
+  white-space: nowrap;
+}
+.ec-feedPreviewItems {
+  counter-reset: preview-item;
+  display: grid;
+  gap: 0.5rem;
+  list-style: none;
+  margin: 0 0 1.75rem;
+  padding: 0;
+}
+.ec-feedPreviewItems li {
+  counter-increment: preview-item;
+}
+.ec-feedPreviewItems li::before {
+  color: var(--ec-theme-text-secondary);
+  content: counter(preview-item) '.';
+  font-weight: 700;
+  text-align: right;
+}
+.ec-feedPreviewItems li {
+  align-items: center;
+  background: var(--ec-theme-action-hover);
+  border-radius: 0.55rem;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1.6rem minmax(0, 1fr) max-content;
+  padding: 0.65rem 0.8rem;
+}
+.ec-feedPreviewItems li div {
+  display: grid;
+  flex: 1 1 auto;
+  gap: 0.15rem;
+  min-width: 0;
+}
+.ec-feedPreviewItems li div span,
+.ec-feedPreviewReason {
+  font-size: 0.85rem;
+  opacity: 0.72;
+}
+.ec-feedPreviewReason {
+  text-align: right;
+}
+.ec-feedPreviewContext {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+.ec-feedPreviewContext span {
+  background: var(--ec-theme-contained);
+  border-radius: 999px;
+  padding: 0.35rem 0.65rem;
+}
+.ec-feedPreviewStats {
+  display: grid;
+  gap: 0.5rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.ec-feedPreviewStats div {
+  align-items: center;
+  border-bottom: 1px solid var(--ec-theme-divider);
+  display: flex;
+  justify-content: space-between;
+  padding: 0.55rem 0.25rem;
+}
+.ec-feedPreviewError {
+  color: var(--ec-theme-error-light);
+}
+.ec-feedPreviewEmpty {
+  opacity: 0.7;
+  padding: 1.5rem 0;
+  text-align: center;
+}
 @media (max-width: 700px) {
-  .ec-feedPreviewControls, .ec-feedPreviewStats { grid-template-columns: 1fr; }
-  .ec-feedPreviewControls > .ec-primaryAction { width: 100%; }
-  .ec-feedPreviewItems li { align-items: start; grid-template-columns: 1.6rem minmax(0, 1fr); }
-  .ec-feedPreviewReason { grid-column: 2; text-align: left; }
+  .ec-feedPreviewControls,
+  .ec-feedPreviewStats {
+    grid-template-columns: 1fr;
+  }
+  .ec-feedPreviewControls > .ec-primaryAction {
+    width: 100%;
+  }
+  .ec-feedPreviewItems li {
+    align-items: start;
+    grid-template-columns: 1.6rem minmax(0, 1fr);
+  }
+  .ec-feedPreviewReason {
+    grid-column: 2;
+    text-align: left;
+  }
 }
 </style>

@@ -21,7 +21,9 @@ function update(value: string): void {
 
 <template>
   <div class="inputContainer">
-    <label class="inputLabel" :class="focused ? 'inputLabelFocused' : 'inputLabelUnfocused'" :for="fieldId">{{ label }}</label>
+    <label class="inputLabel" :class="focused ? 'inputLabelFocused' : 'inputLabelUnfocused'" :for="fieldId">{{
+      label
+    }}</label>
     <input
       :id="fieldId"
       class="emby-input"
@@ -30,6 +32,6 @@ function update(value: string): void {
       @focus="focused = true"
       @blur="focused = false"
       @input="update(($event.target as HTMLInputElement).value)"
-    >
+    />
   </div>
 </template>

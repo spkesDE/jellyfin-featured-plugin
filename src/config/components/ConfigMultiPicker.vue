@@ -24,9 +24,11 @@ const filteredOptions = computed(() => {
   const term = query.value.trim().toLocaleLowerCase();
   return term ? props.options.filter((option) => option.label.toLocaleLowerCase().includes(term)) : props.options;
 });
-const selectedLabels = computed(() => props.modelValue
-  .map((value) => props.options.find((option) => option.value === value)?.label)
-  .filter((value): value is string => Boolean(value)));
+const selectedLabels = computed(() =>
+  props.modelValue
+    .map((value) => props.options.find((option) => option.value === value)?.label)
+    .filter((value): value is string => Boolean(value))
+);
 const selectionText = computed(() => {
   if (!selectedLabels.value.length) return t('common.selectOptions');
   if (selectedLabels.value.length <= 2) return selectedLabels.value.join(', ');
@@ -35,9 +37,10 @@ const selectionText = computed(() => {
 
 function toggle(value: string): void {
   const enabled = !props.modelValue.includes(value);
-  emit('update:modelValue', enabled
-    ? [...new Set([...props.modelValue, value])]
-    : props.modelValue.filter((candidate) => candidate !== value));
+  emit(
+    'update:modelValue',
+    enabled ? [...new Set([...props.modelValue, value])] : props.modelValue.filter((candidate) => candidate !== value)
+  );
 }
 
 function close(): void {
@@ -100,9 +103,12 @@ function handleViewportChange(): void {
   if (open.value) positionMenu();
 }
 
-watch(() => [query.value, props.options.length], () => {
-  if (open.value) void nextTick(() => positionMenu());
-});
+watch(
+  () => [query.value, props.options.length],
+  () => {
+    if (open.value) void nextTick(() => positionMenu());
+  }
+);
 
 onMounted(() => {
   document.addEventListener('pointerdown', handleOutsideClick);
@@ -133,71 +139,207 @@ onBeforeUnmount(() => {
       @click="toggleOpen"
     >
       <span :class="{ 'is-placeholder': !selectedLabels.length }">{{ selectionText }}</span>
-      <span class="material-icons" aria-hidden="true">{{ placement === 'up' ? 'keyboard_arrow_up' : 'keyboard_arrow_down' }}</span>
+      <span class="material-icons" aria-hidden="true">{{
+        placement === 'up' ? 'keyboard_arrow_up' : 'keyboard_arrow_down'
+      }}</span>
     </button>
 
     <Teleport to="body">
-    <div v-if="open" ref="menu" class="ec-multiPickerMenu" :class="`opens-${placement}`" :style="menuStyle" role="listbox" aria-multiselectable="true">
-      <div class="ec-multiPickerSearchWrap">
-        <span class="material-icons" aria-hidden="true">search</span>
-        <input v-model="query" class="ec-multiPickerSearch" type="search" :placeholder="t('common.search')" autofocus>
-      </div>
-
-      <div v-if="filteredOptions.length" class="ec-multiPickerOptions">
-        <button
-          v-for="option in filteredOptions"
-          :key="option.value"
-          type="button"
-          class="ec-multiPickerOption"
-          :class="{ 'is-selected': modelValue.includes(option.value) }"
-          role="option"
-          :aria-selected="modelValue.includes(option.value)"
-          @click="toggle(option.value)"
-        >
-          <span class="material-icons ec-multiPickerCheck" aria-hidden="true">
-            {{ modelValue.includes(option.value) ? 'check_box' : 'check_box_outline_blank' }}
-          </span>
-          <span>{{ option.label }}</span>
-        </button>
-      </div>
-      <p v-else class="ec-multiPickerEmpty">{{ emptyText || t('common.noOptions') }}</p>
-
-      <footer class="ec-multiPickerFooter">
-        <span>{{ t('common.selectedCount', { count: modelValue.length }) }}</span>
-        <div>
-          <button v-if="modelValue.length" type="button" class="ec-multiPickerFooterButton" @click="emit('update:modelValue', [])">
-            {{ t('common.clearSelection') }}
-          </button>
-          <button type="button" class="ec-multiPickerFooterButton is-primary" @click="close">{{ t('common.done') }}</button>
+      <div
+        v-if="open"
+        ref="menu"
+        class="ec-multiPickerMenu"
+        :class="`opens-${placement}`"
+        :style="menuStyle"
+        role="listbox"
+        aria-multiselectable="true"
+      >
+        <div class="ec-multiPickerSearchWrap">
+          <span class="material-icons" aria-hidden="true">search</span>
+          <input
+            v-model="query"
+            class="ec-multiPickerSearch"
+            type="search"
+            :placeholder="t('common.search')"
+            autofocus
+          />
         </div>
-      </footer>
-    </div>
+
+        <div v-if="filteredOptions.length" class="ec-multiPickerOptions">
+          <button
+            v-for="option in filteredOptions"
+            :key="option.value"
+            type="button"
+            class="ec-multiPickerOption"
+            :class="{ 'is-selected': modelValue.includes(option.value) }"
+            role="option"
+            :aria-selected="modelValue.includes(option.value)"
+            @click="toggle(option.value)"
+          >
+            <span class="material-icons ec-multiPickerCheck" aria-hidden="true">
+              {{ modelValue.includes(option.value) ? 'check_box' : 'check_box_outline_blank' }}
+            </span>
+            <span>{{ option.label }}</span>
+          </button>
+        </div>
+        <p v-else class="ec-multiPickerEmpty">{{ emptyText || t('common.noOptions') }}</p>
+
+        <footer class="ec-multiPickerFooter">
+          <span>{{ t('common.selectedCount', { count: modelValue.length }) }}</span>
+          <div>
+            <button
+              v-if="modelValue.length"
+              type="button"
+              class="ec-multiPickerFooterButton"
+              @click="emit('update:modelValue', [])"
+            >
+              {{ t('common.clearSelection') }}
+            </button>
+            <button type="button" class="ec-multiPickerFooterButton is-primary" @click="close">
+              {{ t('common.done') }}
+            </button>
+          </div>
+        </footer>
+      </div>
     </Teleport>
   </div>
 </template>
 
 <style scoped>
-.ec-multiPicker { margin-bottom: 1rem; min-width: 0; position: relative; }
-.ec-multiPickerLabelRow { align-items: center; display: flex; gap: .4rem; margin-bottom: .35rem; width: fit-content; }
-.ec-multiPickerLabelRow > .selectLabel { display: block; }
-.ec-multiPickerTrigger { align-items: center; background: var(--jf-palette-FilledInput-bg, var(--ec-theme-action-hover)); border: 1px solid var(--jf-palette-FilledInput-borderColor, var(--ec-theme-divider)); border-radius: var(--ec-theme-radius); color: inherit; cursor: pointer; display: flex; gap: 1rem; justify-content: space-between; min-height: 2.7rem; padding: .6rem .75rem; text-align: left; width: 100%; }
+.ec-multiPicker {
+  margin-bottom: 1rem;
+  min-width: 0;
+  position: relative;
+}
+.ec-multiPickerLabelRow {
+  align-items: center;
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: 0.35rem;
+  width: fit-content;
+}
+.ec-multiPickerLabelRow > .selectLabel {
+  display: block;
+}
+.ec-multiPickerTrigger {
+  align-items: center;
+  background: var(--jf-palette-FilledInput-bg, var(--ec-theme-action-hover));
+  border: 1px solid var(--jf-palette-FilledInput-borderColor, var(--ec-theme-divider));
+  border-radius: var(--ec-theme-radius);
+  color: inherit;
+  cursor: pointer;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  min-height: 2.7rem;
+  padding: 0.6rem 0.75rem;
+  text-align: left;
+  width: 100%;
+}
 .ec-multiPickerTrigger:focus-visible,
-.ec-multiPicker.is-open .ec-multiPickerTrigger { border-color: var(--ec-theme-secondary); outline: 1px solid var(--ec-theme-secondary); }
-.ec-multiPickerTrigger .is-placeholder { opacity: .58; }
-.ec-multiPickerMenu { background: var(--ec-theme-paper); border: 1px solid var(--ec-theme-divider); border-radius: var(--ec-theme-radius); box-shadow: 0 .85rem 2.4rem rgba(0, 0, 0, .55); color: var(--ec-theme-text-primary); display: flex; flex-direction: column; min-width: min(22rem, calc(100vw - 1rem)); overflow: hidden; overscroll-behavior: contain; }
-.ec-multiPickerSearchWrap { align-items: center; border-bottom: 1px solid var(--ec-theme-divider); display: flex; flex: 0 0 auto; gap: .45rem; padding: .65rem .75rem; }
-.ec-multiPickerSearchWrap .material-icons { font-size: 1.2rem; opacity: .55; }
-.ec-multiPickerSearch { background: transparent; border: 0; color: inherit; min-width: 0; outline: 0; padding: .25rem 0; width: 100%; }
-.ec-multiPickerOptions { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: .35rem; }
-.ec-multiPickerOption { align-items: center; background: transparent; border: 0; border-radius: .3rem; color: inherit; cursor: pointer; display: flex; gap: .55rem; padding: .55rem .6rem; text-align: left; width: 100%; }
+.ec-multiPicker.is-open .ec-multiPickerTrigger {
+  border-color: var(--ec-theme-secondary);
+  outline: 1px solid var(--ec-theme-secondary);
+}
+.ec-multiPickerTrigger .is-placeholder {
+  opacity: 0.58;
+}
+.ec-multiPickerMenu {
+  background: var(--ec-theme-paper);
+  border: 1px solid var(--ec-theme-divider);
+  border-radius: var(--ec-theme-radius);
+  box-shadow: 0 0.85rem 2.4rem rgba(0, 0, 0, 0.55);
+  color: var(--ec-theme-text-primary);
+  display: flex;
+  flex-direction: column;
+  min-width: min(22rem, calc(100vw - 1rem));
+  overflow: hidden;
+  overscroll-behavior: contain;
+}
+.ec-multiPickerSearchWrap {
+  align-items: center;
+  border-bottom: 1px solid var(--ec-theme-divider);
+  display: flex;
+  flex: 0 0 auto;
+  gap: 0.45rem;
+  padding: 0.65rem 0.75rem;
+}
+.ec-multiPickerSearchWrap .material-icons {
+  font-size: 1.2rem;
+  opacity: 0.55;
+}
+.ec-multiPickerSearch {
+  background: transparent;
+  border: 0;
+  color: inherit;
+  min-width: 0;
+  outline: 0;
+  padding: 0.25rem 0;
+  width: 100%;
+}
+.ec-multiPickerOptions {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0.35rem;
+}
+.ec-multiPickerOption {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: 0.3rem;
+  color: inherit;
+  cursor: pointer;
+  display: flex;
+  gap: 0.55rem;
+  padding: 0.55rem 0.6rem;
+  text-align: left;
+  width: 100%;
+}
 .ec-multiPickerOption:hover,
-.ec-multiPickerOption:focus-visible { background: var(--ec-theme-action-hover); outline: 0; }
-.ec-multiPickerOption.is-selected { background: var(--ec-theme-action-focus); }
-.ec-multiPickerCheck { color: var(--ec-theme-primary); font-size: 1.25rem; }
-.ec-multiPickerEmpty { margin: 0; opacity: .68; padding: 1.1rem .9rem; }
-.ec-multiPickerFooter { align-items: center; border-top: 1px solid var(--ec-theme-divider); display: flex; flex: 0 0 auto; font-size: .78rem; gap: .75rem; justify-content: space-between; padding: .55rem .7rem; }
-.ec-multiPickerFooter > div { display: flex; gap: .35rem; }
-.ec-multiPickerFooterButton { background: transparent; border: 0; border-radius: .25rem; color: inherit; cursor: pointer; padding: .4rem .55rem; }
-.ec-multiPickerFooterButton:hover { background: var(--ec-theme-action-hover); }
-.ec-multiPickerFooterButton.is-primary { color: var(--ec-theme-primary); font-weight: 700; }
+.ec-multiPickerOption:focus-visible {
+  background: var(--ec-theme-action-hover);
+  outline: 0;
+}
+.ec-multiPickerOption.is-selected {
+  background: var(--ec-theme-action-focus);
+}
+.ec-multiPickerCheck {
+  color: var(--ec-theme-primary);
+  font-size: 1.25rem;
+}
+.ec-multiPickerEmpty {
+  margin: 0;
+  opacity: 0.68;
+  padding: 1.1rem 0.9rem;
+}
+.ec-multiPickerFooter {
+  align-items: center;
+  border-top: 1px solid var(--ec-theme-divider);
+  display: flex;
+  flex: 0 0 auto;
+  font-size: 0.78rem;
+  gap: 0.75rem;
+  justify-content: space-between;
+  padding: 0.55rem 0.7rem;
+}
+.ec-multiPickerFooter > div {
+  display: flex;
+  gap: 0.35rem;
+}
+.ec-multiPickerFooterButton {
+  background: transparent;
+  border: 0;
+  border-radius: 0.25rem;
+  color: inherit;
+  cursor: pointer;
+  padding: 0.4rem 0.55rem;
+}
+.ec-multiPickerFooterButton:hover {
+  background: var(--ec-theme-action-hover);
+}
+.ec-multiPickerFooterButton.is-primary {
+  color: var(--ec-theme-primary);
+  font-weight: 700;
+}
 </style>

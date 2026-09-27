@@ -9,12 +9,23 @@ const focused = ref(false);
 
 <template>
   <div class="inputContainer">
-    <label class="inputLabel" :class="focused ? 'inputLabelFocused' : 'inputLabelUnfocused'" :for="fieldId"
-      v-if="label">
+    <label
+      v-if="label"
+      class="inputLabel"
+      :class="focused ? 'inputLabelFocused' : 'inputLabelUnfocused'"
+      :for="fieldId"
+    >
       {{ label }}
     </label>
-    <input :id="fieldId" class="emby-input" type="text" :value="String(modelValue ?? '')" :placeholder="placeholder"
-      @focus="focused = true" @blur="focused = false"
-      @input="emit('update:modelValue', ($event.target as HTMLInputElement).value)">
+    <input
+      :id="fieldId"
+      class="emby-input"
+      type="text"
+      :value="String(modelValue ?? '')"
+      :placeholder="placeholder"
+      @focus="focused = true"
+      @blur="focused = false"
+      @input="emit('update:modelValue', ($event.target as HTMLInputElement).value)"
+    />
   </div>
 </template>

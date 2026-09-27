@@ -22,12 +22,8 @@ const focused = ref(false);
 
 <template>
   <div class="selectContainer">
-    <div class="ec-selectLabelRow">
-      <label
-        class="selectLabel"
-        :class="{ selectLabelFocused: focused }"
-        :for="fieldId"
-      >
+    <div class="ec-selectLabelRow ec-configLabelRow">
+      <label class="selectLabel" :class="{ selectLabelFocused: focused }" :for="fieldId">
         {{ label }}
       </label>
       <ConfigHelpTooltip v-if="helpText" :text="helpText" :label="`${label}: ${helpText}`" />
@@ -46,17 +42,8 @@ const focused = ref(false);
       </option>
     </select>
     <div class="selectArrowContainer" aria-hidden="true">
-      <div style="visibility: hidden; display: none;">0</div>
+      <div style="visibility: hidden; display: none">0</div>
       <span class="selectArrow material-icons keyboard_arrow_down"></span>
     </div>
   </div>
 </template>
-
-<style scoped>
-.ec-selectLabelRow {
-  align-items: center;
-  display: flex;
-  gap: .4rem;
-  width: fit-content;
-}
-</style>

@@ -36,8 +36,12 @@ defineProps<{
 </template>
 
 <style scoped>
-.jmp-cardActions { flex: 0 0 auto; }
+.jmp-cardActions {
+  flex: 0 0 auto;
+}
 @media (max-width: 600px) {
-  .jmp-cardActions { width: 100%; }
+  .jmp-cardActions {
+    width: 100%;
+  }
 }
 </style>

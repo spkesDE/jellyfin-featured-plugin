@@ -7,7 +7,7 @@ const emit = defineEmits<{ 'update:modelValue': [value: boolean] }>();
 
 <template>
   <div class="checkboxContainer">
-    <div class="ec-checkboxRow">
+    <div class="ec-checkboxRow ec-configLabelRow">
       <label class="emby-checkbox-label">
         <input
           class="emby-checkbox"
@@ -15,7 +15,7 @@ const emit = defineEmits<{ 'update:modelValue': [value: boolean] }>();
           :disabled="disabled"
           :checked="modelValue === true"
           @change="emit('update:modelValue', ($event.target as HTMLInputElement).checked)"
-        >
+        />
         <span class="checkboxLabel">{{ label }}</span>
         <span class="checkboxOutline">
           <span class="material-icons checkboxIcon checkboxIcon-checked check" aria-hidden="true"></span>
@@ -26,12 +26,3 @@ const emit = defineEmits<{ 'update:modelValue': [value: boolean] }>();
     </div>
   </div>
 </template>
-
-<style scoped>
-.ec-checkboxRow {
-  align-items: center;
-  display: flex;
-  gap: .4rem;
-  width: fit-content;
-}
-</style>
