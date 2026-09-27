@@ -21,7 +21,7 @@ function escapeXml(value) {
 function languageName(locale) {
   const overrides = {
     en: 'English',
-    de: 'German',
+    de: 'German'
   };
 
   if (overrides[locale]) {
@@ -77,7 +77,7 @@ for (const file of localeFiles) {
     name: languageName(locale),
     translated,
     total: referenceKeys.length,
-    percent,
+    percent
   });
 }
 
@@ -98,19 +98,21 @@ const barWidth = 390;
 const barHeight = 10;
 const percentX = 662;
 
-const rowSvg = rows.map((row, index) => {
-  const y = headerHeight + index * rowHeight + 18;
-  const fillWidth = Math.max(0, Math.min(barWidth, (barWidth * row.percent) / 100));
-  const color = progressColor(row.percent);
+const rowSvg = rows
+  .map((row, index) => {
+    const y = headerHeight + index * rowHeight + 18;
+    const fillWidth = Math.max(0, Math.min(barWidth, (barWidth * row.percent) / 100));
+    const color = progressColor(row.percent);
 
-  return `
+    return `
     <g>
       <text x="${labelX}" y="${y}" class="language">${escapeXml(row.name)}</text>
       <rect x="${barX}" y="${y - 9}" width="${barWidth}" height="${barHeight}" rx="5" class="track"/>
       <rect x="${barX}" y="${y - 9}" width="${fillWidth.toFixed(1)}" height="${barHeight}" rx="5" fill="${color}"/>
       <text x="${percentX}" y="${y}" text-anchor="end" class="percent">${row.percent}%</text>
     </g>`;
-}).join('');
+  })
+  .join('');
 
 const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-labelledby="title desc">
   <title id="title">Jellyfin Featured translation status</title>

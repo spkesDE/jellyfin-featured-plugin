@@ -34,58 +34,107 @@ function addOverride(item: FeaturedSearchItem): void {
 </script>
 
 <template>
-  <section id="featuredPanel-trailers" class="jmp-section jmp-section-plain" role="tabpanel"
-    aria-labelledby="featuredTab-trailers">
+  <section
+    id="featuredPanel-trailers"
+    class="jmp-section jmp-section-plain"
+    role="tabpanel"
+    aria-labelledby="featuredTab-trailers"
+  >
     <div class="jmp-subgrid">
       <ConfigCard :title="t('trailers.backgroundTitle')" :help="t('trailers.backgroundHelp')">
         <ConfigCheckbox v-model="store.config.EnableBackgroundTrailers" :label="t('trailers.enabled')" />
         <template v-if="store.config.EnableBackgroundTrailers">
-          <ConfigSelect v-model="store.config.TrailerSourcePriority" :label="t('trailers.sourceLabel')"
-            :options="sourceOptions" />
+          <ConfigSelect
+            v-model="store.config.TrailerSourcePriority"
+            :label="t('trailers.sourceLabel')"
+            :options="sourceOptions"
+          />
           <ConfigCheckbox v-model="store.config.StartTrailersMuted" :label="t('trailers.startMuted')" />
-          <ConfigCheckbox v-model="store.config.HideYouTubeTrailerUntilControlsFade"
-            :label="t('trailers.hideYouTubeControls')" :help-text="t('trailers.hideYouTubeControlsHelp')" />
-          <ConfigCheckbox v-model="store.config.WaitForTrailerToFinish" :label="t('trailers.waitForFinish')"
-            :help-text="t('trailers.waitForFinishHelp')" />
+          <ConfigCheckbox
+            v-model="store.config.HideYouTubeTrailerUntilControlsFade"
+            :label="t('trailers.hideYouTubeControls')"
+            :help-text="t('trailers.hideYouTubeControlsHelp')"
+          />
+          <ConfigCheckbox
+            v-model="store.config.WaitForTrailerToFinish"
+            :label="t('trailers.waitForFinish')"
+            :help-text="t('trailers.waitForFinishHelp')"
+          />
           <ConfigCheckbox v-model="store.config.AllowTrailersOnMobile" :label="t('trailers.allowMobile')" />
         </template>
       </ConfigCard>
 
-      <ConfigCard v-if="store.config.EnableBackgroundTrailers" :title="t('trailers.timingTitle')"
-        :help="t('trailers.timingHelp')">
-        <ConfigNumber v-model="store.config.TrailerDelayMilliseconds" :label="t('trailers.delay')" :min="0"
-          :max="30000" :step="250" />
-        <ConfigNumber v-model="store.config.TrailerStartOffsetSeconds" :label="t('trailers.startOffset')" :min="0"
-          :max="3600" :step="1" />
-        <ConfigNumber v-model="store.config.TrailerEndOffsetSeconds" :label="t('trailers.endOffset')" :min="0"
-          :max="3600" :step="1" />
-        <ConfigSelect v-model="store.config.MultipleTrailerMode" :label="t('trailers.multipleLabel')"
-          :options="multipleOptions" />
+      <ConfigCard
+        v-if="store.config.EnableBackgroundTrailers"
+        :title="t('trailers.timingTitle')"
+        :help="t('trailers.timingHelp')"
+      >
+        <ConfigNumber
+          v-model="store.config.TrailerDelayMilliseconds"
+          :label="t('trailers.delay')"
+          :min="0"
+          :max="30000"
+          :step="250"
+        />
+        <ConfigNumber
+          v-model="store.config.TrailerStartOffsetSeconds"
+          :label="t('trailers.startOffset')"
+          :min="0"
+          :max="3600"
+          :step="1"
+        />
+        <ConfigNumber
+          v-model="store.config.TrailerEndOffsetSeconds"
+          :label="t('trailers.endOffset')"
+          :min="0"
+          :max="3600"
+          :step="1"
+        />
+        <ConfigSelect
+          v-model="store.config.MultipleTrailerMode"
+          :label="t('trailers.multipleLabel')"
+          :options="multipleOptions"
+        />
       </ConfigCard>
     </div>
 
     <ConfigCard class="ec-trailerOverrides" :title="t('trailers.overridesTitle')" :help="t('trailers.overridesHelp')">
-      <ManualItemAutocomplete input-id="trailer-override-search"
-        :exclude-ids="store.config.TrailerOverrides.map((entry) => entry.ItemId)" @select="addOverride" />
+      <ManualItemAutocomplete
+        input-id="trailer-override-search"
+        :exclude-ids="store.config.TrailerOverrides.map((entry) => entry.ItemId)"
+        @select="addOverride"
+      />
       <div v-if="store.config.TrailerOverrides.length" class="ec-trailerOverrideList">
-        <details v-for="(entry, index) in store.config.TrailerOverrides" :key="entry.ItemId"
-          class="ec-trailerOverride">
+        <details v-for="(entry, index) in store.config.TrailerOverrides" :key="entry.ItemId" class="ec-trailerOverride">
           <summary class="ec-trailerOverrideHeader">
-            <span><strong>{{ entry.Name }}</strong><small>{{ entry.Url || entry.LocalTrailerItemId || t('trailers.overrideNotConfigured') }}</small></span>
+            <span
+              ><strong>{{ entry.Name }}</strong
+              ><small>{{ entry.Url || entry.LocalTrailerItemId || t('trailers.overrideNotConfigured') }}</small></span
+            >
             <span class="material-icons ec-trailerOverrideChevron" aria-hidden="true">expand_more</span>
           </summary>
           <div class="ec-trailerOverrideBody">
             <div class="ec-trailerOverrideRemove">
-            <button type="button" class="paper-icon-button-light ec-ruleIconButton ec-removeRule"
-              :title="t('trailers.removeOverride')" @click="store.config.TrailerOverrides.splice(index, 1)">
-              <span class="material-icons" aria-hidden="true">delete</span>
-            </button>
+              <button
+                type="button"
+                class="paper-icon-button-light ec-ruleIconButton ec-removeRule"
+                :title="t('trailers.removeOverride')"
+                @click="store.config.TrailerOverrides.splice(index, 1)"
+              >
+                <span class="material-icons" aria-hidden="true">delete</span>
+              </button>
             </div>
-          <ConfigText v-model="entry.Url" :label="t('trailers.overrideUrl')"
-            placeholder="https://www.youtube.com/watch?v=…" />
-          <ConfigText v-model="entry.LocalTrailerItemId" :label="t('trailers.overrideLocalId')"
-            :placeholder="t('common.optional')" />
-          <p class="jmp-note">{{ t('trailers.overrideHint') }}</p>
+            <ConfigText
+              v-model="entry.Url"
+              :label="t('trailers.overrideUrl')"
+              placeholder="https://www.youtube.com/watch?v=…"
+            />
+            <ConfigText
+              v-model="entry.LocalTrailerItemId"
+              :label="t('trailers.overrideLocalId')"
+              :placeholder="t('common.optional')"
+            />
+            <p class="jmp-note">{{ t('trailers.overrideHint') }}</p>
           </div>
         </details>
       </div>
@@ -95,17 +144,61 @@ function addOverride(item: FeaturedSearchItem): void {
 </template>
 
 <style scoped>
-.ec-trailerOverrides { margin-top: 1rem; }
-.ec-trailerOverrideList { display: grid; gap: .8rem; margin-top: 1rem; }
-.ec-trailerOverride { background: var(--ec-config-nested-background); border: 1px solid var(--ec-theme-divider); border-radius: .7rem; overflow: hidden; }
-.ec-trailerOverrideHeader { align-items: center; cursor: pointer; display: flex; justify-content: space-between; list-style: none; padding: .8rem; }
-.ec-trailerOverrideHeader::-webkit-details-marker { display: none; }
-.ec-trailerOverrideHeader > span:first-child { display: grid; gap: .15rem; }
-.ec-trailerOverrideHeader small { font-size: .75rem; font-weight: 400; opacity: .62; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.ec-trailerOverrideChevron { transition: transform .16s ease; }
-.ec-trailerOverride[open] .ec-trailerOverrideChevron { transform: rotate(180deg); }
-.ec-trailerOverrideBody { border-top: 1px solid rgba(255, 255, 255, .07); padding: .8rem; }
-.ec-trailerOverrideRemove { display: flex; justify-content: flex-end; }
-.ec-trailerOverride :deep(.inputContainer) { margin-bottom: .7rem; }
-.ec-trailerOverride .jmp-note { margin: 0; }
+.ec-trailerOverrides {
+  margin-top: 1rem;
+}
+.ec-trailerOverrideList {
+  display: grid;
+  gap: 0.8rem;
+  margin-top: 1rem;
+}
+.ec-trailerOverride {
+  background: var(--ec-config-nested-background);
+  border: 1px solid var(--ec-theme-divider);
+  border-radius: 0.7rem;
+  overflow: hidden;
+}
+.ec-trailerOverrideHeader {
+  align-items: center;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  list-style: none;
+  padding: 0.8rem;
+}
+.ec-trailerOverrideHeader::-webkit-details-marker {
+  display: none;
+}
+.ec-trailerOverrideHeader > span:first-child {
+  display: grid;
+  gap: 0.15rem;
+}
+.ec-trailerOverrideHeader small {
+  font-size: 0.75rem;
+  font-weight: 400;
+  opacity: 0.62;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ec-trailerOverrideChevron {
+  transition: transform 0.16s ease;
+}
+.ec-trailerOverride[open] .ec-trailerOverrideChevron {
+  transform: rotate(180deg);
+}
+.ec-trailerOverrideBody {
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  padding: 0.8rem;
+}
+.ec-trailerOverrideRemove {
+  display: flex;
+  justify-content: flex-end;
+}
+.ec-trailerOverride :deep(.inputContainer) {
+  margin-bottom: 0.7rem;
+}
+.ec-trailerOverride .jmp-note {
+  margin: 0;
+}
 </style>

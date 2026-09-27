@@ -1,7 +1,7 @@
 {
   "app.title": "Jellyfin Featured",
   "app.intro": "Adds a full-width featured-content carousel to the Jellyfin Web home page. Combine curated favourites, collections, recent releases, and random picks, then control presentation and playback here.",
-   "toolbar.label": "Jellyfin Featured settings",
+  "toolbar.label": "Jellyfin Featured settings",
   "tab.sources": "Sources & Mix",
   "tab.manual": "Manual Sources",
   "tab.users": "User Profiles",

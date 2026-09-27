@@ -33,16 +33,30 @@ const sourceOptions: SelectOption[] = [
 </script>
 
 <template>
-  <section id="featuredPanel-sources" class="jmp-section jmp-section-plain" role="tabpanel" aria-labelledby="featuredTab-sources">
+  <section
+    id="featuredPanel-sources"
+    class="jmp-section jmp-section-plain"
+    role="tabpanel"
+    aria-labelledby="featuredTab-sources"
+  >
     <ConfigCard :title="t('source.title')" :help="t('source.help')">
       <template #actions>
-        <button type="button" class="raised emby-button ec-secondaryAction ec-feedPreviewAction" @click="store.openFeedPreview()">
+        <button
+          type="button"
+          class="raised emby-button ec-secondaryAction ec-feedPreviewAction"
+          @click="store.openFeedPreview()"
+        >
           <span class="material-icons" aria-hidden="true">preview</span>
           {{ t('feedPreview.open') }}
         </button>
       </template>
-      <div class="ec-addSourceRow">
-        <ConfigSelect v-model="selectedType" :label="t('source.newType')" :help-text="t('source.orderHelp')" :options="sourceOptions" />
+      <div class="ec-addSourceRow ec-configAddRow">
+        <ConfigSelect
+          v-model="selectedType"
+          :label="t('source.newType')"
+          :help-text="t('source.orderHelp')"
+          :options="sourceOptions"
+        />
         <button type="button" class="raised button-submit emby-button ec-addSourceButton" @click="addSource">
           <span class="material-icons" aria-hidden="true">add</span>
           {{ t('source.add') }}
@@ -50,18 +64,29 @@ const sourceOptions: SelectOption[] = [
       </div>
     </ConfigCard>
 
-    <Draggable v-if="store.config.SourceRules.length" v-model="store.config.SourceRules" item-key="Id" tag="div"
-      class="ec-sourceRules" handle=".ec-sourceDragHandle" ghost-class="ec-sourceDragGhost"
-      chosen-class="ec-sourceDragChosen" drag-class="ec-sourceDragging" :force-fallback="true"
-      :fallback-on-body="true" :fallback-tolerance="3" :animation="160">
+    <Draggable
+      v-if="store.config.SourceRules.length"
+      v-model="store.config.SourceRules"
+      item-key="Id"
+      tag="div"
+      class="ec-sourceRules ec-configStack"
+      handle=".ec-sourceDragHandle"
+      ghost-class="ec-sourceDragGhost"
+      chosen-class="ec-sourceDragChosen"
+      drag-class="ec-sourceDragging"
+      :force-fallback="true"
+      :fallback-on-body="true"
+      :fallback-tolerance="3"
+      :animation="160"
+    >
       <template #item="{ element: rule, index }">
-      <SourceRuleCard
-        :rule="rule"
-        :index="index"
-        :count="store.config.SourceRules.length"
-        :expanded="expandedSourceId === rule.Id"
-        @toggle="expandedSourceId = expandedSourceId === rule.Id ? null : rule.Id"
-      />
+        <SourceRuleCard
+          :rule="rule"
+          :index="index"
+          :count="store.config.SourceRules.length"
+          :expanded="expandedSourceId === rule.Id"
+          @toggle="expandedSourceId = expandedSourceId === rule.Id ? null : rule.Id"
+        />
       </template>
     </Draggable>
     <div v-else class="ec-emptySources">
@@ -73,16 +98,23 @@ const sourceOptions: SelectOption[] = [
 </template>
 
 <style scoped>
-.ec-addSourceRow { align-items: end; display: grid; gap: 1rem; grid-template-columns: minmax(15rem, 1fr) auto; }
-.ec-addSourceRow > :deep(.selectContainer) { margin-bottom: 0; }
-.ec-sourceRules { display: grid; gap: 1rem; margin-top: 1rem; }
 .ec-sourceDragGhost,
-.ec-sourceDragChosen:not(.ec-sourceDragging) { opacity: .2; }
-.ec-sourceDragging { border-color: var(--ec-theme-primary); box-shadow: 0 .8rem 2rem rgba(0, 0, 0, .4); }
-.ec-feedPreviewAction { min-height: 2.35rem; padding: .45rem .75rem; white-space: nowrap; }
+.ec-sourceDragChosen:not(.ec-sourceDragging) {
+  opacity: 0.2;
+}
+.ec-sourceDragging {
+  border-color: var(--ec-theme-primary);
+  box-shadow: 0 0.8rem 2rem rgba(0, 0, 0, 0.4);
+}
+.ec-feedPreviewAction {
+  min-height: 2.35rem;
+  padding: 0.45rem 0.75rem;
+  white-space: nowrap;
+}
 
 @media (max-width: 600px) {
-  .ec-addSourceRow { grid-template-columns: 1fr; }
-  .ec-feedPreviewAction { width: 100%; }
+  .ec-feedPreviewAction {
+    width: 100%;
+  }
 }
 </style>

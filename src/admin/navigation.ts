@@ -21,7 +21,7 @@ export function isUserSettingsMenu(element: Element): boolean {
   return element.matches('ul[role="menu"]') && element.querySelector(USER_PREFERENCES_SELECTOR) !== null;
 }
 
-export function ensureUserSettingsMenuEntry(): void {
+function ensureUserSettingsMenuEntry(): void {
   document.querySelectorAll<HTMLElement>('ul[role="menu"]').forEach((menu) => {
     if (!isUserSettingsMenu(menu)) return;
     const existing = menu.querySelector<HTMLElement>(`[${USER_SETTINGS_LINK_ATTR}="true"]`);
@@ -54,7 +54,7 @@ export function ensureUserSettingsMenuEntry(): void {
   });
 }
 
-export function ensureUserSettingsPageEntry(): void {
+function ensureUserSettingsPageEntry(): void {
   const page = document.querySelector<HTMLElement>('#myPreferencesMenuPage');
   if (!page) return;
   const existing = page.querySelector<HTMLElement>(`[${USER_SETTINGS_PAGE_LINK_ATTR}="true"]`);
@@ -64,19 +64,23 @@ export function ensureUserSettingsPageEntry(): void {
   }
   if (existing) return;
 
-  const section = page.querySelector<HTMLElement>('.readOnlyContent > .verticalSection')
-    ?? page.querySelector<HTMLElement>('.verticalSection');
-  const template = section?.querySelector<HTMLAnchorElement>('.lnkHomePreferences')
-    ?? section?.querySelector<HTMLAnchorElement>('a.listItem-border');
+  const section =
+    page.querySelector<HTMLElement>('.readOnlyContent > .verticalSection') ??
+    page.querySelector<HTMLElement>('.verticalSection');
+  const template =
+    section?.querySelector<HTMLAnchorElement>('.lnkHomePreferences') ??
+    section?.querySelector<HTMLAnchorElement>('a.listItem-border');
   if (!section || !template) return;
 
   const entry = template.cloneNode(true) as HTMLAnchorElement;
   entry.setAttribute(USER_SETTINGS_PAGE_LINK_ATTR, 'true');
   entry.setAttribute('href', '#');
   entry.removeAttribute('id');
-  Array.from(entry.classList).filter((className) => className.startsWith('lnk')).forEach((className) => {
-    entry.classList.remove(className);
-  });
+  Array.from(entry.classList)
+    .filter((className) => className.startsWith('lnk'))
+    .forEach((className) => {
+      entry.classList.remove(className);
+    });
   const icon = entry.querySelector<HTMLElement>('.listItemIcon');
   if (icon) {
     icon.className = 'material-icons listItemIcon listItemIcon-transparent';
@@ -113,7 +117,7 @@ export function setUserSettingsMenuEnabled(enabled: boolean): void {
   }
 }
 
-export function isPluginConfigurationLink(element: Element | null): boolean {
+function isPluginConfigurationLink(element: Element | null): boolean {
   return !!(
     element &&
     element.tagName === 'A' &&
@@ -122,36 +126,33 @@ export function isPluginConfigurationLink(element: Element | null): boolean {
   );
 }
 
-export function getAdminNavigationContainers(): HTMLElement[] {
+function getAdminNavigationContainers(): HTMLElement[] {
   const containers = new Set<HTMLElement>();
-  const muiPluginsContainer = document.querySelector<HTMLElement>(
-    'ul[aria-labelledby="plugins-subheader"]'
-  );
+  const muiPluginsContainer = document.querySelector<HTMLElement>('ul[aria-labelledby="plugins-subheader"]');
 
   if (muiPluginsContainer) containers.add(muiPluginsContainer);
   return Array.from(containers);
 }
 
-export function isFeaturedConfigurationRoute(): boolean {
+function isFeaturedConfigurationRoute(): boolean {
   const hash = window.location.hash || '';
   if (!hash) return false;
 
   try {
     const normalizedHash = hash.charAt(0) === '#' ? hash.slice(1) : hash;
     const routeUrl = new URL(normalizedHash, window.location.origin);
-    return routeUrl.pathname === '/configurationpage' &&
-      routeUrl.searchParams.get('name') === CONFIGURATION_PAGE_NAME;
+    return routeUrl.pathname === '/configurationpage' && routeUrl.searchParams.get('name') === CONFIGURATION_PAGE_NAME;
   } catch {
     return hash.includes(CONFIGURATION_PAGE_HASH);
   }
 }
 
-export function isPluginsDashboardRoute(): boolean {
+function isPluginsDashboardRoute(): boolean {
   const hash = window.location.hash || '';
   return hash === '#/dashboard/plugins' || hash.startsWith('#/dashboard/plugins?');
 }
 
-export function getSelectedNavClasses(container: HTMLElement, currentEntry: Element | null): string[] {
+function getSelectedNavClasses(container: HTMLElement, currentEntry: Element | null): string[] {
   const selectedCandidate = Array.from(container.children).find((child) => {
     if (!(child instanceof HTMLElement) || child === currentEntry) return false;
     return child.classList.contains('Mui-selected');
@@ -161,11 +162,7 @@ export function getSelectedNavClasses(container: HTMLElement, currentEntry: Elem
   return Array.from(selectedCandidate.classList).filter((className) => className === 'Mui-selected');
 }
 
-export function setAdminNavigationEntrySelected(
-  entry: Element,
-  isSelected: boolean,
-  selectedClasses: string[]
-): void {
+function setAdminNavigationEntrySelected(entry: Element, isSelected: boolean, selectedClasses: string[]): void {
   if (!(entry instanceof HTMLElement)) return;
 
   if (isSelected) {
@@ -177,10 +174,12 @@ export function setAdminNavigationEntrySelected(
   }
 }
 
-export function syncPluginsRootSelection(shouldSelectCustomEntry: boolean): void {
-  const pluginsLinks = Array.from(document.querySelectorAll(
-    'a[href="#/plugins"], a[href$="/#/plugins"], a[href="#/dashboard/plugins"], a[href$="/#/dashboard/plugins"]'
-  ));
+function syncPluginsRootSelection(shouldSelectCustomEntry: boolean): void {
+  const pluginsLinks = Array.from(
+    document.querySelectorAll(
+      'a[href="#/plugins"], a[href$="/#/plugins"], a[href="#/dashboard/plugins"], a[href$="/#/dashboard/plugins"]'
+    )
+  );
 
   pluginsLinks.forEach((link) => {
     if (!(link instanceof HTMLElement) || link.getAttribute(ADMIN_NAV_LINK_ATTR) === 'true') return;
@@ -195,7 +194,7 @@ export function syncPluginsRootSelection(shouldSelectCustomEntry: boolean): void
   });
 }
 
-export function updateAdminNavigationEntry(entry: Element): void {
+function updateAdminNavigationEntry(entry: Element): void {
   entry.setAttribute(ADMIN_NAV_LINK_ATTR, 'true');
   entry.setAttribute('href', CONFIGURATION_PAGE_HASH);
   entry.setAttribute('title', PLUGIN_DISPLAY_NAME);
@@ -229,7 +228,7 @@ export function updateAdminNavigationEntry(entry: Element): void {
   else entry.textContent = PLUGIN_DISPLAY_NAME;
 }
 
-export function ensureAdminNavigationLink(): void {
+function ensureAdminNavigationLink(): void {
   const shouldSelectEntry = isFeaturedConfigurationRoute();
   const containers = getAdminNavigationContainers();
   if (!containers.length) return;
@@ -237,9 +236,9 @@ export function ensureAdminNavigationLink(): void {
   containers.forEach((container) => {
     const selectedClasses = getSelectedNavClasses(container, null);
     syncPluginsRootSelection(shouldSelectEntry);
-    const existing = Array.from(container.children).find((child) => (
-      isPluginConfigurationLink(child) && (child.getAttribute('href') || '') === CONFIGURATION_PAGE_HASH
-    ));
+    const existing = Array.from(container.children).find(
+      (child) => isPluginConfigurationLink(child) && (child.getAttribute('href') || '') === CONFIGURATION_PAGE_HASH
+    );
 
     if (existing) {
       updateAdminNavigationEntry(existing);
@@ -247,7 +246,8 @@ export function ensureAdminNavigationLink(): void {
       return;
     }
 
-    const template = Array.from(container.children).find((child) => isPluginConfigurationLink(child)) ||
+    const template =
+      Array.from(container.children).find((child) => isPluginConfigurationLink(child)) ||
       container.querySelector('a[href="#/dashboard/plugins"], a[href="#/plugins"]');
     if (!template) return;
 
