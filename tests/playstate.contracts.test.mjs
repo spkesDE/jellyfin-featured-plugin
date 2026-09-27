@@ -1,8 +1,6 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { readProjectSource as read } from './helpers/readProjectSource.mjs';
 import test from 'node:test';
-
-const read = (path) => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 
 test('played toggle uses Jellyfin playstate markup and updates in place', async () => {
   const [render, playstate, styles] = await Promise.all([
@@ -18,9 +16,15 @@ test('played toggle uses Jellyfin playstate markup and updates in place', async 
   assert.match(playstate, /button-flat btnPlaystate detailButton emby-button/);
   assert.match(playstate, /UserPlayedItems\/\$\{encodeURIComponent\(item\.id\)\}/);
   assert.match(playstate, /item\.isPlayed = result\.Played \?\? next;[\s\S]*?updateButton\(button, item\.isPlayed\)/);
-  assert.match(playstate, /ec-playstate-button-meta[\s\S]*?--ec-playstate-active-color, #52b54b[\s\S]*?--ec-on-media-color, #fff/);
+  assert.match(
+    playstate,
+    /ec-playstate-button-meta[\s\S]*?--ec-playstate-active-color, #52b54b[\s\S]*?--ec-on-media-color, #fff/
+  );
   assert.match(playstate, /featured\/playstate\/changed/);
-  assert.match(styles, /\.ec-playstate-button\[aria-pressed="true"\][\s\S]*?color:\s*var\(--ec-playstate-active-color, #52b54b\)/);
+  assert.match(
+    styles,
+    /\.ec-playstate-button\[aria-pressed=['"]true['"]\][\s\S]*?color:\s*var\(--ec-playstate-active-color, #52b54b\)/
+  );
 });
 
 test('favorite toggle uses Jellyfin rating button markup', async () => {

@@ -76,11 +76,12 @@ async function fetchPlaybackTarget(item: FeaturedItem): Promise<PlaybackTarget> 
   const userId = getCurrentUserId();
   if (!userId) throw new Error('No active Jellyfin user');
 
-  const resolved = item.mediaType === 'Series'
-    ? await resolveSeriesTarget(item, userId)
-    : await requestJson<JellyfinPlaybackItem>(
-        `Users/${encodeURIComponent(userId)}/Items/${encodeURIComponent(item.id)}`
-      );
+  const resolved =
+    item.mediaType === 'Series'
+      ? await resolveSeriesTarget(item, userId)
+      : await requestJson<JellyfinPlaybackItem>(
+          `Users/${encodeURIComponent(userId)}/Items/${encodeURIComponent(item.id)}`
+        );
   return asTarget(resolved, item);
 }
 
@@ -116,8 +117,9 @@ function createNativePlaybackAction(target: PlaybackTarget): HTMLButtonElement {
 }
 
 function dispatchNativePlayback(target: PlaybackTarget): boolean {
-  const container = Array.from(document.querySelectorAll<HTMLElement>('.itemsContainer'))
-    .find(candidate => candidate.isConnected);
+  const container = Array.from(document.querySelectorAll<HTMLElement>('.itemsContainer')).find(
+    (candidate) => candidate.isConnected
+  );
   if (!container) return false;
 
   const action = createNativePlaybackAction(target);
@@ -131,9 +133,7 @@ function dispatchNativePlayback(target: PlaybackTarget): boolean {
 }
 
 function updateButton(button: HTMLButtonElement, target: PlaybackTarget, customPlayText?: string | null): void {
-  const label = target.positionTicks > 0
-    ? `▶ ${t('carousel.resume')}`
-    : customPlayText || `▶ ${t('carousel.play')}`;
+  const label = target.positionTicks > 0 ? `▶ ${t('carousel.resume')}` : customPlayText || `▶ ${t('carousel.play')}`;
   button.textContent = label;
   button.setAttribute('aria-label', target.positionTicks > 0 ? t('carousel.resume') : t('carousel.play'));
   button.title = target.positionTicks > 0 ? t('carousel.resume') : t('carousel.play');

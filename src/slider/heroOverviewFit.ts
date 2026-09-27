@@ -17,8 +17,7 @@ function clearOverviewFitClasses(content: HTMLElement): void {
 }
 
 function getVisibleContentBottom(content: HTMLElement): number {
-  const visibleChildren = Array.from(content.children)
-    .filter((child) => child.getClientRects().length > 0);
+  const visibleChildren = Array.from(content.children).filter((child) => child.getClientRects().length > 0);
   if (!visibleChildren.length) return content.getBoundingClientRect().top;
   return Math.max(...visibleChildren.map((child) => child.getBoundingClientRect().bottom));
 }
@@ -74,9 +73,9 @@ function mutationNeedsFit(mutation: MutationRecord): boolean {
   if (mutation.type !== 'childList') return false;
   if (mutation.target instanceof Element && mutation.target.closest('.ec-root.ec-hero')) return true;
 
-  return [...mutation.addedNodes, ...mutation.removedNodes].some((node) =>
-    node instanceof Element
-    && (node.matches('.ec-root.ec-hero') || node.querySelector('.ec-root.ec-hero') !== null)
+  return [...mutation.addedNodes, ...mutation.removedNodes].some(
+    (node) =>
+      node instanceof Element && (node.matches('.ec-root.ec-hero') || node.querySelector('.ec-root.ec-hero') !== null)
   );
 }
 

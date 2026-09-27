@@ -1,8 +1,11 @@
 import { getApiClient, requestJson } from '../core/apiClient';
 import { t } from '../i18n';
 import type { FeaturedItem } from '../types/featured';
+import { showTransientActionError } from './actionFeedback';
 
-interface FavoriteResponse { IsFavorite?: boolean }
+interface FavoriteResponse {
+  IsFavorite?: boolean;
+}
 
 function updateButton(button: HTMLButtonElement, favorite: boolean): void {
   button.setAttribute('aria-pressed', String(favorite));
@@ -35,9 +38,10 @@ function styleMetadataButton(button: HTMLButtonElement): void {
 export function createFavoriteButton(item: FeaturedItem, variant: 'action' | 'metadata' = 'action'): HTMLButtonElement {
   const button = document.createElement('button');
   button.type = 'button';
-  button.className = variant === 'metadata'
-    ? 'button-flat btnUserRating detailButton emby-button ec-favorite-button ec-favorite-button-meta'
-    : 'ec-button ec-button-secondary ec-favorite-button raised emby-button';
+  button.className =
+    variant === 'metadata'
+      ? 'button-flat btnUserRating detailButton emby-button ec-favorite-button ec-favorite-button-meta'
+      : 'ec-button ec-button-secondary ec-favorite-button raised emby-button';
   button.setAttribute('is', 'emby-ratingbutton');
   button.dataset.id = item.id;
   const serverId = getApiClient()?.serverId?.();
@@ -61,8 +65,9 @@ export function createFavoriteButton(item: FeaturedItem, variant: 'action' | 'me
     button.parentElement?.querySelector('.ec-favorite-error')?.remove();
     const next = !item.isFavorite;
     try {
-      const result = await requestJson<FavoriteResponse>(`UserFavoriteItems/${encodeURIComponent(item.id)}`,
-        { method: next ? 'POST' : 'DELETE' });
+      const result = await requestJson<FavoriteResponse>(`UserFavoriteItems/${encodeURIComponent(item.id)}`, {
+        method: next ? 'POST' : 'DELETE'
+      });
       item.isFavorite = result.IsFavorite ?? next;
       updateButton(button, item.isFavorite);
       try {
@@ -71,14 +76,7 @@ export function createFavoriteButton(item: FeaturedItem, variant: 'action' | 'me
         console.warn('Jellyfin Featured: could not refresh favorite-dependent feeds.', error);
       }
     } catch (error) {
-      button.dataset.error = t('carousel.favoriteError');
-      button.title = t('carousel.favoriteError');
-      const status = document.createElement('span');
-      status.className = 'ec-favorite-error';
-      status.setAttribute('role', 'alert');
-      status.textContent = t('carousel.favoriteError');
-      button.after(status);
-      window.setTimeout(() => status.remove(), 4000);
+      showTransientActionError(button, 'ec-favorite-error', t('carousel.favoriteError'));
       console.warn('Jellyfin Featured: could not change favorite.', error);
     } finally {
       button.disabled = false;

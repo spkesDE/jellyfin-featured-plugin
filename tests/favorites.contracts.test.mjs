@@ -1,14 +1,15 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { readProjectSource as read } from './helpers/readProjectSource.mjs';
 import test from 'node:test';
-
-const read = (path) => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 
 test('favorite toggles update in place without remounting the featured carousel', async () => {
   const favorites = await read('src/slider/favorites.ts');
   assert.match(favorites, /UserFavoriteItems\/\$\{encodeURIComponent\(item\.id\)\}/);
   assert.match(favorites, /featured\/favorites\/changed/);
-  assert.match(favorites, /item\.isFavorite = result\.IsFavorite \?\? next;[\s\S]*?updateButton\(button, item\.isFavorite\)/);
+  assert.match(
+    favorites,
+    /item\.isFavorite = result\.IsFavorite \?\? next;[\s\S]*?updateButton\(button, item\.isFavorite\)/
+  );
   assert.doesNotMatch(favorites, /USER_PREFERENCES_CHANGED_EVENT|dispatchEvent/);
 });
 
@@ -35,7 +36,13 @@ test('favorite control supports compact metadata and standalone action placement
   assert.match(favorites, /favorite \? '#ff4058' : 'var\(--ec-on-media-color, #fff\)'/);
   assert.match(favorites, /icon\.style\.fontSize = '1\.35rem'/);
   assert.doesNotMatch(favorites, /icon\.textContent/);
-  assert.match(styles, /\.ec-root\.ec-ready\.ec-hero \.ec-slide\.is-active \.ec-favorite-button-meta,[\s\S]*?pointer-events:\s*auto/);
-  assert.match(styles, /\.ec-root \.ec-meta>button\.ec-favorite-button-meta,[\s\S]*?margin:\s*0 !important;[\s\S]*?padding:\s*\.15rem !important/);
+  assert.match(
+    styles,
+    /\.ec-root\.ec-ready\.ec-hero \.ec-slide\.is-active \.ec-favorite-button-meta,[\s\S]*?pointer-events:\s*auto/
+  );
+  assert.match(
+    styles,
+    /\.ec-root \.ec-meta\s*>\s*button\.ec-favorite-button-meta,[\s\S]*?margin:\s*0 !important;[\s\S]*?padding:\s*0?\.15rem !important/
+  );
   assert.match(styles, /button\.ec-favorite-button-meta:hover,[\s\S]*?button\.ec-playstate-button-meta:hover/);
 });

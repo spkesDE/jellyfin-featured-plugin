@@ -1,8 +1,11 @@
 import { getApiClient, requestJson } from '../core/apiClient';
 import { t } from '../i18n';
 import type { FeaturedItem } from '../types/featured';
+import { showTransientActionError } from './actionFeedback';
 
-interface PlaystateResponse { Played?: boolean }
+interface PlaystateResponse {
+  Played?: boolean;
+}
 
 function updateButton(button: HTMLButtonElement, played: boolean): void {
   button.setAttribute('aria-pressed', String(played));
@@ -10,9 +13,7 @@ function updateButton(button: HTMLButtonElement, played: boolean): void {
   button.title = t(played ? 'carousel.markUnplayed' : 'carousel.markPlayed');
   button.dataset.played = String(played);
   if (button.classList.contains('ec-playstate-button-meta')) {
-    button.style.color = played
-      ? 'var(--ec-playstate-active-color, #52b54b)'
-      : 'var(--ec-on-media-color, #fff)';
+    button.style.color = played ? 'var(--ec-playstate-active-color, #52b54b)' : 'var(--ec-on-media-color, #fff)';
   }
   const icon = button.querySelector<HTMLElement>('.material-icons');
   if (icon) {
@@ -21,12 +22,16 @@ function updateButton(button: HTMLButtonElement, played: boolean): void {
   }
 }
 
-export function createPlaystateButton(item: FeaturedItem, variant: 'action' | 'metadata' = 'metadata'): HTMLButtonElement {
+export function createPlaystateButton(
+  item: FeaturedItem,
+  variant: 'action' | 'metadata' = 'metadata'
+): HTMLButtonElement {
   const button = document.createElement('button');
   button.type = 'button';
-  button.className = variant === 'metadata'
-    ? 'button-flat btnPlaystate detailButton emby-button ec-playstate-button ec-playstate-button-meta'
-    : 'ec-button ec-button-secondary ec-playstate-button raised emby-button';
+  button.className =
+    variant === 'metadata'
+      ? 'button-flat btnPlaystate detailButton emby-button ec-playstate-button ec-playstate-button-meta'
+      : 'ec-button ec-button-secondary ec-playstate-button raised emby-button';
   button.setAttribute('is', 'emby-playstatebutton');
   button.dataset.id = item.id;
   button.dataset.type = item.mediaType;
@@ -50,8 +55,9 @@ export function createPlaystateButton(item: FeaturedItem, variant: 'action' | 'm
     button.parentElement?.querySelector('.ec-playstate-error')?.remove();
     const next = !item.isPlayed;
     try {
-      const result = await requestJson<PlaystateResponse>(`UserPlayedItems/${encodeURIComponent(item.id)}`,
-        { method: next ? 'POST' : 'DELETE' });
+      const result = await requestJson<PlaystateResponse>(`UserPlayedItems/${encodeURIComponent(item.id)}`, {
+        method: next ? 'POST' : 'DELETE'
+      });
       item.isPlayed = result.Played ?? next;
       updateButton(button, item.isPlayed);
       try {
@@ -60,14 +66,7 @@ export function createPlaystateButton(item: FeaturedItem, variant: 'action' | 'm
         console.warn('Jellyfin Featured: could not refresh playstate-dependent feeds.', error);
       }
     } catch (error) {
-      button.dataset.error = t('carousel.playstateError');
-      button.title = t('carousel.playstateError');
-      const status = document.createElement('span');
-      status.className = 'ec-playstate-error';
-      status.setAttribute('role', 'alert');
-      status.textContent = t('carousel.playstateError');
-      button.after(status);
-      window.setTimeout(() => status.remove(), 4000);
+      showTransientActionError(button, 'ec-playstate-error', t('carousel.playstateError'));
       console.warn('Jellyfin Featured: could not change play state.', error);
     } finally {
       button.disabled = false;

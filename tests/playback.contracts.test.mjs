@@ -1,8 +1,6 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { readProjectSource as read } from './helpers/readProjectSource.mjs';
 import test from 'node:test';
-
-const read = async (path) => await readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 
 test('hero play action resolves video progress and starts native Jellyfin playback', async () => {
   const [render, playback, styles, english, german] = await Promise.all([

@@ -68,7 +68,12 @@ function createMetadata(item: FeaturedItem, response: FeaturedResponse): HTMLEle
   if (response.showPlaystateButton && response.playstateButtonPlacement === 'metadata') {
     metadata.appendChild(createPlaystateButton(item, 'metadata'));
   }
-  if (response.dismissalsEnabled && response.showDismissalButton && response.dismissalButtonPlacement === 'metadata' && item.dismissalOptions?.length) {
+  if (
+    response.dismissalsEnabled &&
+    response.showDismissalButton &&
+    response.dismissalButtonPlacement === 'metadata' &&
+    item.dismissalOptions?.length
+  ) {
     metadata.appendChild(createDismissalControl(item, 'metadata'));
   }
   return metadata.childElementCount ? metadata : null;
@@ -126,11 +131,19 @@ export function createSlide(item: FeaturedItem, response: FeaturedResponse): HTM
 
   const favoriteAction = response.showFavoriteButton && response.favoriteButtonPlacement === 'actions';
   const playstateAction = response.showPlaystateButton && response.playstateButtonPlacement === 'actions';
-  const dismissalAction = response.dismissalsEnabled
-    && response.showDismissalButton
-    && response.dismissalButtonPlacement === 'actions'
-    && !!item.dismissalOptions?.length;
-  if (response.showPlayButton || response.showSecondaryButton || favoriteAction || playstateAction || dismissalAction || (item.trailer?.provider === 'external' && item.trailer.url)) {
+  const dismissalAction =
+    response.dismissalsEnabled &&
+    response.showDismissalButton &&
+    response.dismissalButtonPlacement === 'actions' &&
+    !!item.dismissalOptions?.length;
+  if (
+    response.showPlayButton ||
+    response.showSecondaryButton ||
+    favoriteAction ||
+    playstateAction ||
+    dismissalAction ||
+    (item.trailer?.provider === 'external' && item.trailer.url)
+  ) {
     const actions = document.createElement('div');
     actions.className = 'ec-actions';
     if (response.showPlayButton) {
