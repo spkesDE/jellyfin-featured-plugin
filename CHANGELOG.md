@@ -29,6 +29,7 @@
 
 - docs(injection): document automatic fallback order
 - docs: update documentation
+
 ## v12.6.0.0 - 2026-09-24
 
 ### Features
@@ -46,11 +47,13 @@
 - fix(dismissals): preserve metadata icon color
 - fix(playback): update playback button class for styling consistency
 - fix(playstate): preserve metadata icon color on hover
+
 ## v12.5.1.0 - 2026-09-22
 
 ### Fixes
 
 - fix(trailers): release volume slider focus after drag
+
 ## v12.5.0.0 - 2026-09-21
 
 ### Features
@@ -87,6 +90,7 @@
 - deps(deps): bump the npm-minor-and-patch group with 3 updates (#13)
 - deps: Bump the nuget-minor-and-patch group with 4 updates (#15)
 - deps(deps-dev): bump typescript from 5.9.3 to 6.0.3 (#14)
+
 ## v12.4.0.0 - 2026-09-15
 
 ### Fixes
@@ -99,6 +103,7 @@
 - fix(style): remove margin-top from config and featured sections for better alignment
 - fix(hero): adapt overview lines to available space
 - fix(hero): scope stacking context to viewport
+
 ## v12.3.1.1 - 2026-09-15
 
 ### Fixes
@@ -108,6 +113,7 @@
 ### Other
 
 - chore: update plugin version to 12.3.1.0
+
 ## v12.3.1.0 - 2026-09-15
 
 ### Features
@@ -143,6 +149,7 @@
 - deps: Bump Microsoft.NET.Test.Sdk from 17.14.1 to 18.10.0 (#5)
 - deps: Bump xunit.runner.visualstudio from 3.1.5 to 4.0.0 (#7)
 - Update beta manifest and logo for 12.3.0.1
+
 ## v12.3.0.0 - 2026-09-14
 
 ### Features
@@ -155,6 +162,7 @@
 
 - fix(styles): add border radius and clip-path to ec-slide for improved aesthetics
 - fix(preview): refine layout and error handling
+
 ## v12.2.2.0 - 2026-09-14
 
 ### Features
@@ -167,6 +175,7 @@
 - docs: add translation status badge to README
 - docs: highlight 12.2.1 performance improvements
 - docs: add performance in README
+
 ## v12.2.1.0 - 2026-09-13
 
 ### Features
@@ -185,6 +194,7 @@
 ### Refactoring
 
 - refactor(ruleEngine): Refactor Featured Rule Engine and Enhance Timing Diagnostics
+
 ## v12.2.0.0 - 2026-09-13
 
 ### Features
@@ -259,6 +269,7 @@
 - test(config): align layout contract with page styles
 - revert(trailers): restore compact backdrop fade
 - style(preferences): enlarge responsive settings modal
+
 ## v12.1.1.0 - 2026-09-12
 
 ### Features
@@ -276,9 +287,9 @@
 ### Other
 
 - chore: Update JavaScript Injector repository URL in README
+
 ## v12.1.0.0 - 2026-09-12
 
 ### Other
 
 - Initial commit 12.1.0.0
-

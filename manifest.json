@@ -1,117 +1,117 @@
 [
-{
-  "guid": "08880a95-8467-4538-bab9-da69c7f4793f",
-  "name": "Jellyfin Featured",
-  "overview": "A Netflix-style featured-content carousel for the Jellyfin Web home page.",
-  "description": "Adds a configurable featured-content carousel with curated favourites, collections, recent releases, random picks, hero layouts, and local background trailers to Jellyfin Web.",
-  "owner": "spkesDE",
-  "category": "General",
-  "imageUrl": "https://raw.githubusercontent.com/spkesDE/jellyfin-featured-plugin/main/logo.png",
-  "versions": [
-    {
-      "version": "12.7.1.0",
-      "changelog": "- feat(cache): accelerate startup and coalesce remounts\n- docs: document cache performance behavior\n- perf(rule-engine): warm and streamline candidate loading\n",
-      "targetAbi": "12.1.0.0",
-      "sourceUrl": "https://github.com/spkesDE/jellyfin-featured-plugin/releases/download/v12.7.1.0/Featured.zip",
-      "checksum": "f770f78326f1066c902da902a949e8c3",
-      "timestamp": "2026-09-26 13:10:56"
-    },
-    {
-      "version": "12.7.0.0",
-      "changelog": "- feat(injection): add resilient direct fallback\n- feat(display): add interactive hero fade editor\n- feat(config): mirror Jellyfin in banner preview\n- fix(sources): fill feed from sole available source\n- docs(injection): document automatic fallback order\n- docs: update documentation\n",
-      "targetAbi": "12.1.0.0",
-      "sourceUrl": "https://github.com/spkesDE/jellyfin-featured-plugin/releases/download/v12.7.0.0/Featured.zip",
-      "checksum": "2ff97c01bde6e7e428fe22c33e8a6147",
-      "timestamp": "2026-09-26 08:26:36"
-    },
-    {
-      "version": "12.6.0.0",
-      "changelog": "- feat(playback): add direct play and resume\n- feat(recommendations): add persistent dismissal feedback\n- feat(sources): add continuation and metadata filters\n- fix(playback): restore play button hover state\n- fix(styles): adjust max-width calculation for better responsiveness\n- fix(styles): remove gap from actions and adjust media query formatting\n- fix(preferences): remove dismissal cooldown hint\n- fix(dismissals): preserve metadata icon color\n- fix(playback): update playback button class for styling consistency\n- fix(playstate): preserve metadata icon color on hover\n",
-      "targetAbi": "12.1.0.0",
-      "sourceUrl": "https://github.com/spkesDE/jellyfin-featured-plugin/releases/download/v12.6.0.0/Featured.zip",
-      "checksum": "365e28c3361509a6057679366e31e436",
-      "timestamp": "2026-09-24 17:51:33"
-    },
-    {
-      "version": "12.5.1.0",
-      "changelog": "- fix(trailers): release volume slider focus after drag\n",
-      "targetAbi": "12.1.0.0",
-      "sourceUrl": "https://github.com/spkesDE/jellyfin-featured-plugin/releases/download/v12.5.1.0/Featured.zip",
-      "checksum": "cc1888aa7be3170cbc000ddd0b78d60b",
-      "timestamp": "2026-09-22 16:50:25"
-    },
-    {
-      "version": "12.5.0.0",
-      "changelog": "- feat: control background trailers per source rule\n- feat: add Jellyfin movie recommendations as a mixer source\n- feat: toggle viewer favorites from featured slides\n- feat: make featured favorite button configurable for admins and users\n- feat: place favorite heart in banner metadata\n- feat(preferences): preload user settings cache\n- feat(trailers): add configurable media controls\n- feat(display): add fullscreen hero fade controls\n- feat(playstate): add watched toggle beside favorites\n- feat(styles): enhance CSS variables for responsive design and transitions\n- feat(sources): add media fallbacks and resolution filter\n- fix(navigation): preserve carousel focus and native keyboard controls\n- fix: show critic rating with rotten icon\n- fix: remove item-page critic rating classes\n- fix: update favorites without reloading carousel\n- fix(trailers): disable subtitles for remote trailers\n- fix(favorites): keep metadata heart clickable\n- fix(trailers): refine volume slider pill placement\n- fix(carousel): hide focus border on pointer clicks\n- fix(trailers): volume slider related styles fixes\n- fix(settings): streamline configuration and preview controls\n- fix(settings): keep live preview visible while scrolling\n- chore(tests): split and prune test suites\n- deps(deps): bump the npm-minor-and-patch group with 3 updates (#13)\n- deps: Bump the nuget-minor-and-patch group with 4 updates (#15)\n- deps(deps-dev): bump typescript from 5.9.3 to 6.0.3 (#14)\n",
-      "targetAbi": "12.1.0.0",
-      "sourceUrl": "https://github.com/spkesDE/jellyfin-featured-plugin/releases/download/v12.5.0.0/Featured.zip",
-      "checksum": "af981e4822486aad9b5c38e4330694b7",
-      "timestamp": "2026-09-21 12:15:33"
-    },
-    {
-      "version": "12.4.0.0",
-      "changelog": "- fix(webos): support Chromium 79 and safe hero spacing\n- fix(style): adjust spacing for meta elements in featured.css\n- fix(hero): keep overlap layout stable with adaptive content\n- fix(hero): preserve logos and align layout tests\n- fix(hero): prioritize logos and align webOS tests\n- fix(style): remove margin-top from config and featured sections for better alignment\n- fix(hero): adapt overview lines to available space\n- fix(hero): scope stacking context to viewport\n",
-      "targetAbi": "12.0.0.0",
-      "sourceUrl": "https://github.com/spkesDE/jellyfin-featured-plugin/releases/download/v12.4.0.0/Featured.zip",
-      "checksum": "58cfd6b85d3b747f5d0ace9b048fbec0",
-      "timestamp": "2026-09-15 09:28:36"
-    },
-    {
-      "version": "12.3.1.1",
-      "changelog": "- fix(release): commit synchronized frontend version\n- chore: update plugin version to 12.3.1.0\n",
-      "targetAbi": "12.0.0.0",
-      "sourceUrl": "https://github.com/spkesDE/jellyfin-featured-plugin/releases/download/v12.3.1.1/Featured.zip",
-      "checksum": "dda5bc98cd2f9804a28ce77564f5d8cc",
-      "timestamp": "2026-09-15 07:55:02"
-    },
-    {
-      "version": "12.3.0.0",
-      "changelog": "- feat(theming): enhance theming capabilities with new CSS variables and documentation\n- feat(readme): add additional badges for license, release, Jellyfin version, and build status\n- feat: add feed preview functionality and better scheduling options for presets\n- fix(styles): add border radius and clip-path to ec-slide for improved aesthetics\n- fix(preview): refine layout and error handling\n",
-      "targetAbi": "12.0.0.0",
-      "sourceUrl": "https://github.com/spkesDE/jellyfin-featured-plugin/releases/download/v12.3.0.0/Featured.zip",
-      "checksum": "474ea9050bae246c7c179b02894143d1",
-      "timestamp": "2026-09-14 15:05:27"
-    },
-    {
-      "version": "12.2.2.0",
-      "changelog": "- feat: implement Jellyfin theme tokens and update styles across components\n- feat(i18n): enhance translation workflow and fallback handling\n- docs: add translation status badge to README\n- docs: highlight 12.2.1 performance improvements\n- docs: add performance in README\n",
-      "targetAbi": "12.0.0.0",
-      "sourceUrl": "https://github.com/spkesDE/jellyfin-featured-plugin/releases/download/v12.2.2.0/Featured.zip",
-      "checksum": "a43d188f7d8ff512f4d287cabf4fd4a2",
-      "timestamp": "2026-09-14 09:11:50"
-    },
-    {
-      "version": "12.2.1.0",
-      "changelog": "- feat(carousel): implement trailer volume management with local storage\n- perf(ruleEngine): dramatically reduce featured loading times by replacing expensive access re-queries with in-memory Jellyfin visibility checks\n- perf(cache): restore reliable prepared-cache hits with deterministic personalization fingerprints so warm requests can skip rule-engine work\n- fix(cache): enhance prepared cache diagnostics and add response serialization\n- fix(config): set new default values\n- docs: update README and add cache and trailer behavior documentation\n- refactor(ruleEngine): Refactor Featured Rule Engine and Enhance Timing Diagnostics\n",
-      "targetAbi": "12.0.0.0",
-      "sourceUrl": "https://github.com/spkesDE/jellyfin-featured-plugin/releases/download/v12.2.1.0/Featured.zip",
-      "checksum": "39e3f9eb4b03e8f89afd4b4f418dba7a",
-      "timestamp": "2026-09-13 23:31:55"
-    },
-    {
-      "version": "12.2.0.0",
-      "changelog": "- feat(personalization): add preference API and effective user settings\n- feat(config): add personalization defaults and policy controls\n- feat(carousel): add user personalization dialog\n- feat(mixer): add constrained source allocation\n- feat(config): expose source mixer controls\n- feat(trailers): add source resolver and response model\n- feat(player): support local remote and YouTube trailers\n- feat(config): add trailer settings and overrides\n- feat(presets): resolve scheduled configuration snapshots\n- feat(config): add preset scheduling editor\n- feat(personalization): add user menu settings entry\n- feat(personalization): link user settings page\n- feat(personalization): support excluded genres\n- feat(trailers): add playback hotkeys\n- feat(trailers): conceal YouTube startup controls\n- feat(trailers): show startup countdown ring\n- feat(trailers): add volume hotkeys\n- feat(trailers): expose ordered fallback candidates\n- feat(display): show controls only on hover\n- feat(preferences): speed up and restyle user settings\n- feat(preferences): add hourly item cooldown choices\n- fix(personalization): preserve inherited server defaults\n- fix(personalization): surface save failures and effective diagnostics\n- fix(personalization): preserve mixer source settings\n- fix(presets): refresh complete snapshots at boundaries\n- fix(trailers): prevent duplicate fullscreen playback\n- fix(config): restore genres and simplify global diversity\n- fix(personalization): normalize settings responses\n- fix(config): fix css for config page\n- fix(trailers): block YouTube playback controls\n- fix(trailers): fade playback into black canvas\n- fix(personalization): repair dialog and add genre states\n- fix(trailers): extend fade beyond hero edge\n- fix(trailers): crossfade concealed YouTube playback\n- fix(hero): finish backdrop fade before viewport edge\n- fix(trailers): render countdown ring inside button\n- fix(trailers): support inline playback on iOS\n- fix(trailers): recover from YouTube preview failures\n- fix(trailers): recover stalled media previews\n- fix(carousel): isolate button keyboard input\n- fix(hero): apply the mobile slide gradient\n- fix(hero): preserve spacing across touch layouts\n- fix(trailers): recover from blocked YouTube embeds\n- fix(performance): defer user settings until opened\n- docs: Revise README for clarity and update installation instructions\n- docs: Add section for additional Jellyfin plugins in README\n- docs: document completed 12.2 personalization\n- docs: document completed source mixer v2\n- docs: document proper trailer support\n- docs: document featured preset scheduling\n- docs: simplify readme for end users\n- refactor(mixer): split rule engine responsibilities\n- refactor(api): split controller endpoints\n- refactor(player): reorganize player initialization and event handling\n- test(trailers): cover resolver and player contracts\n- test(config): align layout contract with page styles\n- revert(trailers): restore compact backdrop fade\n- style(preferences): enlarge responsive settings modal\n",
-      "targetAbi": "12.0.0.0",
-      "sourceUrl": "https://github.com/spkesDE/jellyfin-featured-plugin/releases/download/v12.2.0.0/Featured.zip",
-      "checksum": "47754b4676e6f5decdaf13c7195a3a5c",
-      "timestamp": "2026-09-13 19:34:03"
-    },
-    {
-      "version": "12.1.1.0",
-      "changelog": "- feat: Add sample file exclusion logic and corresponding tests in FeaturedRuleEngine\n- docs: Add Star History section to README\n- refactor: Improve item selection logic in FeaturedPreparedCache and update tests\n- chore: Update JavaScript Injector repository URL in README\n",
-      "targetAbi": "12.0.0.0",
-      "sourceUrl": "https://github.com/spkesDE/jellyfin-featured-plugin/releases/download/v12.1.1.0/Featured.zip",
-      "checksum": "b7ea12719fa18fcd1382b08f5a53c335",
-      "timestamp": "2026-09-12 19:17:57"
-    },
-    {
-      "version": "12.1.0.0",
-      "changelog": "- Initial commit 12.1.0.0\n",
-      "targetAbi": "12.0.0.0",
-      "sourceUrl": "https://github.com/spkesDE/jellyfin-featured-plugin/releases/download/v12.1.0.0/Featured.zip",
-      "checksum": "1a7face17271b412bd6d7815356f8d7a",
-      "timestamp": "2026-09-12 16:05:20"
-    }
-  ]
-}
+  {
+    "guid": "08880a95-8467-4538-bab9-da69c7f4793f",
+    "name": "Jellyfin Featured",
+    "overview": "A Netflix-style featured-content carousel for the Jellyfin Web home page.",
+    "description": "Adds a configurable featured-content carousel with curated favourites, collections, recent releases, random picks, hero layouts, and local background trailers to Jellyfin Web.",
+    "owner": "spkesDE",
+    "category": "General",
+    "imageUrl": "https://raw.githubusercontent.com/spkesDE/jellyfin-featured-plugin/main/logo.png",
+    "versions": [
+      {
+        "version": "12.7.1.0",
+        "changelog": "- feat(cache): accelerate startup and coalesce remounts\n- docs: document cache performance behavior\n- perf(rule-engine): warm and streamline candidate loading\n",
+        "targetAbi": "12.1.0.0",
+        "sourceUrl": "https://github.com/spkesDE/jellyfin-featured-plugin/releases/download/v12.7.1.0/Featured.zip",
+        "checksum": "f770f78326f1066c902da902a949e8c3",
+        "timestamp": "2026-09-26 13:10:56"
+      },
+      {
+        "version": "12.7.0.0",
+        "changelog": "- feat(injection): add resilient direct fallback\n- feat(display): add interactive hero fade editor\n- feat(config): mirror Jellyfin in banner preview\n- fix(sources): fill feed from sole available source\n- docs(injection): document automatic fallback order\n- docs: update documentation\n",
+        "targetAbi": "12.1.0.0",
+        "sourceUrl": "https://github.com/spkesDE/jellyfin-featured-plugin/releases/download/v12.7.0.0/Featured.zip",
+        "checksum": "2ff97c01bde6e7e428fe22c33e8a6147",
+        "timestamp": "2026-09-26 08:26:36"
+      },
+      {
+        "version": "12.6.0.0",
+        "changelog": "- feat(playback): add direct play and resume\n- feat(recommendations): add persistent dismissal feedback\n- feat(sources): add continuation and metadata filters\n- fix(playback): restore play button hover state\n- fix(styles): adjust max-width calculation for better responsiveness\n- fix(styles): remove gap from actions and adjust media query formatting\n- fix(preferences): remove dismissal cooldown hint\n- fix(dismissals): preserve metadata icon color\n- fix(playback): update playback button class for styling consistency\n- fix(playstate): preserve metadata icon color on hover\n",
+        "targetAbi": "12.1.0.0",
+        "sourceUrl": "https://github.com/spkesDE/jellyfin-featured-plugin/releases/download/v12.6.0.0/Featured.zip",
+        "checksum": "365e28c3361509a6057679366e31e436",
+        "timestamp": "2026-09-24 17:51:33"
+      },
+      {
+        "version": "12.5.1.0",
+        "changelog": "- fix(trailers): release volume slider focus after drag\n",
+        "targetAbi": "12.1.0.0",
+        "sourceUrl": "https://github.com/spkesDE/jellyfin-featured-plugin/releases/download/v12.5.1.0/Featured.zip",
+        "checksum": "cc1888aa7be3170cbc000ddd0b78d60b",
+        "timestamp": "2026-09-22 16:50:25"
+      },
+      {
+        "version": "12.5.0.0",
+        "changelog": "- feat: control background trailers per source rule\n- feat: add Jellyfin movie recommendations as a mixer source\n- feat: toggle viewer favorites from featured slides\n- feat: make featured favorite button configurable for admins and users\n- feat: place favorite heart in banner metadata\n- feat(preferences): preload user settings cache\n- feat(trailers): add configurable media controls\n- feat(display): add fullscreen hero fade controls\n- feat(playstate): add watched toggle beside favorites\n- feat(styles): enhance CSS variables for responsive design and transitions\n- feat(sources): add media fallbacks and resolution filter\n- fix(navigation): preserve carousel focus and native keyboard controls\n- fix: show critic rating with rotten icon\n- fix: remove item-page critic rating classes\n- fix: update favorites without reloading carousel\n- fix(trailers): disable subtitles for remote trailers\n- fix(favorites): keep metadata heart clickable\n- fix(trailers): refine volume slider pill placement\n- fix(carousel): hide focus border on pointer clicks\n- fix(trailers): volume slider related styles fixes\n- fix(settings): streamline configuration and preview controls\n- fix(settings): keep live preview visible while scrolling\n- chore(tests): split and prune test suites\n- deps(deps): bump the npm-minor-and-patch group with 3 updates (#13)\n- deps: Bump the nuget-minor-and-patch group with 4 updates (#15)\n- deps(deps-dev): bump typescript from 5.9.3 to 6.0.3 (#14)\n",
+        "targetAbi": "12.1.0.0",
+        "sourceUrl": "https://github.com/spkesDE/jellyfin-featured-plugin/releases/download/v12.5.0.0/Featured.zip",
+        "checksum": "af981e4822486aad9b5c38e4330694b7",
+        "timestamp": "2026-09-21 12:15:33"
+      },
+      {
+        "version": "12.4.0.0",
+        "changelog": "- fix(webos): support Chromium 79 and safe hero spacing\n- fix(style): adjust spacing for meta elements in featured.css\n- fix(hero): keep overlap layout stable with adaptive content\n- fix(hero): preserve logos and align layout tests\n- fix(hero): prioritize logos and align webOS tests\n- fix(style): remove margin-top from config and featured sections for better alignment\n- fix(hero): adapt overview lines to available space\n- fix(hero): scope stacking context to viewport\n",
+        "targetAbi": "12.0.0.0",
+        "sourceUrl": "https://github.com/spkesDE/jellyfin-featured-plugin/releases/download/v12.4.0.0/Featured.zip",
+        "checksum": "58cfd6b85d3b747f5d0ace9b048fbec0",
+        "timestamp": "2026-09-15 09:28:36"
+      },
+      {
+        "version": "12.3.1.1",
+        "changelog": "- fix(release): commit synchronized frontend version\n- chore: update plugin version to 12.3.1.0\n",
+        "targetAbi": "12.0.0.0",
+        "sourceUrl": "https://github.com/spkesDE/jellyfin-featured-plugin/releases/download/v12.3.1.1/Featured.zip",
+        "checksum": "dda5bc98cd2f9804a28ce77564f5d8cc",
+        "timestamp": "2026-09-15 07:55:02"
+      },
+      {
+        "version": "12.3.0.0",
+        "changelog": "- feat(theming): enhance theming capabilities with new CSS variables and documentation\n- feat(readme): add additional badges for license, release, Jellyfin version, and build status\n- feat: add feed preview functionality and better scheduling options for presets\n- fix(styles): add border radius and clip-path to ec-slide for improved aesthetics\n- fix(preview): refine layout and error handling\n",
+        "targetAbi": "12.0.0.0",
+        "sourceUrl": "https://github.com/spkesDE/jellyfin-featured-plugin/releases/download/v12.3.0.0/Featured.zip",
+        "checksum": "474ea9050bae246c7c179b02894143d1",
+        "timestamp": "2026-09-14 15:05:27"
+      },
+      {
+        "version": "12.2.2.0",
+        "changelog": "- feat: implement Jellyfin theme tokens and update styles across components\n- feat(i18n): enhance translation workflow and fallback handling\n- docs: add translation status badge to README\n- docs: highlight 12.2.1 performance improvements\n- docs: add performance in README\n",
+        "targetAbi": "12.0.0.0",
+        "sourceUrl": "https://github.com/spkesDE/jellyfin-featured-plugin/releases/download/v12.2.2.0/Featured.zip",
+        "checksum": "a43d188f7d8ff512f4d287cabf4fd4a2",
+        "timestamp": "2026-09-14 09:11:50"
+      },
+      {
+        "version": "12.2.1.0",
+        "changelog": "- feat(carousel): implement trailer volume management with local storage\n- perf(ruleEngine): dramatically reduce featured loading times by replacing expensive access re-queries with in-memory Jellyfin visibility checks\n- perf(cache): restore reliable prepared-cache hits with deterministic personalization fingerprints so warm requests can skip rule-engine work\n- fix(cache): enhance prepared cache diagnostics and add response serialization\n- fix(config): set new default values\n- docs: update README and add cache and trailer behavior documentation\n- refactor(ruleEngine): Refactor Featured Rule Engine and Enhance Timing Diagnostics\n",
+        "targetAbi": "12.0.0.0",
+        "sourceUrl": "https://github.com/spkesDE/jellyfin-featured-plugin/releases/download/v12.2.1.0/Featured.zip",
+        "checksum": "39e3f9eb4b03e8f89afd4b4f418dba7a",
+        "timestamp": "2026-09-13 23:31:55"
+      },
+      {
+        "version": "12.2.0.0",
+        "changelog": "- feat(personalization): add preference API and effective user settings\n- feat(config): add personalization defaults and policy controls\n- feat(carousel): add user personalization dialog\n- feat(mixer): add constrained source allocation\n- feat(config): expose source mixer controls\n- feat(trailers): add source resolver and response model\n- feat(player): support local remote and YouTube trailers\n- feat(config): add trailer settings and overrides\n- feat(presets): resolve scheduled configuration snapshots\n- feat(config): add preset scheduling editor\n- feat(personalization): add user menu settings entry\n- feat(personalization): link user settings page\n- feat(personalization): support excluded genres\n- feat(trailers): add playback hotkeys\n- feat(trailers): conceal YouTube startup controls\n- feat(trailers): show startup countdown ring\n- feat(trailers): add volume hotkeys\n- feat(trailers): expose ordered fallback candidates\n- feat(display): show controls only on hover\n- feat(preferences): speed up and restyle user settings\n- feat(preferences): add hourly item cooldown choices\n- fix(personalization): preserve inherited server defaults\n- fix(personalization): surface save failures and effective diagnostics\n- fix(personalization): preserve mixer source settings\n- fix(presets): refresh complete snapshots at boundaries\n- fix(trailers): prevent duplicate fullscreen playback\n- fix(config): restore genres and simplify global diversity\n- fix(personalization): normalize settings responses\n- fix(config): fix css for config page\n- fix(trailers): block YouTube playback controls\n- fix(trailers): fade playback into black canvas\n- fix(personalization): repair dialog and add genre states\n- fix(trailers): extend fade beyond hero edge\n- fix(trailers): crossfade concealed YouTube playback\n- fix(hero): finish backdrop fade before viewport edge\n- fix(trailers): render countdown ring inside button\n- fix(trailers): support inline playback on iOS\n- fix(trailers): recover from YouTube preview failures\n- fix(trailers): recover stalled media previews\n- fix(carousel): isolate button keyboard input\n- fix(hero): apply the mobile slide gradient\n- fix(hero): preserve spacing across touch layouts\n- fix(trailers): recover from blocked YouTube embeds\n- fix(performance): defer user settings until opened\n- docs: Revise README for clarity and update installation instructions\n- docs: Add section for additional Jellyfin plugins in README\n- docs: document completed 12.2 personalization\n- docs: document completed source mixer v2\n- docs: document proper trailer support\n- docs: document featured preset scheduling\n- docs: simplify readme for end users\n- refactor(mixer): split rule engine responsibilities\n- refactor(api): split controller endpoints\n- refactor(player): reorganize player initialization and event handling\n- test(trailers): cover resolver and player contracts\n- test(config): align layout contract with page styles\n- revert(trailers): restore compact backdrop fade\n- style(preferences): enlarge responsive settings modal\n",
+        "targetAbi": "12.0.0.0",
+        "sourceUrl": "https://github.com/spkesDE/jellyfin-featured-plugin/releases/download/v12.2.0.0/Featured.zip",
+        "checksum": "47754b4676e6f5decdaf13c7195a3a5c",
+        "timestamp": "2026-09-13 19:34:03"
+      },
+      {
+        "version": "12.1.1.0",
+        "changelog": "- feat: Add sample file exclusion logic and corresponding tests in FeaturedRuleEngine\n- docs: Add Star History section to README\n- refactor: Improve item selection logic in FeaturedPreparedCache and update tests\n- chore: Update JavaScript Injector repository URL in README\n",
+        "targetAbi": "12.0.0.0",
+        "sourceUrl": "https://github.com/spkesDE/jellyfin-featured-plugin/releases/download/v12.1.1.0/Featured.zip",
+        "checksum": "b7ea12719fa18fcd1382b08f5a53c335",
+        "timestamp": "2026-09-12 19:17:57"
+      },
+      {
+        "version": "12.1.0.0",
+        "changelog": "- Initial commit 12.1.0.0\n",
+        "targetAbi": "12.0.0.0",
+        "sourceUrl": "https://github.com/spkesDE/jellyfin-featured-plugin/releases/download/v12.1.0.0/Featured.zip",
+        "checksum": "1a7face17271b412bd6d7815356f8d7a",
+        "timestamp": "2026-09-12 16:05:20"
+      }
+    ]
+  }
 ]
