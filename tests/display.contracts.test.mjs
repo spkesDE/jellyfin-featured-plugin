@@ -245,6 +245,17 @@ test('vertical hero fade generates and applies the runtime mask', async () => {
   assert.match(layout, /setProperty\(\s*'--ec-hero-media-mask',\s*createHeroFadeMask/);
 });
 
+test('mobile hero shade stays inside the fade instead of covering its transparent edge', async () => {
+  const styles = await read('src/styles/featured-hero.css');
+  const mobileHero = styles.match(
+    /@media \(max-width: 700px\)\s*\{[\s\S]*?\.ec-root\.ec-hero\s*\{([\s\S]*?)\n\s*\}/
+  )?.[1];
+
+  assert.ok(mobileHero);
+  assert.match(mobileHero, /--ec-media-shade:\s*linear-gradient\(/);
+  assert.doesNotMatch(mobileHero, /--ec-hero-slide-background/);
+});
+
 test('full-strength hero fade emits a valid transparent endpoint', async () => {
   const source = await read('src/slider/layout.ts');
   const compiled = await transform(source, { format: 'esm', loader: 'ts', target: 'es2020' });
