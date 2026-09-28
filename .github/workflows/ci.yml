@@ -23,6 +23,11 @@ jobs:
           node-version: '22'
           cache: npm
 
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
       - name: Install frontend dependencies
         run: npm ci
 
@@ -40,11 +45,6 @@ jobs:
 
       - name: Test frontend and source contracts
         run: npm test
-
-      - name: Set up .NET
-        uses: actions/setup-dotnet@v6
-        with:
-          dotnet-version: '10.0.x'
 
       - name: Restore
         run: dotnet restore JellyfinFeatured.sln

@@ -21,6 +21,29 @@ test('stable release formats generated metadata before committing it to main', a
   );
 });
 
+test('CI installs the requested .NET SDK before running the combined format check', async () => {
+  const workflow = await read('.github/workflows/ci.yml');
+  const setupDotnet = workflow.indexOf('actions/setup-dotnet@');
+  const formatCheck = workflow.indexOf('npm run format:check');
+  assert.notEqual(setupDotnet, -1);
+  assert.notEqual(formatCheck, -1);
+  assert.equal(setupDotnet < formatCheck, true);
+});
+
+test('translation status updates authenticate with the ruleset bypass app', async () => {
+  const workflow = await read('.github/workflows/i18n-status.yml');
+  assert.match(workflow, /actions\/create-github-app-token@v\d+/);
+  assert.match(workflow, /token: \$\{\{ steps\.app-token\.outputs\.token \}\}/);
+  assert.match(workflow, /GH_TOKEN: \$\{\{ steps\.app-token\.outputs\.token \}\}/);
+  assert.match(workflow, /git push origin HEAD:main/);
+});
+
+test('repository text files are checked out with LF line endings on every platform', async () => {
+  const attributes = await read('.gitattributes');
+  assert.match(attributes, /^\* text=auto eol=lf$/m);
+  assert.match(attributes, /^\*\.png binary$/m);
+});
+
 test('beta manifest and package image are separate from the stable release', async () => {
   const [betaManifestSource, stableManifestSource, buildScript, updateScript] = await Promise.all([
     read('manifest-beta.json'),
