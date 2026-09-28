@@ -149,6 +149,9 @@ jobs:
             -Checksum "${{ steps.artifact.outputs.checksum }}" `
             -Timestamp "${{ steps.artifact.outputs.timestamp }}"
 
+      - name: Format generated release metadata
+        run: npx prettier --write CHANGELOG.md manifest.json
+
       - name: Get release app bot user id
         id: app-user
         shell: bash

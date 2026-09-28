@@ -13,6 +13,7 @@
 ### Other
 
 - perf(rule-engine): warm and streamline candidate loading
+
 ## v12.7.0.0 - 2026-09-26
 
 ### Features

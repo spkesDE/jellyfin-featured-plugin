@@ -13,6 +13,14 @@ test('beta release is manually triggered and keeps the webOS fix selectable with
   assert.match(workflow, /git push origin main/);
 });
 
+test('stable release formats generated metadata before committing it to main', async () => {
+  const workflow = await read('.github/workflows/release.yml');
+  assert.match(
+    workflow,
+    /Generate full changelog[\s\S]*?Update manifest[\s\S]*?Format generated release metadata[\s\S]*?npx prettier --write CHANGELOG\.md manifest\.json[\s\S]*?Commit release artifacts/
+  );
+});
+
 test('beta manifest and package image are separate from the stable release', async () => {
   const [betaManifestSource, stableManifestSource, buildScript, updateScript] = await Promise.all([
     read('manifest-beta.json'),
