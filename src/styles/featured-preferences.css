@@ -1,0 +1,353 @@
+.ec-preferences-backdrop {
+  align-items: center;
+  background: rgb(0 0 0 / 0.72);
+  box-sizing: border-box;
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  overflow: auto;
+  padding: max(1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right))
+    max(1rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
+  position: fixed;
+  z-index: 99999;
+}
+
+.ec-preferences-dialog {
+  --ec-dialog-viewport-height: calc(100vh - 2rem);
+  --ec-dialog-viewport-width: calc(100vw - 2rem);
+  background: var(--ec-dialog-background, var(--ec-theme-background));
+  border: var(--ec-dialog-border, 1px solid var(--ec-theme-divider));
+  border-radius: var(--ec-dialog-radius, var(--ec-theme-radius));
+  box-shadow: var(--ec-dialog-shadow, 0 1rem 3rem rgb(0 0 0 / 0.55));
+  box-sizing: border-box;
+  color: var(--ec-dialog-color, var(--ec-theme-text-primary));
+  display: flex;
+  flex-direction: column;
+  height: min(52rem, var(--ec-dialog-viewport-height));
+  margin: auto;
+  max-height: var(--ec-dialog-viewport-height);
+  max-width: var(--ec-dialog-viewport-width);
+  overflow: hidden;
+  width: 64rem;
+}
+
+.ec-preferences-header {
+  align-items: center;
+  background: var(--ec-dialog-header-background, var(--ec-theme-appbar));
+  display: flex;
+  flex: 0 0 auto;
+  justify-content: space-between;
+  min-height: 3.6rem;
+  padding: 0.45rem 0.65rem 0.45rem 1.4rem;
+}
+
+.ec-preferences-dialog h2 {
+  font-size: 1.45rem;
+  font-weight: 400;
+  margin: 0;
+}
+
+.ec-preferences-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  padding: 0.3rem 1.4rem 1.4rem;
+}
+
+.ec-preferences-help {
+  line-height: 1.45;
+  opacity: 0.75;
+}
+
+.ec-preference-display {
+  display: grid;
+  gap: 0.25rem 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ec-preference-display legend,
+.ec-preference-display-help {
+  grid-column: 1 / -1;
+}
+
+.ec-preference-display-help {
+  line-height: 1.45;
+  margin: 0 0 0.75rem;
+  opacity: 0.75;
+}
+
+.ec-preferences-dialog fieldset {
+  border: 0;
+  border-top: 1px solid var(--ec-theme-divider);
+  margin: 1.25rem 0 0;
+  padding: 1.1rem 0 0;
+}
+
+.ec-preferences-dialog legend {
+  font-size: 1.1rem;
+  font-weight: 500;
+  padding: 0 0.8rem 0 0;
+}
+
+.ec-preferences-hotkeys {
+  align-items: center;
+  background: var(--ec-theme-action-hover);
+  border-radius: var(--ec-theme-radius);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem 1rem;
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+}
+
+.ec-preferences-hotkeys strong {
+  margin-right: auto;
+}
+
+.ec-preferences-hotkeys kbd {
+  background: var(--ec-theme-paper);
+  border: 1px solid var(--ec-theme-divider);
+  border-radius: var(--ec-theme-radius);
+  box-shadow: 0 1px 0 var(--ec-theme-divider);
+  display: inline-block;
+  font: inherit;
+  font-size: 0.85em;
+  font-weight: 700;
+  min-width: 1.7rem;
+  padding: 0.12rem 0.38rem;
+  text-align: center;
+}
+
+.ec-preferences-close {
+  color: inherit;
+  flex: 0 0 auto;
+}
+
+.ec-preference-source {
+  align-items: center;
+  display: grid;
+  gap: 0.75rem 1.5rem;
+  grid-template-columns: minmax(0, 1fr) 8rem;
+  padding: 0.45rem 0;
+}
+
+.ec-preference-check {
+  min-height: 2.5rem;
+}
+
+.ec-preference-number {
+  margin: 0;
+}
+
+.ec-preference-number .inputLabel {
+  font-size: 0.82rem;
+  margin-bottom: 0.2rem;
+  opacity: 0.75;
+}
+
+.ec-preference-number input {
+  box-sizing: border-box;
+  margin: 0;
+  width: 100%;
+}
+
+.ec-preference-cooldown {
+  margin: 0;
+}
+
+.ec-preference-cooldown select {
+  margin: 0;
+  width: 100%;
+}
+
+.ec-preference-genres {
+  display: grid;
+  gap: 0.3rem 1rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.ec-preference-genres legend {
+  grid-column: 1 / -1;
+}
+
+.ec-preference-genres-help {
+  grid-column: 1 / -1;
+  margin: 0 0 0.35rem;
+  opacity: 0.72;
+}
+
+.ec-preference-genre {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: 0.2rem;
+  color: inherit;
+  cursor: pointer;
+  display: flex;
+  font: inherit;
+  gap: 0.55rem;
+  min-width: 0;
+  padding: 0.4rem 0.25rem;
+  text-align: left;
+}
+
+.ec-preference-genre-marker {
+  align-items: center;
+  border: 1px solid var(--ec-theme-divider);
+  border-radius: var(--ec-theme-radius);
+  display: inline-flex;
+  flex: 0 0 1.25rem;
+  font-size: 1rem;
+  font-weight: 800;
+  height: 1.25rem;
+  justify-content: center;
+  line-height: 1;
+}
+
+.ec-preference-genre[data-genre-state='preferred'] .ec-preference-genre-marker {
+  background: var(--ec-theme-primary);
+  border-color: var(--ec-theme-primary);
+  color: var(--ec-theme-primary-contrast);
+}
+
+.ec-preference-genre[data-genre-state='excluded'] .ec-preference-genre-marker {
+  background: var(--ec-theme-error);
+  border-color: var(--ec-theme-error-light);
+  color: var(--ec-theme-error-contrast);
+}
+
+.ec-preference-genre:hover {
+  background: var(--ec-theme-action-hover);
+}
+
+.ec-preference-genre:focus-visible {
+  outline: 2px solid var(--ec-theme-secondary);
+  outline-offset: 0.15rem;
+}
+
+.ec-preference-boosts {
+  display: grid;
+  gap: 0.7rem 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ec-preference-boosts legend {
+  grid-column: 1 / -1;
+}
+
+.ec-preferences-actions {
+  align-items: center;
+  background: var(--ec-dialog-footer-background, var(--ec-theme-paper));
+  border-top: 1px solid var(--ec-theme-divider);
+  display: flex;
+  flex: 0 0 auto;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  padding: 0.8rem 1.4rem;
+}
+
+.ec-preferences-status {
+  align-self: center;
+  color: var(--ec-theme-error-light);
+  flex: 1;
+}
+
+.ec-preferences-actions button {
+  margin: 0;
+}
+
+.ec-preferences-loading-shell {
+  min-height: 12rem;
+}
+
+.ec-preferences-loading {
+  align-items: center;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 1rem;
+  justify-content: center;
+  min-height: 8rem;
+  padding: 2rem;
+  text-align: center;
+}
+
+.ec-preferences-spinner {
+  animation: ec-preferences-spin 0.8s linear infinite;
+  border: 0.22rem solid var(--ec-theme-divider);
+  border-radius: 50%;
+  border-top-color: var(--ec-theme-primary);
+  height: 2rem;
+  width: 2rem;
+}
+
+@keyframes ec-preferences-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 600px) {
+  .ec-preferences-backdrop {
+    align-items: stretch;
+    padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+  }
+
+  .ec-preferences-dialog {
+    --ec-dialog-viewport-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    border-radius: 0;
+    height: var(--ec-dialog-viewport-height);
+    max-height: none;
+    max-width: none;
+    width: 100%;
+  }
+
+  .ec-preferences-content {
+    padding-inline: 1rem;
+  }
+
+  .ec-preferences-header {
+    padding-left: 1rem;
+  }
+
+  .ec-preference-display,
+  .ec-preference-genres,
+  .ec-preference-boosts {
+    grid-template-columns: 1fr;
+  }
+
+  .ec-preference-source {
+    grid-template-columns: 1fr;
+  }
+
+  .ec-preference-number {
+    max-width: 9rem;
+  }
+
+  .ec-preferences-actions {
+    flex-wrap: wrap;
+    padding: 0.75rem 1rem;
+  }
+
+  .ec-preferences-status {
+    flex-basis: 100%;
+  }
+}
+
+@supports (height: 100dvh) {
+  .ec-preferences-dialog {
+    --ec-dialog-viewport-height: calc(100dvh - 2rem);
+  }
+
+  @media (max-width: 600px) {
+    .ec-preferences-dialog {
+      --ec-dialog-viewport-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ec-preferences-spinner {
+    animation: none;
+  }
+}

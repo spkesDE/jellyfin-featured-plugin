@@ -1,0 +1,80 @@
+/* Values shared by the early bootstrap placeholder and the live carousel.
+   Keeping both surfaces here prevents layout jumps while the plugin loads. */
+#homeTab.ec-hero-page,
+#homeTab.ec-bootstrap-hero-page {
+  padding-top: 0 !important;
+  transform: translateY(-120px);
+}
+
+.ec-root,
+.ec-bootstrap-placeholder {
+  --ec-height: 360px;
+  --ec-tablet-height: 400px;
+  --ec-mobile-height: 340px;
+}
+
+.ec-root:not(.ec-hero),
+.ec-bootstrap-placeholder:not(.ec-bootstrap-hero) {
+  padding-left: max(env(safe-area-inset-left), 3.3%);
+  padding-right: max(env(safe-area-inset-right), 3.3%);
+}
+
+.ec-heading,
+.ec-bootstrap-heading {
+  margin: 0 0 0.55em;
+  overflow: hidden;
+  padding-right: 10rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ec-height-auto,
+.ec-bootstrap-height-auto {
+  --ec-height: clamp(360px, 46vw, 750px);
+}
+
+.ec-height-compact,
+.ec-bootstrap-height-compact {
+  --ec-height: 360px;
+}
+
+.ec-height-standard,
+.ec-bootstrap-height-standard {
+  --ec-height: 500px;
+}
+
+.ec-height-cinematic,
+.ec-bootstrap-height-cinematic {
+  --ec-height: 750px;
+}
+
+.ec-height-fullscreen,
+.ec-bootstrap-height-fullscreen,
+.ec-root.ec-height-fullscreen,
+.ec-bootstrap-placeholder.ec-bootstrap-height-fullscreen {
+  --ec-height: 100vh !important;
+}
+
+@media (max-width: 1000px) {
+  .ec-root,
+  .ec-bootstrap-placeholder {
+    --ec-height: var(--ec-tablet-height) !important;
+    --ec-hero-overlap: 100px !important;
+  }
+}
+
+@media (max-width: 700px) {
+  .ec-root,
+  .ec-bootstrap-placeholder {
+    --ec-height: var(--ec-mobile-height) !important;
+    --ec-hero-overlap: 75px !important;
+  }
+}
+
+/* Chromium 79 uses 100vh. Newer engines can account for dynamic browser UI. */
+@supports (height: 100dvh) {
+  .ec-root.ec-height-fullscreen,
+  .ec-bootstrap-placeholder.ec-bootstrap-height-fullscreen {
+    --ec-height: 100dvh !important;
+  }
+}

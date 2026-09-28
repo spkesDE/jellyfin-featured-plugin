@@ -1,6 +1,6 @@
-/* webOS 6 / Chromium 79 fallbacks and stable hero fitting.
-   Keep the following Jellyfin sections at a fixed position; if a hero has more
-   copy, the overview gives up lines before the logo or metadata do. */
+/* Cross-browser fallbacks and stable hero fitting. Chromium 79 remains the
+   oldest target; rules that shape every browser intentionally live here too.
+   If a hero has more copy, the overview gives up lines before core metadata. */
 
 /* Keep Featured's internal z-index layers local to the viewport instead of
    making the whole root a stacking context over following Jellyfin sections. */
@@ -49,21 +49,21 @@
   }
 
   .ec-root.ec-ready.ec-hero .ec-meta {
-    font-size: .9rem;
-    margin-top: .8rem;
+    font-size: 0.9rem;
+    margin-top: 0.8rem;
   }
 
   .ec-root.ec-ready.ec-hero .ec-tagline {
-    font-size: .95rem;
-    margin-top: .65rem;
+    font-size: 0.95rem;
+    margin-top: 0.65rem;
   }
 
   .ec-root.ec-ready.ec-hero .ec-overview {
     -webkit-line-clamp: 4;
     flex: 0 0 auto;
-    font-size: .9rem;
+    font-size: 0.9rem;
     line-height: 1.38;
-    margin-top: .6rem;
+    margin-top: 0.6rem;
     overflow: hidden;
   }
 

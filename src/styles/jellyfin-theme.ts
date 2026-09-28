@@ -1,7 +1,8 @@
 const THEME_STYLE_ID = 'jellyfin-featured-theme-tokens';
 
 const themeTokenDefaults: Record<string, string> = {
-  '--ec-theme-primary': 'var(--jf-palette-primary-main, var(--theme-primary-color, var(--primary-accent-color, var(--accent, #00a4dc))))',
+  '--ec-theme-primary':
+    'var(--jf-palette-primary-main, var(--theme-primary-color, var(--primary-accent-color, var(--accent, #00a4dc))))',
   '--ec-theme-primary-dark': 'var(--jf-palette-primary-dark, var(--ec-theme-primary))',
   '--ec-theme-primary-contrast': 'var(--jf-palette-primary-contrastText, #fff)',
   '--ec-theme-secondary': 'var(--jf-palette-secondary-main, var(--ec-theme-primary))',
