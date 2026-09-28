@@ -56,10 +56,11 @@ test('webOS 6 gets Chromium 79 compatible output and runtime fallbacks', async (
 });
 
 test('hero content adapts overview lines and keeps following sections clear', async () => {
-  const [main, entry, styles, compatibility, heroOverviewFit] = await Promise.all([
+  const [main, entry, styles, base, compatibility, heroOverviewFit] = await Promise.all([
     read('src/main.ts'),
     readFile(new URL('../src/styles/featured.css', import.meta.url), 'utf8'),
     read('src/styles/featured.css'),
+    read('src/styles/featured-base.css'),
     read('src/styles/featured-compatibility.css'),
     read('src/slider/heroOverviewFit.ts')
   ]);
@@ -110,6 +111,10 @@ test('hero content adapts overview lines and keeps following sections clear', as
     compatibility,
     /\.ec-root\.ec-ready\.ec-hero \.ec-overview\s*\{[\s\S]*?-webkit-line-clamp:\s*4;[\s\S]*?flex:\s*0 0 auto;[\s\S]*?font-size:\s*0?\.9rem;[\s\S]*?line-height:\s*1\.38;/
   );
+  const overviewRule = base.match(/\.ec-overview\s*\{([^}]*)\}/)?.[1] ?? '';
+  assert.match(overviewRule, /filter:\s*drop-shadow\(0 2px 12px rgba\(0, 0, 0, 0\.72\)\)/);
+  assert.match(overviewRule, /text-shadow:\s*none/);
+  assert.doesNotMatch(overviewRule, /\bpadding\s*:/);
   for (const lines of [3, 2, 1]) {
     assert.match(compatibility, new RegExp(`ec-overview-lines-${lines}[\\s\\S]*?-webkit-line-clamp:\\s*${lines}`));
   }

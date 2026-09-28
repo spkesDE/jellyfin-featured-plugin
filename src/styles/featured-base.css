@@ -250,11 +250,14 @@
 
 .ec-overview {
   display: -webkit-box;
+  /* A filter is painted after line clamping, so its shadow is not cut off by overflow. */
+  filter: drop-shadow(0 2px 12px rgba(0, 0, 0, 0.72));
   font-size: 1rem;
   line-height: 1.48;
   margin: 0.8rem 0 0;
   max-width: 42rem;
   overflow: hidden;
+  text-shadow: none;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
 }
