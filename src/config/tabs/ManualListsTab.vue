@@ -112,7 +112,6 @@ function syncItemPositions(list: FeaturedManualList): void {
             drag-class="ec-manualDragging"
             fallback-class="ec-manualDragPreview"
             :force-fallback="true"
-            :fallback-on-body="true"
             :fallback-tolerance="3"
             :animation="160"
             @change="syncItemPositions(list)"

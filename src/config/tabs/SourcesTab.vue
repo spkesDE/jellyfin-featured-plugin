@@ -75,7 +75,6 @@ const sourceOptions: SelectOption[] = [
       chosen-class="ec-sourceDragChosen"
       drag-class="ec-sourceDragging"
       :force-fallback="true"
-      :fallback-on-body="true"
       :fallback-tolerance="3"
       :animation="160"
     >

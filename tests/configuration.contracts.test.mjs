@@ -230,6 +230,18 @@ test('configuration discovery uses the authenticated server options fallback', a
   assert.match(styles, /\.jmp-section-plain\s*>\s*\.jmp-subsection\s*\{[\s\S]*?margin-bottom:\s*1rem/);
 });
 
+test('drag previews stay inside the configuration page styling scope', async () => {
+  const [sourcesTab, manualListsTab] = await Promise.all([
+    read('src/config/tabs/SourcesTab.vue'),
+    read('src/config/tabs/ManualListsTab.vue')
+  ]);
+
+  assert.match(sourcesTab, /:force-fallback="true"/);
+  assert.match(manualListsTab, /:force-fallback="true"/);
+  assert.doesNotMatch(sourcesTab, /fallback-on-body/);
+  assert.doesNotMatch(manualListsTab, /fallback-on-body/);
+});
+
 test('source-scoped media fallback, resolution, and user visibility flow through both runtimes', async () => {
   const [
     configuration,
