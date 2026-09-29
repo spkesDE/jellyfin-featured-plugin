@@ -1,5 +1,41 @@
 # Changelog
 
+## v12.7.2.0 - 2026-09-29
+
+### Features
+
+- feat(ci): add .NET setup step and update workflow for translation status
+
+### Fixes
+
+- fix(hero): preserve mobile hero fade on iOS
+- fix(release): format generated metadata
+- fix(styles): fixed drop-shadow for overview
+- fix(config): keep drag previews in styling scope
+
+### Refactoring
+
+- refactor(build): compile bootstrap assets with Vite
+- refactor(injection): centralize frontend markup handling
+- refactor(storage): share atomic persistence and cache primitives
+- refactor(config): split persisted models and mappings by domain
+- refactor(api): separate feed construction and response models
+- refactor(config-ui): separate defaults, factories and projections
+- refactor(config-ui): simplify shared editors and previews
+- refactor(config-ui): reorganize settings tabs and layouts
+- refactor(runtime): coordinate routing, mounting and response reuse
+- refactor(preferences): split dialog, form and dismissal behavior
+- refactor(trailers): separate controller and playback providers
+- refactor(carousel): extract navigation, controls and layout state
+- refactor(styles): organize runtime CSS by ownership
+- refactor(naming): rename ec- prefix to featured-
+
+### Other
+
+- chore(tooling): standardize formatting, linting and tests
+- chore(format): normalize release metadata
+- deps(deps-dev): bump vite (#16)
+
 ## v12.7.1.0 - 2026-09-26
 
 ### Features
