@@ -16,8 +16,8 @@ const placement = ref<Placement>('above');
 const coordinates = ref({ arrowLeft: 0, arrowTop: 0, left: 0, top: 0 });
 
 const tooltipStyle = computed(() => ({
-  '--ec-tooltip-arrow-left': `${coordinates.value.arrowLeft}px`,
-  '--ec-tooltip-arrow-top': `${coordinates.value.arrowTop}px`,
+  '--featured-tooltip-arrow-left': `${coordinates.value.arrowLeft}px`,
+  '--featured-tooltip-arrow-top': `${coordinates.value.arrowTop}px`,
   left: `${coordinates.value.left}px`,
   top: `${coordinates.value.top}px`
 }));
@@ -92,7 +92,7 @@ onBeforeUnmount(hide);
   <button
     ref="trigger"
     type="button"
-    class="ec-helpTrigger"
+    class="featured-helpTrigger"
     :aria-label="props.label || props.text"
     :aria-describedby="tooltipId"
     @mouseenter="show"
@@ -108,7 +108,7 @@ onBeforeUnmount(hide);
       v-show="open"
       :id="tooltipId"
       ref="tooltip"
-      class="ec-helpTooltip"
+      class="featured-helpTooltip"
       :class="`is-${placement}`"
       :style="tooltipStyle"
       role="tooltip"
@@ -118,7 +118,7 @@ onBeforeUnmount(hide);
 </template>
 
 <style scoped>
-.ec-helpTrigger {
+.featured-helpTrigger {
   align-items: center;
   background: transparent;
   border: 1px solid currentColor;
@@ -137,22 +137,22 @@ onBeforeUnmount(hide);
   width: 1.05rem;
 }
 
-.ec-helpTrigger:hover,
-.ec-helpTrigger:focus-visible {
+.featured-helpTrigger:hover,
+.featured-helpTrigger:focus-visible {
   opacity: 1;
 }
 
-.ec-helpTrigger:focus-visible {
-  box-shadow: 0 0 0 2px var(--ec-theme-secondary);
+.featured-helpTrigger:focus-visible {
+  box-shadow: 0 0 0 2px var(--featured-theme-secondary);
 }
 
-.ec-helpTooltip {
-  background: var(--ec-theme-paper);
-  border: 1px solid var(--ec-theme-divider);
-  border-radius: var(--ec-theme-radius);
+.featured-helpTooltip {
+  background: var(--featured-theme-paper);
+  border: 1px solid var(--featured-theme-divider);
+  border-radius: var(--featured-theme-radius);
   box-sizing: border-box;
   box-shadow: 0 0.45rem 1.3rem rgba(0, 0, 0, 0.4);
-  color: var(--ec-theme-text-primary);
+  color: var(--featured-theme-text-primary);
   font-size: 0.82rem;
   font-weight: 400;
   line-height: 1.35;
@@ -165,44 +165,44 @@ onBeforeUnmount(hide);
   z-index: 9999;
 }
 
-.ec-helpTooltip::after {
+.featured-helpTooltip::after {
   content: '';
   position: absolute;
 }
 
-.ec-helpTooltip.is-above::after {
+.featured-helpTooltip.is-above::after {
   border-left: 0.35rem solid transparent;
   border-right: 0.35rem solid transparent;
-  border-top: 0.35rem solid var(--ec-theme-paper);
-  left: var(--ec-tooltip-arrow-left, 50%);
+  border-top: 0.35rem solid var(--featured-theme-paper);
+  left: var(--featured-tooltip-arrow-left, 50%);
   top: 100%;
   transform: translateX(-50%);
 }
 
-.ec-helpTooltip.is-below::after {
-  border-bottom: 0.35rem solid var(--ec-theme-paper);
+.featured-helpTooltip.is-below::after {
+  border-bottom: 0.35rem solid var(--featured-theme-paper);
   border-left: 0.35rem solid transparent;
   border-right: 0.35rem solid transparent;
   bottom: 100%;
-  left: var(--ec-tooltip-arrow-left, 50%);
+  left: var(--featured-tooltip-arrow-left, 50%);
   transform: translateX(-50%);
 }
 
-.ec-helpTooltip.is-left::after {
+.featured-helpTooltip.is-left::after {
   border-bottom: 0.35rem solid transparent;
-  border-left: 0.35rem solid var(--ec-theme-paper);
+  border-left: 0.35rem solid var(--featured-theme-paper);
   border-top: 0.35rem solid transparent;
   left: 100%;
-  top: var(--ec-tooltip-arrow-top, 50%);
+  top: var(--featured-tooltip-arrow-top, 50%);
   transform: translateY(-50%);
 }
 
-.ec-helpTooltip.is-right::after {
+.featured-helpTooltip.is-right::after {
   border-bottom: 0.35rem solid transparent;
-  border-right: 0.35rem solid var(--ec-theme-paper);
+  border-right: 0.35rem solid var(--featured-theme-paper);
   border-top: 0.35rem solid transparent;
   right: 100%;
-  top: var(--ec-tooltip-arrow-top, 50%);
+  top: var(--featured-tooltip-arrow-top, 50%);
   transform: translateY(-50%);
 }
 </style>

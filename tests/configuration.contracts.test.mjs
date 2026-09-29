@@ -182,8 +182,11 @@ test('fullscreen height flows through normalization, settings, and runtime style
   assert.match(types, /HeroHeightMode = [^;]*'fullscreen'/);
   assert.match(displayTab, /value: 'fullscreen'/);
   assert.match(normalizer, /HeroHeightMode is [^\n]*"fullscreen"/);
-  assert.match(styles, /\.ec-height-fullscreen,[\s\S]*?\.ec-root\.ec-height-fullscreen,[\s\S]*?--ec-height:\s*100vh/);
-  assert.match(styles, /@supports \(height: 100dvh\)[\s\S]*?--ec-height:\s*100dvh/);
+  assert.match(
+    styles,
+    /\.featured-height-fullscreen,[\s\S]*?\.featured-root\.featured-height-fullscreen,[\s\S]*?--featured-height:\s*100vh/
+  );
+  assert.match(styles, /@supports \(height: 100dvh\)[\s\S]*?--featured-height:\s*100dvh/);
 });
 
 test('vertical hero fade flows through backend display contracts', async () => {

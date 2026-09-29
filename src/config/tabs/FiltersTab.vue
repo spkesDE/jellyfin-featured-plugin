@@ -44,15 +44,15 @@ async function clearHistory(): Promise<void> {
     role="tabpanel"
     aria-labelledby="featuredTab-filters"
   >
-    <div class="ec-filterLayout">
-      <ConfigCard class="ec-filterGlobal" :title="t('filter.globalRules')" :help="t('filter.globalRulesHelp')">
+    <div class="featured-filterLayout">
+      <ConfigCard class="featured-filterGlobal" :title="t('filter.globalRules')" :help="t('filter.globalRulesHelp')">
         <FilterRuleEditor :filters="store.config.GlobalFilters" />
         <p v-if="!store.config.GlobalFilters.length" class="jmp-note">{{ t('filter.noGlobalRules') }}</p>
       </ConfigCard>
 
-      <div class="ec-filterSecondary">
+      <div class="featured-filterSecondary">
         <ConfigCard :title="t('filter.diversityTitle')" :help="t('filter.diversityHelp')">
-          <div class="ec-diversityGrid">
+          <div class="featured-diversityGrid">
             <ConfigNumber
               v-model="store.config.MaximumItemsPerGenre"
               :label="t('filter.maximumPerGenre')"
@@ -115,7 +115,7 @@ async function clearHistory(): Promise<void> {
           />
           <button
             type="button"
-            class="raised emby-button ec-secondaryAction"
+            class="raised emby-button featured-secondaryAction"
             :disabled="!historyUserIds.length || historyClearing"
             @click="clearHistory"
           >
@@ -129,29 +129,29 @@ async function clearHistory(): Promise<void> {
 </template>
 
 <style scoped>
-.ec-filterLayout {
+.featured-filterLayout {
   display: grid;
   gap: 1rem;
 }
 
-.ec-filterSecondary {
+.featured-filterSecondary {
   align-items: stretch;
   display: grid;
   gap: 1rem;
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.ec-diversityGrid {
+.featured-diversityGrid {
   display: grid;
   gap: 1rem;
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 @media (max-width: 900px) {
-  .ec-filterSecondary {
+  .featured-filterSecondary {
     grid-template-columns: 1fr;
   }
-  .ec-diversityGrid {
+  .featured-diversityGrid {
     grid-template-columns: 1fr;
   }
 }

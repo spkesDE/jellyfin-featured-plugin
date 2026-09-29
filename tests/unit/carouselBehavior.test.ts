@@ -9,7 +9,7 @@ describe('FeaturedCarousel behaviour', () => {
     document.body.appendChild(carousel.root);
     expect(carousel.getActiveItem()?.id).toBe('one');
 
-    carousel.root.querySelector<HTMLButtonElement>('.ec-arrow-next')?.click();
+    carousel.root.querySelector<HTMLButtonElement>('.featured-arrow-next')?.click();
     expect(carousel.getActiveItem()?.id).toBe('two');
 
     dispatchTouch(carousel.root, 'touchstart', 100, 100);
@@ -35,9 +35,9 @@ describe('FeaturedCarousel behaviour', () => {
     const carousel = new FeaturedCarousel(response, loadItems);
     document.body.appendChild(carousel.root);
 
-    carousel.root.querySelector<HTMLButtonElement>('.ec-arrow-next')?.click();
+    carousel.root.querySelector<HTMLButtonElement>('.featured-arrow-next')?.click();
     await vi.waitFor(() => expect(loadItems).toHaveBeenCalledWith(['one', 'two']));
-    carousel.root.querySelector<HTMLButtonElement>('.ec-arrow-next')?.click();
+    carousel.root.querySelector<HTMLButtonElement>('.featured-arrow-next')?.click();
     await vi.waitFor(() => expect(carousel.getActiveItem()?.id).toBe('three'));
     carousel.destroy();
   });

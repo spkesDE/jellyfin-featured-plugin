@@ -28,16 +28,16 @@ describe('preferences dialog behaviour', () => {
     document.addEventListener(USER_PREFERENCES_CHANGED_EVENT, changed);
 
     await openPreferencesDialog();
-    const reset = document.querySelector<HTMLButtonElement>('.ec-preferences-reset');
+    const reset = document.querySelector<HTMLButtonElement>('.featured-preferences-reset');
     expect(reset, document.body.innerHTML).not.toBeNull();
     reset!.click();
     await vi.waitFor(() =>
       expect(mocks.requestJson).toHaveBeenCalledWith('featured/preferences', { method: 'PUT', body: { reset: true } })
     );
-    await vi.waitFor(() => expect(document.querySelector('.ec-preferences-backdrop')).toBeNull());
+    await vi.waitFor(() => expect(document.querySelector('.featured-preferences-backdrop')).toBeNull());
 
     await openPreferencesDialog();
-    const dialog = document.querySelector<HTMLFormElement>('.ec-preferences-dialog');
+    const dialog = document.querySelector<HTMLFormElement>('.featured-preferences-dialog');
     expect(dialog).not.toBeNull();
     dialog!.requestSubmit();
     await vi.waitFor(() =>

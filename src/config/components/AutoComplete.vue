@@ -113,9 +113,9 @@ onBeforeUnmount(clearSearchTimer);
 </script>
 
 <template>
-  <div class="ec-autocompleteField">
+  <div class="featured-autocompleteField">
     <label v-if="label" class="inputLabel" :for="inputId">{{ label }}</label>
-    <div class="ec-autocompleteInputWrap">
+    <div class="featured-autocompleteInputWrap">
       <input
         :id="inputId"
         :value="query"
@@ -134,21 +134,21 @@ onBeforeUnmount(clearSearchTimer);
         @blur="open = false"
         @keydown="handleKeydown"
       />
-      <span class="material-icons ec-autocompleteIcon" :class="{ 'is-loading': loading }" aria-hidden="true">
+      <span class="material-icons featured-autocompleteIcon" :class="{ 'is-loading': loading }" aria-hidden="true">
         {{ loading ? 'sync' : 'search' }}
       </span>
     </div>
 
-    <div v-if="showResults" :id="`${inputId}-results`" class="ec-autocompleteResults" role="listbox">
-      <p v-if="loading" class="ec-autocompleteStatus">{{ loadingText }}</p>
-      <p v-else-if="error" class="ec-autocompleteStatus is-error">{{ error }}</p>
+    <div v-if="showResults" :id="`${inputId}-results`" class="featured-autocompleteResults" role="listbox">
+      <p v-if="loading" class="featured-autocompleteStatus">{{ loadingText }}</p>
+      <p v-else-if="error" class="featured-autocompleteStatus is-error">{{ error }}</p>
       <button
         v-for="(option, optionIndex) in options"
         v-else
         :id="`${inputId}-result-${optionIndex}`"
         :key="option.value"
         type="button"
-        class="ec-autocompleteOption"
+        class="featured-autocompleteOption"
         :class="{ 'is-active': optionIndex === activeOption }"
         role="option"
         :aria-selected="optionIndex === activeOption"
@@ -157,14 +157,14 @@ onBeforeUnmount(clearSearchTimer);
         @click="select(option)"
       >
         <slot name="option" :option="option">
-          <span class="ec-autocompleteOptionMain">
+          <span class="featured-autocompleteOptionMain">
             <strong>{{ option.label }}</strong>
             <small v-if="option.description">{{ option.description }}</small>
           </span>
           <span v-if="option.icon" class="material-icons" aria-hidden="true">{{ option.icon }}</span>
         </slot>
       </button>
-      <p v-if="!loading && !error && searched && !options.length" class="ec-autocompleteStatus">
+      <p v-if="!loading && !error && searched && !options.length" class="featured-autocompleteStatus">
         {{ noResultsText }}
       </p>
     </div>
@@ -172,22 +172,22 @@ onBeforeUnmount(clearSearchTimer);
 </template>
 
 <style scoped>
-.ec-autocompleteField {
+.featured-autocompleteField {
   position: relative;
 }
-.ec-autocompleteInputWrap {
+.featured-autocompleteInputWrap {
   position: relative;
 }
-.ec-autocompleteInputWrap .emby-input {
-  background: var(--jf-palette-FilledInput-bg, var(--ec-theme-action-hover));
-  border: 1px solid var(--jf-palette-FilledInput-borderColor, var(--ec-theme-divider));
-  border-radius: var(--ec-theme-radius);
+.featured-autocompleteInputWrap .emby-input {
+  background: var(--jf-palette-FilledInput-bg, var(--featured-theme-action-hover));
+  border: 1px solid var(--jf-palette-FilledInput-borderColor, var(--featured-theme-divider));
+  border-radius: var(--featured-theme-radius);
   box-sizing: border-box;
   color: inherit;
   padding: 0.6rem 2.6rem 0.6rem 0.75rem;
   width: 100%;
 }
-.ec-autocompleteIcon {
+.featured-autocompleteIcon {
   opacity: 0.58;
   pointer-events: none;
   position: absolute;
@@ -195,20 +195,20 @@ onBeforeUnmount(clearSearchTimer);
   top: 50%;
   transform: translateY(-50%);
 }
-.ec-autocompleteIcon.is-loading {
-  animation: ec-autocompleteSpin 0.8s linear infinite;
+.featured-autocompleteIcon.is-loading {
+  animation: featured-autocompleteSpin 0.8s linear infinite;
 }
-@keyframes ec-autocompleteSpin {
+@keyframes featured-autocompleteSpin {
   to {
     transform: translateY(-50%) rotate(360deg);
   }
 }
-.ec-autocompleteResults {
-  background: var(--ec-theme-paper);
-  border: 1px solid var(--ec-theme-divider);
-  border-radius: var(--ec-theme-radius);
+.featured-autocompleteResults {
+  background: var(--featured-theme-paper);
+  border: 1px solid var(--featured-theme-divider);
+  border-radius: var(--featured-theme-radius);
   box-shadow: 0 0.85rem 2.4rem rgba(0, 0, 0, 0.4);
-  color: var(--ec-theme-text-primary);
+  color: var(--featured-theme-text-primary);
   display: grid;
   left: 0;
   margin-top: 0.35rem;
@@ -220,7 +220,7 @@ onBeforeUnmount(clearSearchTimer);
   top: 100%;
   z-index: 100;
 }
-.ec-autocompleteOption {
+.featured-autocompleteOption {
   align-items: center;
   background: transparent;
   border: 0;
@@ -232,24 +232,24 @@ onBeforeUnmount(clearSearchTimer);
   padding: 0.6rem 0.7rem;
   text-align: left;
 }
-.ec-autocompleteOption:hover,
-.ec-autocompleteOption.is-active {
-  background: var(--ec-theme-action-hover);
+.featured-autocompleteOption:hover,
+.featured-autocompleteOption.is-active {
+  background: var(--featured-theme-action-hover);
 }
-.ec-autocompleteOptionMain {
+.featured-autocompleteOptionMain {
   display: grid;
   gap: 0.12rem;
 }
-.ec-autocompleteOptionMain small {
+.featured-autocompleteOptionMain small {
   opacity: 0.65;
 }
-.ec-autocompleteStatus {
+.featured-autocompleteStatus {
   margin: 0;
   opacity: 0.7;
   padding: 0.7rem;
 }
-.ec-autocompleteStatus.is-error {
-  color: var(--ec-theme-error-light);
+.featured-autocompleteStatus.is-error {
+  color: var(--featured-theme-error-light);
   font-size: 0.84rem;
 }
 </style>

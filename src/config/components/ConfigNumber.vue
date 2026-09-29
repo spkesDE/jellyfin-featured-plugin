@@ -18,7 +18,7 @@ const focused = ref(false);
 
 <template>
   <div class="inputContainer">
-    <div class="ec-numberLabelRow">
+    <div class="featured-numberLabelRow">
       <label class="inputLabel" :class="focused ? 'inputLabelFocused' : 'inputLabelUnfocused'" :for="fieldId">
         {{ label }}
       </label>
@@ -44,7 +44,7 @@ const focused = ref(false);
 </template>
 
 <style scoped>
-.ec-numberLabelRow {
+.featured-numberLabelRow {
   align-items: center;
   display: flex;
   gap: 0.4rem;

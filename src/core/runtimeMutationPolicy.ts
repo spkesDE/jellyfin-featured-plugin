@@ -1,5 +1,5 @@
 const HOME_SURFACE_SELECTOR = '#indexPage, #homeTab, .homeSectionsContainer';
-const PLUGIN_SURFACE_SELECTOR = '.ec-root, .ec-bootstrap-placeholder';
+const PLUGIN_SURFACE_SELECTOR = '.featured-root, .featured-bootstrap-placeholder';
 
 export function shouldScheduleRuntimeScan(
   mutations: MutationRecord[],

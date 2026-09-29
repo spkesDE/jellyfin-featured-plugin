@@ -39,21 +39,21 @@ function syncItemPositions(list: FeaturedManualList): void {
     aria-labelledby="featuredTab-manual"
   >
     <ConfigCard :title="t('manual.title')" :help="t('manual.help')">
-      <button type="button" class="raised button-submit emby-button ec-primaryAction" @click="addManualList">
+      <button type="button" class="raised button-submit emby-button featured-primaryAction" @click="addManualList">
         <span class="material-icons" aria-hidden="true">add</span>{{ t('manual.addList') }}
       </button>
     </ConfigCard>
 
-    <div v-if="store.config.ManualLists.length" class="ec-manualLists ec-configStack">
+    <div v-if="store.config.ManualLists.length" class="featured-manualLists featured-configStack">
       <article
         v-for="(list, listIndex) in store.config.ManualLists"
         :key="list.Id"
-        class="ec-manualList ec-configCard ec-configCardPadded"
+        class="featured-manualList featured-configCard featured-configCardPadded"
       >
-        <header class="ec-manualListSummary ec-configCardHeader">
+        <header class="featured-manualListSummary featured-configCardHeader">
           <button
             type="button"
-            class="ec-manualListToggle ec-configCardToggle"
+            class="featured-manualListToggle featured-configCardToggle"
             :aria-expanded="expandedManualListId === list.Id"
             @click="expandedManualListId = expandedManualListId === list.Id ? null : list.Id"
           >
@@ -65,11 +65,13 @@ function syncItemPositions(list: FeaturedManualList): void {
                 <template v-if="list.StartsAt || list.EndsAt"> · {{ t('manual.summaryScheduled') }}</template>
               </small>
             </span>
-            <span class="material-icons ec-manualListChevron ec-configChevron" aria-hidden="true">expand_more</span>
+            <span class="material-icons featured-manualListChevron featured-configChevron" aria-hidden="true"
+              >expand_more</span
+            >
           </button>
           <button
             type="button"
-            class="paper-icon-button-light ec-ruleIconButton ec-removeRule"
+            class="paper-icon-button-light featured-ruleIconButton featured-removeRule"
             :title="t('manual.removeList')"
             @click="store.removeManualList(listIndex)"
           >
@@ -77,13 +79,13 @@ function syncItemPositions(list: FeaturedManualList): void {
           </button>
         </header>
 
-        <div v-show="expandedManualListId === list.Id" class="ec-manualListBody ec-configCardBody">
-          <div class="ec-manualListHeader">
+        <div v-show="expandedManualListId === list.Id" class="featured-manualListBody featured-configCardBody">
+          <div class="featured-manualListHeader">
             <ConfigText v-model="list.Name" :label="t('manual.listName')" />
             <ConfigCheckbox v-model="list.Enabled" :label="t('manual.listEnabled')" />
           </div>
 
-          <details class="ec-manualSchedule">
+          <details class="featured-manualSchedule">
             <summary>{{ t('manual.schedule') }}</summary>
             <p class="jmp-note">{{ t('manual.scheduleHelp') }}</p>
             <div class="jmp-compactGrid">
@@ -92,7 +94,7 @@ function syncItemPositions(list: FeaturedManualList): void {
             </div>
           </details>
 
-          <div class="ec-manualSearch">
+          <div class="featured-manualSearch">
             <ManualItemAutocomplete
               :input-id="`manual-search-${list.Id}`"
               :exclude-ids="list.Items.map((item) => item.ItemId)"
@@ -105,42 +107,46 @@ function syncItemPositions(list: FeaturedManualList): void {
             v-model="list.Items"
             item-key="Id"
             tag="div"
-            class="ec-manualItems"
-            handle=".ec-dragHandle"
-            ghost-class="ec-manualDragGhost"
-            chosen-class="ec-manualDragChosen"
-            drag-class="ec-manualDragging"
-            fallback-class="ec-manualDragPreview"
+            class="featured-manualItems"
+            handle=".featured-dragHandle"
+            ghost-class="featured-manualDragGhost"
+            chosen-class="featured-manualDragChosen"
+            drag-class="featured-manualDragging"
+            fallback-class="featured-manualDragPreview"
             :force-fallback="true"
             :fallback-tolerance="3"
             :animation="160"
             @change="syncItemPositions(list)"
           >
             <template #item="{ element: item, index: itemIndex }">
-              <article class="ec-manualItem">
-                <button type="button" class="ec-dragHandle ec-configDragHandle" :title="t('manual.dragItem')">
+              <article class="featured-manualItem">
+                <button
+                  type="button"
+                  class="featured-dragHandle featured-configDragHandle"
+                  :title="t('manual.dragItem')"
+                >
                   <span class="material-icons" aria-hidden="true">drag_indicator</span>
                 </button>
-                <div class="ec-manualItemText">
+                <div class="featured-manualItemText">
                   <strong>{{ item.Name }}</strong
                   ><small
                     >{{ mediaTypeLabel(item.MediaType)
                     }}<template v-if="item.ProductionYear"> · {{ item.ProductionYear }}</template></small
                   >
                 </div>
-                <details class="ec-itemSchedule">
+                <details class="featured-itemSchedule">
                   <summary :title="t('manual.itemSchedule')">
                     <span class="material-icons" aria-hidden="true">schedule</span>
                   </summary>
-                  <div class="ec-itemSchedulePanel">
+                  <div class="featured-itemSchedulePanel">
                     <ConfigDateTime v-model="item.StartsAt" :label="t('manual.startsAt')" />
                     <ConfigDateTime v-model="item.EndsAt" :label="t('manual.endsAt')" />
                   </div>
                 </details>
-                <div class="ec-manualItemActions ec-configActions">
+                <div class="featured-manualItemActions featured-configActions">
                   <button
                     type="button"
-                    class="paper-icon-button-light ec-ruleIconButton"
+                    class="paper-icon-button-light featured-ruleIconButton"
                     :disabled="itemIndex === 0"
                     :title="t('source.moveUp')"
                     @click="store.moveManualItem(list, itemIndex, itemIndex - 1)"
@@ -149,7 +155,7 @@ function syncItemPositions(list: FeaturedManualList): void {
                   </button>
                   <button
                     type="button"
-                    class="paper-icon-button-light ec-ruleIconButton"
+                    class="paper-icon-button-light featured-ruleIconButton"
                     :disabled="itemIndex === list.Items.length - 1"
                     :title="t('source.moveDown')"
                     @click="store.moveManualItem(list, itemIndex, itemIndex + 1)"
@@ -158,7 +164,7 @@ function syncItemPositions(list: FeaturedManualList): void {
                   </button>
                   <button
                     type="button"
-                    class="paper-icon-button-light ec-ruleIconButton ec-removeRule"
+                    class="paper-icon-button-light featured-ruleIconButton featured-removeRule"
                     :title="t('manual.removeItem')"
                     @click="store.removeManualItem(list, itemIndex)"
                   >
@@ -168,11 +174,11 @@ function syncItemPositions(list: FeaturedManualList): void {
               </article>
             </template>
           </Draggable>
-          <p v-else class="ec-emptyInline">{{ t('manual.emptyList') }}</p>
+          <p v-else class="featured-emptyInline">{{ t('manual.emptyList') }}</p>
         </div>
       </article>
     </div>
-    <div v-else class="ec-emptySources">
+    <div v-else class="featured-emptySources">
       <span class="material-icons" aria-hidden="true">featured_play_list</span>
       <h3>{{ t('manual.emptyTitle') }}</h3>
       <p>{{ t('manual.emptyHelp') }}</p>
@@ -181,68 +187,68 @@ function syncItemPositions(list: FeaturedManualList): void {
 </template>
 
 <style scoped>
-.ec-manualListToggle > span:first-child {
+.featured-manualListToggle > span:first-child {
   gap: 0.18rem;
 }
-.ec-manualListToggle small {
+.featured-manualListToggle small {
   opacity: 0.68;
 }
-.ec-manualListToggle[aria-expanded='true'] .ec-manualListChevron {
+.featured-manualListToggle[aria-expanded='true'] .featured-manualListChevron {
   transform: rotate(180deg);
 }
 
-.ec-manualListHeader {
+.featured-manualListHeader {
   align-items: center;
   display: grid;
   gap: 1rem;
   grid-template-columns: minmax(15rem, 1fr) auto;
 }
 
-.ec-manualListHeader > :deep(.inputContainer),
-.ec-manualListHeader > :deep(.checkboxContainer) {
+.featured-manualListHeader > :deep(.inputContainer),
+.featured-manualListHeader > :deep(.checkboxContainer) {
   margin-bottom: 0;
 }
 
-.ec-manualSchedule {
+.featured-manualSchedule {
   border-top: 1px solid rgba(255, 255, 255, 0.07);
   margin-top: 0.8rem;
   padding-top: 0.7rem;
 }
 
-.ec-manualSchedule > summary {
+.featured-manualSchedule > summary {
   cursor: pointer;
   font-weight: 600;
 }
 
-.ec-manualSchedule > .jmp-note {
+.featured-manualSchedule > .jmp-note {
   margin: 0.35rem 0 0.75rem;
 }
 
-.ec-manualSchedule :deep(.inputContainer),
-.ec-itemSchedulePanel :deep(.inputContainer) {
+.featured-manualSchedule :deep(.inputContainer),
+.featured-itemSchedulePanel :deep(.inputContainer) {
   margin-bottom: 0;
 }
 
-.ec-manualSearch {
+.featured-manualSearch {
   margin-top: 1rem;
 }
 
-.ec-manualItemText {
+.featured-manualItemText {
   display: grid;
   gap: 0.12rem;
 }
 
-.ec-manualItemText small {
+.featured-manualItemText small {
   opacity: 0.65;
 }
 
-.ec-manualItems {
+.featured-manualItems {
   display: grid;
   gap: 0.45rem;
   margin-top: 1rem;
 }
 
-.ec-manualItem {
+.featured-manualItem {
   align-items: center;
   background: rgba(0, 0, 0, 0.14);
   border: 1px solid rgba(255, 255, 255, 0.07);
@@ -256,32 +262,32 @@ function syncItemPositions(list: FeaturedManualList): void {
     opacity 0.15s ease;
 }
 
-.ec-manualDragGhost,
-.ec-manualDragChosen:not(.ec-manualDragPreview) {
+.featured-manualDragGhost,
+.featured-manualDragChosen:not(.featured-manualDragPreview) {
   opacity: 0 !important;
 }
 
-.ec-manualDragPreview {
-  border-color: var(--ec-theme-primary);
+.featured-manualDragPreview {
+  border-color: var(--featured-theme-primary);
   box-shadow: 0 0.8rem 2rem rgba(0, 0, 0, 0.45);
   opacity: 0.96;
   pointer-events: none;
 }
 
-.ec-itemSchedule {
+.featured-itemSchedule {
   position: relative;
 }
 
-.ec-itemSchedule > summary {
+.featured-itemSchedule > summary {
   cursor: pointer;
   list-style: none;
 }
 
-.ec-itemSchedulePanel {
-  background: var(--ec-theme-paper);
-  border: 1px solid var(--ec-theme-divider);
-  border-radius: var(--ec-theme-radius);
-  color: var(--ec-theme-text-primary);
+.featured-itemSchedulePanel {
+  background: var(--featured-theme-paper);
+  border: 1px solid var(--featured-theme-divider);
+  border-radius: var(--featured-theme-radius);
+  color: var(--featured-theme-text-primary);
   box-shadow: 0 0.85rem 2.4rem rgba(0, 0, 0, 0.55);
   display: grid;
   gap: 0.75rem;
@@ -293,27 +299,27 @@ function syncItemPositions(list: FeaturedManualList): void {
   z-index: 90;
 }
 
-.ec-emptyInline {
+.featured-emptyInline {
   margin: 1rem 0 0;
   opacity: 0.68;
 }
 
 @media (max-width: 850px) {
-  .ec-manualListHeader {
+  .featured-manualListHeader {
     grid-template-columns: 1fr auto;
   }
 
-  .ec-manualListHeader > :deep(.inputContainer) {
+  .featured-manualListHeader > :deep(.inputContainer) {
     grid-column: 1 / -1;
   }
 }
 
 @media (max-width: 600px) {
-  .ec-manualItem {
+  .featured-manualItem {
     grid-template-columns: auto minmax(0, 1fr) auto;
   }
 
-  .ec-manualItemActions {
+  .featured-manualItemActions {
     grid-column: 1 / -1;
     justify-content: flex-end;
   }

@@ -12,8 +12,10 @@ function updateButton(button: HTMLButtonElement, played: boolean): void {
   button.setAttribute('aria-label', t(played ? 'carousel.markUnplayed' : 'carousel.markPlayed'));
   button.title = t(played ? 'carousel.markUnplayed' : 'carousel.markPlayed');
   button.dataset.played = String(played);
-  if (button.classList.contains('ec-playstate-button-meta')) {
-    button.style.color = played ? 'var(--ec-playstate-active-color, #52b54b)' : 'var(--ec-on-media-color, #fff)';
+  if (button.classList.contains('featured-playstate-button-meta')) {
+    button.style.color = played
+      ? 'var(--featured-playstate-active-color, #52b54b)'
+      : 'var(--featured-on-media-color, #fff)';
   }
   const icon = button.querySelector<HTMLElement>('.material-icons');
   if (icon) {
@@ -30,8 +32,8 @@ export function createPlaystateButton(
   button.type = 'button';
   button.className =
     variant === 'metadata'
-      ? 'button-flat btnPlaystate detailButton emby-button ec-playstate-button ec-playstate-button-meta'
-      : 'ec-button ec-button-secondary ec-playstate-button raised emby-button';
+      ? 'button-flat btnPlaystate detailButton emby-button featured-playstate-button featured-playstate-button-meta'
+      : 'featured-button featured-button-secondary featured-playstate-button raised emby-button';
   button.setAttribute('is', 'emby-playstatebutton');
   button.dataset.id = item.id;
   button.dataset.type = item.mediaType;
@@ -52,7 +54,7 @@ export function createPlaystateButton(
     if (button.disabled) return;
     button.disabled = true;
     button.removeAttribute('data-error');
-    button.parentElement?.querySelector('.ec-playstate-error')?.remove();
+    button.parentElement?.querySelector('.featured-playstate-error')?.remove();
     const next = !item.isPlayed;
     try {
       const result = await requestJson<PlaystateResponse>(`UserPlayedItems/${encodeURIComponent(item.id)}`, {
@@ -66,7 +68,7 @@ export function createPlaystateButton(
         console.warn('Jellyfin Featured: could not refresh playstate-dependent feeds.', error);
       }
     } catch (error) {
-      showTransientActionError(button, 'ec-playstate-error', t('carousel.playstateError'));
+      showTransientActionError(button, 'featured-playstate-error', t('carousel.playstateError'));
       console.warn('Jellyfin Featured: could not change play state.', error);
     } finally {
       button.disabled = false;

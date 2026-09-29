@@ -2,7 +2,7 @@ import { t } from '../i18n';
 
 export function createCarouselStatus(): HTMLDivElement {
   const status = document.createElement('div');
-  status.className = 'ec-status';
+  status.className = 'featured-status';
   status.setAttribute('aria-live', 'polite');
   return status;
 }
@@ -10,7 +10,7 @@ export function createCarouselStatus(): HTMLDivElement {
 export function createCarouselArrow(direction: 'prev' | 'next', activate: (offset: number) => void): HTMLButtonElement {
   const button = document.createElement('button');
   button.type = 'button';
-  button.className = `ec-control ec-arrow ec-arrow-${direction} emby-scrollbuttons-button paper-icon-button-light`;
+  button.className = `featured-control featured-arrow featured-arrow-${direction} emby-scrollbuttons-button paper-icon-button-light`;
   const icon = document.createElement('span');
   icon.className = `material-icons ${direction === 'prev' ? 'chevron_left' : 'chevron_right'}`;
   icon.setAttribute('aria-hidden', 'true');
@@ -26,13 +26,13 @@ export function createAutoplayControl(toggle: () => void): {
 } {
   const button = document.createElement('button');
   button.type = 'button';
-  button.className = 'ec-control ec-autoplay emby-scrollbuttons-button paper-icon-button-light';
+  button.className = 'featured-control featured-autoplay emby-scrollbuttons-button paper-icon-button-light';
   const countdownRing = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  countdownRing.classList.add('ec-countdown-ring');
+  countdownRing.classList.add('featured-countdown-ring');
   countdownRing.setAttribute('viewBox', '0 0 40 40');
   countdownRing.setAttribute('aria-hidden', 'true');
-  const countdownTrack = createCountdownCircle('ec-countdown-track');
-  const countdownProgress = createCountdownCircle('ec-countdown-progress');
+  const countdownTrack = createCountdownCircle('featured-countdown-track');
+  const countdownProgress = createCountdownCircle('featured-countdown-progress');
   countdownProgress.setAttribute('pathLength', '100');
   countdownRing.append(countdownTrack, countdownProgress);
   button.appendChild(countdownRing);
@@ -60,11 +60,11 @@ export function createPaginationDots(
   buttons: HTMLButtonElement[];
 } {
   const root = document.createElement('div');
-  root.className = 'ec-dots';
+  root.className = 'featured-dots';
   const buttons = Array.from({ length: count }, (_, index) => {
     const button = document.createElement('button');
     button.type = 'button';
-    button.className = 'ec-dot';
+    button.className = 'featured-dot';
     button.setAttribute('aria-label', `${index + 1} / ${count}`);
     button.addEventListener('click', () => activate(index));
     root.appendChild(button);

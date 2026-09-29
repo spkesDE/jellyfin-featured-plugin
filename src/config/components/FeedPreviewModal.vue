@@ -41,23 +41,23 @@ watch(
 </script>
 
 <template>
-  <div v-if="store.feedPreviewOpen.value" class="ec-feedPreviewOverlay" @click.self="store.closeFeedPreview()">
+  <div v-if="store.feedPreviewOpen.value" class="featured-feedPreviewOverlay" @click.self="store.closeFeedPreview()">
     <section
       ref="dialog"
-      class="ec-feedPreviewDialog"
+      class="featured-feedPreviewDialog"
       role="dialog"
       aria-modal="true"
-      aria-labelledby="ec-feedPreviewTitle"
+      aria-labelledby="featured-feedPreviewTitle"
       tabindex="-1"
     >
-      <header class="ec-feedPreviewHeader ec-configSplitHeader">
+      <header class="featured-feedPreviewHeader featured-configSplitHeader">
         <div>
-          <h2 id="ec-feedPreviewTitle">{{ t('feedPreview.title') }}</h2>
+          <h2 id="featured-feedPreviewTitle">{{ t('feedPreview.title') }}</h2>
           <p>{{ t('feedPreview.help') }}</p>
         </div>
         <button
           type="button"
-          class="ec-feedPreviewClose"
+          class="featured-feedPreviewClose"
           :aria-label="t('feedPreview.close')"
           @click="store.closeFeedPreview()"
         >
@@ -65,7 +65,7 @@ watch(
         </button>
       </header>
 
-      <div class="ec-feedPreviewControls">
+      <div class="featured-feedPreviewControls">
         <ConfigSelect v-model="store.feedPreviewUserId.value" :label="t('feedPreview.user')" :options="userOptions" />
         <ConfigSelect
           v-model="store.feedPreviewPresetId.value"
@@ -74,7 +74,7 @@ watch(
         />
         <button
           type="button"
-          class="raised button-submit emby-button ec-primaryAction"
+          class="raised button-submit emby-button featured-primaryAction"
           :disabled="store.feedPreviewLoading.value"
           @click="refresh"
         >
@@ -83,34 +83,34 @@ watch(
         </button>
       </div>
 
-      <p v-if="store.feedPreviewError.value" class="ec-feedPreviewError">
+      <p v-if="store.feedPreviewError.value" class="featured-feedPreviewError">
         {{ t('feedPreview.failed', { error: store.feedPreviewError.value }) }}
       </p>
-      <div v-else-if="store.feedPreviewLoading.value && !store.feedPreview.value" class="ec-feedPreviewEmpty">
+      <div v-else-if="store.feedPreviewLoading.value && !store.feedPreview.value" class="featured-feedPreviewEmpty">
         {{ t('feedPreview.loading') }}
       </div>
       <template v-else-if="store.feedPreview.value">
-        <div class="ec-feedPreviewContext">
+        <div class="featured-feedPreviewContext">
           <span>{{ t('feedPreview.asUser', { name: store.feedPreview.value.userName }) }}</span>
           <span>{{ store.feedPreview.value.activePresetName || t('feedPreview.defaultConfig') }}</span>
           <span v-if="store.feedPreview.value.userProfileApplied">{{ t('feedPreview.profileApplied') }}</span>
         </div>
 
-        <ol v-if="store.feedPreview.value.items?.length" class="ec-feedPreviewItems">
+        <ol v-if="store.feedPreview.value.items?.length" class="featured-feedPreviewItems">
           <li v-for="item in store.feedPreview.value.items" :key="item.id">
             <div>
               <strong>{{ item.name }}</strong>
               <span>{{ item.productionYear ? `${item.mediaType} · ${item.productionYear}` : item.mediaType }}</span>
             </div>
-            <span class="ec-feedPreviewReason" :title="t('feedPreview.whyHelp')">
+            <span class="featured-feedPreviewReason" :title="t('feedPreview.whyHelp')">
               {{ t('feedPreview.selectedBy', { source: sourceLabel(item.sourceType) }) }}
             </span>
           </li>
         </ol>
-        <p v-else class="ec-feedPreviewEmpty">{{ t('feedPreview.noItems') }}</p>
+        <p v-else class="featured-feedPreviewEmpty">{{ t('feedPreview.noItems') }}</p>
 
         <h3>{{ t('feedPreview.diagnostics') }}</h3>
-        <div class="ec-feedPreviewStats">
+        <div class="featured-feedPreviewStats">
           <div v-for="rule in store.feedPreview.value.rules ?? []" :key="rule.id">
             <span>{{ sourceLabel(rule.type) }}</span>
             <strong>{{ t('feedPreview.selectedCount', { count: rule.returned }) }}</strong>
@@ -134,7 +134,7 @@ watch(
 </template>
 
 <style scoped>
-.ec-feedPreviewOverlay {
+.featured-feedPreviewOverlay {
   align-items: center;
   background: rgba(0, 0, 0, 0.72);
   display: flex;
@@ -144,9 +144,9 @@ watch(
   position: fixed;
   z-index: 9999;
 }
-.ec-feedPreviewDialog {
-  background: var(--ec-theme-background, #181818);
-  border: 1px solid var(--ec-theme-divider);
+.featured-feedPreviewDialog {
+  background: var(--featured-theme-background, #181818);
+  border: 1px solid var(--featured-theme-divider);
   border-radius: 1rem;
   box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.5);
   box-sizing: border-box;
@@ -156,35 +156,35 @@ watch(
   padding: 1.5rem;
   width: 100%;
 }
-.ec-feedPreviewHeader h2 {
+.featured-feedPreviewHeader h2 {
   margin: 0;
 }
-.ec-feedPreviewHeader p {
+.featured-feedPreviewHeader p {
   margin: 0.25rem 0 0;
   opacity: 0.72;
 }
-.ec-feedPreviewClose {
+.featured-feedPreviewClose {
   background: transparent;
   border: 0;
   color: inherit;
   cursor: pointer;
   padding: 0.35rem;
 }
-.ec-feedPreviewControls {
+.featured-feedPreviewControls {
   align-items: end;
   display: grid;
   gap: 1rem;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) max-content;
   margin: 1.5rem 0;
 }
-.ec-feedPreviewControls > :deep(.selectContainer) {
+.featured-feedPreviewControls > :deep(.selectContainer) {
   margin-bottom: 0;
 }
-.ec-feedPreviewControls > .ec-primaryAction {
+.featured-feedPreviewControls > .featured-primaryAction {
   min-height: 2.7rem;
   white-space: nowrap;
 }
-.ec-feedPreviewItems {
+.featured-feedPreviewItems {
   counter-reset: preview-item;
   display: grid;
   gap: 0.5rem;
@@ -192,82 +192,82 @@ watch(
   margin: 0 0 1.75rem;
   padding: 0;
 }
-.ec-feedPreviewItems li {
+.featured-feedPreviewItems li {
   counter-increment: preview-item;
 }
-.ec-feedPreviewItems li::before {
-  color: var(--ec-theme-text-secondary);
+.featured-feedPreviewItems li::before {
+  color: var(--featured-theme-text-secondary);
   content: counter(preview-item) '.';
   font-weight: 700;
   text-align: right;
 }
-.ec-feedPreviewItems li {
+.featured-feedPreviewItems li {
   align-items: center;
-  background: var(--ec-theme-action-hover);
+  background: var(--featured-theme-action-hover);
   border-radius: 0.55rem;
   display: grid;
   gap: 1rem;
   grid-template-columns: 1.6rem minmax(0, 1fr) max-content;
   padding: 0.65rem 0.8rem;
 }
-.ec-feedPreviewItems li div {
+.featured-feedPreviewItems li div {
   display: grid;
   flex: 1 1 auto;
   gap: 0.15rem;
   min-width: 0;
 }
-.ec-feedPreviewItems li div span,
-.ec-feedPreviewReason {
+.featured-feedPreviewItems li div span,
+.featured-feedPreviewReason {
   font-size: 0.85rem;
   opacity: 0.72;
 }
-.ec-feedPreviewReason {
+.featured-feedPreviewReason {
   text-align: right;
 }
-.ec-feedPreviewContext {
+.featured-feedPreviewContext {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
   margin-bottom: 1.25rem;
 }
-.ec-feedPreviewContext span {
-  background: var(--ec-theme-contained);
+.featured-feedPreviewContext span {
+  background: var(--featured-theme-contained);
   border-radius: 999px;
   padding: 0.35rem 0.65rem;
 }
-.ec-feedPreviewStats {
+.featured-feedPreviewStats {
   display: grid;
   gap: 0.5rem;
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
-.ec-feedPreviewStats div {
+.featured-feedPreviewStats div {
   align-items: center;
-  border-bottom: 1px solid var(--ec-theme-divider);
+  border-bottom: 1px solid var(--featured-theme-divider);
   display: flex;
   justify-content: space-between;
   padding: 0.55rem 0.25rem;
 }
-.ec-feedPreviewError {
-  color: var(--ec-theme-error-light);
+.featured-feedPreviewError {
+  color: var(--featured-theme-error-light);
 }
-.ec-feedPreviewEmpty {
+.featured-feedPreviewEmpty {
   opacity: 0.7;
   padding: 1.5rem 0;
   text-align: center;
 }
 @media (max-width: 700px) {
-  .ec-feedPreviewControls,
-  .ec-feedPreviewStats {
+  .featured-feedPreviewControls,
+  .featured-feedPreviewStats {
     grid-template-columns: 1fr;
   }
-  .ec-feedPreviewControls > .ec-primaryAction {
+  .featured-feedPreviewControls > .featured-primaryAction {
     width: 100%;
   }
-  .ec-feedPreviewItems li {
+  .featured-feedPreviewItems li {
     align-items: start;
     grid-template-columns: 1.6rem minmax(0, 1fr);
   }
-  .ec-feedPreviewReason {
+  .featured-feedPreviewReason {
     grid-column: 2;
     text-align: left;
   }

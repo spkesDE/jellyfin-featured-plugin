@@ -7,7 +7,7 @@ const emit = defineEmits<{ 'update:modelValue': [value: boolean] }>();
 
 <template>
   <div class="checkboxContainer">
-    <div class="ec-checkboxRow ec-configLabelRow">
+    <div class="featured-checkboxRow featured-configLabelRow">
       <label class="emby-checkbox-label">
         <input
           class="emby-checkbox"

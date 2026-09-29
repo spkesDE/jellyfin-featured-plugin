@@ -46,16 +46,19 @@ test('dismissal UI offers metadata-aware scopes, undo, and settings management',
   assert.match(dismissals, /USER_PREFERENCES_CHANGED_EVENT/);
   assert.match(render, /createDismissalControl\(item, 'metadata'\)[\s\S]*?createDismissalControl\(item\)/);
   assert.match(render, /dismissalButtonPlacement === 'metadata'[\s\S]*?dismissalButtonPlacement === 'actions'/);
-  assert.match(dismissals, /button-flat detailButton emby-button ec-dismissal-button ec-dismissal-button-meta/);
-  assert.match(dismissals, /button\.style\.color = 'var\(--ec-on-media-color, #fff\)'/);
-  assert.match(dismissals, /ec-button ec-button-secondary ec-dismissal-button raised emby-button/);
+  assert.match(
+    dismissals,
+    /button-flat detailButton emby-button featured-dismissal-button featured-dismissal-button-meta/
+  );
+  assert.match(dismissals, /button\.style\.color = 'var\(--featured-on-media-color, #fff\)'/);
+  assert.match(dismissals, /featured-button featured-button-secondary featured-dismissal-button raised emby-button/);
   assert.match(dismissals, /detailButton-icon visibility_off/);
   assert.match(
     dismissals,
     /actionSheet actionsheet-not-fullscreen[\s\S]*?listItem listItem-button actionSheetMenuItem emby-button/
   );
   assert.match(dismissals, /toast toastVisible[\s\S]*?button-link emby-button/);
-  assert.doesNotMatch(styles, /\.ec-dismiss-(?:menu|toast|control|option)|\.ec-icon-button/);
+  assert.doesNotMatch(styles, /\.featured-dismiss-(?:menu|toast|control|option)|\.featured-icon-button/);
   assert.match(
     userTab,
     /DismissalPolicy\.Enabled[\s\S]*?DismissalPolicy\.AllowTitle[\s\S]*?DismissalPolicy\.AllowSeries[\s\S]*?DismissalPolicy\.AllowFranchise/

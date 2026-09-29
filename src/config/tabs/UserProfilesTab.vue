@@ -37,10 +37,10 @@ function addProfile(): void {
     role="tabpanel"
     aria-labelledby="featuredTab-users"
   >
-    <div class="ec-userSettingsGrid">
+    <div class="featured-userSettingsGrid">
       <ConfigCard :title="t('users.dismissalsTitle')" :help="t('users.dismissalsHelp')">
         <ConfigCheckbox v-model="store.config.DismissalPolicy.Enabled" :label="t('users.dismissalsEnabled')" />
-        <div class="ec-policyGrid" :class="{ 'ec-disabledGroup': !store.config.DismissalPolicy.Enabled }">
+        <div class="featured-policyGrid" :class="{ 'featured-disabledGroup': !store.config.DismissalPolicy.Enabled }">
           <ConfigCheckbox
             v-model="store.config.DismissalPolicy.AllowTitle"
             :label="t('users.dismissTitle')"
@@ -64,7 +64,10 @@ function addProfile(): void {
           v-model="store.config.PersonalizationPolicy.Enabled"
           :label="t('users.personalizationEnabled')"
         />
-        <div class="ec-policyGrid" :class="{ 'ec-disabledGroup': !store.config.PersonalizationPolicy.Enabled }">
+        <div
+          class="featured-policyGrid"
+          :class="{ 'featured-disabledGroup': !store.config.PersonalizationPolicy.Enabled }"
+        >
           <ConfigCheckbox
             v-model="store.config.PersonalizationPolicy.AllowSourceSelection"
             :label="t('users.allowSources')"
@@ -109,7 +112,7 @@ function addProfile(): void {
           :label="t('users.preferredGenres')"
           :options="genreOptions()"
         />
-        <div class="ec-scoreGrid">
+        <div class="featured-scoreGrid">
           <ConfigNumber
             v-model="store.config.PersonalizationDefaults.UnplayedBoost"
             :label="t('users.unplayedBoost')"
@@ -143,7 +146,7 @@ function addProfile(): void {
     </div>
 
     <ConfigCard :title="t('users.title')" :help="t('users.help')">
-      <div class="ec-userExplanation">
+      <div class="featured-userExplanation">
         <strong>{{ t('users.howItWorks') }}</strong>
         <ol>
           <li>{{ t('users.stepEligibility') }}</li>
@@ -151,11 +154,11 @@ function addProfile(): void {
           <li>{{ t('users.stepPriority') }}</li>
         </ol>
       </div>
-      <div class="ec-addSourceRow ec-configAddRow">
+      <div class="featured-addSourceRow featured-configAddRow">
         <ConfigSelect v-model="selectedUserId" :label="t('users.newProfile')" :options="userOptions" />
         <button
           type="button"
-          class="raised button-submit emby-button ec-addSourceButton"
+          class="raised button-submit emby-button featured-addSourceButton"
           :disabled="!selectedUserId"
           @click="addProfile"
         >
@@ -164,21 +167,21 @@ function addProfile(): void {
       </div>
     </ConfigCard>
 
-    <div v-if="store.config.UserProfiles.length" class="ec-userProfiles ec-configStack">
+    <div v-if="store.config.UserProfiles.length" class="featured-userProfiles featured-configStack">
       <article
         v-for="(profile, index) in store.config.UserProfiles"
         :key="profile.Id"
-        class="ec-userProfile ec-configCard ec-configCardPadded"
+        class="featured-userProfile featured-configCard featured-configCardPadded"
       >
-        <header class="ec-userProfileHeader ec-configCardHeader">
+        <header class="featured-userProfileHeader featured-configCardHeader">
           <button
             type="button"
-            class="ec-userProfileToggle ec-configCardToggle"
+            class="featured-userProfileToggle featured-configCardToggle"
             :aria-expanded="expandedProfileId === profile.Id"
             @click="expandedProfileId = expandedProfileId === profile.Id ? null : profile.Id"
           >
             <span>
-              <span class="ec-sourceRuleEyebrow ec-configEyebrow">{{ t('users.profile') }}</span>
+              <span class="featured-sourceRuleEyebrow featured-configEyebrow">{{ t('users.profile') }}</span>
               <strong>{{ userName(profile.UserId) }}</strong>
               <small>
                 {{ profile.Enabled ? t('source.statusActive') : t('source.statusInactive') }}
@@ -188,12 +191,14 @@ function addProfile(): void {
                 {{ t('users.summarySeries', { value: profile.InProgressSeriesBoost }) }}
               </small>
             </span>
-            <span class="material-icons ec-userProfileChevron ec-configChevron" aria-hidden="true">expand_more</span>
+            <span class="material-icons featured-userProfileChevron featured-configChevron" aria-hidden="true"
+              >expand_more</span
+            >
           </button>
-          <div class="ec-userProfileActions ec-configActions">
+          <div class="featured-userProfileActions featured-configActions">
             <button
               type="button"
-              class="paper-icon-button-light ec-ruleIconButton ec-removeRule"
+              class="paper-icon-button-light featured-ruleIconButton featured-removeRule"
               :title="t('users.removeProfile')"
               @click="store.removeUserProfile(index)"
             >
@@ -201,7 +206,7 @@ function addProfile(): void {
             </button>
           </div>
         </header>
-        <div v-show="expandedProfileId === profile.Id" class="ec-userProfileBody ec-configCardBody">
+        <div v-show="expandedProfileId === profile.Id" class="featured-userProfileBody featured-configCardBody">
           <ConfigCheckbox v-model="profile.Enabled" :label="t('users.enabled')" />
           <p class="jmp-subsectionHelp">{{ t('users.scoringHelp') }}</p>
           <ConfigMultiPicker
@@ -209,7 +214,7 @@ function addProfile(): void {
             :label="t('users.preferredGenres')"
             :options="genreOptions()"
           />
-          <div class="ec-scoreGrid jmp-compactGrid">
+          <div class="featured-scoreGrid jmp-compactGrid">
             <ConfigNumber
               v-model="profile.UnplayedBoost"
               :label="t('users.unplayedBoost')"
@@ -242,7 +247,7 @@ function addProfile(): void {
         </div>
       </article>
     </div>
-    <div v-else class="ec-emptySources">
+    <div v-else class="featured-emptySources">
       <span class="material-icons" aria-hidden="true">group</span>
       <h3>{{ t('users.emptyTitle') }}</h3>
       <p>{{ t('users.emptyHelp') }}</p>
@@ -251,64 +256,64 @@ function addProfile(): void {
 </template>
 
 <style scoped>
-.ec-userExplanation {
-  background: var(--ec-theme-action-focus);
-  border: 1px solid var(--ec-theme-primary);
-  border-radius: var(--ec-theme-radius);
+.featured-userExplanation {
+  background: var(--featured-theme-action-focus);
+  border: 1px solid var(--featured-theme-primary);
+  border-radius: var(--featured-theme-radius);
   margin-bottom: 1rem;
   padding: 0.75rem 0.85rem;
 }
-.ec-userExplanation strong {
+.featured-userExplanation strong {
   display: block;
   margin-bottom: 0.35rem;
 }
-.ec-userExplanation ol {
+.featured-userExplanation ol {
   display: grid;
   gap: 0.25rem;
   margin: 0;
   padding-left: 1.25rem;
 }
-.ec-userExplanation li {
+.featured-userExplanation li {
   line-height: 1.35;
   opacity: 0.85;
 }
-.ec-userProfileToggle > span:first-child {
+.featured-userProfileToggle > span:first-child {
   gap: 0.16rem;
 }
-.ec-userProfileToggle strong {
+.featured-userProfileToggle strong {
   font-size: 1.08rem;
 }
-.ec-userProfileToggle small {
+.featured-userProfileToggle small {
   display: flex;
   flex-wrap: wrap;
   font-size: 0.78rem;
   gap: 0.15rem;
   opacity: 0.68;
 }
-.ec-userProfileToggle[aria-expanded='true'] .ec-userProfileChevron {
+.featured-userProfileToggle[aria-expanded='true'] .featured-userProfileChevron {
   transform: rotate(180deg);
 }
-.ec-userProfileActions > :deep(.checkboxContainer) {
+.featured-userProfileActions > :deep(.checkboxContainer) {
   margin-bottom: 0;
 }
-.ec-userProfileBody > .jmp-subsectionHelp {
+.featured-userProfileBody > .jmp-subsectionHelp {
   margin-bottom: 0.75rem;
 }
-.ec-scoreGrid :deep(.inputContainer) {
+.featured-scoreGrid :deep(.inputContainer) {
   margin-bottom: 0;
 }
-.ec-policyGrid {
+.featured-policyGrid {
   display: grid;
   gap: 0.25rem 1rem;
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
-.ec-policyGrid :deep(.checkboxContainer) {
+.featured-policyGrid :deep(.checkboxContainer) {
   margin-bottom: 0.35rem;
 }
-.ec-disabledGroup {
+.featured-disabledGroup {
   opacity: 0.55;
 }
-.ec-userSettingsGrid {
+.featured-userSettingsGrid {
   display: grid;
   gap: 1.5rem;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -316,13 +321,13 @@ function addProfile(): void {
 }
 
 @media (max-width: 900px) {
-  .ec-userSettingsGrid {
+  .featured-userSettingsGrid {
     grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 600px) {
-  .ec-policyGrid {
+  .featured-policyGrid {
     grid-template-columns: 1fr;
   }
 }

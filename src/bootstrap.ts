@@ -29,24 +29,27 @@ function installStyles(): void {
 
 function createPlaceholder(settings: BootstrapSettings): HTMLElement {
   const placeholder = document.createElement('section');
-  placeholder.className = `ec-bootstrap-placeholder ec-bootstrap-height-${settings.heightMode}${settings.hero ? ' ec-bootstrap-hero' : ''}`;
+  placeholder.className = `featured-bootstrap-placeholder featured-bootstrap-height-${settings.heightMode}${settings.hero ? ' featured-bootstrap-hero' : ''}`;
   placeholder.setAttribute('aria-hidden', 'true');
-  placeholder.style.setProperty('--ec-height', getHeroHeightCssValue(settings.heightMode, settings.desktopHeight));
-  placeholder.style.setProperty('--ec-tablet-height', `${settings.tabletHeight}px`);
-  placeholder.style.setProperty('--ec-mobile-height', `${settings.mobileHeight}px`);
-  placeholder.style.setProperty('--ec-hero-overlap', `${settings.heroOverlap}px`);
-  if (!settings.hero) placeholder.style.setProperty('--ec-radius', `${settings.radius}px`);
-  placeholder.style.setProperty('--ec-media-padding', `${settings.mediaPadding}px`);
+  placeholder.style.setProperty(
+    '--featured-height',
+    getHeroHeightCssValue(settings.heightMode, settings.desktopHeight)
+  );
+  placeholder.style.setProperty('--featured-tablet-height', `${settings.tabletHeight}px`);
+  placeholder.style.setProperty('--featured-mobile-height', `${settings.mobileHeight}px`);
+  placeholder.style.setProperty('--featured-hero-overlap', `${settings.heroOverlap}px`);
+  if (!settings.hero) placeholder.style.setProperty('--featured-radius', `${settings.radius}px`);
+  placeholder.style.setProperty('--featured-media-padding', `${settings.mediaPadding}px`);
 
   if (settings.heading && !settings.hero) {
     const heading = document.createElement('h2');
-    heading.className = 'sectionTitle sectionTitle-cards ec-bootstrap-heading';
+    heading.className = 'sectionTitle sectionTitle-cards featured-bootstrap-heading';
     heading.textContent = settings.heading;
     placeholder.appendChild(heading);
   }
 
   const viewport = document.createElement('div');
-  viewport.className = 'ec-bootstrap-viewport';
+  viewport.className = 'featured-bootstrap-viewport';
   placeholder.appendChild(viewport);
   return placeholder;
 }
@@ -58,16 +61,18 @@ function startBootstrap(settings: BootstrapSettings): void {
   let scheduled = false;
   const scan = (): void => {
     scheduled = false;
-    document.querySelectorAll('.ec-bootstrap-placeholder').forEach((element) => {
+    document.querySelectorAll('.featured-bootstrap-placeholder').forEach((element) => {
       if (!element.parentElement?.matches(CONTAINER_SELECTOR)) element.remove();
     });
     document.querySelectorAll(CONTAINER_SELECTOR).forEach((container) => {
       const hiddenOnTv = settings.hideOnTv && document.documentElement.classList.contains('layout-tv');
-      const alreadyMounted = container.querySelector(':scope > .ec-root, :scope > .ec-bootstrap-placeholder');
+      const alreadyMounted = container.querySelector(
+        ':scope > .featured-root, :scope > .featured-bootstrap-placeholder'
+      );
       if (hiddenOnTv || alreadyMounted) return;
 
       container.prepend(createPlaceholder(settings));
-      container.closest('#homeTab')?.classList.toggle('ec-bootstrap-hero-page', settings.hero);
+      container.closest('#homeTab')?.classList.toggle('featured-bootstrap-hero-page', settings.hero);
     });
   };
   const schedule = (): void => {

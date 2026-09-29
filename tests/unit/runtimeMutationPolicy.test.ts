@@ -14,7 +14,7 @@ describe('runtime mutation policy', () => {
 
   it('recovers a disconnected tracked mount without treating plugin DOM as page navigation', () => {
     const pluginRoot = document.createElement('section');
-    pluginRoot.className = 'ec-root';
+    pluginRoot.className = 'featured-root';
     const pluginChild = document.createElement('div');
     pluginRoot.appendChild(pluginChild);
     const mutation = childListMutation(pluginRoot, [pluginChild]);

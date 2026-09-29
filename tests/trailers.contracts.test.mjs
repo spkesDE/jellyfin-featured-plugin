@@ -43,7 +43,7 @@ test('persisted trailer settings and serialized responses retain their public co
   assert.doesNotMatch(styles, /slider-vertical/);
   assert.match(
     styles,
-    /\.ec-volume-up \.ec-trailer-volume,[\s\S]*?direction:\s*rtl;[\s\S]*?writing-mode:\s*vertical-lr/
+    /\.featured-volume-up \.featured-trailer-volume,[\s\S]*?direction:\s*rtl;[\s\S]*?writing-mode:\s*vertical-lr/
   );
 });
 

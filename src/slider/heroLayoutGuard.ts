@@ -81,11 +81,11 @@ export class HeroLayoutGuard {
 
     const contentBottom = Math.max(...visibleChildren.map((child) => child.getBoundingClientRect().bottom));
     const sectionTop = section.getBoundingClientRect().top;
-    const current = Number.parseFloat(this.root.style.getPropertyValue('--ec-content-clearance')) || 0;
+    const current = Number.parseFloat(this.root.style.getPropertyValue('--featured-content-clearance')) || 0;
     const clearance = calculateHeroClearance(current, contentBottom, sectionTop);
     if (Math.abs(clearance - current) < 1) return;
-    if (clearance) this.root.style.setProperty('--ec-content-clearance', `${clearance}px`);
-    else this.root.style.removeProperty('--ec-content-clearance');
+    if (clearance) this.root.style.setProperty('--featured-content-clearance', `${clearance}px`);
+    else this.root.style.removeProperty('--featured-content-clearance');
     if (this.verificationPasses < 2) {
       this.verificationPasses += 1;
       this.queueUpdate();

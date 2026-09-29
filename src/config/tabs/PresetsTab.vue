@@ -88,36 +88,36 @@ function syncExpandedPreset(event: Event, presetId: string): void {
     aria-labelledby="featuredTab-presets"
   >
     <ConfigCard :title="t('preset.title')" :help="t('preset.help')">
-      <div class="ec-presetIntro">
+      <div class="featured-presetIntro">
         <div>
           <strong>{{ t('preset.defaultTitle') }}</strong>
           <p>{{ t('preset.defaultHelp') }}</p>
         </div>
-        <button type="button" class="raised button-submit emby-button ec-primaryAction" @click="addPreset">
+        <button type="button" class="raised button-submit emby-button featured-primaryAction" @click="addPreset">
           <span class="material-icons" aria-hidden="true">add</span>
           {{ t('preset.add') }}
         </button>
       </div>
     </ConfigCard>
 
-    <div v-if="store.config.Presets.length" class="ec-presetList">
+    <div v-if="store.config.Presets.length" class="featured-presetList">
       <details
         v-for="(preset, index) in store.config.Presets"
         :key="preset.Id"
-        class="ec-presetCard ec-configCard"
+        class="featured-presetCard featured-configCard"
         :open="expandedPresetId === preset.Id"
         @toggle="syncExpandedPreset($event, preset.Id)"
       >
-        <summary class="ec-presetCardSummary">
-          <span class="ec-presetCardCopy">
-            <span class="ec-presetTitleRow">
+        <summary class="featured-presetCardSummary">
+          <span class="featured-presetCardCopy">
+            <span class="featured-presetTitleRow">
               <strong>{{ preset.Name || t('preset.defaultName') }}</strong>
               <span class="jmp-badge" :class="{ 'jmp-badge-muted': scheduleState(preset) !== 'active' }">{{
                 stateLabel(preset)
               }}</span>
             </span>
             <small>{{ t('preset.summaryPriority', { value: preset.Priority }) }} · {{ scheduleSummary(preset) }}</small>
-            <span class="ec-presetSummary" :aria-label="t('preset.snapshotSummary')">
+            <span class="featured-presetSummary" :aria-label="t('preset.snapshotSummary')">
               <span>{{ t('preset.sourcesSummary', { count: preset.SourceRules.length }) }}</span>
               <span>{{ t('preset.filtersSummary', { count: preset.GlobalFilters.length }) }}</span>
               <span>{{
@@ -129,10 +129,12 @@ function syncExpandedPreset(event: Event, presetId: string): void {
               }}</span>
             </span>
           </span>
-          <span class="material-icons ec-presetChevron ec-configChevron" aria-hidden="true">expand_more</span>
+          <span class="material-icons featured-presetChevron featured-configChevron" aria-hidden="true"
+            >expand_more</span
+          >
         </summary>
-        <div class="ec-presetCardBody">
-          <div class="ec-presetGrid">
+        <div class="featured-presetCardBody">
+          <div class="featured-presetGrid">
             <ConfigText v-model="preset.Name" :label="t('preset.name')" />
             <ConfigNumber
               v-model="preset.Priority"
@@ -148,15 +150,15 @@ function syncExpandedPreset(event: Event, presetId: string): void {
               :options="scheduleTypeOptions"
             />
           </div>
-          <div v-if="preset.ScheduleType === 'one_time'" class="ec-presetScheduleGrid">
+          <div v-if="preset.ScheduleType === 'one_time'" class="featured-presetScheduleGrid">
             <ConfigDateTime v-model="preset.StartsAt" :label="t('preset.startsAt')" />
             <ConfigDateTime v-model="preset.EndsAt" :label="t('preset.endsAt')" />
           </div>
-          <div v-else class="ec-recurringSchedule">
+          <div v-else class="featured-recurringSchedule">
             <ConfigText v-model="preset.TimeZoneId" :label="t('preset.timeZone')" :placeholder="'Europe/Berlin'" />
-            <div v-if="preset.ScheduleType === 'weekly'" class="ec-weekdayField">
+            <div v-if="preset.ScheduleType === 'weekly'" class="featured-weekdayField">
               <span>{{ t('preset.days') }}</span>
-              <div class="ec-weekdays">
+              <div class="featured-weekdays">
                 <button
                   v-for="day in weekdays"
                   :key="day.value"
@@ -181,14 +183,16 @@ function syncExpandedPreset(event: Event, presetId: string): void {
               <input v-model="preset.EndTime" class="emby-input" type="time" />
             </label>
           </div>
-          <p v-if="preset.ScheduleType !== 'one_time'" class="ec-presetTimezoneHelp">{{ t('preset.timeZoneHelp') }}</p>
+          <p v-if="preset.ScheduleType !== 'one_time'" class="featured-presetTimezoneHelp">
+            {{ t('preset.timeZoneHelp') }}
+          </p>
           <ConfigCheckbox v-model="preset.Enabled" :label="t('preset.enabled')" :help-text="t('preset.enabledHelp')" />
 
-          <p class="ec-presetSnapshotHelp">{{ t('preset.snapshotHelp') }}</p>
-          <div class="ec-presetActions">
+          <p class="featured-presetSnapshotHelp">{{ t('preset.snapshotHelp') }}</p>
+          <div class="featured-presetActions">
             <button
               type="button"
-              class="raised emby-button ec-secondaryAction"
+              class="raised emby-button featured-secondaryAction"
               @click="store.openFeedPreview(preset.Id)"
             >
               <span class="material-icons" aria-hidden="true">preview</span>
@@ -196,7 +200,7 @@ function syncExpandedPreset(event: Event, presetId: string): void {
             </button>
             <button
               type="button"
-              class="raised emby-button ec-secondaryAction"
+              class="raised emby-button featured-secondaryAction"
               @click="store.updatePresetSnapshot(index)"
             >
               <span class="material-icons" aria-hidden="true">sync</span>
@@ -204,7 +208,7 @@ function syncExpandedPreset(event: Event, presetId: string): void {
             </button>
             <button
               type="button"
-              class="raised emby-button ec-secondaryAction"
+              class="raised emby-button featured-secondaryAction"
               @click="
                 store.duplicatePreset(index);
                 expandDuplicatedPreset(index);
@@ -215,7 +219,7 @@ function syncExpandedPreset(event: Event, presetId: string): void {
             </button>
             <button
               type="button"
-              class="raised emby-button ec-secondaryAction ec-presetRemove"
+              class="raised emby-button featured-secondaryAction featured-presetRemove"
               @click="store.removePreset(index)"
             >
               <span class="material-icons" aria-hidden="true">delete</span>
@@ -226,7 +230,7 @@ function syncExpandedPreset(event: Event, presetId: string): void {
       </details>
     </div>
 
-    <div v-else class="ec-emptySources">
+    <div v-else class="featured-emptySources">
       <span class="material-icons" aria-hidden="true">event</span>
       <h3>{{ t('preset.emptyTitle') }}</h3>
       <p>{{ t('preset.emptyHelp') }}</p>
@@ -235,24 +239,24 @@ function syncExpandedPreset(event: Event, presetId: string): void {
 </template>
 
 <style scoped>
-.ec-presetIntro {
+.featured-presetIntro {
   align-items: center;
   display: flex;
   gap: 1rem;
   justify-content: space-between;
 }
-.ec-presetIntro p {
+.featured-presetIntro p {
   margin: 0.25rem 0 0;
   opacity: 0.75;
 }
-.ec-presetList {
+.featured-presetList {
   display: grid;
   gap: 1rem;
 }
-.ec-presetCard {
+.featured-presetCard {
   overflow: hidden;
 }
-.ec-presetCardSummary {
+.featured-presetCardSummary {
   align-items: center;
   cursor: pointer;
   display: grid;
@@ -261,123 +265,123 @@ function syncExpandedPreset(event: Event, presetId: string): void {
   list-style: none;
   padding: 1rem;
 }
-.ec-presetCardSummary::-webkit-details-marker {
+.featured-presetCardSummary::-webkit-details-marker {
   display: none;
 }
-.ec-presetCardCopy {
+.featured-presetCardCopy {
   display: grid;
   gap: 0.35rem;
   min-width: 0;
 }
-.ec-presetTitleRow {
+.featured-presetTitleRow {
   align-items: center;
   display: flex;
   flex-wrap: wrap;
   gap: 0.55rem;
 }
-.ec-presetTitleRow strong {
+.featured-presetTitleRow strong {
   font-size: 1.08rem;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.ec-presetCardCopy > small {
+.featured-presetCardCopy > small {
   opacity: 0.68;
   overflow-wrap: anywhere;
 }
-.ec-presetCard[open] .ec-presetChevron {
+.featured-presetCard[open] .featured-presetChevron {
   transform: rotate(180deg);
 }
-.ec-presetCardBody {
-  border-top: 1px solid var(--ec-theme-divider);
+.featured-presetCardBody {
+  border-top: 1px solid var(--featured-theme-divider);
   padding: 1rem;
 }
-.ec-presetGrid {
+.featured-presetGrid {
   display: grid;
   gap: 1rem;
   grid-template-columns: 2fr 1fr 1.5fr;
 }
-.ec-presetScheduleGrid {
+.featured-presetScheduleGrid {
   display: grid;
   gap: 1rem;
   grid-template-columns: 1fr 1fr;
 }
-.ec-recurringSchedule {
+.featured-recurringSchedule {
   display: grid;
   gap: 1rem;
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
-.ec-weekdayField {
+.featured-weekdayField {
   grid-column: span 3;
 }
-.ec-weekdayField > span {
+.featured-weekdayField > span {
   display: block;
   margin-bottom: 0.4rem;
 }
-.ec-weekdays {
+.featured-weekdays {
   display: flex;
   flex-wrap: wrap;
   gap: 0.4rem;
 }
-.ec-weekdays button {
-  background: var(--ec-theme-action-hover);
-  border: 1px solid var(--ec-theme-divider);
+.featured-weekdays button {
+  background: var(--featured-theme-action-hover);
+  border: 1px solid var(--featured-theme-divider);
   border-radius: 999px;
   color: inherit;
   cursor: pointer;
   padding: 0.45rem 0.7rem;
 }
-.ec-weekdays button.is-selected {
-  background: var(--ec-theme-primary);
-  border-color: var(--ec-theme-primary);
-  color: var(--ec-theme-primary-contrast);
+.featured-weekdays button.is-selected {
+  background: var(--featured-theme-primary);
+  border-color: var(--featured-theme-primary);
+  color: var(--featured-theme-primary-contrast);
 }
-.ec-presetTimezoneHelp {
+.featured-presetTimezoneHelp {
   margin: -0.35rem 0 0.75rem;
   opacity: 0.7;
 }
-.ec-presetSummary {
+.featured-presetSummary {
   display: flex;
   flex-wrap: wrap;
   gap: 0.4rem;
 }
-.ec-presetSummary span {
-  background: var(--ec-theme-action-hover);
+.featured-presetSummary span {
+  background: var(--featured-theme-action-hover);
   border-radius: 999px;
   padding: 0.35rem 0.65rem;
 }
-.ec-presetSnapshotHelp {
+.featured-presetSnapshotHelp {
   margin: 0.25rem 0 0.75rem;
   opacity: 0.7;
 }
-.ec-presetActions {
+.featured-presetActions {
   display: flex;
   flex-wrap: wrap;
   gap: 0.65rem;
 }
-.ec-presetRemove {
-  color: var(--ec-theme-error-light);
+.featured-presetRemove {
+  color: var(--featured-theme-error-light);
 }
 @media (max-width: 900px) {
-  .ec-presetGrid,
-  .ec-recurringSchedule {
+  .featured-presetGrid,
+  .featured-recurringSchedule {
     grid-template-columns: 1fr 1fr;
   }
-  .ec-weekdayField {
+  .featured-weekdayField {
     grid-column: span 2;
   }
 }
 @media (max-width: 600px) {
-  .ec-presetIntro {
+  .featured-presetIntro {
     align-items: stretch;
     flex-direction: column;
   }
-  .ec-presetGrid,
-  .ec-presetScheduleGrid,
-  .ec-recurringSchedule {
+  .featured-presetGrid,
+  .featured-presetScheduleGrid,
+  .featured-recurringSchedule {
     grid-template-columns: 1fr;
   }
-  .ec-weekdayField {
+  .featured-weekdayField {
     grid-column: auto;
   }
 }

@@ -43,21 +43,21 @@ const sourceOptions: SelectOption[] = [
       <template #actions>
         <button
           type="button"
-          class="raised emby-button ec-secondaryAction ec-feedPreviewAction"
+          class="raised emby-button featured-secondaryAction featured-feedPreviewAction"
           @click="store.openFeedPreview()"
         >
           <span class="material-icons" aria-hidden="true">preview</span>
           {{ t('feedPreview.open') }}
         </button>
       </template>
-      <div class="ec-addSourceRow ec-configAddRow">
+      <div class="featured-addSourceRow featured-configAddRow">
         <ConfigSelect
           v-model="selectedType"
           :label="t('source.newType')"
           :help-text="t('source.orderHelp')"
           :options="sourceOptions"
         />
-        <button type="button" class="raised button-submit emby-button ec-addSourceButton" @click="addSource">
+        <button type="button" class="raised button-submit emby-button featured-addSourceButton" @click="addSource">
           <span class="material-icons" aria-hidden="true">add</span>
           {{ t('source.add') }}
         </button>
@@ -69,11 +69,11 @@ const sourceOptions: SelectOption[] = [
       v-model="store.config.SourceRules"
       item-key="Id"
       tag="div"
-      class="ec-sourceRules ec-configStack"
-      handle=".ec-sourceDragHandle"
-      ghost-class="ec-sourceDragGhost"
-      chosen-class="ec-sourceDragChosen"
-      drag-class="ec-sourceDragging"
+      class="featured-sourceRules featured-configStack"
+      handle=".featured-sourceDragHandle"
+      ghost-class="featured-sourceDragGhost"
+      chosen-class="featured-sourceDragChosen"
+      drag-class="featured-sourceDragging"
       :force-fallback="true"
       :fallback-tolerance="3"
       :animation="160"
@@ -88,7 +88,7 @@ const sourceOptions: SelectOption[] = [
         />
       </template>
     </Draggable>
-    <div v-else class="ec-emptySources">
+    <div v-else class="featured-emptySources">
       <span class="material-icons" aria-hidden="true">view_carousel</span>
       <h3>{{ t('source.emptyTitle') }}</h3>
       <p>{{ t('source.emptyHelp') }}</p>
@@ -97,22 +97,22 @@ const sourceOptions: SelectOption[] = [
 </template>
 
 <style scoped>
-.ec-sourceDragGhost,
-.ec-sourceDragChosen:not(.ec-sourceDragging) {
+.featured-sourceDragGhost,
+.featured-sourceDragChosen:not(.featured-sourceDragging) {
   opacity: 0.2;
 }
-.ec-sourceDragging {
-  border-color: var(--ec-theme-primary);
+.featured-sourceDragging {
+  border-color: var(--featured-theme-primary);
   box-shadow: 0 0.8rem 2rem rgba(0, 0, 0, 0.4);
 }
-.ec-feedPreviewAction {
+.featured-feedPreviewAction {
   min-height: 2.35rem;
   padding: 0.45rem 0.75rem;
   white-space: nowrap;
 }
 
 @media (max-width: 600px) {
-  .ec-feedPreviewAction {
+  .featured-feedPreviewAction {
     width: 100%;
   }
 }

@@ -176,15 +176,15 @@ function stopDrag(event: PointerEvent): void {
 </script>
 
 <template>
-  <section class="ec-fadeEditor" :aria-label="t('display.fadeEditor')">
-    <div class="ec-fadeEditorHeader ec-configSplitHeader">
+  <section class="featured-fadeEditor" :aria-label="t('display.fadeEditor')">
+    <div class="featured-fadeEditorHeader featured-configSplitHeader">
       <div>
         <strong>{{ t('display.fadeEditor') }}</strong>
         <small>{{ t('display.fadeEditorHelp') }}</small>
       </div>
     </div>
 
-    <div class="ec-fadeGraph" @selectstart.prevent @dragstart.prevent>
+    <div class="featured-fadeGraph" @selectstart.prevent @dragstart.prevent>
       <svg
         ref="graph"
         :viewBox="`0 0 ${width} ${height}`"
@@ -194,7 +194,7 @@ function stopDrag(event: PointerEvent): void {
         @pointerup="stopDrag"
         @pointercancel="stopDrag"
       >
-        <g class="ec-fadeGrid">
+        <g class="featured-fadeGrid">
           <template v-for="value in gridValues" :key="`grid-${value}`">
             <line :x1="x(0)" :x2="x(100)" :y1="yEffective(value)" :y2="yEffective(value)" />
             <text :x="inset.left - 8" :y="yEffective(value) + 4" text-anchor="end">{{ value }}</text>
@@ -203,31 +203,49 @@ function stopDrag(event: PointerEvent): void {
           </template>
         </g>
         <g
-          class="ec-fadeBoundaryTarget"
+          class="featured-fadeBoundaryTarget"
           role="button"
           tabindex="0"
           :aria-label="t('display.fadeStart')"
           @pointerdown="startBoundaryDrag('start', $event)"
         >
-          <line class="ec-fadeBoundaryHit" :x1="x(start)" :x2="x(start)" :y1="inset.top" :y2="height - inset.bottom" />
-          <line class="ec-fadeBoundary" :x1="x(start)" :x2="x(start)" :y1="inset.top" :y2="height - inset.bottom" />
+          <line
+            class="featured-fadeBoundaryHit"
+            :x1="x(start)"
+            :x2="x(start)"
+            :y1="inset.top"
+            :y2="height - inset.bottom"
+          />
+          <line
+            class="featured-fadeBoundary"
+            :x1="x(start)"
+            :x2="x(start)"
+            :y1="inset.top"
+            :y2="height - inset.bottom"
+          />
         </g>
         <g
-          class="ec-fadeBoundaryTarget"
+          class="featured-fadeBoundaryTarget"
           role="button"
           tabindex="0"
           :aria-label="t('display.fadeEnd')"
           @pointerdown="startBoundaryDrag('end', $event)"
         >
-          <line class="ec-fadeBoundaryHit" :x1="x(end)" :x2="x(end)" :y1="inset.top" :y2="height - inset.bottom" />
-          <line class="ec-fadeBoundary" :x1="x(end)" :x2="x(end)" :y1="inset.top" :y2="height - inset.bottom" />
+          <line
+            class="featured-fadeBoundaryHit"
+            :x1="x(end)"
+            :x2="x(end)"
+            :y1="inset.top"
+            :y2="height - inset.bottom"
+          />
+          <line class="featured-fadeBoundary" :x1="x(end)" :x2="x(end)" :y1="inset.top" :y2="height - inset.bottom" />
         </g>
-        <path class="ec-fadeArea" :d="areaPath" />
-        <path class="ec-fadeLine" :d="path" />
+        <path class="featured-fadeArea" :d="areaPath" />
+        <path class="featured-fadeLine" :d="path" />
         <g
           v-for="(point, index) in graphPoints"
           :key="`${index}-${point.Position}`"
-          class="ec-fadePointTarget"
+          class="featured-fadePointTarget"
           role="button"
           tabindex="0"
           :aria-label="
@@ -240,9 +258,9 @@ function stopDrag(event: PointerEvent): void {
           @keydown.enter.prevent="selectedIndex = index"
           @keydown.space.prevent="selectedIndex = index"
         >
-          <circle class="ec-fadePointHit" :cx="x(point.ActualPosition)" :cy="y(point.Fade)" r="14" />
+          <circle class="featured-fadePointHit" :cx="x(point.ActualPosition)" :cy="y(point.Fade)" r="14" />
           <circle
-            class="ec-fadePoint"
+            class="featured-fadePoint"
             :class="{ 'is-selected': index === selectedIndex }"
             :cx="x(point.ActualPosition)"
             :cy="y(point.Fade)"
@@ -250,13 +268,13 @@ function stopDrag(event: PointerEvent): void {
           />
         </g>
       </svg>
-      <div class="ec-fadeAxisLabels" aria-hidden="true">
+      <div class="featured-fadeAxisLabels" aria-hidden="true">
         <span>{{ t('display.fadeAmount') }} (%)</span>
         <span>{{ t('display.fadePosition') }} (%)</span>
       </div>
     </div>
 
-    <div class="ec-fadePointControls">
+    <div class="featured-fadePointControls">
       <label class="inputContainer">
         <span class="inputLabel">{{ t('display.fadePointPosition') }} (%)</span>
         <input
@@ -285,7 +303,7 @@ function stopDrag(event: PointerEvent): void {
       </label>
       <button
         type="button"
-        class="raised emby-button ec-fadePointAction"
+        class="raised emby-button featured-fadePointAction"
         :aria-label="t('display.fadeAddPoint')"
         :title="t('display.fadeAddPoint')"
         :disabled="basePoints.length >= 12"
@@ -295,7 +313,7 @@ function stopDrag(event: PointerEvent): void {
       </button>
       <button
         type="button"
-        class="raised emby-button ec-fadePointAction"
+        class="raised emby-button featured-fadePointAction"
         :aria-label="t('display.fadeRemovePoint')"
         :title="t('display.fadeRemovePoint')"
         :disabled="!canRemove"
@@ -308,110 +326,110 @@ function stopDrag(event: PointerEvent): void {
 </template>
 
 <style scoped>
-.ec-fadeEditor {
-  background: var(--ec-theme-paper);
-  border: 1px solid var(--ec-theme-divider);
-  border-radius: var(--ec-theme-radius);
+.featured-fadeEditor {
+  background: var(--featured-theme-paper);
+  border: 1px solid var(--featured-theme-divider);
+  border-radius: var(--featured-theme-radius);
   display: grid;
   gap: 0.7rem;
   margin-bottom: 1rem;
   padding: 0.85rem;
 }
-.ec-fadeEditorHeader > div {
+.featured-fadeEditorHeader > div {
   display: grid;
   gap: 0.2rem;
 }
-.ec-fadeEditorHeader strong {
+.featured-fadeEditorHeader strong {
   font-weight: 500;
 }
-.ec-fadeEditorHeader small {
-  color: var(--ec-theme-text-secondary);
+.featured-fadeEditorHeader small {
+  color: var(--featured-theme-text-secondary);
   line-height: 1.35;
 }
-.ec-fadeGraph {
+.featured-fadeGraph {
   min-width: 0;
   position: relative;
 }
-.ec-fadeGraph,
-.ec-fadeGraph * {
+.featured-fadeGraph,
+.featured-fadeGraph * {
   -webkit-user-select: none;
   user-select: none;
 }
-.ec-fadeGraph svg {
+.featured-fadeGraph svg {
   display: block;
   touch-action: none;
   width: 100%;
 }
-.ec-fadeGrid {
+.featured-fadeGrid {
   pointer-events: none;
 }
-.ec-fadeGrid line {
-  stroke: var(--ec-theme-divider);
+.featured-fadeGrid line {
+  stroke: var(--featured-theme-divider);
   stroke-width: 1;
 }
-.ec-fadeGrid text {
-  fill: var(--ec-theme-text-secondary);
+.featured-fadeGrid text {
+  fill: var(--featured-theme-text-secondary);
   font-size: 10px;
 }
-.ec-fadeBoundaryTarget {
+.featured-fadeBoundaryTarget {
   cursor: ew-resize;
 }
-.ec-fadeBoundaryHit {
+.featured-fadeBoundaryHit {
   stroke: transparent;
   stroke-width: 18;
 }
-.ec-fadeBoundary {
-  stroke: var(--ec-theme-text-secondary);
+.featured-fadeBoundary {
+  stroke: var(--featured-theme-text-secondary);
   stroke-dasharray: 4 4;
   stroke-width: 1;
 }
-.ec-fadeArea {
+.featured-fadeArea {
   fill: rgba(0, 164, 220, 0.16);
-  fill: color-mix(in srgb, var(--ec-theme-primary) 18%, transparent);
+  fill: color-mix(in srgb, var(--featured-theme-primary) 18%, transparent);
   pointer-events: none;
 }
-.ec-fadeLine {
+.featured-fadeLine {
   fill: none;
   pointer-events: none;
-  stroke: var(--ec-theme-primary);
+  stroke: var(--featured-theme-primary);
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke-width: 2.25;
 }
-.ec-fadePointTarget {
+.featured-fadePointTarget {
   cursor: grab;
 }
-.ec-fadePointTarget:active {
+.featured-fadePointTarget:active {
   cursor: grabbing;
 }
-.ec-fadePointHit {
+.featured-fadePointHit {
   fill: transparent;
 }
-.ec-fadePoint {
-  fill: var(--ec-theme-paper);
-  stroke: var(--ec-theme-primary);
+.featured-fadePoint {
+  fill: var(--featured-theme-paper);
+  stroke: var(--featured-theme-primary);
   stroke-width: 2.25;
 }
-.ec-fadePoint.is-selected {
-  fill: var(--ec-theme-primary);
+.featured-fadePoint.is-selected {
+  fill: var(--featured-theme-primary);
 }
-.ec-fadeAxisLabels {
-  color: var(--ec-theme-text-secondary);
+.featured-fadeAxisLabels {
+  color: var(--featured-theme-text-secondary);
   display: flex;
   font-size: 0.72rem;
   justify-content: space-between;
   padding: 0 0.25rem 0 2.65rem;
 }
-.ec-fadePointControls {
+.featured-fadePointControls {
   align-items: end;
   display: grid;
   gap: 0.7rem;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto auto;
 }
-.ec-fadePointControls .inputContainer {
+.featured-fadePointControls .inputContainer {
   margin-bottom: 0;
 }
-.ec-fadePointAction {
+.featured-fadePointAction {
   align-items: center;
   display: inline-flex;
   font-size: 1.35rem;
@@ -424,7 +442,7 @@ function stopDrag(event: PointerEvent): void {
   width: 2.5rem;
 }
 @media (max-width: 650px) {
-  .ec-fadePointControls {
+  .featured-fadePointControls {
     gap: 0.45rem;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto auto;
   }

@@ -22,7 +22,7 @@ const focused = ref(false);
 
 <template>
   <div class="selectContainer">
-    <div class="ec-selectLabelRow ec-configLabelRow">
+    <div class="featured-selectLabelRow featured-configLabelRow">
       <label class="selectLabel" :class="{ selectLabelFocused: focused }" :for="fieldId">
         {{ label }}
       </label>

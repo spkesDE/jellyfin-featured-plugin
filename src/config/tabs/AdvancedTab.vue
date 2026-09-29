@@ -96,29 +96,29 @@ function runDiagnostics(): void {
           :help-text="t('advanced.preparedCacheHelp')"
         />
       </ConfigCard>
-      <details class="ec-diagnostics-section" :open="diagnosticsOpen" @toggle="syncDiagnosticsOpen">
-        <summary class="ec-advancedSummary">
+      <details class="featured-diagnostics-section" :open="diagnosticsOpen" @toggle="syncDiagnosticsOpen">
+        <summary class="featured-advancedSummary">
           <span class="material-icons" aria-hidden="true">troubleshoot</span>
           <span
             ><strong>{{ t('advanced.diagnostics') }}</strong
             ><small>{{ t('advanced.diagnosticsHelp') }}</small></span
           >
-          <span class="material-icons ec-advancedChevron" aria-hidden="true">expand_more</span>
+          <span class="material-icons featured-advancedChevron" aria-hidden="true">expand_more</span>
         </summary>
-        <div class="ec-diagnosticsBody">
+        <div class="featured-diagnosticsBody">
           <ConfigCheckbox v-model="store.config.Debug" :label="t('advanced.debug')" />
           <button
             type="button"
-            class="raised emby-button ec-diagnosticsButton"
+            class="raised emby-button featured-diagnosticsButton"
             :disabled="store.diagnosticsLoading.value"
             @click="runDiagnostics"
           >
             {{ store.diagnosticsLoading.value ? t('advanced.testingHero') : t('advanced.testHero') }}
           </button>
-          <p v-if="store.diagnosticsError.value" class="ec-diagnosticsError" role="alert">
+          <p v-if="store.diagnosticsError.value" class="featured-diagnosticsError" role="alert">
             {{ t('advanced.diagnosticsFailed', { error: store.diagnosticsError.value }) }}
           </p>
-          <dl v-if="store.diagnostics.value" class="ec-diagnosticsResults" aria-live="polite">
+          <dl v-if="store.diagnostics.value" class="featured-diagnosticsResults" aria-live="polite">
             <div>
               <dt>{{ t('advanced.frontendStatus') }}</dt>
               <dd>
@@ -179,9 +179,9 @@ function runDiagnostics(): void {
               <dd>{{ store.diagnostics.value.cache }}</dd>
             </div>
           </dl>
-          <div v-if="store.diagnostics.value?.rules?.length" class="ec-ruleDiagnostics">
+          <div v-if="store.diagnostics.value?.rules?.length" class="featured-ruleDiagnostics">
             <h3>{{ t('advanced.ruleBreakdown') }}</h3>
-            <div class="ec-ruleDiagnosticsScroll">
+            <div class="featured-ruleDiagnosticsScroll">
               <table>
                 <thead>
                   <tr>
@@ -217,7 +217,7 @@ function runDiagnostics(): void {
         </div>
       </details>
 
-      <footer class="ec-advancedCredits">
+      <footer class="featured-advancedCredits">
         <span>{{ t('advanced.creditsHelp') }}</span>
         <a
           href="https://github.com/lachlandcp/jellyfin-editors-choice-plugin"
@@ -232,14 +232,14 @@ function runDiagnostics(): void {
 </template>
 
 <style scoped>
-.ec-diagnostics-section {
-  background: var(--ec-config-card-background);
-  border: 1px solid var(--ec-theme-divider);
+.featured-diagnostics-section {
+  background: var(--featured-config-card-background);
+  border: 1px solid var(--featured-theme-divider);
   border-radius: 0.9rem;
   grid-column: 1 / -1;
   overflow: hidden;
 }
-.ec-advancedSummary {
+.featured-advancedSummary {
   align-items: center;
   cursor: pointer;
   display: grid;
@@ -248,29 +248,29 @@ function runDiagnostics(): void {
   list-style: none;
   padding: 0.9rem 1rem;
 }
-.ec-advancedSummary::-webkit-details-marker {
+.featured-advancedSummary::-webkit-details-marker {
   display: none;
 }
-.ec-advancedSummary > span:nth-child(2) {
+.featured-advancedSummary > span:nth-child(2) {
   display: grid;
   gap: 0.1rem;
 }
-.ec-advancedSummary small {
+.featured-advancedSummary small {
   font-size: 0.78rem;
   font-weight: 400;
   opacity: 0.65;
 }
-.ec-advancedChevron {
+.featured-advancedChevron {
   transition: transform 0.16s ease;
 }
-.ec-diagnostics-section[open] .ec-advancedChevron {
+.featured-diagnostics-section[open] .featured-advancedChevron {
   transform: rotate(180deg);
 }
-.ec-diagnosticsBody {
-  border-top: 1px solid var(--ec-theme-divider);
+.featured-diagnosticsBody {
+  border-top: 1px solid var(--featured-theme-divider);
   padding: 1rem;
 }
-.ec-advancedCredits {
+.featured-advancedCredits {
   display: flex;
   flex-wrap: wrap;
   font-size: 0.8rem;
@@ -281,7 +281,7 @@ function runDiagnostics(): void {
   padding: 0.35rem 1rem 0;
   text-align: center;
 }
-.ec-advancedCredits a {
+.featured-advancedCredits a {
   color: inherit;
 }
 </style>

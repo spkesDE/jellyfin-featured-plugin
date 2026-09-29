@@ -12,7 +12,7 @@ describe('PreferencesDialogShell', () => {
 
     const form = document.createElement('form');
     const close = document.createElement('button');
-    close.className = 'ec-preferences-close';
+    close.className = 'featured-preferences-close';
     form.appendChild(close);
     shell.replaceContent(form);
     close.click();

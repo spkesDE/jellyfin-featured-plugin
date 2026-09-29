@@ -1,22 +1,22 @@
-#FeaturedConfigPage .ec-configPreviewItem {
+#FeaturedConfigPage .featured-configPreviewItem {
   margin: 0 auto;
   max-width: 64rem;
   width: 100%;
 }
 
-#FeaturedConfigPage .ec-jellyfinMock {
-  background: var(--ec-theme-background);
-  border: 1px solid var(--ec-theme-divider);
-  border-radius: var(--ec-theme-radius);
+#FeaturedConfigPage .featured-jellyfinMock {
+  background: var(--featured-theme-background);
+  border: 1px solid var(--featured-theme-divider);
+  border-radius: var(--featured-theme-radius);
   box-shadow: 0 1rem 2.8rem rgba(0, 0, 0, 0.32);
-  color: var(--ec-theme-text-primary);
+  color: var(--featured-theme-text-primary);
   container-type: inline-size;
   overflow: hidden;
   position: relative;
   width: 100%;
 }
 
-#FeaturedConfigPage .ec-jellyfinMockHeader {
+#FeaturedConfigPage .featured-jellyfinMockHeader {
   align-items: center;
   background: linear-gradient(180deg, rgba(7, 12, 22, 0.88), rgba(7, 12, 22, 0.54) 58%, transparent);
   box-sizing: border-box;
@@ -32,31 +32,31 @@
   z-index: 8;
 }
 
-#FeaturedConfigPage .ec-mockIcon {
+#FeaturedConfigPage .featured-mockIcon {
   font-size: 0.88rem;
   opacity: 0.82;
 }
 
-#FeaturedConfigPage .ec-jellyfinMockBrand {
+#FeaturedConfigPage .featured-jellyfinMockBrand {
   align-items: center;
   display: flex;
   gap: 0.38rem;
   min-width: 0;
 }
 
-#FeaturedConfigPage .ec-jellyfinMockBrandLogo {
+#FeaturedConfigPage .featured-jellyfinMockBrandLogo {
   display: block;
   flex: 0 0 auto;
   height: 1.55rem;
   width: 1.55rem;
 }
 
-#FeaturedConfigPage .ec-jellyfinMockHeader strong {
+#FeaturedConfigPage .featured-jellyfinMockHeader strong {
   color: #fff;
   font-size: 0.82rem;
 }
 
-#FeaturedConfigPage .ec-jellyfinMockNav {
+#FeaturedConfigPage .featured-jellyfinMockNav {
   align-items: center;
   display: flex;
   font-size: 0.59rem;
@@ -64,7 +64,7 @@
   min-width: 0;
 }
 
-#FeaturedConfigPage .ec-jellyfinMockNav > span {
+#FeaturedConfigPage .featured-jellyfinMockNav > span {
   align-items: center;
   border-radius: 999px;
   display: flex;
@@ -73,22 +73,22 @@
   white-space: nowrap;
 }
 
-#FeaturedConfigPage .ec-jellyfinMockNav > span.is-active {
+#FeaturedConfigPage .featured-jellyfinMockNav > span.is-active {
   background: rgba(18, 28, 46, 0.88);
 }
 
-#FeaturedConfigPage .ec-jellyfinMockNav .material-icons {
+#FeaturedConfigPage .featured-jellyfinMockNav .material-icons {
   font-size: 0.72rem;
 }
 
-#FeaturedConfigPage .ec-jellyfinMockHeaderActions {
+#FeaturedConfigPage .featured-jellyfinMockHeaderActions {
   align-items: center;
   display: flex;
   gap: 0.55rem;
   margin-left: auto;
 }
 
-#FeaturedConfigPage .ec-jellyfinMockAvatar {
+#FeaturedConfigPage .featured-jellyfinMockAvatar {
   align-items: center;
   background: linear-gradient(135deg, #8a4eb4, #00a4dc);
   border: 1px solid rgba(255, 255, 255, 0.72);
@@ -101,21 +101,21 @@
   width: 1.35rem;
 }
 
-#FeaturedConfigPage .ec-jellyfinMockPage {
-  background: var(--ec-theme-background);
+#FeaturedConfigPage .featured-jellyfinMockPage {
+  background: var(--featured-theme-background);
   overflow: hidden;
 }
 
-#FeaturedConfigPage .ec-configPreview {
-  --ec-preview-background: #181b22 radial-gradient(circle at 72% 28%, #465267 0, #222936 35%, #11151d 72%);
-  --ec-preview-content-inline-inset: 8%;
-  --ec-preview-shade: linear-gradient(
+#FeaturedConfigPage .featured-configPreview {
+  --featured-preview-background: #181b22 radial-gradient(circle at 72% 28%, #465267 0, #222936 35%, #11151d 72%);
+  --featured-preview-content-inline-inset: 8%;
+  --featured-preview-shade: linear-gradient(
     0deg,
-    rgb(4 6 10 / calc(var(--ec-preview-gradient, 0.85) * 0.74)),
+    rgb(4 6 10 / calc(var(--featured-preview-gradient, 0.85) * 0.74)),
     transparent 45%
   );
-  background: var(--ec-preview-background);
-  border-radius: var(--ec-preview-radius, 0);
+  background: var(--featured-preview-background);
+  border-radius: var(--featured-preview-radius, 0);
   color: #fff;
   container-type: inline-size;
   min-height: 170px;
@@ -124,27 +124,27 @@
   width: 100%;
 }
 
-#FeaturedConfigPage .ec-configPreview:not(.is-hero) {
-  border: 1px solid var(--ec-theme-divider);
-  border-radius: var(--ec-preview-radius, 0);
+#FeaturedConfigPage .featured-configPreview:not(.is-hero) {
+  border: 1px solid var(--featured-theme-divider);
+  border-radius: var(--featured-preview-radius, 0);
   box-shadow: 0 0.45rem 1.35rem rgba(0, 0, 0, 0.34);
   margin: 3.15rem 3.3% 0;
   width: 93.4%;
 }
 
-#FeaturedConfigPage .ec-configPreview.is-hero {
-  --ec-preview-shade: none;
+#FeaturedConfigPage .featured-configPreview.is-hero {
+  --featured-preview-shade: none;
   background: transparent;
   margin: 0;
 }
 
-#FeaturedConfigPage .ec-jellyfinMockHeading {
+#FeaturedConfigPage .featured-jellyfinMockHeading {
   font-size: clamp(0.75rem, 1.5vw, 1rem);
   font-weight: 500;
   padding: 0.7rem 3.3% 0.4rem;
 }
 
-#FeaturedConfigPage .ec-configPreviewBackdrop {
+#FeaturedConfigPage .featured-configPreviewBackdrop {
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
@@ -154,27 +154,27 @@
   z-index: 0;
 }
 
-#FeaturedConfigPage .ec-configPreview.is-hero .ec-configPreviewBackdrop,
-#FeaturedConfigPage .ec-configPreview.is-hero .ec-configPreviewShade {
-  -webkit-mask-image: var(--ec-preview-fade);
-  mask-image: var(--ec-preview-fade);
+#FeaturedConfigPage .featured-configPreview.is-hero .featured-configPreviewBackdrop,
+#FeaturedConfigPage .featured-configPreview.is-hero .featured-configPreviewShade {
+  -webkit-mask-image: var(--featured-preview-fade);
+  mask-image: var(--featured-preview-fade);
 }
 
-#FeaturedConfigPage .ec-configPreviewShade {
-  background: var(--ec-preview-shade);
+#FeaturedConfigPage .featured-configPreviewShade {
+  background: var(--featured-preview-shade);
   inset: 0;
   position: absolute;
 }
 
-#FeaturedConfigPage .ec-configPreviewContent {
+#FeaturedConfigPage .featured-configPreviewContent {
   bottom: 18%;
-  left: var(--ec-preview-content-inline-inset);
+  left: var(--featured-preview-content-inline-inset);
   max-width: 58%;
   position: absolute;
   z-index: 2;
 }
 
-#FeaturedConfigPage .ec-configPreview.text-center .ec-configPreviewContent {
+#FeaturedConfigPage .featured-configPreview.text-center .featured-configPreviewContent {
   align-items: center;
   display: flex;
   flex-direction: column;
@@ -182,16 +182,16 @@
   text-align: center;
 }
 
-#FeaturedConfigPage .ec-configPreview.text-right .ec-configPreviewContent {
+#FeaturedConfigPage .featured-configPreview.text-right .featured-configPreviewContent {
   align-items: flex-end;
   display: flex;
   flex-direction: column;
   left: auto;
-  right: var(--ec-preview-content-inline-inset);
+  right: var(--featured-preview-content-inline-inset);
   text-align: right;
 }
 
-#FeaturedConfigPage .ec-configPreviewLogo {
+#FeaturedConfigPage .featured-configPreviewLogo {
   display: -webkit-box;
   font-size: clamp(1.25rem, 5cqw, 3.4rem);
   font-weight: 900;
@@ -203,7 +203,7 @@
   -webkit-line-clamp: 2;
 }
 
-#FeaturedConfigPage .ec-configPreviewImageLogo {
+#FeaturedConfigPage .featured-configPreviewImageLogo {
   display: block;
   max-height: clamp(3.5rem, 12cqw, 5.25rem);
   max-width: min(18rem, 68%);
@@ -211,7 +211,7 @@
   object-position: left center;
 }
 
-#FeaturedConfigPage .ec-configPreviewMeta {
+#FeaturedConfigPage .featured-configPreviewMeta {
   align-items: center;
   display: flex;
   flex-wrap: wrap;
@@ -221,7 +221,7 @@
   margin-top: 0.7rem;
 }
 
-#FeaturedConfigPage .ec-configPreviewText {
+#FeaturedConfigPage .featured-configPreviewText {
   display: -webkit-box;
   font-size: 0.75rem;
   margin-top: 0.45rem;
@@ -230,41 +230,41 @@
   -webkit-line-clamp: 2;
 }
 
-#FeaturedConfigPage .ec-configPreviewButton {
-  background: var(--ec-button-primary-background, var(--ec-theme-primary));
-  border: var(--ec-button-border, 0);
-  border-radius: var(--ec-button-radius, var(--ec-theme-radius));
-  box-shadow: var(--ec-button-shadow, none);
-  color: var(--ec-button-primary-color, var(--ec-theme-primary-contrast));
+#FeaturedConfigPage .featured-configPreviewButton {
+  background: var(--featured-button-primary-background, var(--featured-theme-primary));
+  border: var(--featured-button-border, 0);
+  border-radius: var(--featured-button-radius, var(--featured-theme-radius));
+  box-shadow: var(--featured-button-shadow, none);
+  color: var(--featured-button-primary-color, var(--featured-theme-primary-contrast));
   font-weight: 700;
   margin-top: 0.65rem;
   padding: 0.45rem 0.8rem;
 }
 
-#FeaturedConfigPage .ec-configPreviewButton + .ec-configPreviewButton {
+#FeaturedConfigPage .featured-configPreviewButton + .featured-configPreviewButton {
   margin-left: 0.4rem;
 }
 
-#FeaturedConfigPage .ec-configPreviewButton:hover,
-#FeaturedConfigPage .ec-configPreviewButton:focus-visible {
-  background: var(--ec-button-primary-hover-background, var(--ec-theme-primary-dark));
+#FeaturedConfigPage .featured-configPreviewButton:hover,
+#FeaturedConfigPage .featured-configPreviewButton:focus-visible {
+  background: var(--featured-button-primary-hover-background, var(--featured-theme-primary-dark));
 }
 
-#FeaturedConfigPage .ec-configPreviewActions {
+#FeaturedConfigPage .featured-configPreviewActions {
   white-space: nowrap;
 }
 
-#FeaturedConfigPage .ec-configPreviewButton.is-secondary {
-  background: var(--ec-button-secondary-background, var(--ec-theme-contained));
-  color: var(--ec-button-secondary-color, var(--ec-theme-text-primary));
+#FeaturedConfigPage .featured-configPreviewButton.is-secondary {
+  background: var(--featured-button-secondary-background, var(--featured-theme-contained));
+  color: var(--featured-button-secondary-color, var(--featured-theme-text-primary));
 }
 
-#FeaturedConfigPage .ec-configPreviewButton.is-secondary:hover,
-#FeaturedConfigPage .ec-configPreviewButton.is-secondary:focus-visible {
-  background: var(--ec-button-secondary-hover-background, var(--ec-theme-contained-hover));
+#FeaturedConfigPage .featured-configPreviewButton.is-secondary:hover,
+#FeaturedConfigPage .featured-configPreviewButton.is-secondary:focus-visible {
+  background: var(--featured-button-secondary-hover-background, var(--featured-theme-contained-hover));
 }
 
-#FeaturedConfigPage .ec-configPreviewButton.is-favorite {
+#FeaturedConfigPage .featured-configPreviewButton.is-favorite {
   align-items: center;
   display: inline-flex;
   justify-content: center;
@@ -273,23 +273,23 @@
   vertical-align: middle;
 }
 
-#FeaturedConfigPage .ec-configPreviewDots {
+#FeaturedConfigPage .featured-configPreviewDots {
   display: flex;
   gap: 0.3rem;
 }
 
-#FeaturedConfigPage .ec-configPreviewDots span {
+#FeaturedConfigPage .featured-configPreviewDots span {
   background: rgba(255, 255, 255, 0.42);
   border-radius: 50%;
   height: 0.35rem;
   width: 0.35rem;
 }
 
-#FeaturedConfigPage .ec-configPreviewDots span.is-active {
+#FeaturedConfigPage .featured-configPreviewDots span.is-active {
   background: #fff;
 }
 
-#FeaturedConfigPage .ec-configPreviewNavigation {
+#FeaturedConfigPage .featured-configPreviewNavigation {
   align-items: center;
   bottom: 0.55rem;
   display: flex;
@@ -301,7 +301,7 @@
   z-index: 4;
 }
 
-#FeaturedConfigPage .ec-configPreview.is-hero .ec-configPreviewNavigation {
+#FeaturedConfigPage .featured-configPreview.is-hero .featured-configPreviewNavigation {
   bottom: auto;
   left: auto;
   right: max(1rem, 3.3%);
@@ -309,21 +309,21 @@
   transform: none;
 }
 
-#FeaturedConfigPage .ec-configPreviewControls {
+#FeaturedConfigPage .featured-configPreviewControls {
   align-items: center;
   display: flex;
   gap: 0.25rem;
   mix-blend-mode: difference;
 }
 
-#FeaturedConfigPage .ec-configPreviewControls .ec-mockControl {
+#FeaturedConfigPage .featured-configPreviewControls .featured-mockControl {
   font-size: 1.2rem;
   line-height: 1;
   opacity: 0.58;
   padding: 0.25rem;
 }
 
-#FeaturedConfigPage .ec-configPreviewStatus {
+#FeaturedConfigPage .featured-configPreviewStatus {
   font-size: 0.62rem;
   letter-spacing: 0.04em;
   opacity: 0.58;
@@ -331,14 +331,14 @@
   white-space: nowrap;
 }
 
-#FeaturedConfigPage .ec-jellyfinMockMedia {
-  margin-top: var(--ec-preview-media-offset, -1rem);
+#FeaturedConfigPage .featured-jellyfinMockMedia {
+  margin-top: var(--featured-preview-media-offset, -1rem);
   padding: 0 3.3% 1rem;
   position: relative;
   z-index: 5;
 }
 
-#FeaturedConfigPage .ec-jellyfinMockMedia .ec-jellyfinMockHeading {
+#FeaturedConfigPage .featured-jellyfinMockMedia .featured-jellyfinMockHeading {
   color: #fff;
   font-size: clamp(0.82rem, 2.5cqw, 1.2rem);
   font-weight: 700;
@@ -346,17 +346,17 @@
   text-shadow: 0 1px 0.3rem rgba(0, 0, 0, 0.75);
 }
 
-#FeaturedConfigPage .ec-jellyfinMockCards {
+#FeaturedConfigPage .featured-jellyfinMockCards {
   display: grid;
   gap: 0.7rem;
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
-#FeaturedConfigPage .ec-jellyfinMockCard {
+#FeaturedConfigPage .featured-jellyfinMockCard {
   min-width: 0;
 }
 
-#FeaturedConfigPage .ec-jellyfinMockCardArt {
+#FeaturedConfigPage .featured-jellyfinMockCardArt {
   align-items: center;
   aspect-ratio: 1.72;
   background: linear-gradient(135deg, #34495e, #17202a);
@@ -372,14 +372,14 @@
   position: relative;
 }
 
-#FeaturedConfigPage .ec-jellyfinMockCardArt::after {
+#FeaturedConfigPage .featured-jellyfinMockCardArt::after {
   background: linear-gradient(180deg, rgba(4, 8, 14, 0.08), rgba(4, 8, 14, 0.66));
   content: '';
   inset: 0;
   position: absolute;
 }
 
-#FeaturedConfigPage .ec-jellyfinMockCardArt > span {
+#FeaturedConfigPage .featured-jellyfinMockCardArt > span {
   color: #fff;
   font-size: clamp(0.72rem, 2.5cqw, 1.1rem);
   font-weight: 800;
@@ -392,50 +392,50 @@
   z-index: 1;
 }
 
-#FeaturedConfigPage .ec-jellyfinMockCardArt.art-2 {
+#FeaturedConfigPage .featured-jellyfinMockCardArt.art-2 {
   background: linear-gradient(135deg, #59315f, #23172f);
 }
 
-#FeaturedConfigPage .ec-jellyfinMockCardArt.art-3 {
+#FeaturedConfigPage .featured-jellyfinMockCardArt.art-3 {
   background: linear-gradient(135deg, #175a64, #102931);
 }
 
-#FeaturedConfigPage .ec-jellyfinMockCardArt.art-4 {
+#FeaturedConfigPage .featured-jellyfinMockCardArt.art-4 {
   background: linear-gradient(135deg, #725124, #251c13);
 }
 
-#FeaturedConfigPage .ec-jellyfinMockCardArt.art-5 {
+#FeaturedConfigPage .featured-jellyfinMockCardArt.art-5 {
   background: linear-gradient(135deg, #385d3d, #142419);
 }
 
 @container (min-width: 60rem) {
-  #FeaturedConfigPage .ec-jellyfinMockCards {
+  #FeaturedConfigPage .featured-jellyfinMockCards {
     grid-template-columns: repeat(5, minmax(0, 1fr));
   }
 }
 
 @container (max-width: 59.99rem) {
-  #FeaturedConfigPage .ec-jellyfinMockCard:nth-child(n + 4) {
+  #FeaturedConfigPage .featured-jellyfinMockCard:nth-child(n + 4) {
     display: none;
   }
 }
 
 @container (max-width: 38rem) {
-  #FeaturedConfigPage .ec-jellyfinMockNav > span:nth-child(n + 3) {
+  #FeaturedConfigPage .featured-jellyfinMockNav > span:nth-child(n + 3) {
     display: none;
   }
 }
 
 @media (max-width: 650px) {
-  #FeaturedConfigPage .ec-jellyfinMockNav {
+  #FeaturedConfigPage .featured-jellyfinMockNav {
     display: none;
   }
 
-  #FeaturedConfigPage .ec-jellyfinMockCards {
+  #FeaturedConfigPage .featured-jellyfinMockCards {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  #FeaturedConfigPage .ec-configPreviewContent {
+  #FeaturedConfigPage .featured-configPreviewContent {
     left: 6%;
     max-width: 72%;
   }

@@ -100,7 +100,7 @@ test('personalization is authenticated, policy-bound, user scoped, and fast to r
   );
   assert.match(
     slideRender,
-    /if \(response\.showDescription\)[\s\S]*?appendText\(content, 'ec-tagline'[\s\S]*?appendText\(content, 'ec-overview'/
+    /if \(response\.showDescription\)[\s\S]*?appendText\(content, 'featured-tagline'[\s\S]*?appendText\(content, 'featured-overview'/
   );
   assert.match(frontend, /body: \{ reset: true \}/);
   assert.match(frontend, /body: \{ preferences \}/);
@@ -149,21 +149,24 @@ test('personalization is authenticated, policy-bound, user scoped, and fast to r
     navigation,
     /function updateAdminNavigationEntry[\s\S]*?\.MuiListItemIcon-root[\s\S]*?createUserSettingsIcon\(\)/
   );
-  assert.match(styles, /ec-preferences-spinner/);
+  assert.match(styles, /featured-preferences-spinner/);
   assert.match(styles, /env\(safe-area-inset-top\)/);
   assert.match(
     styles,
-    /\.ec-preferences-dialog[^}]*--ec-dialog-viewport-height:\s*calc\(100vh - 2rem\)[^}]*height:\s*min\(52rem, var\(--ec-dialog-viewport-height\)\)[^}]*width:\s*64rem/
+    /\.featured-preferences-dialog[^}]*--featured-dialog-viewport-height:\s*calc\(100vh - 2rem\)[^}]*height:\s*min\(52rem, var\(--featured-dialog-viewport-height\)\)[^}]*width:\s*64rem/
   );
-  assert.match(styles, /@supports \(height: 100dvh\)[\s\S]*?--ec-dialog-viewport-height:\s*calc\(100dvh - 2rem\)/);
-  assert.match(styles, /\.ec-preferences-content[^}]*flex: 1 1 auto/);
-  assert.match(styles, /\.ec-preference-display[^}]*grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\)/);
-  assert.match(styles, /@media \(max-width: 600px\)[\s\S]*?\.ec-preferences-dialog[^}]*width: 100%/);
   assert.match(
     styles,
-    /@media \(max-width: 600px\)[\s\S]*?\.ec-preference-display,[\s\S]*?grid-template-columns:\s*1fr/
+    /@supports \(height: 100dvh\)[\s\S]*?--featured-dialog-viewport-height:\s*calc\(100dvh - 2rem\)/
   );
-  assert.doesNotMatch(carousel, /ec-personalize|openPreferencesDialog/);
+  assert.match(styles, /\.featured-preferences-content[^}]*flex: 1 1 auto/);
+  assert.match(styles, /\.featured-preference-display[^}]*grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\)/);
+  assert.match(styles, /@media \(max-width: 600px\)[\s\S]*?\.featured-preferences-dialog[^}]*width: 100%/);
+  assert.match(
+    styles,
+    /@media \(max-width: 600px\)[\s\S]*?\.featured-preference-display,[\s\S]*?grid-template-columns:\s*1fr/
+  );
+  assert.doesNotMatch(carousel, /featured-personalize|openPreferencesDialog/);
 });
 
 test('source mixer constraints survive personalized source cloning', async () => {
@@ -203,7 +206,7 @@ test('feed preview reuses mixer diagnostics for unsaved configs, users, and forc
   assert.match(store, /cloneConfig[\s\S]*?cloneJsonValue\(value\)/);
   assert.match(store, /featured\/config\/preview[\s\S]*?configuration: cloneConfig\(config\)/);
   assert.match(modal, /feedPreview\.value\.items[\s\S]*?feedPreview\.value\.rules[\s\S]*?duplicatesRemoved/);
-  assert.match(sources, /#actions[\s\S]*?ec-feedPreviewAction[\s\S]*?store\.openFeedPreview\(\)/);
+  assert.match(sources, /#actions[\s\S]*?featured-feedPreviewAction[\s\S]*?store\.openFeedPreview\(\)/);
 });
 
 test('prepared cache fingerprint includes excluded genres', async () => {

@@ -88,23 +88,23 @@ const selectionCount = computed(() => {
 </script>
 
 <template>
-  <article class="ec-sourceRule ec-configCard" :class="{ 'is-disabled': !rule.Enabled }">
-    <header class="ec-sourceRuleHeader">
-      <button type="button" class="ec-sourceDragHandle ec-configDragHandle" :title="t('source.drag')">
+  <article class="featured-sourceRule featured-configCard" :class="{ 'is-disabled': !rule.Enabled }">
+    <header class="featured-sourceRuleHeader">
+      <button type="button" class="featured-sourceDragHandle featured-configDragHandle" :title="t('source.drag')">
         <span class="material-icons" aria-hidden="true">drag_indicator</span>
       </button>
       <button
         type="button"
-        class="ec-sourceRuleToggle ec-configCardToggle"
+        class="featured-sourceRuleToggle featured-configCardToggle"
         :aria-expanded="expanded"
         @click="$emit('toggle')"
       >
         <div>
-          <p class="ec-sourceRuleEyebrow ec-configEyebrow">
+          <p class="featured-sourceRuleEyebrow featured-configEyebrow">
             {{ t('source.ruleNumber', { number: index + 1 }) }}
           </p>
           <h3>{{ sourceLabel(rule.Type) }}</h3>
-          <p class="ec-sourceRuleSummary">
+          <p class="featured-sourceRuleSummary">
             <span>{{ rule.Enabled ? t('source.statusActive') : t('source.statusInactive') }}</span>
             <span>{{ t('source.summaryWeight', { weight: rule.Weight }) }}</span>
             <span v-if="selectionCount">{{ t('source.summarySelections', { count: selectionCount }) }}</span>
@@ -113,12 +113,12 @@ const selectionCount = computed(() => {
             <span v-if="rule.UserIds.length">{{ t('source.summaryUsers', { count: rule.UserIds.length }) }}</span>
           </p>
         </div>
-        <span class="material-icons ec-sourceChevron ec-configChevron" aria-hidden="true">expand_more</span>
+        <span class="material-icons featured-sourceChevron featured-configChevron" aria-hidden="true">expand_more</span>
       </button>
-      <div class="ec-sourceRuleActions">
+      <div class="featured-sourceRuleActions">
         <button
           type="button"
-          class="paper-icon-button-light ec-ruleIconButton"
+          class="paper-icon-button-light featured-ruleIconButton"
           :disabled="index === 0"
           :title="t('source.moveUp')"
           @click="store.moveSource(index, -1)"
@@ -127,7 +127,7 @@ const selectionCount = computed(() => {
         </button>
         <button
           type="button"
-          class="paper-icon-button-light ec-ruleIconButton"
+          class="paper-icon-button-light featured-ruleIconButton"
           :disabled="index === count - 1"
           :title="t('source.moveDown')"
           @click="store.moveSource(index, 1)"
@@ -136,7 +136,7 @@ const selectionCount = computed(() => {
         </button>
         <button
           type="button"
-          class="paper-icon-button-light ec-ruleIconButton ec-removeRule"
+          class="paper-icon-button-light featured-ruleIconButton featured-removeRule"
           :title="t('source.remove')"
           @click="store.removeSource(index)"
         >
@@ -145,9 +145,9 @@ const selectionCount = computed(() => {
       </div>
     </header>
 
-    <div v-show="expanded" class="ec-sourceRuleBody">
+    <div v-show="expanded" class="featured-sourceRuleBody">
       <p class="jmp-subsectionHelp">{{ sourceHelp(rule.Type) }}</p>
-      <div class="ec-sourceRuleBasics">
+      <div class="featured-sourceRuleBasics">
         <ConfigCheckbox v-model="rule.Enabled" :label="t('source.enabled')" />
         <ConfigNumber
           v-model="rule.Weight"
@@ -187,7 +187,7 @@ const selectionCount = computed(() => {
         />
       </div>
 
-      <div v-if="rule.Enabled" class="ec-sourceSettings">
+      <div v-if="rule.Enabled" class="featured-sourceSettings">
         <ConfigMultiPicker
           v-model="rule.UserIds"
           :label="t('source.onlyUsers')"
@@ -256,7 +256,7 @@ const selectionCount = computed(() => {
           :step="1"
         />
 
-        <details class="ec-sourceFilters">
+        <details class="featured-sourceFilters">
           <summary>{{ t('source.additionalFilters', { count: rule.Filters.length }) }}</summary>
           <p class="jmp-note">{{ t('source.additionalFiltersHelp') }}</p>
           <FilterRuleEditor :filters="rule.Filters" />
@@ -267,23 +267,23 @@ const selectionCount = computed(() => {
 </template>
 
 <style scoped>
-.ec-sourceRule {
+.featured-sourceRule {
   padding: 1rem 1.1rem 1.15rem;
 }
-.ec-sourceRule.is-disabled {
+.featured-sourceRule.is-disabled {
   opacity: 0.72;
 }
-.ec-sourceRuleHeader {
+.featured-sourceRuleHeader {
   align-items: center;
   display: grid;
   gap: 0.55rem;
   grid-template-columns: auto minmax(0, 1fr) auto;
 }
-.ec-sourceRuleHeader h3 {
+.featured-sourceRuleHeader h3 {
   font-size: 1.08rem;
   margin: 0.12rem 0 0.25rem;
 }
-.ec-sourceRuleSummary {
+.featured-sourceRuleSummary {
   display: flex;
   flex-wrap: wrap;
   font-size: 0.78rem;
@@ -291,62 +291,62 @@ const selectionCount = computed(() => {
   margin: 0;
   opacity: 0.68;
 }
-.ec-sourceRuleSummary span + span::before {
+.featured-sourceRuleSummary span + span::before {
   content: '·';
   margin-right: 0.75rem;
 }
-.ec-sourceRuleToggle[aria-expanded='true'] .ec-sourceChevron {
+.featured-sourceRuleToggle[aria-expanded='true'] .featured-sourceChevron {
   transform: rotate(180deg);
 }
-.ec-sourceRuleActions {
+.featured-sourceRuleActions {
   display: flex;
   gap: 0.2rem;
 }
-.ec-sourceRuleBody {
+.featured-sourceRuleBody {
   border-top: 1px solid rgba(255, 255, 255, 0.07);
   margin-top: 0.8rem;
   padding-top: 0.8rem;
 }
-.ec-sourceRuleBasics {
+.featured-sourceRuleBasics {
   align-items: center;
   display: grid;
   gap: 0.75rem 1.25rem;
   grid-template-columns: repeat(2, minmax(10rem, 1fr));
   margin-top: 0;
 }
-.ec-sourceRule > .jmp-subsectionHelp {
+.featured-sourceRule > .jmp-subsectionHelp {
   margin-bottom: 0.4rem;
 }
-.ec-sourceRuleBasics > :deep(.checkboxContainer),
-.ec-sourceRuleBasics > :deep(.inputContainer) {
+.featured-sourceRuleBasics > :deep(.checkboxContainer),
+.featured-sourceRuleBasics > :deep(.inputContainer) {
   margin-bottom: 0;
 }
-.ec-sourceSettings {
+.featured-sourceSettings {
   border-top: 1px solid rgba(255, 255, 255, 0.07);
   margin-top: 0.7rem;
   padding-top: 1rem;
 }
-.ec-sourceFilters {
+.featured-sourceFilters {
   margin-top: 0.35rem;
   padding-top: 0;
 }
-.ec-sourceFilters > summary {
+.featured-sourceFilters > summary {
   cursor: pointer;
   font-weight: 600;
   padding: 0.25rem 0;
 }
-.ec-sourceFilters > .jmp-note {
+.featured-sourceFilters > .jmp-note {
   margin: 0.3rem 0 0.65rem;
 }
 
 @media (max-width: 700px) {
-  .ec-sourceRuleBasics {
+  .featured-sourceRuleBasics {
     grid-template-columns: 1fr;
   }
-  .ec-sourceRuleHeader {
+  .featured-sourceRuleHeader {
     grid-template-columns: auto minmax(0, 1fr);
   }
-  .ec-sourceRuleActions {
+  .featured-sourceRuleActions {
     grid-column: 1 / -1;
     justify-content: flex-end;
   }

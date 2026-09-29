@@ -68,7 +68,7 @@ export class TrickplayPlayer implements TrailerPlayer {
     private readonly options: TrailerPlaybackOptions
   ) {
     this.element = document.createElement('div');
-    this.element.className = 'ec-trailer ec-trickplay';
+    this.element.className = 'featured-trailer featured-trickplay';
     this.element.tabIndex = -1;
     this.element.setAttribute('aria-hidden', 'true');
     this.ready = this.initialize();

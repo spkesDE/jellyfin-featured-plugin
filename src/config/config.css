@@ -1,41 +1,41 @@
 #FeaturedConfigPage {
-  --ec-config-appbar-offset: calc(4rem + env(safe-area-inset-top, 0px));
-  --ec-config-control-padding: 0.55rem 0.9rem;
-  --ec-config-control-transition:
+  --featured-config-appbar-offset: calc(4rem + env(safe-area-inset-top, 0px));
+  --featured-config-control-padding: 0.55rem 0.9rem;
+  --featured-config-control-transition:
     background 0.18s ease, border-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
-  --ec-config-card-background: var(--ec-theme-paper);
-  --ec-config-nested-background: var(--ec-theme-action-hover);
-  --ec-config-pill-radius: 999px;
-  --ec-config-sticky-offset: calc(8.5rem + env(safe-area-inset-top, 0px));
-  --ec-controls-reveal-transition: opacity 0.2s ease, transform 0.2s ease;
+  --featured-config-card-background: var(--featured-theme-paper);
+  --featured-config-nested-background: var(--featured-theme-action-hover);
+  --featured-config-pill-radius: 999px;
+  --featured-config-sticky-offset: calc(8.5rem + env(safe-area-inset-top, 0px));
+  --featured-controls-reveal-transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
 /* Shared configuration primitives. Tabs keep their semantic class names for
    behavior, while these classes own the repeated visual structure. */
-#FeaturedConfigPage .ec-configStack {
+#FeaturedConfigPage .featured-configStack {
   display: grid;
   gap: 1rem;
   margin-top: 1rem;
 }
 
-#FeaturedConfigPage .ec-configCard {
-  background: var(--ec-config-card-background);
-  border: 1px solid var(--ec-theme-divider);
+#FeaturedConfigPage .featured-configCard {
+  background: var(--featured-config-card-background);
+  border: 1px solid var(--featured-theme-divider);
   border-radius: 0.9rem;
 }
 
-#FeaturedConfigPage .ec-configCardPadded {
+#FeaturedConfigPage .featured-configCardPadded {
   padding: 1rem;
 }
 
-#FeaturedConfigPage .ec-configCardHeader {
+#FeaturedConfigPage .featured-configCardHeader {
   align-items: center;
   display: grid;
   gap: 0.35rem;
   grid-template-columns: minmax(0, 1fr) auto;
 }
 
-#FeaturedConfigPage .ec-configCardToggle {
+#FeaturedConfigPage .featured-configCardToggle {
   align-items: center;
   background: transparent;
   border: 0;
@@ -48,34 +48,34 @@
   text-align: left;
 }
 
-#FeaturedConfigPage .ec-configCardToggle > :first-child {
+#FeaturedConfigPage .featured-configCardToggle > :first-child {
   display: grid;
   min-width: 0;
 }
 
-#FeaturedConfigPage .ec-configCardToggle strong {
+#FeaturedConfigPage .featured-configCardToggle strong {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-#FeaturedConfigPage .ec-configChevron {
+#FeaturedConfigPage .featured-configChevron {
   transition: transform 0.16s ease;
 }
 
-#FeaturedConfigPage .ec-configCardBody {
-  border-top: 1px solid var(--ec-theme-divider);
+#FeaturedConfigPage .featured-configCardBody {
+  border-top: 1px solid var(--featured-theme-divider);
   margin-top: 0.8rem;
   padding-top: 0.8rem;
 }
 
-#FeaturedConfigPage .ec-configActions {
+#FeaturedConfigPage .featured-configActions {
   align-items: center;
   display: flex;
   gap: 0.15rem;
 }
 
-#FeaturedConfigPage .ec-configDragHandle {
+#FeaturedConfigPage .featured-configDragHandle {
   background: transparent;
   border: 0;
   color: inherit;
@@ -84,11 +84,11 @@
   padding: 0.2rem;
 }
 
-#FeaturedConfigPage .ec-configDragHandle:active {
+#FeaturedConfigPage .featured-configDragHandle:active {
   cursor: grabbing;
 }
 
-#FeaturedConfigPage .ec-configEyebrow {
+#FeaturedConfigPage .featured-configEyebrow {
   font-size: 0.7rem;
   letter-spacing: 0.08em;
   margin: 0;
@@ -96,29 +96,29 @@
   text-transform: uppercase;
 }
 
-#FeaturedConfigPage .ec-configLabelRow,
-#FeaturedConfigPage .ec-numberLabelRow {
+#FeaturedConfigPage .featured-configLabelRow,
+#FeaturedConfigPage .featured-numberLabelRow {
   align-items: center;
   display: flex;
   gap: 0.4rem;
   width: fit-content;
 }
 
-#FeaturedConfigPage .ec-configSplitHeader {
+#FeaturedConfigPage .featured-configSplitHeader {
   align-items: flex-start;
   display: flex;
   gap: 1rem;
   justify-content: space-between;
 }
 
-#FeaturedConfigPage .ec-configAddRow {
+#FeaturedConfigPage .featured-configAddRow {
   align-items: end;
   display: grid;
   gap: 1rem;
   grid-template-columns: minmax(15rem, 1fr) auto;
 }
 
-#FeaturedConfigPage .ec-configAddRow .selectContainer {
+#FeaturedConfigPage .featured-configAddRow .selectContainer {
   margin-bottom: 0;
 }
 
@@ -134,68 +134,68 @@
   max-width: none !important;
 }
 
-#FeaturedConfigPage .ec-diagnosticsError {
-  color: var(--ec-theme-error-light);
+#FeaturedConfigPage .featured-diagnosticsError {
+  color: var(--featured-theme-error-light);
   overflow-wrap: anywhere;
 }
 
-#FeaturedConfigPage .ec-diagnostics-section {
+#FeaturedConfigPage .featured-diagnostics-section {
   grid-column: 1 / -1;
 }
 
-#FeaturedConfigPage .ec-diagnosticsResults {
+#FeaturedConfigPage .featured-diagnosticsResults {
   display: grid;
   gap: 0;
   margin: 0.35rem 0 1rem;
   overflow: hidden;
-  border: 1px solid var(--ec-theme-divider);
+  border: 1px solid var(--featured-theme-divider);
   border-radius: 0.55rem;
 }
 
-#FeaturedConfigPage .ec-diagnosticsResults > div {
+#FeaturedConfigPage .featured-diagnosticsResults > div {
   display: grid;
   grid-template-columns: minmax(10rem, 1fr) minmax(0, 1.5fr);
   gap: 1rem;
   padding: 0.58rem 0.72rem;
 }
 
-#FeaturedConfigPage .ec-diagnosticsResults > div:nth-child(odd) {
-  background: var(--ec-theme-action-hover);
+#FeaturedConfigPage .featured-diagnosticsResults > div:nth-child(odd) {
+  background: var(--featured-theme-action-hover);
 }
 
-#FeaturedConfigPage .ec-diagnosticsResults dt {
+#FeaturedConfigPage .featured-diagnosticsResults dt {
   opacity: 0.72;
 }
 
-#FeaturedConfigPage .ec-diagnosticsResults dd {
+#FeaturedConfigPage .featured-diagnosticsResults dd {
   margin: 0;
   overflow-wrap: anywhere;
 }
 
-#FeaturedConfigPage .ec-ruleDiagnosticsScroll {
+#FeaturedConfigPage .featured-ruleDiagnosticsScroll {
   overflow-x: auto;
 }
 
-#FeaturedConfigPage .ec-ruleDiagnostics table {
+#FeaturedConfigPage .featured-ruleDiagnostics table {
   border-collapse: collapse;
   min-width: 42rem;
   width: 100%;
 }
 
-#FeaturedConfigPage .ec-ruleDiagnostics th,
-#FeaturedConfigPage .ec-ruleDiagnostics td {
-  border-bottom: 1px solid var(--ec-theme-divider);
+#FeaturedConfigPage .featured-ruleDiagnostics th,
+#FeaturedConfigPage .featured-ruleDiagnostics td {
+  border-bottom: 1px solid var(--featured-theme-divider);
   padding: 0.55rem 0.65rem;
   text-align: left;
 }
 
-#FeaturedConfigPage .ec-ruleDiagnostics th {
+#FeaturedConfigPage .featured-ruleDiagnostics th {
   font-size: 0.75rem;
   opacity: 0.7;
 }
 
 @media (max-width: 650px) {
-  #FeaturedConfigPage .ec-diagnosticsResults > div {
+  #FeaturedConfigPage .featured-diagnosticsResults > div {
     grid-template-columns: 1fr;
     gap: 0.2rem;
   }
@@ -211,8 +211,8 @@
 #FeaturedConfigPage .jmp-section {
   padding: 1rem;
   border-radius: 0.75rem;
-  background: var(--ec-config-card-background);
-  border: 1px solid var(--ec-theme-divider);
+  background: var(--featured-config-card-background);
+  border: 1px solid var(--featured-theme-divider);
   margin-bottom: 1rem;
 }
 
@@ -234,14 +234,14 @@
 #FeaturedConfigPage .jmp-toolbar {
   display: flex;
   align-items: center;
-  background: var(--ec-theme-background);
-  border-bottom: 1px solid var(--ec-theme-divider);
+  background: var(--featured-theme-background);
+  border-bottom: 1px solid var(--featured-theme-divider);
   gap: 1rem;
   margin-bottom: 1rem;
   flex-wrap: wrap;
   padding: 0.5rem 0;
   position: sticky;
-  top: var(--ec-config-appbar-offset);
+  top: var(--featured-config-appbar-offset);
   z-index: 120;
 }
 
@@ -255,15 +255,15 @@
   min-width: 0;
   padding: 1rem;
   border-radius: 0.9rem;
-  background: var(--ec-config-card-background);
-  border: 1px solid var(--ec-theme-divider);
+  background: var(--featured-config-card-background);
+  border: 1px solid var(--featured-theme-divider);
 }
 
 #FeaturedConfigPage .jmp-subsectionTitle {
   margin: 0 0 0.2rem;
   font-size: 1rem;
   font-weight: 600;
-  color: var(--ec-theme-text-primary);
+  color: var(--featured-theme-text-primary);
 }
 
 #FeaturedConfigPage .jmp-titleRow {
@@ -284,10 +284,10 @@
   justify-content: center;
   flex: 0 0 auto;
   padding: 0.28rem 0.55rem;
-  border-radius: var(--ec-config-pill-radius);
-  border: 1px solid var(--ec-theme-primary);
-  background: var(--ec-theme-primary);
-  color: var(--ec-theme-primary-contrast);
+  border-radius: var(--featured-config-pill-radius);
+  border: 1px solid var(--featured-theme-primary);
+  background: var(--featured-theme-primary);
+  color: var(--featured-theme-primary-contrast);
   font-size: 0.72rem;
   font-weight: 700;
   line-height: 1;
@@ -297,9 +297,9 @@
 }
 
 #FeaturedConfigPage .jmp-badge-muted {
-  border-color: var(--ec-theme-divider);
-  background: var(--ec-theme-action-hover);
-  color: var(--ec-theme-text-secondary);
+  border-color: var(--featured-theme-divider);
+  background: var(--featured-theme-action-hover);
+  color: var(--featured-theme-text-secondary);
 }
 
 #FeaturedConfigPage .jmp-badge-wip {
@@ -328,7 +328,7 @@
 }
 
 @media (max-width: 600px) {
-  #FeaturedConfigPage .ec-configAddRow {
+  #FeaturedConfigPage .featured-configAddRow {
     grid-template-columns: 1fr;
   }
 
@@ -368,27 +368,27 @@
   align-items: center;
   justify-content: center;
   gap: 0.4rem;
-  border: 1px solid var(--ec-theme-divider);
-  border-radius: var(--ec-config-pill-radius);
-  background: var(--ec-theme-action-hover);
-  color: var(--ec-theme-text-secondary);
-  padding: var(--ec-config-control-padding);
+  border: 1px solid var(--featured-theme-divider);
+  border-radius: var(--featured-config-pill-radius);
+  background: var(--featured-theme-action-hover);
+  color: var(--featured-theme-text-secondary);
+  padding: var(--featured-config-control-padding);
   font-size: 0.92em;
   line-height: 1;
   cursor: pointer;
-  transition: var(--ec-config-control-transition);
+  transition: var(--featured-config-control-transition);
 }
 
 #FeaturedConfigPage .jmp-tabButton:hover {
-  background: var(--ec-theme-action-focus);
-  color: var(--ec-theme-text-primary);
+  background: var(--featured-theme-action-focus);
+  color: var(--featured-theme-text-primary);
   transform: translateY(-1px);
 }
 
 #FeaturedConfigPage .jmp-tabButton.is-active {
-  background: var(--ec-theme-primary);
-  border-color: var(--ec-theme-primary);
-  color: var(--ec-theme-primary-contrast);
+  background: var(--featured-theme-primary);
+  border-color: var(--featured-theme-primary);
+  color: var(--featured-theme-primary-contrast);
 }
 
 #FeaturedConfigPage .jmp-tabButton .jmp-badge {
@@ -413,11 +413,11 @@
   height: auto;
   margin-top: 0;
   margin-bottom: 0;
-  padding: var(--ec-config-control-padding);
-  border: 1px solid var(--ec-theme-divider);
-  border-radius: var(--ec-config-pill-radius);
-  background: var(--ec-theme-action-hover);
-  color: var(--ec-theme-text-secondary);
+  padding: var(--featured-config-control-padding);
+  border: 1px solid var(--featured-theme-divider);
+  border-radius: var(--featured-config-pill-radius);
+  background: var(--featured-theme-action-hover);
+  color: var(--featured-theme-text-secondary);
   box-shadow: none !important;
   box-shadow: none;
   font: inherit;
@@ -427,7 +427,7 @@
   white-space: nowrap;
   text-transform: none;
   text-decoration: none;
-  transition: var(--ec-config-control-transition);
+  transition: var(--featured-config-control-transition);
 }
 
 #FeaturedConfigPage .jmp-saveButton span {
@@ -439,20 +439,20 @@
 
 #FeaturedConfigPage .jmp-saveButton:hover,
 #FeaturedConfigPage .jmp-saveButton:focus {
-  background: var(--ec-theme-action-focus);
-  color: var(--ec-theme-text-primary);
+  background: var(--featured-theme-action-focus);
+  color: var(--featured-theme-text-primary);
   transform: translateY(-1px);
 }
 
 #FeaturedConfigPage .jmp-saveButton.is-dirty {
-  background: var(--ec-theme-primary);
-  border-color: var(--ec-theme-primary);
-  color: var(--ec-theme-primary-contrast);
+  background: var(--featured-theme-primary);
+  border-color: var(--featured-theme-primary);
+  color: var(--featured-theme-primary-contrast);
 }
 
 #FeaturedConfigPage .jmp-saveButton.is-dirty:hover,
 #FeaturedConfigPage .jmp-saveButton.is-dirty:focus {
-  background: var(--ec-theme-primary-dark);
+  background: var(--featured-theme-primary-dark);
 }
 
 #FeaturedConfigPage .jmp-saveButton.is-saved {
@@ -485,13 +485,13 @@
   }
 }
 
-#FeaturedConfigPage .ec-addSourceButton,
-#FeaturedConfigPage .ec-addFilterButton {
+#FeaturedConfigPage .featured-addSourceButton,
+#FeaturedConfigPage .featured-addFilterButton {
   align-items: center;
-  background: var(--ec-theme-primary);
+  background: var(--featured-theme-primary);
   border: 0;
-  border-radius: var(--ec-theme-radius);
-  color: var(--ec-theme-primary-contrast);
+  border-radius: var(--featured-theme-radius);
+  color: var(--featured-theme-primary-contrast);
   cursor: pointer;
   display: inline-flex;
   gap: 0.4rem;
@@ -501,12 +501,12 @@
   padding: 0.65rem 1rem;
 }
 
-#FeaturedConfigPage .ec-addSourceButton:hover,
-#FeaturedConfigPage .ec-addFilterButton:hover {
-  background: var(--ec-theme-primary-dark);
+#FeaturedConfigPage .featured-addSourceButton:hover,
+#FeaturedConfigPage .featured-addFilterButton:hover {
+  background: var(--featured-theme-primary-dark);
 }
 
-#FeaturedConfigPage .ec-ruleIconButton {
+#FeaturedConfigPage .featured-ruleIconButton {
   align-items: center;
   border-radius: 50%;
   display: inline-flex;
@@ -520,17 +520,17 @@
   color: inherit;
 }
 
-#FeaturedConfigPage .ec-ruleIconButton:disabled {
+#FeaturedConfigPage .featured-ruleIconButton:disabled {
   opacity: 0.24;
 }
 
-#FeaturedConfigPage .ec-removeRule,
-#FeaturedConfigPage .ec-removeFilter {
-  color: var(--ec-theme-error-light);
+#FeaturedConfigPage .featured-removeRule,
+#FeaturedConfigPage .featured-removeFilter {
+  color: var(--featured-theme-error-light);
 }
 
-#FeaturedConfigPage .ec-primaryAction,
-#FeaturedConfigPage .ec-secondaryAction {
+#FeaturedConfigPage .featured-primaryAction,
+#FeaturedConfigPage .featured-secondaryAction {
   align-items: center;
   border: 0;
   border-radius: 0.35rem;
@@ -543,17 +543,17 @@
   padding: 0.65rem 1rem;
 }
 
-#FeaturedConfigPage .ec-primaryAction {
-  background: var(--ec-theme-primary);
-  color: var(--ec-theme-primary-contrast);
+#FeaturedConfigPage .featured-primaryAction {
+  background: var(--featured-theme-primary);
+  color: var(--featured-theme-primary-contrast);
 }
 
-#FeaturedConfigPage .ec-secondaryAction {
-  background: var(--ec-theme-contained);
-  color: var(--ec-theme-text-primary);
+#FeaturedConfigPage .featured-secondaryAction {
+  background: var(--featured-theme-contained);
+  color: var(--featured-theme-text-primary);
 }
 
-#FeaturedConfigPage .ec-emptySources {
+#FeaturedConfigPage .featured-emptySources {
   align-items: center;
   border: 1px dashed rgba(255, 255, 255, 0.16);
   border-radius: 0.9rem;
@@ -564,29 +564,29 @@
   text-align: center;
 }
 
-#FeaturedConfigPage .ec-emptySources .material-icons {
+#FeaturedConfigPage .featured-emptySources .material-icons {
   font-size: 2rem;
   opacity: 0.5;
 }
 
-#FeaturedConfigPage .ec-emptySources h3 {
+#FeaturedConfigPage .featured-emptySources h3 {
   margin: 0.7rem 0 0.25rem;
 }
 
-#FeaturedConfigPage .ec-emptySources p {
+#FeaturedConfigPage .featured-emptySources p {
   margin: 0;
   opacity: 0.7;
 }
 
 @media (hover: hover) and (pointer: fine) {
-  #FeaturedConfigPage .ec-configPreview.controls-on-hover .ec-configPreviewControls {
+  #FeaturedConfigPage .featured-configPreview.controls-on-hover .featured-configPreviewControls {
     opacity: 0;
     transform: translateY(-0.2rem);
-    transition: var(--ec-controls-reveal-transition);
+    transition: var(--featured-controls-reveal-transition);
   }
 
-  #FeaturedConfigPage .ec-configPreview.controls-on-hover:hover .ec-configPreviewControls,
-  #FeaturedConfigPage .ec-configPreview.controls-on-hover:focus-within .ec-configPreviewControls {
+  #FeaturedConfigPage .featured-configPreview.controls-on-hover:hover .featured-configPreviewControls,
+  #FeaturedConfigPage .featured-configPreview.controls-on-hover:focus-within .featured-configPreviewControls {
     opacity: 1;
     transform: translateY(0);
   }

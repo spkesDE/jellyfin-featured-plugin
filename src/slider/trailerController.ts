@@ -118,8 +118,8 @@ export class TrailerController {
           if (!player || this.player !== player) return;
           this.stopCountdown();
           this.concealed = false;
-          slide.classList.remove('ec-youtube-trailer-concealed');
-          slide.classList.add('ec-trailer-active');
+          slide.classList.remove('featured-youtube-trailer-concealed');
+          slide.classList.add('featured-trailer-active');
           void player.setMuted(this.muted);
           this.updateControls();
         },
@@ -146,10 +146,10 @@ export class TrailerController {
       this.paused = false;
       this.concealed = concealYouTube;
       this.slide = slide;
-      slide.classList.toggle('ec-trailer-active', !concealYouTube);
-      slide.classList.toggle('ec-youtube-trailer-concealed', concealYouTube);
-      slide.querySelectorAll('.ec-media > .ec-trailer').forEach((element) => element.remove());
-      slide.querySelector('.ec-backdrop')?.after(player.element);
+      slide.classList.toggle('featured-trailer-active', !concealYouTube);
+      slide.classList.toggle('featured-youtube-trailer-concealed', concealYouTube);
+      slide.querySelectorAll('.featured-media > .featured-trailer').forEach((element) => element.remove());
+      slide.querySelector('.featured-backdrop')?.after(player.element);
       this.updateControls();
       if (this.response.waitForTrailerToFinish) this.callbacks.pauseAutoplay();
       void player.play().catch(recover);
@@ -162,7 +162,7 @@ export class TrailerController {
     this.stopCountdown();
     this.player?.destroy();
     this.player = null;
-    this.slide?.classList.remove('ec-trailer-active', 'ec-youtube-trailer-concealed');
+    this.slide?.classList.remove('featured-trailer-active', 'featured-youtube-trailer-concealed');
     this.slide = null;
     this.itemId = null;
     this.candidateIndex = -1;
@@ -180,29 +180,32 @@ export class TrailerController {
 
   private createControls(): HTMLDivElement {
     const controls = document.createElement('div');
-    controls.className = 'ec-trailer-controls';
+    controls.className = 'featured-trailer-controls';
     controls.hidden = true;
 
     this.pauseButton = document.createElement('button');
     this.pauseButton.type = 'button';
-    this.pauseButton.className = 'ec-control ec-trailer-pause emby-scrollbuttons-button paper-icon-button-light';
+    this.pauseButton.className =
+      'featured-control featured-trailer-pause emby-scrollbuttons-button paper-icon-button-light';
     this.pauseButton.addEventListener('click', () => this.togglePaused());
     controls.appendChild(this.pauseButton);
 
     this.volumeControl = document.createElement('div');
-    this.volumeControl.className = 'ec-trailer-volume-control ec-volume-' + this.response.trailerVolumeSliderDirection;
+    this.volumeControl.className =
+      'featured-trailer-volume-control featured-volume-' + this.response.trailerVolumeSliderDirection;
     this.volumeControl.addEventListener('pointerenter', this.placeVolumePopover);
     this.volumeControl.addEventListener('focusin', this.placeVolumePopover);
 
     this.muteButton = document.createElement('button');
     this.muteButton.type = 'button';
-    this.muteButton.className = 'ec-control ec-trailer-mute emby-scrollbuttons-button paper-icon-button-light';
+    this.muteButton.className =
+      'featured-control featured-trailer-mute emby-scrollbuttons-button paper-icon-button-light';
     this.muteButton.addEventListener('click', () => this.toggleMuted());
     this.volumeControl.appendChild(this.muteButton);
 
     this.volumeInput = document.createElement('input');
     this.volumeInput.type = 'range';
-    this.volumeInput.className = 'ec-trailer-volume';
+    this.volumeInput.className = 'featured-trailer-volume';
     this.volumeInput.min = '0';
     this.volumeInput.max = '100';
     this.volumeInput.step = '1';
@@ -217,7 +220,7 @@ export class TrailerController {
     this.volumeInput.addEventListener('pointercancel', this.releaseVolumeInput);
 
     this.volumePopover = document.createElement('div');
-    this.volumePopover.className = 'ec-trailer-volume-popover';
+    this.volumePopover.className = 'featured-trailer-volume-popover';
     this.volumePopover.appendChild(this.volumeInput);
     this.volumeControl.appendChild(this.volumePopover);
     controls.appendChild(this.volumeControl);
@@ -228,8 +231,8 @@ export class TrailerController {
   private startCountdown(durationMilliseconds?: number): void {
     this.clearCountdownTimer();
     if (!this.autoplayButton || !this.countdownProgress) return;
-    this.autoplayButton.classList.add('ec-countdown-active');
-    this.autoplayButton.classList.toggle('ec-countdown-loading', durationMilliseconds === undefined);
+    this.autoplayButton.classList.add('featured-countdown-active');
+    this.autoplayButton.classList.toggle('featured-countdown-loading', durationMilliseconds === undefined);
     if (durationMilliseconds === undefined) {
       this.countdownProgress.style.removeProperty('stroke-dashoffset');
       return;
@@ -251,7 +254,7 @@ export class TrailerController {
 
   private stopCountdown(): void {
     this.clearCountdownTimer();
-    this.autoplayButton?.classList.remove('ec-countdown-active', 'ec-countdown-loading');
+    this.autoplayButton?.classList.remove('featured-countdown-active', 'featured-countdown-loading');
     this.countdownProgress?.style.removeProperty('stroke-dashoffset');
   }
 
@@ -313,8 +316,8 @@ export class TrailerController {
     let lowestOverflow = Number.POSITIVE_INFINITY;
 
     const applyPlacement = (placement: TrailerVolumePlacement): void => {
-      control.classList.remove(...TRAILER_VOLUME_PLACEMENTS.map((item) => `ec-volume-${item}`));
-      control.classList.add(`ec-volume-${placement}`);
+      control.classList.remove(...TRAILER_VOLUME_PLACEMENTS.map((item) => `featured-volume-${item}`));
+      control.classList.add(`featured-volume-${placement}`);
       this.volumeInput?.setAttribute(
         'aria-orientation',
         placement === 'up' || placement === 'down' ? 'vertical' : 'horizontal'

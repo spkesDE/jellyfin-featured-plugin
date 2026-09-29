@@ -32,17 +32,20 @@ test('favorite control supports compact metadata and standalone action placement
   assert.match(render, /favoriteButtonPlacement === 'metadata'/);
   assert.match(render, /favoriteButtonPlacement === 'actions'/);
   assert.match(render, /actions\.appendChild\(createFavoriteButton\(item, 'action'\)\)/);
-  assert.match(favorites, /ec-favorite-button-meta/);
-  assert.match(favorites, /favorite \? '#ff4058' : 'var\(--ec-on-media-color, #fff\)'/);
+  assert.match(favorites, /featured-favorite-button-meta/);
+  assert.match(favorites, /favorite \? '#ff4058' : 'var\(--featured-on-media-color, #fff\)'/);
   assert.match(favorites, /icon\.style\.fontSize = '1\.35rem'/);
   assert.doesNotMatch(favorites, /icon\.textContent/);
   assert.match(
     styles,
-    /\.ec-root\.ec-ready\.ec-hero \.ec-slide\.is-active \.ec-favorite-button-meta,[\s\S]*?pointer-events:\s*auto/
+    /\.featured-root\.featured-ready\.featured-hero \.featured-slide\.is-active \.featured-favorite-button-meta,[\s\S]*?pointer-events:\s*auto/
   );
   assert.match(
     styles,
-    /\.ec-root \.ec-meta\s*>\s*button\.ec-favorite-button-meta,[\s\S]*?margin:\s*0 !important;[\s\S]*?padding:\s*0?\.15rem !important/
+    /\.featured-root \.featured-meta\s*>\s*button\.featured-favorite-button-meta,[\s\S]*?margin:\s*0 !important;[\s\S]*?padding:\s*0?\.15rem !important/
   );
-  assert.match(styles, /button\.ec-favorite-button-meta:hover,[\s\S]*?button\.ec-playstate-button-meta:hover/);
+  assert.match(
+    styles,
+    /button\.featured-favorite-button-meta:hover,[\s\S]*?button\.featured-playstate-button-meta:hover/
+  );
 });

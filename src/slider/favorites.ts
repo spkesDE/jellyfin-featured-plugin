@@ -12,8 +12,8 @@ function updateButton(button: HTMLButtonElement, favorite: boolean): void {
   button.setAttribute('aria-label', t(favorite ? 'carousel.removeFavorite' : 'carousel.addFavorite'));
   button.title = t(favorite ? 'carousel.removeFavorite' : 'carousel.addFavorite');
   button.dataset.isfavorite = String(favorite);
-  if (button.classList.contains('ec-favorite-button-meta')) {
-    button.style.color = favorite ? '#ff4058' : 'var(--ec-on-media-color, #fff)';
+  if (button.classList.contains('featured-favorite-button-meta')) {
+    button.style.color = favorite ? '#ff4058' : 'var(--featured-on-media-color, #fff)';
   }
 }
 
@@ -40,8 +40,8 @@ export function createFavoriteButton(item: FeaturedItem, variant: 'action' | 'me
   button.type = 'button';
   button.className =
     variant === 'metadata'
-      ? 'button-flat btnUserRating detailButton emby-button ec-favorite-button ec-favorite-button-meta'
-      : 'ec-button ec-button-secondary ec-favorite-button raised emby-button';
+      ? 'button-flat btnUserRating detailButton emby-button featured-favorite-button featured-favorite-button-meta'
+      : 'featured-button featured-button-secondary featured-favorite-button raised emby-button';
   button.setAttribute('is', 'emby-ratingbutton');
   button.dataset.id = item.id;
   const serverId = getApiClient()?.serverId?.();
@@ -62,7 +62,7 @@ export function createFavoriteButton(item: FeaturedItem, variant: 'action' | 'me
     if (button.disabled) return;
     button.disabled = true;
     button.removeAttribute('data-error');
-    button.parentElement?.querySelector('.ec-favorite-error')?.remove();
+    button.parentElement?.querySelector('.featured-favorite-error')?.remove();
     const next = !item.isFavorite;
     try {
       const result = await requestJson<FavoriteResponse>(`UserFavoriteItems/${encodeURIComponent(item.id)}`, {
@@ -76,7 +76,7 @@ export function createFavoriteButton(item: FeaturedItem, variant: 'action' | 'me
         console.warn('Jellyfin Featured: could not refresh favorite-dependent feeds.', error);
       }
     } catch (error) {
-      showTransientActionError(button, 'ec-favorite-error', t('carousel.favoriteError'));
+      showTransientActionError(button, 'featured-favorite-error', t('carousel.favoriteError'));
       console.warn('Jellyfin Featured: could not change favorite.', error);
     } finally {
       button.disabled = false;

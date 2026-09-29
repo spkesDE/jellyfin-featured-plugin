@@ -1,13 +1,15 @@
-.ec-root.ec-hero {
-  --ec-content-height: var(--ec-desktop-content-height);
-  --ec-desktop-content-height: clamp(
+.featured-root.featured-hero {
+  --featured-content-height: var(--featured-desktop-content-height);
+  --featured-desktop-content-height: clamp(
     0px,
-    calc(var(--ec-height) - var(--ec-hero-overlap, 150px) + 52px + var(--ec-media-padding, 0px)),
-    var(--ec-height)
+    calc(var(--featured-height) - var(--featured-hero-overlap, 150px) + 52px + var(--featured-media-padding, 0px)),
+    var(--featured-height)
   );
-  --ec-desktop-overlap-offset: calc((var(--ec-hero-overlap, 150px) * -1) + 52px + var(--ec-media-padding, 0px));
-  --ec-hero-content-padding-top: clamp(5em, 10vw, 9rem);
-  --ec-hero-media-mask: linear-gradient(
+  --featured-desktop-overlap-offset: calc(
+    (var(--featured-hero-overlap, 150px) * -1) + 52px + var(--featured-media-padding, 0px)
+  );
+  --featured-hero-content-padding-top: clamp(5em, 10vw, 9rem);
+  --featured-hero-media-mask: linear-gradient(
     to bottom,
     #000 18%,
     rgba(0, 0, 0, 0.932) 36%,
@@ -15,9 +17,9 @@
     rgba(0, 0, 0, 0.354) 70%,
     rgba(0, 0, 0, 0.15) 85%
   );
-  --ec-media-shade: none;
-  --ec-hero-overlap-offset: var(--ec-desktop-overlap-offset);
-  --ec-hero-slide-background: linear-gradient(
+  --featured-media-shade: none;
+  --featured-hero-overlap-offset: var(--featured-desktop-overlap-offset);
+  --featured-hero-slide-background: linear-gradient(
     to bottom,
     #000 0%,
     #000 54%,
@@ -28,47 +30,49 @@
   );
 }
 
-.ec-root.ec-ready.ec-hero {
-  margin-bottom: calc(var(--ec-hero-overlap-offset) + var(--ec-content-clearance, 0px));
+.featured-root.featured-ready.featured-hero {
+  margin-bottom: calc(var(--featured-hero-overlap-offset) + var(--featured-content-clearance, 0px));
   pointer-events: none;
 }
 
-.ec-root.ec-placeholder.ec-hero {
-  margin-bottom: var(--ec-hero-overlap-offset);
+.featured-root.featured-placeholder.featured-hero {
+  margin-bottom: var(--featured-hero-overlap-offset);
   margin-top: 0;
 }
 
 /* The artwork keeps its full height for the fade, while this transparent
    surface ends exactly where the following Jellyfin section starts. */
-.ec-root.ec-ready.ec-hero .ec-slide {
+.featured-root.featured-ready.featured-hero .featured-slide {
   pointer-events: none;
 }
 
-.ec-root.ec-ready.ec-hero .ec-slide-hitbox {
-  height: var(--ec-content-height);
+.featured-root.featured-ready.featured-hero .featured-slide-hitbox {
+  height: var(--featured-content-height);
   inset: 0 0 auto;
   pointer-events: none;
   position: absolute;
   z-index: 2;
 }
 
-.ec-root.ec-ready.ec-hero.ec-whole-banner-interactive .ec-slide.is-active .ec-slide-hitbox {
+.featured-root.featured-ready.featured-hero.featured-whole-banner-interactive
+  .featured-slide.is-active
+  .featured-slide-hitbox {
   pointer-events: auto;
 }
 
-.ec-root.ec-ready.ec-hero .ec-content {
+.featured-root.featured-ready.featured-hero .featured-content {
   z-index: 3;
 }
 
-.ec-root.ec-ready.ec-hero .ec-slide.is-active .ec-button,
-.ec-root.ec-ready.ec-hero .ec-slide.is-active .ec-favorite-button-meta,
-.ec-root.ec-ready.ec-hero .ec-slide.is-active .ec-playstate-button-meta,
-.ec-root.ec-ready.ec-hero .ec-slide.is-active button,
-.ec-root.ec-ready.ec-hero .ec-navigation {
+.featured-root.featured-ready.featured-hero .featured-slide.is-active .featured-button,
+.featured-root.featured-ready.featured-hero .featured-slide.is-active .featured-favorite-button-meta,
+.featured-root.featured-ready.featured-hero .featured-slide.is-active .featured-playstate-button-meta,
+.featured-root.featured-ready.featured-hero .featured-slide.is-active button,
+.featured-root.featured-ready.featured-hero .featured-navigation {
   pointer-events: auto;
 }
 
-.ec-root.ec-hero .ec-navigation {
+.featured-root.featured-hero .featured-navigation {
   bottom: auto;
   left: auto;
   right: max(env(safe-area-inset-right), 3.3%);
@@ -76,45 +80,45 @@
   transform: none;
 }
 
-.ec-root.ec-hero .ec-viewport {
+.featured-root.featured-hero .featured-viewport {
   background: transparent;
-  height: var(--ec-height);
+  height: var(--featured-height);
 }
 
-.ec-root.ec-hero .ec-slide {
-  background: var(--ec-hero-slide-background);
+.featured-root.featured-hero .featured-slide {
+  background: var(--featured-hero-slide-background);
 }
 
-.ec-root.ec-hero .ec-slide.ec-trailer-active .ec-backdrop {
+.featured-root.featured-hero .featured-slide.featured-trailer-active .featured-backdrop {
   opacity: 0;
 }
 
-.ec-root.ec-hero .ec-media {
-  -webkit-mask-image: var(--ec-hero-media-mask);
-  mask-image: var(--ec-hero-media-mask);
+.featured-root.featured-hero .featured-media {
+  -webkit-mask-image: var(--featured-hero-media-mask);
+  mask-image: var(--featured-hero-media-mask);
 }
 
-.ec-root.ec-hero .ec-slide::after {
-  -webkit-mask-image: var(--ec-hero-media-mask);
-  mask-image: var(--ec-hero-media-mask);
+.featured-root.featured-hero .featured-slide::after {
+  -webkit-mask-image: var(--featured-hero-media-mask);
+  mask-image: var(--featured-hero-media-mask);
 }
 
-.ec-root.ec-hero .ec-content {
-  padding-top: var(--ec-hero-content-padding-top);
+.featured-root.featured-hero .featured-content {
+  padding-top: var(--featured-hero-content-padding-top);
 }
 
 @media (max-width: 1000px) {
-  .ec-content {
+  .featured-content {
     max-width: min(38rem, 70%);
   }
 }
 
 @media (max-width: 700px) {
-  .ec-root.ec-hero {
+  .featured-root.featured-hero {
     /* Keep the slide canvas transparent at its lower edge. Applying this
        shade as the slide background leaves an opaque final row in WebKit,
        which turns the hero fade into a hard horizontal edge on iOS. */
-    --ec-media-shade: linear-gradient(
+    --featured-media-shade: linear-gradient(
       0deg,
       rgba(5, 7, 12, 0.96) 0%,
       rgba(5, 7, 12, 0.54) 58%,
@@ -122,84 +126,88 @@
     );
   }
 
-  .ec-root.ec-hero .ec-viewport {
-    height: var(--ec-height);
+  .featured-root.featured-hero .featured-viewport {
+    height: var(--featured-height);
   }
 
-  .ec-content {
+  .featured-content {
     justify-content: flex-end;
     max-width: 100%;
     padding: 2rem 1.2rem 2.8rem;
   }
 
-  .ec-text-center .ec-content,
-  .ec-text-right .ec-content {
+  .featured-text-center .featured-content,
+  .featured-text-right .featured-content {
     align-items: flex-start;
     margin: 0;
     text-align: left;
   }
 
-  .ec-text-center .ec-logo,
-  .ec-text-right .ec-logo {
+  .featured-text-center .featured-logo,
+  .featured-text-right .featured-logo {
     object-position: left center;
   }
 
-  .ec-logo {
+  .featured-logo {
     max-height: 7.5rem;
     max-width: 70vw;
   }
 
-  .ec-title {
+  .featured-title {
     font-size: clamp(1.8rem, 10vw, 3rem);
   }
 
-  .ec-overview {
+  .featured-overview {
     -webkit-line-clamp: 2;
   }
 
-  .ec-controls {
+  .featured-controls {
     display: none;
   }
 }
 
 @media (max-width: 700px), (hover: none) and (pointer: coarse) {
-  .ec-root.ec-hero {
-    --ec-content-height: clamp(0px, calc(var(--ec-height) + 1.25rem + var(--ec-media-padding, 0px)), var(--ec-height));
-    --ec-hero-overlap-offset: calc(1.25rem + var(--ec-media-padding, 0px));
+  .featured-root.featured-hero {
+    --featured-content-height: clamp(
+      0px,
+      calc(var(--featured-height) + 1.25rem + var(--featured-media-padding, 0px)),
+      var(--featured-height)
+    );
+    --featured-hero-overlap-offset: calc(1.25rem + var(--featured-media-padding, 0px));
   }
 
-  .ec-root.ec-ready.ec-hero {
-    margin-bottom: calc(var(--ec-hero-overlap-offset) + var(--ec-content-clearance, 0px));
+  .featured-root.featured-ready.featured-hero {
+    margin-bottom: calc(var(--featured-hero-overlap-offset) + var(--featured-content-clearance, 0px));
   }
 
-  .ec-root.ec-placeholder.ec-hero {
-    margin-bottom: var(--ec-hero-overlap-offset);
+  .featured-root.featured-placeholder.featured-hero {
+    margin-bottom: var(--featured-hero-overlap-offset);
   }
 
-  .ec-root.ec-ready.ec-hero .ec-slide-hitbox {
-    height: var(--ec-content-height);
+  .featured-root.featured-ready.featured-hero .featured-slide-hitbox {
+    height: var(--featured-content-height);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ec-slide {
+  .featured-slide {
     transition-duration: 0.01ms !important;
   }
 
-  .ec-play-button {
+  .featured-play-button {
     transition: none;
   }
 
-  .ec-root .ec-play-button:hover,
-  .ec-root .ec-play-button:focus-visible {
+  .featured-root .featured-play-button:hover,
+  .featured-root .featured-play-button:focus-visible {
     transform: none;
   }
 
-  .ec-placeholder-viewport {
+  .featured-placeholder-viewport {
     animation: none;
   }
 
-  .ec-autoplay.ec-countdown-loading .ec-countdown-ring {
+  .featured-autoplay.featured-countdown-loading .featured-countdown-ring {
     animation: none;
   }
 }

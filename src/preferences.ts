@@ -43,7 +43,7 @@ function notifyPreferencesChanged(): void {
 }
 
 export async function openPreferencesDialog(): Promise<void> {
-  if (document.querySelector('.ec-preferences-backdrop')) return;
+  if (document.querySelector('.featured-preferences-backdrop')) return;
   const shell = new PreferencesDialogShell();
   shell.attach();
 
@@ -55,16 +55,16 @@ export async function openPreferencesDialog(): Promise<void> {
     }
     const effective = current.effective;
     const dialog = document.createElement('form');
-    dialog.className = 'ec-preferences-dialog';
+    dialog.className = 'featured-preferences-dialog';
     dialog.setAttribute('role', 'dialog');
     dialog.setAttribute('aria-modal', 'true');
-    dialog.setAttribute('aria-labelledby', 'ec-preferences-title');
+    dialog.setAttribute('aria-labelledby', 'featured-preferences-title');
     dialog.appendChild(createPreferencesHeader());
     const actions = createPreferencesActions(options.policy.enabled || dismissals.policy.enabled);
     const actionStatus = new PreferencesActionStatus(dialog, actions.status);
     const content = document.createElement('div');
-    content.className = 'ec-preferences-content';
-    content.appendChild(createTextElement('p', t('preferences.help'), 'ec-preferences-help'));
+    content.className = 'featured-preferences-content';
+    content.appendChild(createTextElement('p', t('preferences.help'), 'featured-preferences-help'));
     const hotkeys = createPreferencesHotkeys();
     if (effective.display.enableBackgroundTrailers) content.appendChild(hotkeys);
 
@@ -83,7 +83,7 @@ export async function openPreferencesDialog(): Promise<void> {
     const display = createPreferenceFieldset(
       t('preferences.display'),
       t('preferences.displayHelp'),
-      'ec-preference-display'
+      'featured-preference-display'
     );
     let displayOptionCount = 0;
     for (const [key, label] of displayFields) {
@@ -98,7 +98,7 @@ export async function openPreferencesDialog(): Promise<void> {
     const sources = createPreferenceFieldset(t('preferences.sources'));
     for (const source of options.sources) {
       const row = document.createElement('div');
-      row.className = 'ec-preference-source';
+      row.className = 'featured-preference-source';
       const enabled = createCheckbox(
         t(sourceKeys[source.type] ?? 'source.type.random'),
         effective.sourceEnabled[source.id] ?? source.enabled,
@@ -121,7 +121,7 @@ export async function openPreferencesDialog(): Promise<void> {
       const genres = createPreferenceFieldset(
         t('preferences.genres'),
         t('preferences.genresHelp'),
-        'ec-preference-genres'
+        'featured-preference-genres'
       );
       for (const genre of options.genres) {
         const initialState: GenrePreferenceState = effective.excludedGenres.includes(genre)
@@ -134,7 +134,7 @@ export async function openPreferencesDialog(): Promise<void> {
       content.appendChild(genres);
     }
 
-    const boosts = createPreferenceFieldset(t('preferences.content'), undefined, 'ec-preference-boosts');
+    const boosts = createPreferenceFieldset(t('preferences.content'), undefined, 'featured-preference-boosts');
     const boostFields: Array<[keyof FeaturedUserPreferences, string, number, boolean]> = [
       ['unplayedBoost', t('preferences.unplayed'), effective.unplayedBoost, options.policy.allowUnplayedBoost],
       ['favouriteBoost', t('preferences.favourites'), effective.favouriteBoost, options.policy.allowFavouriteBoost],
@@ -155,7 +155,7 @@ export async function openPreferencesDialog(): Promise<void> {
     if (boosts.children.length > 1) content.appendChild(boosts);
 
     if (!options.policy.enabled) {
-      replaceElementChildren(content, createTextElement('p', t('preferences.disabled'), 'ec-preferences-help'));
+      replaceElementChildren(content, createTextElement('p', t('preferences.disabled'), 'featured-preferences-help'));
       if (displayOptionCount > 0) content.appendChild(display);
     }
 
@@ -167,7 +167,7 @@ export async function openPreferencesDialog(): Promise<void> {
 
     dialog.appendChild(actions.root);
     shell.replaceContent(dialog);
-    dialog.querySelector('.ec-preferences-reset')?.addEventListener('click', async () => {
+    dialog.querySelector('.featured-preferences-reset')?.addEventListener('click', async () => {
       const succeeded = await actionStatus.run(async () => {
         await requestJson('featured/preferences', { method: 'PUT', body: { reset: true } });
       });

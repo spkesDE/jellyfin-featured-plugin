@@ -67,7 +67,7 @@ onBeforeUnmount(() => {
 function focusSection(event: Event): void {
   const current = event.currentTarget as HTMLDetailsElement;
   if (!current.open) return;
-  displayEditor.value?.querySelectorAll<HTMLDetailsElement>('details.ec-displayGroup').forEach((entry) => {
+  displayEditor.value?.querySelectorAll<HTMLDetailsElement>('details.featured-displayGroup').forEach((entry) => {
     if (entry !== current) entry.open = false;
   });
 }
@@ -75,7 +75,7 @@ function openPreviewSection(section: string): void {
   void nextTick(() => {
     const target = displayEditor.value?.querySelector<HTMLDetailsElement>(`[data-display-section="${section}"]`);
     if (!target) return;
-    displayEditor.value?.querySelectorAll<HTMLDetailsElement>('details.ec-displayGroup').forEach((entry) => {
+    displayEditor.value?.querySelectorAll<HTMLDetailsElement>('details.featured-displayGroup').forEach((entry) => {
       entry.open = entry === target;
     });
   });
@@ -119,10 +119,10 @@ const placementOptions: SelectOption[] = [
     role="tabpanel"
     aria-labelledby="featuredTab-display"
   >
-    <div class="ec-displayWorkspace">
-      <div ref="displayEditor" class="ec-displayEditor">
+    <div class="featured-displayWorkspace">
+      <div ref="displayEditor" class="featured-displayEditor">
         <details
-          class="ec-displayGroup ec-configCard"
+          class="featured-displayGroup featured-configCard"
           data-display-section="layout"
           open
           @toggle="focusSection($event)"
@@ -132,9 +132,11 @@ const placementOptions: SelectOption[] = [
             ><span
               ><strong>{{ t('display.layout') }}</strong
               ><small>{{ t('display.layoutHelp') }}</small></span
-            ><span class="material-icons ec-displayGroupChevron ec-configChevron" aria-hidden="true">expand_more</span>
+            ><span class="material-icons featured-displayGroupChevron featured-configChevron" aria-hidden="true"
+              >expand_more</span
+            >
           </summary>
-          <div class="ec-displayGroupBody">
+          <div class="featured-displayGroupBody">
             <ConfigCheckbox v-model="store.config.UseHeroLayout" :label="t('display.heroLayout')" />
             <ConfigSelect
               v-model="store.config.HeroHeightMode"
@@ -210,15 +212,21 @@ const placementOptions: SelectOption[] = [
           </div>
         </details>
 
-        <details class="ec-displayGroup ec-configCard" data-display-section="metadata" @toggle="focusSection($event)">
+        <details
+          class="featured-displayGroup featured-configCard"
+          data-display-section="metadata"
+          @toggle="focusSection($event)"
+        >
           <summary>
             <span class="material-icons" aria-hidden="true">subtitles</span
             ><span
               ><strong>{{ t('display.metadata') }}</strong
               ><small>{{ t('display.metadataHelp') }}</small></span
-            ><span class="material-icons ec-displayGroupChevron ec-configChevron" aria-hidden="true">expand_more</span>
+            ><span class="material-icons featured-displayGroupChevron featured-configChevron" aria-hidden="true"
+              >expand_more</span
+            >
           </summary>
-          <div class="ec-displayGroupBody">
+          <div class="featured-displayGroupBody">
             <ConfigSelect
               v-model="store.config.TitleDisplayMode"
               :label="t('display.titleDisplay')"
@@ -237,15 +245,21 @@ const placementOptions: SelectOption[] = [
           </div>
         </details>
 
-        <details class="ec-displayGroup ec-configCard" data-display-section="actions" @toggle="focusSection($event)">
+        <details
+          class="featured-displayGroup featured-configCard"
+          data-display-section="actions"
+          @toggle="focusSection($event)"
+        >
           <summary>
             <span class="material-icons" aria-hidden="true">smart_button</span
             ><span
               ><strong>{{ t('display.actions') }}</strong
               ><small>{{ t('display.actionsHelp') }}</small></span
-            ><span class="material-icons ec-displayGroupChevron ec-configChevron" aria-hidden="true">expand_more</span>
+            ><span class="material-icons featured-displayGroupChevron featured-configChevron" aria-hidden="true"
+              >expand_more</span
+            >
           </summary>
-          <div class="ec-displayGroupBody">
+          <div class="featured-displayGroupBody">
             <ConfigCheckbox v-model="store.config.ShowPlayButton" :label="t('display.showPlayButton')" />
             <ConfigText
               v-if="store.config.ShowPlayButton"
@@ -260,7 +274,7 @@ const placementOptions: SelectOption[] = [
               :label="t('display.secondaryButtonText')"
               :placeholder="t('display.moreInfo')"
             />
-            <div class="ec-dependentSetting">
+            <div class="featured-dependentSetting">
               <ConfigCheckbox v-model="store.config.ShowFavoriteButton" :label="t('display.showFavoriteButton')" />
               <ConfigSelect
                 v-if="store.config.ShowFavoriteButton"
@@ -269,7 +283,7 @@ const placementOptions: SelectOption[] = [
                 :options="placementOptions"
               />
             </div>
-            <div class="ec-dependentSetting">
+            <div class="featured-dependentSetting">
               <ConfigCheckbox v-model="store.config.ShowPlaystateButton" :label="t('display.showPlaystateButton')" />
               <ConfigSelect
                 v-if="store.config.ShowPlaystateButton"
@@ -278,7 +292,7 @@ const placementOptions: SelectOption[] = [
                 :options="placementOptions"
               />
             </div>
-            <div class="ec-dependentSetting">
+            <div class="featured-dependentSetting">
               <ConfigCheckbox
                 v-model="store.config.ShowDismissalButton"
                 :label="t('display.showDismissalButton')"
@@ -294,15 +308,21 @@ const placementOptions: SelectOption[] = [
           </div>
         </details>
 
-        <details class="ec-displayGroup ec-configCard" data-display-section="navigation" @toggle="focusSection($event)">
+        <details
+          class="featured-displayGroup featured-configCard"
+          data-display-section="navigation"
+          @toggle="focusSection($event)"
+        >
           <summary>
             <span class="material-icons" aria-hidden="true">tune</span
             ><span
               ><strong>{{ t('display.navigationAndAutoplay') }}</strong
               ><small>{{ t('display.navigationAndAutoplayHelp') }}</small></span
-            ><span class="material-icons ec-displayGroupChevron ec-configChevron" aria-hidden="true">expand_more</span>
+            ><span class="material-icons featured-displayGroupChevron featured-configChevron" aria-hidden="true"
+              >expand_more</span
+            >
           </summary>
-          <div class="ec-displayGroupBody">
+          <div class="featured-displayGroupBody">
             <ConfigCheckbox v-model="store.config.ShowNavigationArrows" :label="t('display.showNavigation')" />
             <ConfigCheckbox
               v-if="!store.config.EnableInfiniteLoading"
@@ -345,15 +365,21 @@ const placementOptions: SelectOption[] = [
           </div>
         </details>
 
-        <details class="ec-displayGroup ec-configCard" data-display-section="behavior" @toggle="focusSection($event)">
+        <details
+          class="featured-displayGroup featured-configCard"
+          data-display-section="behavior"
+          @toggle="focusSection($event)"
+        >
           <summary>
             <span class="material-icons" aria-hidden="true">devices</span
             ><span
               ><strong>{{ t('display.behavior') }}</strong
               ><small>{{ t('display.behaviorHelp') }}</small></span
-            ><span class="material-icons ec-displayGroupChevron ec-configChevron" aria-hidden="true">expand_more</span>
+            ><span class="material-icons featured-displayGroupChevron featured-configChevron" aria-hidden="true"
+              >expand_more</span
+            >
           </summary>
-          <div class="ec-displayGroupBody">
+          <div class="featured-displayGroupBody">
             <ConfigCheckbox
               v-model="store.config.InteractOnWholeBanner"
               :label="t('display.interactOnWholeBanner')"
@@ -372,9 +398,9 @@ const placementOptions: SelectOption[] = [
         </details>
       </div>
 
-      <div ref="previewRail" class="ec-previewRail">
+      <div ref="previewRail" class="featured-previewRail">
         <ConfigCard
-          class="ec-preview-section"
+          class="featured-preview-section"
           :style="previewPositionStyle"
           :title="t('display.livePreview')"
           :help="t('display.livePreviewHelp')"
@@ -387,20 +413,20 @@ const placementOptions: SelectOption[] = [
 </template>
 
 <style scoped>
-.ec-displayWorkspace {
+.featured-displayWorkspace {
   align-items: start;
   display: grid;
   gap: 1.25rem;
   grid-template-columns: minmax(25rem, 1.25fr) minmax(28rem, 0.9fr);
 }
-.ec-displayEditor {
+.featured-displayEditor {
   display: grid;
   gap: 0.75rem;
 }
-.ec-displayGroup {
+.featured-displayGroup {
   overflow: hidden;
 }
-.ec-displayGroup > summary {
+.featured-displayGroup > summary {
   align-items: center;
   cursor: pointer;
   display: grid;
@@ -409,42 +435,42 @@ const placementOptions: SelectOption[] = [
   list-style: none;
   padding: 0.85rem 1rem;
 }
-.ec-displayGroup > summary::-webkit-details-marker {
+.featured-displayGroup > summary::-webkit-details-marker {
   display: none;
 }
-.ec-displayGroup > summary > span:nth-child(2) {
+.featured-displayGroup > summary > span:nth-child(2) {
   display: grid;
   gap: 0.1rem;
 }
-.ec-displayGroup > summary small {
+.featured-displayGroup > summary small {
   font-size: 0.78rem;
   font-weight: 400;
   opacity: 0.65;
 }
-.ec-displayGroup[open] .ec-displayGroupChevron {
+.featured-displayGroup[open] .featured-displayGroupChevron {
   transform: rotate(180deg);
 }
-.ec-displayGroupBody {
+.featured-displayGroupBody {
   border-top: 1px solid rgba(255, 255, 255, 0.07);
   padding: 1rem;
 }
-.ec-displayGroupBody > :deep(.checkboxContainer:last-child),
-.ec-displayGroupBody > :deep(.inputContainer:last-child),
-.ec-displayGroupBody > :deep(.selectContainer:last-child) {
+.featured-displayGroupBody > :deep(.checkboxContainer:last-child),
+.featured-displayGroupBody > :deep(.inputContainer:last-child),
+.featured-displayGroupBody > :deep(.selectContainer:last-child) {
   margin-bottom: 0;
 }
-.ec-dependentSetting {
+.featured-dependentSetting {
   border-top: 1px solid rgba(255, 255, 255, 0.07);
   margin-top: 0.7rem;
   padding-top: 0.7rem;
 }
-.ec-previewRail {
+.featured-previewRail {
   align-self: stretch;
   min-width: 0;
 }
-.ec-preview-section {
+.featured-preview-section {
   box-sizing: border-box;
-  max-height: calc(100vh - var(--ec-config-appbar-offset) - 1rem);
+  max-height: calc(100vh - var(--featured-config-appbar-offset) - 1rem);
   overflow-y: auto;
   overscroll-behavior: contain;
   position: relative;
@@ -452,20 +478,20 @@ const placementOptions: SelectOption[] = [
   will-change: transform;
 }
 @media (max-width: 1050px) {
-  .ec-displayWorkspace {
+  .featured-displayWorkspace {
     grid-template-columns: 1fr;
   }
-  .ec-previewRail {
+  .featured-previewRail {
     grid-row: 1;
   }
-  .ec-preview-section {
+  .featured-preview-section {
     max-height: none;
     overflow: visible;
     transform: none !important;
   }
 }
 @media (max-width: 600px) {
-  .ec-displayWorkspace {
+  .featured-displayWorkspace {
     grid-template-columns: minmax(0, 1fr);
   }
 }

@@ -10,7 +10,7 @@ function keepFieldKeyboardInputLocal(event: KeyboardEvent): void {
 
 export function createCheckbox(label: string, checked: boolean, disabled: boolean): HTMLLabelElement {
   const wrapper = document.createElement('label');
-  wrapper.className = 'emby-checkbox-label ec-preference-check';
+  wrapper.className = 'emby-checkbox-label featured-preference-check';
   const input = document.createElement('input');
   input.type = 'checkbox';
   input.className = 'emby-checkbox';
@@ -29,7 +29,7 @@ export function createCheckbox(label: string, checked: boolean, disabled: boolea
 
 export function createNumberField(label: string, value: number, max: number): HTMLLabelElement {
   const wrapper = document.createElement('label');
-  wrapper.className = 'inputContainer ec-preference-number';
+  wrapper.className = 'inputContainer featured-preference-number';
   const text = document.createElement('span');
   text.className = 'inputLabel';
   text.textContent = label;
@@ -61,8 +61,8 @@ const COOLDOWN_CHOICES: Array<[number, TranslationKey]> = [
 
 export function createCooldownField(value: number): HTMLDivElement {
   const wrapper = document.createElement('div');
-  wrapper.className = 'selectContainer ec-preference-cooldown';
-  const fieldId = 'ec-preference-cooldown-hours';
+  wrapper.className = 'selectContainer featured-preference-cooldown';
+  const fieldId = 'featured-preference-cooldown-hours';
   const label = document.createElement('label');
   label.className = 'selectLabel';
   label.htmlFor = fieldId;
@@ -86,10 +86,10 @@ export function createCooldownField(value: number): HTMLDivElement {
 export function createGenreSelector(genre: string, initialState: GenrePreferenceState): HTMLButtonElement {
   const button = document.createElement('button');
   button.type = 'button';
-  button.className = 'ec-preference-genre';
+  button.className = 'featured-preference-genre';
   button.dataset.genre = genre;
   const marker = document.createElement('span');
-  marker.className = 'ec-preference-genre-marker';
+  marker.className = 'featured-preference-genre-marker';
   marker.setAttribute('aria-hidden', 'true');
   const label = document.createElement('span');
   label.textContent = genre;

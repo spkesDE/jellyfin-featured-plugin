@@ -17,20 +17,20 @@ function createIconButton(iconName: string, label: string, className: string): H
 
 export function createPreferencesHeader(): HTMLElement {
   const header = document.createElement('header');
-  header.className = 'ec-preferences-header';
+  header.className = 'featured-preferences-header';
   const title = document.createElement('h2');
-  title.id = 'ec-preferences-title';
+  title.id = 'featured-preferences-title';
   title.textContent = t('preferences.title');
   header.append(
     title,
-    createIconButton('close', t('preferences.close'), 'paper-icon-button-light ec-preferences-close')
+    createIconButton('close', t('preferences.close'), 'paper-icon-button-light featured-preferences-close')
   );
   return header;
 }
 
 export function createPreferencesHotkeys(): HTMLElement {
   const hotkeys = document.createElement('aside');
-  hotkeys.className = 'ec-preferences-hotkeys';
+  hotkeys.className = 'featured-preferences-hotkeys';
   const title = document.createElement('strong');
   title.textContent = t('preferences.hotkeys');
   hotkeys.append(title);
@@ -53,19 +53,19 @@ export function createPreferencesActions(showButtons: boolean): {
   status: HTMLSpanElement;
 } {
   const root = document.createElement('div');
-  root.className = 'ec-preferences-actions';
+  root.className = 'featured-preferences-actions';
   const status = document.createElement('span');
-  status.className = 'ec-preferences-status';
+  status.className = 'featured-preferences-status';
   status.setAttribute('aria-live', 'polite');
   root.appendChild(status);
   if (showButtons) {
     const reset = document.createElement('button');
     reset.type = 'button';
-    reset.className = 'raised emby-button ec-preferences-reset';
+    reset.className = 'raised emby-button featured-preferences-reset';
     reset.textContent = t('preferences.reset');
     const save = document.createElement('button');
     save.type = 'submit';
-    save.className = 'raised button-submit emby-button ec-preferences-save';
+    save.className = 'raised button-submit emby-button featured-preferences-save';
     save.textContent = t('preferences.save');
     root.append(reset, save);
   }
@@ -81,18 +81,18 @@ export class PreferencesDialogShell {
   constructor() {
     this.previouslyFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     this.backdrop = document.createElement('div');
-    this.backdrop.className = 'ec-preferences-backdrop';
+    this.backdrop.className = 'featured-preferences-backdrop';
 
     const dialog = document.createElement('section');
-    dialog.className = 'ec-preferences-dialog ec-preferences-loading-shell';
+    dialog.className = 'featured-preferences-dialog featured-preferences-loading-shell';
     dialog.setAttribute('role', 'dialog');
     dialog.setAttribute('aria-modal', 'true');
-    dialog.setAttribute('aria-labelledby', 'ec-preferences-title');
+    dialog.setAttribute('aria-labelledby', 'featured-preferences-title');
     this.loading = document.createElement('div');
-    this.loading.className = 'ec-preferences-loading';
+    this.loading.className = 'featured-preferences-loading';
     this.loading.setAttribute('role', 'status');
     const spinner = document.createElement('span');
-    spinner.className = 'ec-preferences-spinner';
+    spinner.className = 'featured-preferences-spinner';
     spinner.setAttribute('aria-hidden', 'true');
     const label = document.createElement('span');
     label.textContent = t('preferences.loading');
@@ -137,6 +137,6 @@ export class PreferencesDialogShell {
   };
 
   private bindCloseButton(): void {
-    this.backdrop.querySelector('.ec-preferences-close')?.addEventListener('click', this.close);
+    this.backdrop.querySelector('.featured-preferences-close')?.addEventListener('click', this.close);
   }
 }

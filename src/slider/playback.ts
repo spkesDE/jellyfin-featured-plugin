@@ -103,7 +103,7 @@ function createNativePlaybackAction(target: PlaybackTarget): HTMLButtonElement {
   const action = document.createElement('button');
   action.type = 'button';
   action.hidden = true;
-  action.className = 'itemAction ec-native-playback-action';
+  action.className = 'itemAction featured-native-playback-action';
   action.dataset.action = target.positionTicks > 0 ? 'resume' : 'play';
   action.dataset.id = target.id;
   action.dataset.serverid = target.serverId;
@@ -142,7 +142,7 @@ function updateButton(button: HTMLButtonElement, target: PlaybackTarget, customP
 export function createPlaybackButton(item: FeaturedItem, customPlayText?: string | null): HTMLButtonElement {
   const button = document.createElement('button');
   button.type = 'button';
-  button.className = 'ec-button ec-play-button raised button-submit emby-button';
+  button.className = 'featured-button featured-play-button raised button-submit emby-button';
   button.textContent = customPlayText || `▶ ${t('carousel.play')}`;
   button.setAttribute('aria-label', t('carousel.play'));
 

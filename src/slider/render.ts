@@ -9,14 +9,14 @@ import { createPlaystateButton } from './playstate';
 import { createDismissalControl } from './dismissals';
 
 export function loadSlideArtwork(slide: HTMLElement): void {
-  const backdrop = slide.querySelector<HTMLElement>('.ec-backdrop');
+  const backdrop = slide.querySelector<HTMLElement>('.featured-backdrop');
   const backdropUrl = backdrop?.dataset.ecImageUrl;
   if (backdrop && backdropUrl) {
     backdrop.style.backgroundImage = `url("${backdropUrl.replace(/"/g, '%22')}")`;
     delete backdrop.dataset.ecImageUrl;
   }
 
-  const logo = slide.querySelector<HTMLImageElement>('.ec-logo');
+  const logo = slide.querySelector<HTMLImageElement>('.featured-logo');
   const logoUrl = logo?.dataset.ecImageUrl;
   if (logo && logoUrl) {
     logo.src = logoUrl;
@@ -34,11 +34,11 @@ function appendText(parent: HTMLElement, className: string, value: string | null
 
 function createMetadata(item: FeaturedItem, response: FeaturedResponse): HTMLElement | null {
   const metadata = document.createElement('div');
-  metadata.className = 'ec-meta';
+  metadata.className = 'featured-meta';
 
   if (response.showRating && item.community_rating !== undefined) {
     const rating = document.createElement('span');
-    rating.className = 'ec-community';
+    rating.className = 'featured-community';
     rating.textContent = item.community_rating.toFixed(1);
     metadata.appendChild(rating);
   }
@@ -81,7 +81,7 @@ function createMetadata(item: FeaturedItem, response: FeaturedResponse): HTMLEle
 
 export function createSlide(item: FeaturedItem, response: FeaturedResponse): HTMLElement {
   const slide = document.createElement('article');
-  slide.className = 'ec-slide';
+  slide.className = 'featured-slide';
   slide.tabIndex = -1;
   if (response.interactOnWholeBanner) {
     slide.setAttribute('role', 'link');
@@ -89,10 +89,10 @@ export function createSlide(item: FeaturedItem, response: FeaturedResponse): HTM
   }
 
   const media = document.createElement('div');
-  media.className = 'ec-media';
+  media.className = 'featured-media';
 
   const backdrop = document.createElement('div');
-  backdrop.className = 'ec-backdrop';
+  backdrop.className = 'featured-backdrop';
   if (item.hasImage !== false) {
     backdrop.dataset.ecImageUrl = heroImageUrl(item.id, item.imageType, response.reduceImageSizes);
   }
@@ -101,15 +101,15 @@ export function createSlide(item: FeaturedItem, response: FeaturedResponse): HTM
   slide.appendChild(media);
 
   const hitbox = document.createElement('div');
-  hitbox.className = 'ec-slide-hitbox';
+  hitbox.className = 'featured-slide-hitbox';
   hitbox.setAttribute('aria-hidden', 'true');
   slide.appendChild(hitbox);
 
   const content = document.createElement('div');
-  content.className = 'ec-content';
+  content.className = 'featured-content';
   if (response.titleDisplayMode === 'logo' && item.hasLogo) {
     const logo = document.createElement('img');
-    logo.className = 'ec-logo';
+    logo.className = 'featured-logo';
     logo.dataset.ecImageUrl = logoUrl(item.id, response.reduceImageSizes);
     logo.alt = item.name;
     logo.loading = 'lazy';
@@ -117,7 +117,7 @@ export function createSlide(item: FeaturedItem, response: FeaturedResponse): HTM
     content.appendChild(logo);
   } else {
     const title = document.createElement('h2');
-    title.className = 'ec-title';
+    title.className = 'featured-title';
     title.textContent = item.name;
     content.appendChild(title);
   }
@@ -125,8 +125,8 @@ export function createSlide(item: FeaturedItem, response: FeaturedResponse): HTM
   const metadata = createMetadata(item, response);
   if (metadata) content.appendChild(metadata);
   if (response.showDescription) {
-    appendText(content, 'ec-tagline', item.tagline);
-    appendText(content, 'ec-overview', item.overview);
+    appendText(content, 'featured-tagline', item.tagline);
+    appendText(content, 'featured-overview', item.overview);
   }
 
   const favoriteAction = response.showFavoriteButton && response.favoriteButtonPlacement === 'actions';
@@ -145,14 +145,14 @@ export function createSlide(item: FeaturedItem, response: FeaturedResponse): HTM
     (item.trailer?.provider === 'external' && item.trailer.url)
   ) {
     const actions = document.createElement('div');
-    actions.className = 'ec-actions';
+    actions.className = 'featured-actions';
     if (response.showPlayButton) {
       actions.appendChild(createPlaybackButton(item, response.playButtonText));
     }
     if (response.showSecondaryButton) {
       const details = document.createElement('button');
       details.type = 'button';
-      details.className = 'ec-button ec-button-secondary raised emby-button';
+      details.className = 'featured-button featured-button-secondary raised emby-button';
       details.textContent = response.secondaryButtonText || t('carousel.moreInfo');
       details.addEventListener('click', () => openItemDetails(item.id));
       actions.appendChild(details);
@@ -163,7 +163,7 @@ export function createSlide(item: FeaturedItem, response: FeaturedResponse): HTM
     if (item.trailer?.provider === 'external' && item.trailer.url) {
       const trailer = document.createElement('button');
       trailer.type = 'button';
-      trailer.className = 'ec-button ec-button-secondary raised emby-button';
+      trailer.className = 'featured-button featured-button-secondary raised emby-button';
       trailer.textContent = t('carousel.trailer');
       trailer.addEventListener('click', () => new ExternalPlayer(item.trailer!.url!).open());
       actions.appendChild(trailer);

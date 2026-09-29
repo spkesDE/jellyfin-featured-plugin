@@ -29,9 +29,9 @@ describe('hero height variables', () => {
     const root = document.createElement('section');
     applyHeroLayoutVariables(root, settings);
 
-    expect(root.style.getPropertyValue('--ec-height')).toBe('750px');
-    expect(root.style.getPropertyValue('--ec-tablet-height')).toBe('500px');
-    expect(root.style.getPropertyValue('--ec-mobile-height')).toBe('350px');
-    expect(root.style.getPropertyValue('--ec-hero-overlap')).toBe('280px');
+    expect(root.style.getPropertyValue('--featured-height')).toBe('750px');
+    expect(root.style.getPropertyValue('--featured-tablet-height')).toBe('500px');
+    expect(root.style.getPropertyValue('--featured-mobile-height')).toBe('350px');
+    expect(root.style.getPropertyValue('--featured-hero-overlap')).toBe('280px');
   });
 });

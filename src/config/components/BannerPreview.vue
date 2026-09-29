@@ -46,9 +46,9 @@ const desktopHeight = computed(() => getHeroDesktopHeight(store.config.HeroHeigh
 const previewScale = computed(() => (store.config.UseHeroLayout ? 0.76 : 0.44));
 const previewStyle = computed(() => ({
   height: `${Math.max(190, Math.min(360, desktopHeight.value * previewScale.value))}px`,
-  '--ec-preview-radius': store.config.UseHeroLayout ? '0px' : `${store.config.HeroBorderRadius}px`,
-  '--ec-preview-gradient': String(store.config.UseHeroLayout ? store.config.HeroGradientStrength / 100 : 0.85),
-  '--ec-preview-fade': createHeroFadeMask(
+  '--featured-preview-radius': store.config.UseHeroLayout ? '0px' : `${store.config.HeroBorderRadius}px`,
+  '--featured-preview-gradient': String(store.config.UseHeroLayout ? store.config.HeroGradientStrength / 100 : 0.85),
+  '--featured-preview-fade': createHeroFadeMask(
     store.config.HeroFadeStart,
     store.config.HeroFadeEnd,
     store.config.HeroFadeCurve,
@@ -57,7 +57,7 @@ const previewStyle = computed(() => ({
   )
 }));
 const mockStyle = computed(() => ({
-  '--ec-preview-media-offset': `${Math.max(-90, Math.min(90, store.config.MediaPadding * previewScale.value))}px`
+  '--featured-preview-media-offset': `${Math.max(-90, Math.min(90, store.config.MediaPadding * previewScale.value))}px`
 }));
 const backdropStyle = computed(() =>
   item.value
@@ -148,20 +148,20 @@ function mediaCardStyle(index: number): Record<string, string> | undefined {
 </script>
 
 <template>
-  <div class="jmp-appearancePreviewItem ec-configPreviewItem">
+  <div class="jmp-appearancePreviewItem featured-configPreviewItem">
     <div class="jmp-appearancePreviewLabel">
       <span>{{ item ? t('preview.libraryWithName', { name: item.name }) : t('preview.library') }}</span>
       <span class="jmp-badge jmp-badge-muted">{{
         store.config.UseHeroLayout ? t('preview.hero') : t('preview.standard')
       }}</span>
     </div>
-    <div class="ec-jellyfinMock" :style="mockStyle">
-      <div class="ec-jellyfinMockHeader">
-        <div class="ec-jellyfinMockBrand">
-          <svg class="ec-jellyfinMockBrandLogo" viewBox="0 0 72 72" role="img" aria-label="Jellyfin">
+    <div class="featured-jellyfinMock" :style="mockStyle">
+      <div class="featured-jellyfinMockHeader">
+        <div class="featured-jellyfinMockBrand">
+          <svg class="featured-jellyfinMockBrandLogo" viewBox="0 0 72 72" role="img" aria-label="Jellyfin">
             <defs>
               <linearGradient
-                id="ec-jellyfin-logo-inner"
+                id="featured-jellyfin-logo-inner"
                 x1="12"
                 y1="30"
                 x2="72"
@@ -172,7 +172,7 @@ function mediaCardStyle(index: number): Record<string, string> | undefined {
                 <stop offset="1" stop-color="#00a4dc" />
               </linearGradient>
               <linearGradient
-                id="ec-jellyfin-logo-outer"
+                id="featured-jellyfin-logo-outer"
                 x1="12"
                 y1="30"
                 x2="72"
@@ -185,18 +185,18 @@ function mediaCardStyle(index: number): Record<string, string> | undefined {
             </defs>
             <path
               d="M24.2116 49.1581C22.6599 46.0424 32.8378 27.5879 35.9999 27.5879C39.1666 27.5895 49.3228 46.0764 47.7882 49.1581C46.2536 52.2398 25.7632 52.2738 24.2116 49.1581Z"
-              fill="url(#ec-jellyfin-logo-inner)"
+              fill="url(#featured-jellyfin-logo-inner)"
             />
             <path
               fill-rule="evenodd"
               clip-rule="evenodd"
               d="M0.481861 64.9951C-4.19479 55.6047 26.4765 0 36 0C45.5328 0 76.153 55.713 71.5274 64.9951C66.9018 74.2773 5.15852 74.3856 0.481861 64.9951ZM12.7358 56.847C15.8005 62.9995 56.2536 62.9314 59.2843 56.847C62.3149 50.761 42.2515 14.2605 36.0093 14.2605C29.767 14.2605 9.67118 50.6944 12.7358 56.847Z"
-              fill="url(#ec-jellyfin-logo-outer)"
+              fill="url(#featured-jellyfin-logo-outer)"
             />
           </svg>
           <strong>Jellyfin</strong>
         </div>
-        <div class="ec-jellyfinMockNav">
+        <div class="featured-jellyfinMockNav">
           <span class="is-active"
             ><span class="material-icons" aria-hidden="true">home</span>{{ t('preview.home') }}</span
           >
@@ -204,18 +204,18 @@ function mediaCardStyle(index: number): Record<string, string> | undefined {
           <span><span class="material-icons" aria-hidden="true">movie</span>{{ t('preview.movies') }}</span>
           <span><span class="material-icons" aria-hidden="true">tv</span>{{ t('preview.shows') }}</span>
         </div>
-        <div class="ec-jellyfinMockHeaderActions">
-          <span class="material-icons ec-mockIcon">cast</span>
-          <span class="material-icons ec-mockIcon">search</span>
-          <span class="ec-jellyfinMockAvatar">J</span>
+        <div class="featured-jellyfinMockHeaderActions">
+          <span class="material-icons featured-mockIcon">cast</span>
+          <span class="material-icons featured-mockIcon">search</span>
+          <span class="featured-jellyfinMockAvatar">J</span>
         </div>
       </div>
-      <div class="ec-jellyfinMockPage">
-        <div v-if="store.config.Heading && !store.config.UseHeroLayout" class="ec-jellyfinMockHeading">
+      <div class="featured-jellyfinMockPage">
+        <div v-if="store.config.Heading && !store.config.UseHeroLayout" class="featured-jellyfinMockHeading">
           {{ store.config.Heading }}
         </div>
         <div
-          class="ec-configPreview"
+          class="featured-configPreview"
           :class="[
             `text-${store.config.HeroTextPosition}`,
             { 'is-hero': store.config.UseHeroLayout, 'controls-on-hover': store.config.ShowControlsOnHoverOnly }
@@ -223,12 +223,12 @@ function mediaCardStyle(index: number): Record<string, string> | undefined {
           :style="previewStyle"
           @click="$emit('focusSection', 'layout')"
         >
-          <div class="ec-configPreviewBackdrop" :style="backdropStyle" />
-          <div class="ec-configPreviewShade" />
-          <div class="ec-configPreviewContent">
-            <img v-if="logoSource" class="ec-configPreviewImageLogo" :src="logoSource" :alt="item?.name || ''" />
-            <div v-else class="ec-configPreviewLogo">{{ item?.name || t('preview.fallbackTitle') }}</div>
-            <div v-if="showMetadata" class="ec-configPreviewMeta" @click.stop="$emit('focusSection', 'metadata')">
+          <div class="featured-configPreviewBackdrop" :style="backdropStyle" />
+          <div class="featured-configPreviewShade" />
+          <div class="featured-configPreviewContent">
+            <img v-if="logoSource" class="featured-configPreviewImageLogo" :src="logoSource" :alt="item?.name || ''" />
+            <div v-else class="featured-configPreviewLogo">{{ item?.name || t('preview.fallbackTitle') }}</div>
+            <div v-if="showMetadata" class="featured-configPreviewMeta" @click.stop="$emit('focusSection', 'metadata')">
               <span v-if="store.config.ShowRating">★ {{ item?.community_rating?.toFixed(1) || '8.7' }}</span>
               <span v-if="store.config.ShowRating"
                 >{{ item?.critic_rating ? Math.round(item.critic_rating) : 92 }}%</span
@@ -239,7 +239,7 @@ function mediaCardStyle(index: number): Record<string, string> | undefined {
               <button
                 v-if="showMetadataFavorite"
                 type="button"
-                class="ec-configPreviewMetaControl"
+                class="featured-configPreviewMetaControl"
                 :title="t('display.showFavoriteButton')"
               >
                 <span class="material-icons" aria-hidden="true">{{
@@ -249,7 +249,7 @@ function mediaCardStyle(index: number): Record<string, string> | undefined {
               <button
                 v-if="showMetadataPlaystate"
                 type="button"
-                class="ec-configPreviewMetaControl"
+                class="featured-configPreviewMetaControl"
                 :title="t('display.showPlaystateButton')"
               >
                 <span class="material-icons" aria-hidden="true">check</span>
@@ -257,34 +257,38 @@ function mediaCardStyle(index: number): Record<string, string> | undefined {
               <button
                 v-if="showMetadataDismissal"
                 type="button"
-                class="ec-configPreviewMetaControl"
+                class="featured-configPreviewMetaControl"
                 :title="t('display.showDismissalButton')"
               >
                 <span class="material-icons" aria-hidden="true">visibility_off</span>
               </button>
             </div>
-            <div v-if="store.config.ShowDescription" class="ec-configPreviewText">
+            <div v-if="store.config.ShowDescription" class="featured-configPreviewText">
               {{ item?.overview || t('preview.fallbackDescription') }}
             </div>
-            <div v-if="showActions" class="ec-configPreviewActions" @click.stop="$emit('focusSection', 'actions')">
+            <div
+              v-if="showActions"
+              class="featured-configPreviewActions"
+              @click.stop="$emit('focusSection', 'actions')"
+            >
               <button
                 v-if="store.config.ShowPlayButton"
                 type="button"
-                class="ec-configPreviewButton raised button-submit emby-button"
+                class="featured-configPreviewButton raised button-submit emby-button"
               >
                 {{ store.config.PlayButtonText || `▶ ${t('common.play')}` }}
               </button>
               <button
                 v-if="store.config.ShowSecondaryButton"
                 type="button"
-                class="ec-configPreviewButton is-secondary raised emby-button"
+                class="featured-configPreviewButton is-secondary raised emby-button"
               >
                 {{ store.config.SecondaryButtonText || t('display.moreInfo') }}
               </button>
               <button
                 v-if="showActionFavorite"
                 type="button"
-                class="ec-configPreviewButton is-secondary is-favorite raised emby-button"
+                class="featured-configPreviewButton is-secondary is-favorite raised emby-button"
                 :title="t('display.showFavoriteButton')"
               >
                 <span class="material-icons" aria-hidden="true">{{
@@ -294,7 +298,7 @@ function mediaCardStyle(index: number): Record<string, string> | undefined {
               <button
                 v-if="showActionPlaystate"
                 type="button"
-                class="ec-configPreviewButton is-secondary raised emby-button"
+                class="featured-configPreviewButton is-secondary raised emby-button"
                 :title="t('display.showPlaystateButton')"
               >
                 <span class="material-icons" aria-hidden="true">check</span>
@@ -302,7 +306,7 @@ function mediaCardStyle(index: number): Record<string, string> | undefined {
               <button
                 v-if="showActionDismissal"
                 type="button"
-                class="ec-configPreviewButton is-secondary raised emby-button"
+                class="featured-configPreviewButton is-secondary raised emby-button"
                 :title="t('display.showDismissalButton')"
               >
                 <span class="material-icons" aria-hidden="true">visibility_off</span>
@@ -311,30 +315,30 @@ function mediaCardStyle(index: number): Record<string, string> | undefined {
           </div>
           <div
             v-if="showNavigation"
-            class="ec-configPreviewNavigation"
+            class="featured-configPreviewNavigation"
             @click.stop="$emit('focusSection', 'navigation')"
           >
-            <div v-if="showNavigationControls" class="ec-configPreviewControls">
-              <span v-if="showSlidePosition" class="ec-configPreviewStatus">1 / {{ itemCount }}</span>
-              <span v-if="store.config.ShowNavigationArrows" class="ec-mockControl">‹</span>
-              <span v-if="showAutoplayControl" class="ec-mockControl">Ⅱ</span>
-              <span v-if="store.config.ShowNavigationArrows" class="ec-mockControl">›</span>
-              <span v-if="showTrailerControl" class="ec-mockControl material-icons">volume_off</span>
+            <div v-if="showNavigationControls" class="featured-configPreviewControls">
+              <span v-if="showSlidePosition" class="featured-configPreviewStatus">1 / {{ itemCount }}</span>
+              <span v-if="store.config.ShowNavigationArrows" class="featured-mockControl">‹</span>
+              <span v-if="showAutoplayControl" class="featured-mockControl">Ⅱ</span>
+              <span v-if="store.config.ShowNavigationArrows" class="featured-mockControl">›</span>
+              <span v-if="showTrailerControl" class="featured-mockControl material-icons">volume_off</span>
             </div>
             <div
               v-if="!store.config.EnableInfiniteLoading && store.config.ShowPaginationDots"
-              class="ec-configPreviewDots"
+              class="featured-configPreviewDots"
               aria-hidden="true"
             >
               <span v-for="dot in Math.min(itemCount, 10)" :key="dot" :class="{ 'is-active': dot === 1 }" />
             </div>
           </div>
         </div>
-        <div class="ec-jellyfinMockMedia">
-          <div class="ec-jellyfinMockHeading">{{ t('preview.myMedia') }}</div>
-          <div class="ec-jellyfinMockCards">
-            <div v-for="(card, index) in mediaCards" :key="card" class="ec-jellyfinMockCard">
-              <div class="ec-jellyfinMockCardArt" :class="'art-' + (index + 1)" :style="mediaCardStyle(index)">
+        <div class="featured-jellyfinMockMedia">
+          <div class="featured-jellyfinMockHeading">{{ t('preview.myMedia') }}</div>
+          <div class="featured-jellyfinMockCards">
+            <div v-for="(card, index) in mediaCards" :key="card" class="featured-jellyfinMockCard">
+              <div class="featured-jellyfinMockCardArt" :class="'art-' + (index + 1)" :style="mediaCardStyle(index)">
                 <span>{{ card }}</span>
               </div>
             </div>
@@ -348,7 +352,7 @@ function mediaCardStyle(index: number): Record<string, string> | undefined {
 <style src="./BannerPreview.css"></style>
 
 <style scoped>
-.ec-configPreviewMetaControl {
+.featured-configPreviewMetaControl {
   align-items: center;
   background: transparent;
   border: 0;
@@ -356,7 +360,7 @@ function mediaCardStyle(index: number): Record<string, string> | undefined {
   display: inline-flex;
   padding: 0;
 }
-.ec-configPreviewMetaControl .material-icons {
+.featured-configPreviewMetaControl .material-icons {
   font-size: 1.15em;
 }
 </style>

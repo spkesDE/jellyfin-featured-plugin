@@ -45,7 +45,7 @@ describe('createDismissalsSection', () => {
       body: { dismissalId: 'dismissal-1' }
     });
     await vi.waitFor(() => expect(dismissals.entries).toEqual([]));
-    expect(section.querySelector('.ec-preferences-help')).not.toBeNull();
+    expect(section.querySelector('.featured-preferences-help')).not.toBeNull();
     expect(section.querySelector<HTMLButtonElement>('.raised')?.hidden).toBe(true);
     expect(changed).toHaveBeenCalledOnce();
   });

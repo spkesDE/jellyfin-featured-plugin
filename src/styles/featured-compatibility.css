@@ -4,27 +4,27 @@
 
 /* Keep Featured's internal z-index layers local to the viewport instead of
    making the whole root a stacking context over following Jellyfin sections. */
-.ec-root {
+.featured-root {
   isolation: auto;
   z-index: auto;
 }
 
-.ec-viewport {
+.featured-viewport {
   isolation: isolate;
 }
 
 /* Large touch devices (iPad, Nest Hub, touch displays) should keep the same
    overlap as desktop. Pointer type must not create a full hero-height gap. */
 @media (min-width: 701px) and (hover: none) and (pointer: coarse) {
-  .ec-root.ec-hero {
-    --ec-content-height: var(--ec-desktop-content-height);
-    --ec-hero-overlap-offset: var(--ec-desktop-overlap-offset);
+  .featured-root.featured-hero {
+    --featured-content-height: var(--featured-desktop-content-height);
+    --featured-hero-overlap-offset: var(--featured-desktop-overlap-offset);
   }
 }
 
 @media (min-width: 701px) {
-  .ec-root.ec-ready.ec-hero .ec-content {
-    height: var(--ec-content-height);
+  .featured-root.featured-ready.featured-hero .featured-content {
+    height: var(--featured-content-height);
     overflow: hidden;
     padding-top: clamp(4.5rem, 7vw, 7rem);
     padding-bottom: clamp(1.5rem, 3vw, 3rem);
@@ -32,7 +32,7 @@
 
   /* Give artwork/title priority, but cap the rendered logo so unusually large
      source artwork cannot consume the whole content column. */
-  .ec-root.ec-ready.ec-hero .ec-logo {
+  .featured-root.featured-ready.featured-hero .featured-logo {
     flex: 0 0 auto;
     flex-shrink: 0;
     height: clamp(5rem, 11vw, 8.5rem);
@@ -41,24 +41,24 @@
     width: auto;
   }
 
-  .ec-root.ec-ready.ec-hero .ec-title,
-  .ec-root.ec-ready.ec-hero .ec-meta,
-  .ec-root.ec-ready.ec-hero .ec-tagline,
-  .ec-root.ec-ready.ec-hero .ec-actions {
+  .featured-root.featured-ready.featured-hero .featured-title,
+  .featured-root.featured-ready.featured-hero .featured-meta,
+  .featured-root.featured-ready.featured-hero .featured-tagline,
+  .featured-root.featured-ready.featured-hero .featured-actions {
     flex-shrink: 0;
   }
 
-  .ec-root.ec-ready.ec-hero .ec-meta {
+  .featured-root.featured-ready.featured-hero .featured-meta {
     font-size: 0.9rem;
     margin-top: 0.8rem;
   }
 
-  .ec-root.ec-ready.ec-hero .ec-tagline {
+  .featured-root.featured-ready.featured-hero .featured-tagline {
     font-size: 0.95rem;
     margin-top: 0.65rem;
   }
 
-  .ec-root.ec-ready.ec-hero .ec-overview {
+  .featured-root.featured-ready.featured-hero .featured-overview {
     -webkit-line-clamp: 4;
     flex: 0 0 auto;
     font-size: 0.9rem;
@@ -67,19 +67,19 @@
     overflow: hidden;
   }
 
-  .ec-root.ec-ready.ec-hero .ec-content.ec-overview-lines-3 .ec-overview {
+  .featured-root.featured-ready.featured-hero .featured-content.featured-overview-lines-3 .featured-overview {
     -webkit-line-clamp: 3;
   }
 
-  .ec-root.ec-ready.ec-hero .ec-content.ec-overview-lines-2 .ec-overview {
+  .featured-root.featured-ready.featured-hero .featured-content.featured-overview-lines-2 .featured-overview {
     -webkit-line-clamp: 2;
   }
 
-  .ec-root.ec-ready.ec-hero .ec-content.ec-overview-lines-1 .ec-overview {
+  .featured-root.featured-ready.featured-hero .featured-content.featured-overview-lines-1 .featured-overview {
     -webkit-line-clamp: 1;
   }
 
-  .ec-root.ec-ready.ec-hero .ec-content.ec-overview-hidden .ec-overview {
+  .featured-root.featured-ready.featured-hero .featured-content.featured-overview-hidden .featured-overview {
     display: none;
   }
 }

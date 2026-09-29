@@ -40,7 +40,7 @@ abstract class HtmlVideoPlayer implements TrailerPlayer {
     this.onError = options.onError;
 
     this.element = document.createElement('video');
-    this.element.className = 'ec-trailer';
+    this.element.className = 'featured-trailer';
     this.element.src = url;
     this.element.muted = options.muted;
     this.element.defaultMuted = options.muted;

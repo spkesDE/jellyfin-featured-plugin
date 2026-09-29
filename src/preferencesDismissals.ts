@@ -29,7 +29,7 @@ export function createDismissalsSection(
     replaceElementChildren(list);
     reset.hidden = dismissals.entries.length === 0;
     if (!dismissals.entries.length) {
-      list.appendChild(createTextElement('p', t('preferences.noDismissals'), 'ec-preferences-help'));
+      list.appendChild(createTextElement('p', t('preferences.noDismissals'), 'featured-preferences-help'));
       return;
     }
 

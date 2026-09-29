@@ -107,26 +107,26 @@ function createPlaceholder(container: Element): HTMLElement {
   if (existing?.isConnected) return existing;
 
   const placeholder = document.createElement('section');
-  placeholder.className = `ec-root ec-placeholder ec-height-${config.heroHeightMode}${config.useHeroLayout ? ' ec-hero' : ''}`;
+  placeholder.className = `featured-root featured-placeholder featured-height-${config.heroHeightMode}${config.useHeroLayout ? ' featured-hero' : ''}`;
   placeholder.setAttribute('aria-hidden', 'true');
   applyHeroLayoutVariables(placeholder, config);
 
   if (config.heading && !config.useHeroLayout) {
     const heading = document.createElement('h2');
-    heading.className = 'sectionTitle sectionTitle-cards ec-heading';
+    heading.className = 'sectionTitle sectionTitle-cards featured-heading';
     heading.textContent = config.heading;
     placeholder.appendChild(heading);
   }
 
   const viewport = document.createElement('div');
-  viewport.className = 'ec-viewport ec-placeholder-viewport';
+  viewport.className = 'featured-viewport featured-placeholder-viewport';
   placeholder.appendChild(viewport);
-  const bootstrapPlaceholder = container.querySelector(':scope > .ec-bootstrap-placeholder');
+  const bootstrapPlaceholder = container.querySelector(':scope > .featured-bootstrap-placeholder');
   if (bootstrapPlaceholder) bootstrapPlaceholder.replaceWith(placeholder);
   else container.prepend(placeholder);
   placeholders.set(container, placeholder);
-  container.closest('#homeTab')?.classList.remove('ec-bootstrap-hero-page');
-  container.closest('#homeTab')?.classList.toggle('ec-hero-page', config.useHeroLayout);
+  container.closest('#homeTab')?.classList.remove('featured-bootstrap-hero-page');
+  container.closest('#homeTab')?.classList.toggle('featured-hero-page', config.useHeroLayout);
   return placeholder;
 }
 
@@ -211,7 +211,7 @@ function attachCarousel(
   placeholders.delete(container);
   instances.set(container, carousel);
   resetMountFailures();
-  container.closest('#homeTab')?.classList.toggle('ec-hero-page', response.useHeroLayout);
+  container.closest('#homeTab')?.classList.toggle('featured-hero-page', response.useHeroLayout);
 }
 
 async function mount(container: Element): Promise<void> {
@@ -220,7 +220,7 @@ async function mount(container: Element): Promise<void> {
     pendingContainers.has(container) ||
     !canAttemptMount() ||
     container.hasAttribute('data-featured-loading') ||
-    container.querySelector(':scope > .ec-root') ||
+    container.querySelector(':scope > .featured-root') ||
     (config.hideOnTvLayout && isTvLayout())
   )
     return;
@@ -257,7 +257,7 @@ async function mount(container: Element): Promise<void> {
       !container.isConnected ||
       !isActiveHomeContainer(container) ||
       (instances.has(container) && instances.get(container) !== cachedCarousel) ||
-      Array.from(container.querySelectorAll(':scope > .ec-root')).some(
+      Array.from(container.querySelectorAll(':scope > .featured-root')).some(
         (root) => root !== placeholder && root !== cachedCarousel?.root
       ) ||
       !response.items?.length ||
@@ -287,7 +287,7 @@ async function mount(container: Element): Promise<void> {
       !container.isConnected ||
       !isActiveHomeContainer(container) ||
       (instances.has(container) && instances.get(container) !== cachedCarousel) ||
-      Array.from(container.querySelectorAll(':scope > .ec-root')).some(
+      Array.from(container.querySelectorAll(':scope > .featured-root')).some(
         (root) => root !== placeholder && root !== cachedCarousel?.root
       )
     )
@@ -314,7 +314,7 @@ async function mount(container: Element): Promise<void> {
       )
         recordMountFailure();
       removePlaceholder(container);
-      container.closest('#homeTab')?.classList.remove('ec-hero-page');
+      container.closest('#homeTab')?.classList.remove('featured-hero-page');
     }
     pendingContainers.delete(container);
     container.removeAttribute('data-featured-loading');
@@ -327,7 +327,7 @@ function scan(removeInactive = false): void {
     if (!container.isConnected || !placeholder.isConnected) {
       placeholder.remove();
       placeholders.delete(container);
-      container.closest('#homeTab')?.classList.remove('ec-hero-page', 'ec-bootstrap-hero-page');
+      container.closest('#homeTab')?.classList.remove('featured-hero-page', 'featured-bootstrap-hero-page');
     }
   }
   for (const [container, instance] of instances) {
@@ -337,14 +337,14 @@ function scan(removeInactive = false): void {
       if (rootWasUnexpectedlyRemoved) recordMountFailure();
       instance.destroy();
       instances.delete(container);
-      container.closest('#homeTab')?.classList.remove('ec-hero-page', 'ec-bootstrap-hero-page');
+      container.closest('#homeTab')?.classList.remove('featured-hero-page', 'featured-bootstrap-hero-page');
     }
   }
   document.querySelectorAll(HOME_SELECTOR).forEach((container) => {
     if (!isActiveHomeContainer(container)) return;
     const instance = instances.get(container);
     const placeholder = placeholders.get(container);
-    container.querySelectorAll(':scope > .ec-root').forEach((root) => {
+    container.querySelectorAll(':scope > .featured-root').forEach((root) => {
       if (root !== instance?.root && root !== placeholder) root.remove();
     });
     void mount(container);
@@ -408,8 +408,10 @@ export function destroy(): void {
   document.querySelectorAll('[data-featured-loading]').forEach((element) => {
     element.removeAttribute('data-featured-loading');
   });
-  document.querySelectorAll('.ec-root').forEach((element) => element.remove());
-  document.querySelectorAll('#homeTab.ec-hero-page').forEach((element) => element.classList.remove('ec-hero-page'));
+  document.querySelectorAll('.featured-root').forEach((element) => element.remove());
+  document
+    .querySelectorAll('#homeTab.featured-hero-page')
+    .forEach((element) => element.classList.remove('featured-hero-page'));
 }
 
 export function refresh(): void {

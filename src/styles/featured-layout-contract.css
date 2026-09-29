@@ -1,26 +1,26 @@
 /* Values shared by the early bootstrap placeholder and the live carousel.
    Keeping both surfaces here prevents layout jumps while the plugin loads. */
-#homeTab.ec-hero-page,
-#homeTab.ec-bootstrap-hero-page {
+#homeTab.featured-hero-page,
+#homeTab.featured-bootstrap-hero-page {
   padding-top: 0 !important;
   transform: translateY(-120px);
 }
 
-.ec-root,
-.ec-bootstrap-placeholder {
-  --ec-height: 360px;
-  --ec-tablet-height: 400px;
-  --ec-mobile-height: 340px;
+.featured-root,
+.featured-bootstrap-placeholder {
+  --featured-height: 360px;
+  --featured-tablet-height: 400px;
+  --featured-mobile-height: 340px;
 }
 
-.ec-root:not(.ec-hero),
-.ec-bootstrap-placeholder:not(.ec-bootstrap-hero) {
+.featured-root:not(.featured-hero),
+.featured-bootstrap-placeholder:not(.featured-bootstrap-hero) {
   padding-left: max(env(safe-area-inset-left), 3.3%);
   padding-right: max(env(safe-area-inset-right), 3.3%);
 }
 
-.ec-heading,
-.ec-bootstrap-heading {
+.featured-heading,
+.featured-bootstrap-heading {
   margin: 0 0 0.55em;
   overflow: hidden;
   padding-right: 10rem;
@@ -28,53 +28,53 @@
   white-space: nowrap;
 }
 
-.ec-height-auto,
-.ec-bootstrap-height-auto {
-  --ec-height: clamp(360px, 46vw, 750px);
+.featured-height-auto,
+.featured-bootstrap-height-auto {
+  --featured-height: clamp(360px, 46vw, 750px);
 }
 
-.ec-height-compact,
-.ec-bootstrap-height-compact {
-  --ec-height: 360px;
+.featured-height-compact,
+.featured-bootstrap-height-compact {
+  --featured-height: 360px;
 }
 
-.ec-height-standard,
-.ec-bootstrap-height-standard {
-  --ec-height: 500px;
+.featured-height-standard,
+.featured-bootstrap-height-standard {
+  --featured-height: 500px;
 }
 
-.ec-height-cinematic,
-.ec-bootstrap-height-cinematic {
-  --ec-height: 750px;
+.featured-height-cinematic,
+.featured-bootstrap-height-cinematic {
+  --featured-height: 750px;
 }
 
-.ec-height-fullscreen,
-.ec-bootstrap-height-fullscreen,
-.ec-root.ec-height-fullscreen,
-.ec-bootstrap-placeholder.ec-bootstrap-height-fullscreen {
-  --ec-height: 100vh !important;
+.featured-height-fullscreen,
+.featured-bootstrap-height-fullscreen,
+.featured-root.featured-height-fullscreen,
+.featured-bootstrap-placeholder.featured-bootstrap-height-fullscreen {
+  --featured-height: 100vh !important;
 }
 
 @media (max-width: 1000px) {
-  .ec-root,
-  .ec-bootstrap-placeholder {
-    --ec-height: var(--ec-tablet-height) !important;
-    --ec-hero-overlap: 100px !important;
+  .featured-root,
+  .featured-bootstrap-placeholder {
+    --featured-height: var(--featured-tablet-height) !important;
+    --featured-hero-overlap: 100px !important;
   }
 }
 
 @media (max-width: 700px) {
-  .ec-root,
-  .ec-bootstrap-placeholder {
-    --ec-height: var(--ec-mobile-height) !important;
-    --ec-hero-overlap: 75px !important;
+  .featured-root,
+  .featured-bootstrap-placeholder {
+    --featured-height: var(--featured-mobile-height) !important;
+    --featured-hero-overlap: 75px !important;
   }
 }
 
 /* Chromium 79 uses 100vh. Newer engines can account for dynamic browser UI. */
 @supports (height: 100dvh) {
-  .ec-root.ec-height-fullscreen,
-  .ec-bootstrap-placeholder.ec-bootstrap-height-fullscreen {
-    --ec-height: 100dvh !important;
+  .featured-root.featured-height-fullscreen,
+  .featured-bootstrap-placeholder.featured-bootstrap-height-fullscreen {
+    --featured-height: 100dvh !important;
   }
 }

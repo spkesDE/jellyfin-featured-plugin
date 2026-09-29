@@ -107,19 +107,19 @@ export function calculateHeroClearance(
 }
 
 export function applyHeroLayoutVariables(element: HTMLElement, settings: HeroLayoutSettings): void {
-  element.style.setProperty('--ec-height', getHeroHeightCssValue(settings.heroHeightMode, settings.bannerHeight));
-  element.style.setProperty('--ec-tablet-height', `${settings.tabletBannerHeight}px`);
-  element.style.setProperty('--ec-mobile-height', `${settings.mobileBannerHeight}px`);
+  element.style.setProperty('--featured-height', getHeroHeightCssValue(settings.heroHeightMode, settings.bannerHeight));
+  element.style.setProperty('--featured-tablet-height', `${settings.tabletBannerHeight}px`);
+  element.style.setProperty('--featured-mobile-height', `${settings.mobileBannerHeight}px`);
   element.style.setProperty(
-    '--ec-hero-overlap',
+    '--featured-hero-overlap',
     `${getHeroOverlap(getHeroDesktopHeight(settings.heroHeightMode, settings.bannerHeight), settings.heroHeightMode)}px`
   );
-  element.style.setProperty('--ec-media-padding', `${settings.mediaPadding}px`);
+  element.style.setProperty('--featured-media-padding', `${settings.mediaPadding}px`);
 
   if (settings.useHeroLayout) {
-    element.style.setProperty('--ec-gradient-strength', String(settings.heroGradientStrength / 100));
+    element.style.setProperty('--featured-gradient-strength', String(settings.heroGradientStrength / 100));
     element.style.setProperty(
-      '--ec-hero-media-mask',
+      '--featured-hero-media-mask',
       createHeroFadeMask(
         settings.heroFadeStart,
         settings.heroFadeEnd,
@@ -129,6 +129,6 @@ export function applyHeroLayoutVariables(element: HTMLElement, settings: HeroLay
       )
     );
   } else {
-    element.style.setProperty('--ec-radius', `${settings.heroBorderRadius}px`);
+    element.style.setProperty('--featured-radius', `${settings.heroBorderRadius}px`);
   }
 }

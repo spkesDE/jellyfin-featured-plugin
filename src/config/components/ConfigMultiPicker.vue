@@ -125,15 +125,15 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div ref="root" class="ec-multiPicker" :class="{ 'is-open': open }">
-    <div class="ec-multiPickerLabelRow">
+  <div ref="root" class="featured-multiPicker" :class="{ 'is-open': open }">
+    <div class="featured-multiPickerLabelRow">
       <label class="selectLabel">{{ label }}</label>
       <ConfigHelpTooltip v-if="helpText" :text="helpText" :label="`${label}: ${helpText}`" />
     </div>
     <button
       ref="trigger"
       type="button"
-      class="emby-select emby-select-withcolor ec-multiPickerTrigger"
+      class="emby-select emby-select-withcolor featured-multiPickerTrigger"
       :aria-expanded="open"
       aria-haspopup="listbox"
       @click="toggleOpen"
@@ -148,54 +148,54 @@ onBeforeUnmount(() => {
       <div
         v-if="open"
         ref="menu"
-        class="ec-multiPickerMenu"
+        class="featured-multiPickerMenu"
         :class="`opens-${placement}`"
         :style="menuStyle"
         role="listbox"
         aria-multiselectable="true"
       >
-        <div class="ec-multiPickerSearchWrap">
+        <div class="featured-multiPickerSearchWrap">
           <span class="material-icons" aria-hidden="true">search</span>
           <input
             v-model="query"
-            class="ec-multiPickerSearch"
+            class="featured-multiPickerSearch"
             type="search"
             :placeholder="t('common.search')"
             autofocus
           />
         </div>
 
-        <div v-if="filteredOptions.length" class="ec-multiPickerOptions">
+        <div v-if="filteredOptions.length" class="featured-multiPickerOptions">
           <button
             v-for="option in filteredOptions"
             :key="option.value"
             type="button"
-            class="ec-multiPickerOption"
+            class="featured-multiPickerOption"
             :class="{ 'is-selected': modelValue.includes(option.value) }"
             role="option"
             :aria-selected="modelValue.includes(option.value)"
             @click="toggle(option.value)"
           >
-            <span class="material-icons ec-multiPickerCheck" aria-hidden="true">
+            <span class="material-icons featured-multiPickerCheck" aria-hidden="true">
               {{ modelValue.includes(option.value) ? 'check_box' : 'check_box_outline_blank' }}
             </span>
             <span>{{ option.label }}</span>
           </button>
         </div>
-        <p v-else class="ec-multiPickerEmpty">{{ emptyText || t('common.noOptions') }}</p>
+        <p v-else class="featured-multiPickerEmpty">{{ emptyText || t('common.noOptions') }}</p>
 
-        <footer class="ec-multiPickerFooter">
+        <footer class="featured-multiPickerFooter">
           <span>{{ t('common.selectedCount', { count: modelValue.length }) }}</span>
           <div>
             <button
               v-if="modelValue.length"
               type="button"
-              class="ec-multiPickerFooterButton"
+              class="featured-multiPickerFooterButton"
               @click="emit('update:modelValue', [])"
             >
               {{ t('common.clearSelection') }}
             </button>
-            <button type="button" class="ec-multiPickerFooterButton is-primary" @click="close">
+            <button type="button" class="featured-multiPickerFooterButton is-primary" @click="close">
               {{ t('common.done') }}
             </button>
           </div>
@@ -206,26 +206,26 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
-.ec-multiPicker {
+.featured-multiPicker {
   margin-bottom: 1rem;
   min-width: 0;
   position: relative;
 }
-.ec-multiPickerLabelRow {
+.featured-multiPickerLabelRow {
   align-items: center;
   display: flex;
   gap: 0.4rem;
   margin-bottom: 0.35rem;
   width: fit-content;
 }
-.ec-multiPickerLabelRow > .selectLabel {
+.featured-multiPickerLabelRow > .selectLabel {
   display: block;
 }
-.ec-multiPickerTrigger {
+.featured-multiPickerTrigger {
   align-items: center;
-  background: var(--jf-palette-FilledInput-bg, var(--ec-theme-action-hover));
-  border: 1px solid var(--jf-palette-FilledInput-borderColor, var(--ec-theme-divider));
-  border-radius: var(--ec-theme-radius);
+  background: var(--jf-palette-FilledInput-bg, var(--featured-theme-action-hover));
+  border: 1px solid var(--jf-palette-FilledInput-borderColor, var(--featured-theme-divider));
+  border-radius: var(--featured-theme-radius);
   color: inherit;
   cursor: pointer;
   display: flex;
@@ -236,39 +236,39 @@ onBeforeUnmount(() => {
   text-align: left;
   width: 100%;
 }
-.ec-multiPickerTrigger:focus-visible,
-.ec-multiPicker.is-open .ec-multiPickerTrigger {
-  border-color: var(--ec-theme-secondary);
-  outline: 1px solid var(--ec-theme-secondary);
+.featured-multiPickerTrigger:focus-visible,
+.featured-multiPicker.is-open .featured-multiPickerTrigger {
+  border-color: var(--featured-theme-secondary);
+  outline: 1px solid var(--featured-theme-secondary);
 }
-.ec-multiPickerTrigger .is-placeholder {
+.featured-multiPickerTrigger .is-placeholder {
   opacity: 0.58;
 }
-.ec-multiPickerMenu {
-  background: var(--ec-theme-paper);
-  border: 1px solid var(--ec-theme-divider);
-  border-radius: var(--ec-theme-radius);
+.featured-multiPickerMenu {
+  background: var(--featured-theme-paper);
+  border: 1px solid var(--featured-theme-divider);
+  border-radius: var(--featured-theme-radius);
   box-shadow: 0 0.85rem 2.4rem rgba(0, 0, 0, 0.55);
-  color: var(--ec-theme-text-primary);
+  color: var(--featured-theme-text-primary);
   display: flex;
   flex-direction: column;
   min-width: min(22rem, calc(100vw - 1rem));
   overflow: hidden;
   overscroll-behavior: contain;
 }
-.ec-multiPickerSearchWrap {
+.featured-multiPickerSearchWrap {
   align-items: center;
-  border-bottom: 1px solid var(--ec-theme-divider);
+  border-bottom: 1px solid var(--featured-theme-divider);
   display: flex;
   flex: 0 0 auto;
   gap: 0.45rem;
   padding: 0.65rem 0.75rem;
 }
-.ec-multiPickerSearchWrap .material-icons {
+.featured-multiPickerSearchWrap .material-icons {
   font-size: 1.2rem;
   opacity: 0.55;
 }
-.ec-multiPickerSearch {
+.featured-multiPickerSearch {
   background: transparent;
   border: 0;
   color: inherit;
@@ -277,13 +277,13 @@ onBeforeUnmount(() => {
   padding: 0.25rem 0;
   width: 100%;
 }
-.ec-multiPickerOptions {
+.featured-multiPickerOptions {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
   padding: 0.35rem;
 }
-.ec-multiPickerOption {
+.featured-multiPickerOption {
   align-items: center;
   background: transparent;
   border: 0;
@@ -296,26 +296,26 @@ onBeforeUnmount(() => {
   text-align: left;
   width: 100%;
 }
-.ec-multiPickerOption:hover,
-.ec-multiPickerOption:focus-visible {
-  background: var(--ec-theme-action-hover);
+.featured-multiPickerOption:hover,
+.featured-multiPickerOption:focus-visible {
+  background: var(--featured-theme-action-hover);
   outline: 0;
 }
-.ec-multiPickerOption.is-selected {
-  background: var(--ec-theme-action-focus);
+.featured-multiPickerOption.is-selected {
+  background: var(--featured-theme-action-focus);
 }
-.ec-multiPickerCheck {
-  color: var(--ec-theme-primary);
+.featured-multiPickerCheck {
+  color: var(--featured-theme-primary);
   font-size: 1.25rem;
 }
-.ec-multiPickerEmpty {
+.featured-multiPickerEmpty {
   margin: 0;
   opacity: 0.68;
   padding: 1.1rem 0.9rem;
 }
-.ec-multiPickerFooter {
+.featured-multiPickerFooter {
   align-items: center;
-  border-top: 1px solid var(--ec-theme-divider);
+  border-top: 1px solid var(--featured-theme-divider);
   display: flex;
   flex: 0 0 auto;
   font-size: 0.78rem;
@@ -323,11 +323,11 @@ onBeforeUnmount(() => {
   justify-content: space-between;
   padding: 0.55rem 0.7rem;
 }
-.ec-multiPickerFooter > div {
+.featured-multiPickerFooter > div {
   display: flex;
   gap: 0.35rem;
 }
-.ec-multiPickerFooterButton {
+.featured-multiPickerFooterButton {
   background: transparent;
   border: 0;
   border-radius: 0.25rem;
@@ -335,11 +335,11 @@ onBeforeUnmount(() => {
   cursor: pointer;
   padding: 0.4rem 0.55rem;
 }
-.ec-multiPickerFooterButton:hover {
-  background: var(--ec-theme-action-hover);
+.featured-multiPickerFooterButton:hover {
+  background: var(--featured-theme-action-hover);
 }
-.ec-multiPickerFooterButton.is-primary {
-  color: var(--ec-theme-primary);
+.featured-multiPickerFooterButton.is-primary {
+  color: var(--featured-theme-primary);
   font-weight: 700;
 }
 </style>

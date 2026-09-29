@@ -27,7 +27,7 @@ export class YouTubePlayer implements TrailerPlayer {
 
   constructor(videoId: string, options: TrailerPlaybackOptions) {
     this.element = document.createElement('div');
-    this.element.className = 'ec-trailer';
+    this.element.className = 'featured-trailer';
     this.element.tabIndex = -1;
     this.element.setAttribute('aria-hidden', 'true');
 
@@ -115,8 +115,8 @@ export class YouTubePlayer implements TrailerPlayer {
     replaceElementChildren(this.element);
 
     const iframe = document.createElement('iframe');
-    iframe.id = `ec-youtube-player-${++youtubePlayerSequence}`;
-    iframe.className = 'ec-youtube-frame';
+    iframe.id = `featured-youtube-player-${++youtubePlayerSequence}`;
+    iframe.className = 'featured-youtube-frame';
     iframe.tabIndex = -1;
     iframe.referrerPolicy = 'strict-origin-when-cross-origin';
     iframe.setAttribute('allow', 'autoplay; encrypted-media; picture-in-picture');
@@ -167,7 +167,7 @@ export class YouTubePlayer implements TrailerPlayer {
                   this.resolveReadyOnce();
 
                   const playerIframe = target.getIframe();
-                  playerIframe.classList.add('ec-youtube-frame');
+                  playerIframe.classList.add('featured-youtube-frame');
                   playerIframe.tabIndex = -1;
                   playerIframe.referrerPolicy = 'strict-origin-when-cross-origin';
                   playerIframe.setAttribute('allow', 'autoplay; encrypted-media; picture-in-picture');
@@ -378,7 +378,7 @@ function loadYouTubeApi(): Promise<YouTubeApi> {
       );
     };
 
-    if (!document.querySelector('script[data-ec-youtube-api]')) {
+    if (!document.querySelector('script[data-featured-youtube-api]')) {
       const script = document.createElement('script');
       script.src = 'https://www.youtube.com/iframe_api';
       script.dataset.ecYoutubeApi = 'true';

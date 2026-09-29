@@ -60,7 +60,7 @@ export class FeaturedCarousel {
     );
     this.autoplayEnabled = response.autoplay;
     this.root = document.createElement('section');
-    this.root.className = `ec-root ec-ready ec-effect-${response.transitionEffect} ec-height-${response.heroHeightMode} ec-text-${response.heroTextPosition}${response.useHeroLayout ? ' ec-hero' : ''}${response.showControlsOnHoverOnly ? ' ec-controls-hover' : ''}${response.interactOnWholeBanner ? ' ec-whole-banner-interactive' : ''}`;
+    this.root.className = `featured-root featured-ready featured-effect-${response.transitionEffect} featured-height-${response.heroHeightMode} featured-text-${response.heroTextPosition}${response.useHeroLayout ? ' featured-hero' : ''}${response.showControlsOnHoverOnly ? ' featured-controls-hover' : ''}${response.interactOnWholeBanner ? ' featured-whole-banner-interactive' : ''}`;
     this.root.dataset.featuredVersion = PLUGIN_VERSION;
     applyHeroLayoutVariables(this.root, response);
     this.root.setAttribute('aria-roledescription', 'carousel');
@@ -68,15 +68,15 @@ export class FeaturedCarousel {
 
     if (response.heading && !response.useHeroLayout) {
       const heading = document.createElement('h2');
-      heading.className = 'sectionTitle sectionTitle-cards ec-heading';
+      heading.className = 'sectionTitle sectionTitle-cards featured-heading';
       heading.textContent = response.heading;
       this.root.appendChild(heading);
     }
 
     const viewport = document.createElement('div');
-    viewport.className = 'ec-viewport';
+    viewport.className = 'featured-viewport';
     this.track = document.createElement('div');
-    this.track.className = 'ec-track';
+    this.track.className = 'featured-track';
     this.slides = this.items.map((item) => createSlide(item, response));
     this.slides.forEach((slide) => this.track.appendChild(slide));
     viewport.appendChild(this.track);
@@ -84,16 +84,16 @@ export class FeaturedCarousel {
     this.heroLayoutGuard = response.useHeroLayout
       ? new HeroLayoutGuard(
           this.root,
-          () => this.slides[this.window.index - this.window.windowStart]?.querySelector('.ec-content') ?? null
+          () => this.slides[this.window.index - this.window.windowStart]?.querySelector('.featured-content') ?? null
         )
       : null;
 
     const navigation = document.createElement('div');
-    navigation.className = 'ec-navigation';
+    navigation.className = 'featured-navigation';
 
     const controls = document.createElement('div');
     let autoplayCountdownProgress: SVGCircleElement | null = null;
-    controls.className = 'ec-controls';
+    controls.className = 'featured-controls';
     if (
       response.showSlidePosition &&
       !response.showPaginationDots &&
@@ -186,7 +186,9 @@ export class FeaturedCarousel {
     const focusedElement = document.activeElement;
     const focusedActionIndex =
       activeSlide && focusedElement instanceof HTMLButtonElement
-        ? Array.from(activeSlide.querySelectorAll<HTMLButtonElement>('.ec-actions button')).indexOf(focusedElement)
+        ? Array.from(activeSlide.querySelectorAll<HTMLButtonElement>('.featured-actions button')).indexOf(
+            focusedElement
+          )
         : -1;
     const focusedBanner = focusedElement === activeSlide;
 
@@ -207,20 +209,20 @@ export class FeaturedCarousel {
       offset = Math.sign(offset);
       const previousOffset = Number(slide.dataset.ecOffset);
       if (Number.isFinite(previousOffset) && Math.abs(previousOffset - offset) > 1) {
-        slide.classList.add('ec-no-transition');
+        slide.classList.add('featured-no-transition');
         wrappedSlides.push(slide);
       }
       const isActive = slideIndex === localIndex;
       if (previousOffset !== offset) {
         slide.dataset.ecOffset = String(offset);
-        slide.style.setProperty('--ec-offset', `${offset * 100}%`);
+        slide.style.setProperty('--featured-offset', `${offset * 100}%`);
       }
       if (slide.classList.contains('is-active') !== isActive) slide.classList.toggle('is-active', isActive);
       const ariaHidden = isActive ? 'false' : 'true';
       if (slide.getAttribute('aria-hidden') !== ariaHidden) slide.setAttribute('aria-hidden', ariaHidden);
       const tabIndex = isActive && this.response.interactOnWholeBanner ? 0 : -1;
       if (slide.tabIndex !== tabIndex) slide.tabIndex = tabIndex;
-      slide.querySelectorAll<HTMLButtonElement>('.ec-actions button').forEach((button) => {
+      slide.querySelectorAll<HTMLButtonElement>('.featured-actions button').forEach((button) => {
         const actionTabIndex = isActive ? 0 : -1;
         if (button.tabIndex !== actionTabIndex) button.tabIndex = actionTabIndex;
       });
@@ -229,15 +231,15 @@ export class FeaturedCarousel {
       const nextSlide = this.slides[localIndex];
       const nextAction =
         focusedActionIndex >= 0
-          ? nextSlide?.querySelectorAll<HTMLButtonElement>('.ec-actions button')[focusedActionIndex]
+          ? nextSlide?.querySelectorAll<HTMLButtonElement>('.featured-actions button')[focusedActionIndex]
           : null;
       if (nextAction) nextAction.focus();
       else if (this.response.interactOnWholeBanner) nextSlide?.focus();
-      else nextSlide?.querySelector<HTMLButtonElement>('.ec-actions button')?.focus();
+      else nextSlide?.querySelector<HTMLButtonElement>('.featured-actions button')?.focus();
     }
     if (wrappedSlides.length) {
       void this.root.offsetWidth;
-      wrappedSlides.forEach((slide) => slide.classList.remove('ec-no-transition'));
+      wrappedSlides.forEach((slide) => slide.classList.remove('featured-no-transition'));
     }
     if (this.status) {
       const absolutePosition = this.window.discardedItemCount + this.window.index + 1;

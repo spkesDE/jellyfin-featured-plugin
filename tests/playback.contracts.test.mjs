@@ -16,9 +16,9 @@ test('hero play action resolves video progress and starts native Jellyfin playba
   assert.match(playback, /PlaybackPositionTicks/);
   assert.match(playback, /dataset\.action = target\.positionTicks > 0 \? 'resume' : 'play'/);
   assert.match(playback, /dataset\.positionticks = String\(target\.positionTicks\)/);
-  assert.match(playback, /className = 'itemAction ec-native-playback-action'/);
-  assert.match(playback, /className = 'ec-button ec-play-button raised button-submit emby-button'/);
-  assert.match(styles, /\.ec-root \.ec-play-button:hover,[\s\S]*?filter:\s*brightness\(1\.16\)[\s\S]*?/);
+  assert.match(playback, /className = 'itemAction featured-native-playback-action'/);
+  assert.match(playback, /className = 'featured-button featured-play-button raised button-submit emby-button'/);
+  assert.match(styles, /\.featured-root \.featured-play-button:hover,[\s\S]*?filter:\s*brightness\(1\.16\)[\s\S]*?/);
   assert.match(playback, /new MouseEvent\('click', \{ bubbles: true, cancelable: true, view: window \}\)/);
   assert.match(english, /"carousel\.resume": "Resume"/);
   assert.match(german, /"carousel\.resume": "Fortsetzen"/);

@@ -13,7 +13,7 @@ export function createPreferenceFieldset(title: string, help?: string, className
   const fieldset = document.createElement('fieldset');
   if (className) fieldset.className = className;
   fieldset.appendChild(createTextElement('legend', title));
-  if (help) fieldset.appendChild(createTextElement('p', help, `${className ?? 'ec-preference'}-help`));
+  if (help) fieldset.appendChild(createTextElement('p', help, `${className ?? 'featured-preference'}-help`));
   return fieldset;
 }
 

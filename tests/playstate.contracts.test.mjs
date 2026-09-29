@@ -18,12 +18,12 @@ test('played toggle uses Jellyfin playstate markup and updates in place', async 
   assert.match(playstate, /item\.isPlayed = result\.Played \?\? next;[\s\S]*?updateButton\(button, item\.isPlayed\)/);
   assert.match(
     playstate,
-    /ec-playstate-button-meta[\s\S]*?--ec-playstate-active-color, #52b54b[\s\S]*?--ec-on-media-color, #fff/
+    /featured-playstate-button-meta[\s\S]*?--featured-playstate-active-color, #52b54b[\s\S]*?--featured-on-media-color, #fff/
   );
   assert.match(playstate, /featured\/playstate\/changed/);
   assert.match(
     styles,
-    /\.ec-playstate-button\[aria-pressed=['"]true['"]\][\s\S]*?color:\s*var\(--ec-playstate-active-color, #52b54b\)/
+    /\.featured-playstate-button\[aria-pressed=['"]true['"]\][\s\S]*?color:\s*var\(--featured-playstate-active-color, #52b54b\)/
   );
 });
 

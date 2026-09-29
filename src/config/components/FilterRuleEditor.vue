@@ -103,8 +103,8 @@ function numberLimits(field: FilterField): { min: number; max: number; step: num
 </script>
 
 <template>
-  <div class="ec-filterEditor">
-    <div v-for="(filter, index) in filters" :key="filter.Id" class="ec-filterRow">
+  <div class="featured-filterEditor">
+    <div v-for="(filter, index) in filters" :key="filter.Id" class="featured-filterRow">
       <ConfigSelect
         :model-value="filter.Field"
         :label="t('filter.fieldLabel')"
@@ -195,7 +195,7 @@ function numberLimits(field: FilterField): { min: number; max: number; step: num
 
       <button
         type="button"
-        class="paper-icon-button-light ec-ruleIconButton ec-removeFilter"
+        class="paper-icon-button-light featured-ruleIconButton featured-removeFilter"
         :title="t('filter.remove')"
         @click="store.removeFilter(filters, index)"
       >
@@ -203,7 +203,7 @@ function numberLimits(field: FilterField): { min: number; max: number; step: num
       </button>
     </div>
 
-    <button type="button" class="raised emby-button ec-addFilterButton" @click="store.addFilter(filters)">
+    <button type="button" class="raised emby-button featured-addFilterButton" @click="store.addFilter(filters)">
       <span class="material-icons" aria-hidden="true">add</span>
       {{ t('filter.add') }}
     </button>
@@ -211,12 +211,12 @@ function numberLimits(field: FilterField): { min: number; max: number; step: num
 </template>
 
 <style scoped>
-.ec-filterEditor {
+.featured-filterEditor {
   display: grid;
   gap: 0.75rem;
 }
 
-.ec-filterRow {
+.featured-filterRow {
   align-items: end;
   background: rgba(0, 0, 0, 0.12);
   border: 1px solid rgba(255, 255, 255, 0.07);
@@ -227,28 +227,28 @@ function numberLimits(field: FilterField): { min: number; max: number; step: num
   padding: 0.75rem;
 }
 
-.ec-filterRow > :deep(.selectContainer),
-.ec-filterRow > :deep(.inputContainer),
-.ec-filterRow > :deep(.ec-multiPicker) {
+.featured-filterRow > :deep(.selectContainer),
+.featured-filterRow > :deep(.inputContainer),
+.featured-filterRow > :deep(.featured-multiPicker) {
   margin-bottom: 0;
 }
 
-.ec-addFilterButton {
+.featured-addFilterButton {
   justify-self: start;
 }
 
 @media (max-width: 850px) {
-  .ec-filterRow {
+  .featured-filterRow {
     grid-template-columns: 1fr 1fr;
   }
 
-  .ec-removeFilter {
+  .featured-removeFilter {
     justify-self: end;
   }
 }
 
 @media (max-width: 600px) {
-  .ec-filterRow {
+  .featured-filterRow {
     grid-template-columns: 1fr;
   }
 }

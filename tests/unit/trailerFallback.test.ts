@@ -40,9 +40,9 @@ describe('TrailerController fallback', () => {
     });
     const slide = document.createElement('article');
     const media = document.createElement('div');
-    media.className = 'ec-media';
+    media.className = 'featured-media';
     const backdrop = document.createElement('div');
-    backdrop.className = 'ec-backdrop';
+    backdrop.className = 'featured-backdrop';
     media.appendChild(backdrop);
     slide.appendChild(media);
 

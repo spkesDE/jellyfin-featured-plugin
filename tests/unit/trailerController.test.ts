@@ -25,11 +25,11 @@ describe('TrailerController', () => {
       restartAutoplay: vi.fn()
     });
 
-    expect(controller.controls?.querySelector('.ec-trailer-pause')).toBeInstanceOf(HTMLButtonElement);
-    expect(controller.controls?.querySelector('.ec-trailer-mute')).toBeInstanceOf(HTMLButtonElement);
-    expect(controller.controls?.querySelector<HTMLInputElement>('.ec-trailer-volume')?.min).toBe('0');
-    expect(controller.controls?.querySelector<HTMLInputElement>('.ec-trailer-volume')?.max).toBe('100');
-    expect(controller.controls?.querySelector('.ec-volume-side')).toBeNull();
+    expect(controller.controls?.querySelector('.featured-trailer-pause')).toBeInstanceOf(HTMLButtonElement);
+    expect(controller.controls?.querySelector('.featured-trailer-mute')).toBeInstanceOf(HTMLButtonElement);
+    expect(controller.controls?.querySelector<HTMLInputElement>('.featured-trailer-volume')?.min).toBe('0');
+    expect(controller.controls?.querySelector<HTMLInputElement>('.featured-trailer-volume')?.max).toBe('100');
+    expect(controller.controls?.querySelector('.featured-volume-side')).toBeNull();
 
     controller.destroy();
 

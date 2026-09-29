@@ -153,10 +153,10 @@ export function createDismissalControl(
   button.title = label;
 
   if (variant === 'metadata') {
-    button.className = 'button-flat detailButton emby-button ec-dismissal-button ec-dismissal-button-meta';
-    button.style.color = 'var(--ec-on-media-color, #fff)';
+    button.className = 'button-flat detailButton emby-button featured-dismissal-button featured-dismissal-button-meta';
+    button.style.color = 'var(--featured-on-media-color, #fff)';
   } else {
-    button.className = 'ec-button ec-button-secondary ec-dismissal-button raised emby-button';
+    button.className = 'featured-button featured-button-secondary featured-dismissal-button raised emby-button';
   }
   const content = document.createElement('span');
   content.className = 'detailButton-content';

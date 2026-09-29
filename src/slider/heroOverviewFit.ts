@@ -1,13 +1,13 @@
 const HERO_FIT_MEDIA_QUERY = '(min-width: 701px)';
-const HERO_CONTENT_SELECTOR = '.ec-root.ec-ready.ec-hero .ec-slide.is-active .ec-content';
+const HERO_CONTENT_SELECTOR = '.featured-root.featured-ready.featured-hero .featured-slide.is-active .featured-content';
 const INSTALL_MARKER = 'data-jellyfin-featured-overview-fit';
 const HERO_CONTENT_GAP_PX = 12;
 const OVERFLOW_TOLERANCE_PX = 1;
 const OVERVIEW_FIT_CLASSES = [
-  'ec-overview-lines-3',
-  'ec-overview-lines-2',
-  'ec-overview-lines-1',
-  'ec-overview-hidden'
+  'featured-overview-lines-3',
+  'featured-overview-lines-2',
+  'featured-overview-lines-1',
+  'featured-overview-hidden'
 ] as const;
 
 let scheduledFrame: number | null = null;
@@ -24,7 +24,7 @@ function getVisibleContentBottom(content: HTMLElement): number {
 
 function getAvailableContentBottom(content: HTMLElement): number {
   const contentBottom = content.getBoundingClientRect().bottom;
-  const root = content.closest<HTMLElement>('.ec-root.ec-ready.ec-hero');
+  const root = content.closest<HTMLElement>('.featured-root.featured-ready.featured-hero');
   const nextSection = root?.nextElementSibling;
   if (!(nextSection instanceof HTMLElement)) return contentBottom;
   return Math.min(contentBottom, nextSection.getBoundingClientRect().top - HERO_CONTENT_GAP_PX);
@@ -34,7 +34,7 @@ export function fitHeroOverview(content: HTMLElement): number {
   clearOverviewFitClasses(content);
   if (!window.matchMedia(HERO_FIT_MEDIA_QUERY).matches) return 0;
 
-  const overview = content.querySelector<HTMLElement>('.ec-overview');
+  const overview = content.querySelector<HTMLElement>('.featured-overview');
   if (!overview || content.clientHeight <= 0) return 0;
 
   const fits = (): boolean =>
@@ -43,13 +43,13 @@ export function fitHeroOverview(content: HTMLElement): number {
   if (fits()) return 4;
 
   for (const lines of [3, 2, 1] as const) {
-    const className = `ec-overview-lines-${lines}`;
+    const className = `featured-overview-lines-${lines}`;
     content.classList.add(className);
     if (fits()) return lines;
     content.classList.remove(className);
   }
 
-  content.classList.add('ec-overview-hidden');
+  content.classList.add('featured-overview-hidden');
   return 0;
 }
 
@@ -67,15 +67,16 @@ function scheduleHeroOverviewFit(): void {
 
 function mutationNeedsFit(mutation: MutationRecord): boolean {
   if (mutation.type === 'attributes') {
-    return mutation.target instanceof HTMLElement && mutation.target.classList.contains('ec-slide');
+    return mutation.target instanceof HTMLElement && mutation.target.classList.contains('featured-slide');
   }
 
   if (mutation.type !== 'childList') return false;
-  if (mutation.target instanceof Element && mutation.target.closest('.ec-root.ec-hero')) return true;
+  if (mutation.target instanceof Element && mutation.target.closest('.featured-root.featured-hero')) return true;
 
   return [...mutation.addedNodes, ...mutation.removedNodes].some(
     (node) =>
-      node instanceof Element && (node.matches('.ec-root.ec-hero') || node.querySelector('.ec-root.ec-hero') !== null)
+      node instanceof Element &&
+      (node.matches('.featured-root.featured-hero') || node.querySelector('.featured-root.featured-hero') !== null)
   );
 }
 
