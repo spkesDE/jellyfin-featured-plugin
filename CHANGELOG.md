@@ -1,5 +1,11 @@
 # Changelog
 
+## v12.8.0.0 - 2026-10-03
+
+### Features
+
+- feat(trailer): add banner navigation and media controls positioning
+
 ## v12.7.2.0 - 2026-09-29
 
 ### Features

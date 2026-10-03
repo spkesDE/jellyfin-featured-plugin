@@ -9,6 +9,14 @@
     "imageUrl": "https://raw.githubusercontent.com/spkesDE/jellyfin-featured-plugin/main/logo.png",
     "versions": [
       {
+        "version": "12.8.0.0",
+        "changelog": "- feat(trailer): add banner navigation and media controls positioning\n",
+        "targetAbi": "12.1.0.0",
+        "sourceUrl": "https://github.com/spkesDE/jellyfin-featured-plugin/releases/download/v12.8.0.0/Featured.zip",
+        "checksum": "bfbb172430e6e92751fb28353be27eb7",
+        "timestamp": "2026-10-03 13:33:37"
+      },
+      {
         "version": "12.7.2.0",
         "changelog": "- feat(ci): add .NET setup step and update workflow for translation status\n- fix(hero): preserve mobile hero fade on iOS\n- fix(release): format generated metadata\n- fix(styles): fixed drop-shadow for overview\n- fix(config): keep drag previews in styling scope\n- refactor(build): compile bootstrap assets with Vite\n- refactor(injection): centralize frontend markup handling\n- refactor(storage): share atomic persistence and cache primitives\n- refactor(config): split persisted models and mappings by domain\n- refactor(api): separate feed construction and response models\n- refactor(config-ui): separate defaults, factories and projections\n- refactor(config-ui): simplify shared editors and previews\n- refactor(config-ui): reorganize settings tabs and layouts\n- refactor(runtime): coordinate routing, mounting and response reuse\n- refactor(preferences): split dialog, form and dismissal behavior\n- refactor(trailers): separate controller and playback providers\n- refactor(carousel): extract navigation, controls and layout state\n- refactor(styles): organize runtime CSS by ownership\n- refactor(naming): rename ec- prefix to featured-\n- chore(tooling): standardize formatting, linting and tests\n- chore(format): normalize release metadata\n- deps(deps-dev): bump vite (#16)\n",
         "targetAbi": "12.1.0.0",
