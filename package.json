@@ -2,7 +2,7 @@
   "name": "jellyfin-featured-plugin",
   "private": true,
   "type": "module",
-  "version": "12.7.2.0",
+  "version": "12.8.0.0",
   "description": "TypeScript and Vue frontend for the Jellyfin Featured plugin.",
   "scripts": {
     "format": "npm run format:web && npm run format:dotnet",
