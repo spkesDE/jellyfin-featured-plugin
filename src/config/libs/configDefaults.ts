@@ -65,6 +65,8 @@ export const CONFIG_DEFAULTS: FeaturedPluginConfig = {
   ShowDismissalButton: true,
   DismissalButtonPlacement: 'metadata',
   ShowNavigationArrows: true,
+  BannerNavigationPosition: 'bottom-center',
+  BannerMediaControlsPosition: 'top-right',
   ShowControlsOnHoverOnly: false,
   InteractOnWholeBanner: true,
   ShowSlidePosition: true,

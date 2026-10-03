@@ -24,6 +24,8 @@ export function createDisplaySettings(config: FeaturedPluginConfig): FeaturedDis
     showDismissalButton: config.DismissalPolicy.Enabled && config.ShowDismissalButton,
     dismissalButtonPlacement: config.DismissalButtonPlacement,
     showNavigationArrows: config.ShowNavigationArrows,
+    bannerNavigationPosition: config.BannerNavigationPosition,
+    bannerMediaControlsPosition: config.BannerMediaControlsPosition,
     showControlsOnHoverOnly: config.ShowControlsOnHoverOnly,
     interactOnWholeBanner: config.InteractOnWholeBanner,
     showSlidePosition: config.ShowSlidePosition,

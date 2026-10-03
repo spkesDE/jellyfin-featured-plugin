@@ -337,6 +337,49 @@
   z-index: 4;
 }
 
+/* Banner controls use independent position settings. The navigation surface
+   fills the viewport so both groups can be anchored without affecting layout. */
+.featured-root:not(.featured-hero) .featured-navigation {
+  bottom: 0;
+  display: block;
+  left: 0;
+  pointer-events: none;
+  right: 0;
+  top: 0;
+  transform: none;
+}
+
+.featured-root:not(.featured-hero) .featured-control-slot {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  pointer-events: none;
+  position: absolute;
+}
+
+.featured-root:not(.featured-hero) .featured-control-slot > * {
+  pointer-events: auto;
+}
+
+.featured-root:not(.featured-hero) .featured-control-slot-bottom-center {
+  bottom: 0.8rem;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.featured-root:not(.featured-hero) .featured-control-slot-top-right {
+  align-items: flex-end;
+  right: 0.8rem;
+  top: 0.8rem;
+}
+
+.featured-root:not(.featured-hero) .featured-control-slot-center {
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
 .featured-dots {
   display: flex;
   gap: 0.42rem;

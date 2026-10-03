@@ -96,4 +96,32 @@ public sealed class HeroDisplaySettingsTests
             point => Assert.Equal((65, 100), (point.Position, point.Fade)),
             point => Assert.Equal((100, 100), (point.Position, point.Fade)));
     }
+
+    [Fact]
+    public void Normalize_SanitizesBannerControlPositionsForRootAndPresets()
+    {
+        PluginConfiguration config = new()
+        {
+            BannerNavigationPosition = "center",
+            BannerMediaControlsPosition = "bottom-center",
+            Presets =
+            [
+                new FeaturedPreset
+                {
+                    Layout = new FeaturedPresetLayoutSettings
+                    {
+                        BannerNavigationPosition = "invalid",
+                        BannerMediaControlsPosition = "center"
+                    }
+                }
+            ]
+        };
+
+        PluginConfiguration normalized = PluginConfigurationNormalizer.Normalize(config);
+
+        Assert.Equal("center", normalized.BannerNavigationPosition);
+        Assert.Equal("bottom-center", normalized.BannerMediaControlsPosition);
+        Assert.Equal("bottom-center", normalized.Presets[0].Layout.BannerNavigationPosition);
+        Assert.Equal("center", normalized.Presets[0].Layout.BannerMediaControlsPosition);
+    }
 }

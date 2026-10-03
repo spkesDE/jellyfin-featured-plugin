@@ -28,6 +28,8 @@ public abstract class FeaturedDisplaySettingsDto
             ?? (config.DismissalPolicy.Enabled && config.ShowDismissalButton);
         DismissalButtonPlacement = config.DismissalButtonPlacement;
         ShowNavigationArrows = config.ShowNavigationArrows;
+        BannerNavigationPosition = config.BannerNavigationPosition;
+        BannerMediaControlsPosition = config.BannerMediaControlsPosition;
         ShowControlsOnHoverOnly = config.ShowControlsOnHoverOnly;
         InteractOnWholeBanner = config.InteractOnWholeBanner;
         ShowSlidePosition = config.ShowSlidePosition;
@@ -80,6 +82,8 @@ public abstract class FeaturedDisplaySettingsDto
     public bool ShowDismissalButton { get; }
     public string DismissalButtonPlacement { get; }
     public bool ShowNavigationArrows { get; }
+    public string BannerNavigationPosition { get; }
+    public string BannerMediaControlsPosition { get; }
     public bool ShowControlsOnHoverOnly { get; }
     public bool InteractOnWholeBanner { get; }
     public bool ShowSlidePosition { get; }

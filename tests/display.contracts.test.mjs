@@ -191,6 +191,15 @@ test('carousel controls can be hidden until hover without affecting touch input'
   );
 });
 
+test('live preview leaves vertical scrolling to the configuration page', async () => {
+  const displayTab = await read('src/config/tabs/DisplayTab.vue');
+  const previewSectionRule = displayTab.match(/\.featured-preview-section\s*\{([^}]*)\}/)?.[1] ?? '';
+
+  assert.match(previewSectionRule, /touch-action:\s*pan-y/);
+  assert.doesNotMatch(previewSectionRule, /overflow(?:-y)?:\s*auto/);
+  assert.doesNotMatch(previewSectionRule, /overscroll-behavior:\s*contain/);
+});
+
 test('frontend theming inherits Jellyfin palette tokens and exposes a Custom CSS API', async () => {
   const [tokens, main, configMain, devMain, render, playback, runtimeStyles, configStyles, preview, guide, readme] =
     await Promise.all([

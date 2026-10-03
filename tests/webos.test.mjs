@@ -58,14 +58,14 @@ test('webOS 6 gets Chromium 79 compatible output and runtime fallbacks', async (
   assert.doesNotMatch(layout, /(?<!-)maskImage\s*=/);
 });
 
-test('hero content adapts overview lines and keeps following sections clear', async () => {
-  const [main, entry, styles, base, compatibility, heroOverviewFit] = await Promise.all([
+test('featured content adapts overview lines and keeps following sections clear', async () => {
+  const [main, entry, styles, base, compatibility, overviewFit] = await Promise.all([
     read('src/main.ts'),
     readFile(new URL('../src/styles/featured.css', import.meta.url), 'utf8'),
     read('src/styles/featured.css'),
     read('src/styles/featured-base.css'),
     read('src/styles/featured-compatibility.css'),
-    read('src/slider/heroOverviewFit.ts')
+    read('src/slider/overviewFit.ts')
   ]);
 
   assert.match(
@@ -79,8 +79,6 @@ test('hero content adapts overview lines and keeps following sections clear', as
       .trim(),
     ''
   );
-  assert.match(main, /import \{ installAdaptiveHeroOverview \} from '\.\/slider\/heroOverviewFit'/);
-  assert.match(main, /installAdaptiveHeroOverview\(\)/);
   assert.match(main, /style\.textContent = styles/);
   assert.match(
     styles,
@@ -125,11 +123,13 @@ test('hero content adapts overview lines and keeps following sections clear', as
     );
   }
   assert.match(compatibility, /featured-overview-hidden \.featured-overview\s*\{[\s\S]*?display:\s*none/);
-  assert.match(heroOverviewFit, /for \(const lines of \[3, 2, 1\] as const\)/);
+  assert.match(overviewFit, /for \(const lines of \[3, 2, 1\] as const\)/);
   assert.match(
-    heroOverviewFit,
+    overviewFit,
     /getVisibleContentBottom\(content\) <= getAvailableContentBottom\(content\) \+ OVERFLOW_TOLERANCE_PX/
   );
-  assert.match(heroOverviewFit, /nextSection\.getBoundingClientRect\(\)\.top - HERO_CONTENT_GAP_PX/);
-  assert.match(heroOverviewFit, /classList\.contains\('featured-slide'\)/);
+  assert.match(overviewFit, /nextSection\.getBoundingClientRect\(\)\.top - HERO_CONTENT_GAP_PX/);
+  assert.match(overviewFit, /class OverviewFitGuard/);
+  assert.match(overviewFit, /new ResizeObserver\(this\.schedule\)/);
+  assert.match(overviewFit, /Array\.from\(content\.children\)[\s\S]*?resizeObserver\?\.observe\(child\)/);
 });

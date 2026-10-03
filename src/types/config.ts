@@ -38,6 +38,8 @@ export type TrailerSourcePriority = 'prefer_local' | 'prefer_remote' | 'local_on
 export type MultipleTrailerMode = 'first' | 'random';
 export type TrailerVolumeSliderDirection = 'side' | 'up' | 'down';
 export type FeatureControlPlacement = 'metadata' | 'actions';
+export type BannerControlPosition = 'bottom-center' | 'top-right' | 'center';
+export type BannerNavigationPosition = BannerControlPosition;
 export type PresetScheduleType = 'one_time' | 'weekly' | 'annual';
 
 export interface HeroFadePoint {
@@ -119,6 +121,8 @@ export interface FeaturedPluginConfig {
   ShowDismissalButton: boolean;
   DismissalButtonPlacement: FeatureControlPlacement;
   ShowNavigationArrows: boolean;
+  BannerNavigationPosition: BannerNavigationPosition;
+  BannerMediaControlsPosition: BannerControlPosition;
   ShowControlsOnHoverOnly: boolean;
   InteractOnWholeBanner: boolean;
   ShowSlidePosition: boolean;
@@ -198,6 +202,8 @@ type FeaturedPresetLayoutSharedSettings = Pick<
   | 'ShowDismissalButton'
   | 'DismissalButtonPlacement'
   | 'ShowNavigationArrows'
+  | 'BannerNavigationPosition'
+  | 'BannerMediaControlsPosition'
   | 'ShowControlsOnHoverOnly'
   | 'InteractOnWholeBanner'
   | 'ShowSlidePosition'

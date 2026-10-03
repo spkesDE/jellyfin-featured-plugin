@@ -115,6 +115,8 @@ internal static class PluginConfigurationNormalizer
         config.FavoriteButtonPlacement = NormalizeControlPlacement(config.FavoriteButtonPlacement);
         config.PlaystateButtonPlacement = NormalizeControlPlacement(config.PlaystateButtonPlacement);
         config.DismissalButtonPlacement = NormalizeControlPlacement(config.DismissalButtonPlacement);
+        config.BannerNavigationPosition = NormalizeBannerNavigationPosition(config.BannerNavigationPosition);
+        config.BannerMediaControlsPosition = NormalizeBannerControlPosition(config.BannerMediaControlsPosition);
         return config;
     }
 
@@ -185,6 +187,8 @@ internal static class PluginConfigurationNormalizer
         layout.FavoriteButtonPlacement = NormalizeControlPlacement(layout.FavoriteButtonPlacement);
         layout.PlaystateButtonPlacement = NormalizeControlPlacement(layout.PlaystateButtonPlacement);
         layout.DismissalButtonPlacement = NormalizeControlPlacement(layout.DismissalButtonPlacement);
+        layout.BannerNavigationPosition = NormalizeBannerNavigationPosition(layout.BannerNavigationPosition);
+        layout.BannerMediaControlsPosition = NormalizeBannerControlPosition(layout.BannerMediaControlsPosition);
         layout.SecondaryButtonText = NullIfWhiteSpace(layout.SecondaryButtonText);
         layout.Heading = NullIfWhiteSpace(layout.Heading);
         layout.PlayButtonText = NullIfWhiteSpace(layout.PlayButtonText);
@@ -510,6 +514,12 @@ internal static class PluginConfigurationNormalizer
 
     private static string NormalizeControlPlacement(string? value)
         => value == "actions" ? "actions" : "metadata";
+
+    private static string NormalizeBannerNavigationPosition(string? value)
+        => value is "top-right" or "center" ? value : "bottom-center";
+
+    private static string NormalizeBannerControlPosition(string? value)
+        => value is "bottom-center" or "center" ? value : "top-right";
 
     private static string NormalizeTrailerVolumeSliderDirection(string? _)
         => "down";

@@ -1,6 +1,5 @@
 import styles from './styles/featured.css?inline';
 import { injectJellyfinThemeTokens } from './styles/jellyfin-theme';
-import { installAdaptiveHeroOverview } from './slider/heroOverviewFit';
 import { destroy, refresh, start } from './runtime';
 import { CONSOLE_PREFIX, PLUGIN_VERSION } from './constants';
 
@@ -16,7 +15,6 @@ const existingApi = window.JellyfinFeatured;
 console.debug(`${CONSOLE_PREFIX} Loading v${PLUGIN_VERSION}; frontend injection method: ${injectionMethod}.`);
 
 injectJellyfinThemeTokens();
-installAdaptiveHeroOverview();
 
 if (existingApi) {
   console.debug(`${CONSOLE_PREFIX} Existing v${existingApi.version} instance found; reusing it.`);

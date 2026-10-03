@@ -110,6 +110,11 @@ const placementOptions: SelectOption[] = [
   { value: 'metadata', label: t('display.placementMetadata') },
   { value: 'actions', label: t('display.placementActions') }
 ];
+const bannerControlPositionOptions: SelectOption[] = [
+  { value: 'bottom-center', label: t('display.positionBottomCenter') },
+  { value: 'top-right', label: t('display.positionTopRight') },
+  { value: 'center', label: t('display.positionCenterMiddle') }
+];
 </script>
 
 <template>
@@ -324,6 +329,13 @@ const placementOptions: SelectOption[] = [
           </summary>
           <div class="featured-displayGroupBody">
             <ConfigCheckbox v-model="store.config.ShowNavigationArrows" :label="t('display.showNavigation')" />
+            <ConfigSelect
+              v-if="!store.config.UseHeroLayout"
+              v-model="store.config.BannerNavigationPosition"
+              :label="t('display.bannerNavigationPosition')"
+              :options="bannerControlPositionOptions"
+              :help-text="t('display.bannerPositionHelp')"
+            />
             <ConfigCheckbox
               v-if="!store.config.EnableInfiniteLoading"
               v-model="store.config.ShowPaginationDots"
@@ -361,6 +373,13 @@ const placementOptions: SelectOption[] = [
               v-model="store.config.ShowTrailerControls"
               :label="t('trailers.showControls')"
               :help-text="t('trailers.showControlsHelp')"
+            />
+            <ConfigSelect
+              v-if="!store.config.UseHeroLayout && store.config.ShowTrailerControls"
+              v-model="store.config.BannerMediaControlsPosition"
+              :label="t('display.bannerMediaControlsPosition')"
+              :options="bannerControlPositionOptions"
+              :help-text="t('display.bannerPositionHelp')"
             />
           </div>
         </details>
@@ -470,11 +489,8 @@ const placementOptions: SelectOption[] = [
 }
 .featured-preview-section {
   box-sizing: border-box;
-  max-height: calc(100vh - var(--featured-config-appbar-offset) - 1rem);
-  overflow-y: auto;
-  overscroll-behavior: contain;
   position: relative;
-  scrollbar-width: thin;
+  touch-action: pan-y;
   will-change: transform;
 }
 @media (max-width: 1050px) {
@@ -485,8 +501,6 @@ const placementOptions: SelectOption[] = [
     grid-row: 1;
   }
   .featured-preview-section {
-    max-height: none;
-    overflow: visible;
     transform: none !important;
   }
 }

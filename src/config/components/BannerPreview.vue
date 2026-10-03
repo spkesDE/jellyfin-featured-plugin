@@ -4,6 +4,7 @@ import { t } from '../../i18n';
 import { heroImageUrl, logoUrl } from '../../slider/images';
 import { createHeroFadeMask, getHeroDesktopHeight } from '../../slider/layout';
 import { useConfigStore } from '../libs/store';
+import type { BannerControlPosition } from '../../types/config';
 import type { FeaturedItem } from '../../types/featured';
 
 const store = useConfigStore();
@@ -127,17 +128,26 @@ const showSlidePosition = computed(
   () => !store.config.EnableInfiniteLoading && store.config.ShowSlidePosition && !store.config.ShowPaginationDots
 );
 const showNavigationControls = computed(
-  () =>
-    store.config.ShowNavigationArrows ||
-    showAutoplayControl.value ||
-    showTrailerControl.value ||
-    showSlidePosition.value
+  () => store.config.ShowNavigationArrows || showAutoplayControl.value || showSlidePosition.value
 );
+type PreviewControlPosition = BannerControlPosition | 'hero';
+const bannerControlPositions: BannerControlPosition[] = ['bottom-center', 'top-right', 'center'];
+const previewControlPositions = computed<PreviewControlPosition[]>(() =>
+  store.config.UseHeroLayout ? ['hero'] : bannerControlPositions
+);
+const showPagination = computed(() => !store.config.EnableInfiniteLoading && store.config.ShowPaginationDots);
 const showNavigation = computed(
-  () =>
-    itemCount.value > 1 &&
-    (showNavigationControls.value || (!store.config.EnableInfiniteLoading && store.config.ShowPaginationDots))
+  () => itemCount.value > 1 && (showNavigationControls.value || showTrailerControl.value || showPagination.value)
 );
+function showsNavigationAt(position: PreviewControlPosition): boolean {
+  return showNavigationControls.value && (position === 'hero' || position === store.config.BannerNavigationPosition);
+}
+function showsMediaAt(position: PreviewControlPosition): boolean {
+  return showTrailerControl.value && (position === 'hero' || position === store.config.BannerMediaControlsPosition);
+}
+function showsPaginationAt(position: PreviewControlPosition): boolean {
+  return showPagination.value && (position === 'hero' || position === 'bottom-center');
+}
 function mediaCardStyle(index: number): Record<string, string> | undefined {
   const cards = libraryItems.value;
   if (!cards.length) return undefined;
@@ -318,19 +328,25 @@ function mediaCardStyle(index: number): Record<string, string> | undefined {
             class="featured-configPreviewNavigation"
             @click.stop="$emit('focusSection', 'navigation')"
           >
-            <div v-if="showNavigationControls" class="featured-configPreviewControls">
-              <span v-if="showSlidePosition" class="featured-configPreviewStatus">1 / {{ itemCount }}</span>
-              <span v-if="store.config.ShowNavigationArrows" class="featured-mockControl">‹</span>
-              <span v-if="showAutoplayControl" class="featured-mockControl">Ⅱ</span>
-              <span v-if="store.config.ShowNavigationArrows" class="featured-mockControl">›</span>
-              <span v-if="showTrailerControl" class="featured-mockControl material-icons">volume_off</span>
-            </div>
             <div
-              v-if="!store.config.EnableInfiniteLoading && store.config.ShowPaginationDots"
-              class="featured-configPreviewDots"
-              aria-hidden="true"
+              v-for="position in previewControlPositions"
+              :key="position"
+              class="featured-configPreviewControlSlot"
+              :class="`featured-configPreviewControlSlot-${position}`"
             >
-              <span v-for="dot in Math.min(itemCount, 10)" :key="dot" :class="{ 'is-active': dot === 1 }" />
+              <div v-if="showsNavigationAt(position)" class="featured-configPreviewControls">
+                <span v-if="showSlidePosition" class="featured-configPreviewStatus">1 / {{ itemCount }}</span>
+                <span v-if="store.config.ShowNavigationArrows" class="featured-mockControl">‹</span>
+                <span v-if="showAutoplayControl" class="featured-mockControl">Ⅱ</span>
+                <span v-if="store.config.ShowNavigationArrows" class="featured-mockControl">›</span>
+              </div>
+              <div v-if="showsMediaAt(position)" class="featured-configPreviewControls">
+                <span class="featured-mockControl">Ⅱ</span>
+                <span class="featured-mockControl material-icons">volume_off</span>
+              </div>
+              <div v-if="showsPaginationAt(position)" class="featured-configPreviewDots" aria-hidden="true">
+                <span v-for="dot in Math.min(itemCount, 10)" :key="dot" :class="{ 'is-active': dot === 1 }" />
+              </div>
             </div>
           </div>
         </div>

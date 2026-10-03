@@ -41,6 +41,22 @@ describe('FeaturedCarousel behaviour', () => {
     await vi.waitFor(() => expect(carousel.getActiveItem()?.id).toBe('three'));
     carousel.destroy();
   });
+
+  it('applies independent banner positions inside the viewport', () => {
+    const first = createItem('one');
+    first.trailer = { type: 'remote', provider: 'youtube', videoId: 'trailer-one' };
+    const response = createResponse([first, createItem('two')]);
+    response.bannerNavigationPosition = 'center';
+    response.bannerMediaControlsPosition = 'top-right';
+    const carousel = new FeaturedCarousel(response);
+
+    expect(carousel.root.classList.contains('featured-banner-navigation-center')).toBe(true);
+    expect(carousel.root.classList.contains('featured-banner-media-top-right')).toBe(true);
+    expect(carousel.root.querySelector('.featured-viewport > .featured-navigation')).not.toBeNull();
+    expect(carousel.root.querySelector('.featured-control-slot-center > .featured-controls')).not.toBeNull();
+    expect(carousel.root.querySelector('.featured-control-slot-top-right > .featured-trailer-controls')).not.toBeNull();
+    carousel.destroy();
+  });
 });
 
 function createResponse(items: FeaturedItem[]): FeaturedResponse {

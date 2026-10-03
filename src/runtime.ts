@@ -207,7 +207,7 @@ function attachCarousel(
     if (placeholder?.isConnected) placeholder.replaceWith(carousel.root);
     else container.prepend(carousel.root);
   }
-  carousel.startHeroLayoutGuard();
+  carousel.startLayoutGuards();
   placeholders.delete(container);
   instances.set(container, carousel);
   resetMountFailures();

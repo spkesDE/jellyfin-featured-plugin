@@ -41,6 +41,8 @@ internal static class FeaturedConfigurationMappings
         target.ShowDismissalButton = source.ShowDismissalButton;
         target.DismissalButtonPlacement = source.DismissalButtonPlacement;
         target.ShowNavigationArrows = source.ShowNavigationArrows;
+        target.BannerNavigationPosition = source.BannerNavigationPosition;
+        target.BannerMediaControlsPosition = source.BannerMediaControlsPosition;
         target.ShowControlsOnHoverOnly = source.ShowControlsOnHoverOnly;
         target.InteractOnWholeBanner = source.InteractOnWholeBanner;
         target.ShowSlidePosition = source.ShowSlidePosition;

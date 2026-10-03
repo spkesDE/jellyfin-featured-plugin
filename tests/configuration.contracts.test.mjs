@@ -52,6 +52,8 @@ test('critical C# and TypeScript defaults stay in parity', async () => {
     PlaystateButtonPlacement: "'metadata'",
     ShowDismissalButton: 'true',
     DismissalButtonPlacement: "'metadata'",
+    BannerNavigationPosition: "'bottom-center'",
+    BannerMediaControlsPosition: "'top-right'",
     HideYouTubeTrailerUntilControlsFade: 'true',
     AllowTrailersOnMobile: 'false',
     AllowSourceSelection: 'false',

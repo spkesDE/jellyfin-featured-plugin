@@ -94,6 +94,8 @@ export function createPresetFromConfig(config: FeaturedPluginConfig, name = 'Fea
       ShowDismissalButton: config.ShowDismissalButton,
       DismissalButtonPlacement: config.DismissalButtonPlacement,
       ShowNavigationArrows: config.ShowNavigationArrows,
+      BannerNavigationPosition: config.BannerNavigationPosition,
+      BannerMediaControlsPosition: config.BannerMediaControlsPosition,
       ShowControlsOnHoverOnly: config.ShowControlsOnHoverOnly,
       InteractOnWholeBanner: config.InteractOnWholeBanner,
       ShowSlidePosition: config.ShowSlidePosition,

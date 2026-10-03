@@ -1,4 +1,6 @@
 import type {
+  BannerControlPosition,
+  BannerNavigationPosition,
   FeatureControlPlacement,
   HeroBackdropPosition,
   HeroFadeCurve,
@@ -33,6 +35,8 @@ export interface FeaturedDisplaySettings {
   showDismissalButton: boolean;
   dismissalButtonPlacement: FeatureControlPlacement;
   showNavigationArrows: boolean;
+  bannerNavigationPosition: BannerNavigationPosition;
+  bannerMediaControlsPosition: BannerControlPosition;
   showControlsOnHoverOnly: boolean;
   interactOnWholeBanner: boolean;
   showSlidePosition: boolean;

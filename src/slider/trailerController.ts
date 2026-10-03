@@ -190,9 +190,9 @@ export class TrailerController {
     this.pauseButton.addEventListener('click', () => this.togglePaused());
     controls.appendChild(this.pauseButton);
 
+    const preferredVolumeDirection = this.getPreferredVolumeDirection();
     this.volumeControl = document.createElement('div');
-    this.volumeControl.className =
-      'featured-trailer-volume-control featured-volume-' + this.response.trailerVolumeSliderDirection;
+    this.volumeControl.className = 'featured-trailer-volume-control featured-volume-' + preferredVolumeDirection;
     this.volumeControl.addEventListener('pointerenter', this.placeVolumePopover);
     this.volumeControl.addEventListener('focusin', this.placeVolumePopover);
 
@@ -210,7 +210,7 @@ export class TrailerController {
     this.volumeInput.max = '100';
     this.volumeInput.step = '1';
     if (
-      (this.response.trailerVolumeSliderDirection === 'up' || this.response.trailerVolumeSliderDirection === 'down') &&
+      (preferredVolumeDirection === 'up' || preferredVolumeDirection === 'down') &&
       requiresLegacyVerticalRangeAppearance()
     ) {
       this.volumeInput.style.setProperty('-webkit-appearance', 'slider-vertical');
@@ -302,7 +302,7 @@ export class TrailerController {
     const popover = this.volumePopover;
     if (!control || !popover || !control.offsetParent) return;
 
-    const preferred = this.response.trailerVolumeSliderDirection;
+    const preferred = this.getPreferredVolumeDirection();
     const candidates: TrailerVolumePlacement[] =
       preferred === 'side'
         ? ['right', 'left', 'down', 'up']
@@ -340,6 +340,11 @@ export class TrailerController {
     }
     applyPlacement(bestPlacement);
   };
+
+  private getPreferredVolumeDirection(): FeaturedResponse['trailerVolumeSliderDirection'] {
+    if (!this.response.useHeroLayout && this.response.bannerMediaControlsPosition === 'bottom-center') return 'up';
+    return this.response.trailerVolumeSliderDirection;
+  }
 
   private toggleMuted(): void {
     if (!this.player) return;

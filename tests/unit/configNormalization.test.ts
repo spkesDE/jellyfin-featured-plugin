@@ -12,6 +12,8 @@ describe('configuration normalization boundaries', () => {
       target.HeroFadeEnd = 10;
       target.HeroFadeCurve = 'soft';
       target.HeroHeightMode = 'invalid' as typeof target.HeroHeightMode;
+      target.BannerNavigationPosition = 'invalid' as typeof target.BannerNavigationPosition;
+      target.BannerMediaControlsPosition = 'bottom-center';
       target.HeroFadePoints = [
         { Position: 20, Fade: 30 },
         { Position: 20, Fade: 80 }
@@ -21,6 +23,8 @@ describe('configuration normalization boundaries', () => {
       expect(target.HeroFadeEnd).toBe(100);
       expect(target.HeroFadeCurve).toBe('custom');
       expect(target.HeroHeightMode).toBe('standard');
+      expect(target.BannerNavigationPosition).toBe('bottom-center');
+      expect(target.BannerMediaControlsPosition).toBe('bottom-center');
       expect(target.HeroFadePoints).toEqual([
         { Position: 0, Fade: 0 },
         { Position: 20, Fade: 30 },

@@ -1,10 +1,12 @@
 import type { FeaturedItem, FeaturedResponse } from '../types/featured';
+import type { BannerControlPosition } from '../types/config';
 import { t } from '../i18n';
 import { CONSOLE_PREFIX, PLUGIN_VERSION } from '../constants';
 import { createSlide, loadSlideArtwork } from './render';
 import { applyHeroLayoutVariables } from './layout';
 import { replaceElementChildren } from '../core/dom';
 import { HeroLayoutGuard } from './heroLayoutGuard';
+import { OverviewFitGuard } from './overviewFit';
 import { TrailerController } from './trailerController';
 import { CarouselWindowModel } from './carouselWindow';
 import {
@@ -42,6 +44,7 @@ export class FeaturedCarousel {
   private lastReportedItemId: string | null = null;
   private readonly trailerController: TrailerController;
   private readonly heroLayoutGuard: HeroLayoutGuard | null;
+  private readonly overviewFitGuard: OverviewFitGuard;
 
   constructor(
     response: FeaturedResponse,
@@ -60,7 +63,7 @@ export class FeaturedCarousel {
     );
     this.autoplayEnabled = response.autoplay;
     this.root = document.createElement('section');
-    this.root.className = `featured-root featured-ready featured-effect-${response.transitionEffect} featured-height-${response.heroHeightMode} featured-text-${response.heroTextPosition}${response.useHeroLayout ? ' featured-hero' : ''}${response.showControlsOnHoverOnly ? ' featured-controls-hover' : ''}${response.interactOnWholeBanner ? ' featured-whole-banner-interactive' : ''}`;
+    this.root.className = `featured-root featured-ready featured-effect-${response.transitionEffect} featured-height-${response.heroHeightMode} featured-text-${response.heroTextPosition} featured-banner-navigation-${response.bannerNavigationPosition} featured-banner-media-${response.bannerMediaControlsPosition}${response.useHeroLayout ? ' featured-hero' : ''}${response.showControlsOnHoverOnly ? ' featured-controls-hover' : ''}${response.interactOnWholeBanner ? ' featured-whole-banner-interactive' : ''}`;
     this.root.dataset.featuredVersion = PLUGIN_VERSION;
     applyHeroLayoutVariables(this.root, response);
     this.root.setAttribute('aria-roledescription', 'carousel');
@@ -87,6 +90,11 @@ export class FeaturedCarousel {
           () => this.slides[this.window.index - this.window.windowStart]?.querySelector('.featured-content') ?? null
         )
       : null;
+    this.overviewFitGuard = new OverviewFitGuard(
+      () =>
+        this.slides[this.window.index - this.window.windowStart]?.querySelector<HTMLElement>('.featured-content') ??
+        null
+    );
 
     const navigation = document.createElement('div');
     navigation.className = 'featured-navigation';
@@ -120,7 +128,7 @@ export class FeaturedCarousel {
     if (response.showNavigationArrows && this.slides.length > 1) {
       controls.appendChild(createCarouselArrow('next', (offset) => this.activateSlide(this.window.index + offset)));
     }
-    if (controls.childElementCount) navigation.appendChild(controls);
+    const hasCarouselControls = controls.childElementCount > 0;
 
     this.trailerController = new TrailerController(
       response,
@@ -137,13 +145,34 @@ export class FeaturedCarousel {
       }
     );
 
+    let paginationRoot: HTMLDivElement | null = null;
     if (response.showPaginationDots && !response.infiniteLoading && this.slides.length > 1) {
       const pagination = createPaginationDots(this.slides.length, (index) => this.activateSlide(index));
       this.dots = pagination.buttons;
-      navigation.appendChild(pagination.root);
+      paginationRoot = pagination.root;
     }
-    if (this.trailerController.controls) navigation.appendChild(this.trailerController.controls);
-    if (navigation.childElementCount) this.root.appendChild(navigation);
+    if (response.useHeroLayout) {
+      if (hasCarouselControls) navigation.appendChild(controls);
+      if (paginationRoot) navigation.appendChild(paginationRoot);
+      if (this.trailerController.controls) navigation.appendChild(this.trailerController.controls);
+    } else {
+      const slots = new Map<BannerControlPosition, HTMLDivElement>();
+      const getSlot = (position: BannerControlPosition): HTMLDivElement => {
+        let slot = slots.get(position);
+        if (slot) return slot;
+        slot = document.createElement('div');
+        slot.className = `featured-control-slot featured-control-slot-${position}`;
+        slots.set(position, slot);
+        navigation.appendChild(slot);
+        return slot;
+      };
+      if (hasCarouselControls) getSlot(response.bannerNavigationPosition).appendChild(controls);
+      if (this.trailerController.controls) {
+        getSlot(response.bannerMediaControlsPosition).appendChild(this.trailerController.controls);
+      }
+      if (paginationRoot) getSlot('bottom-center').appendChild(paginationRoot);
+    }
+    if (navigation.childElementCount) viewport.appendChild(navigation);
 
     this.root.addEventListener('mouseenter', this.pauseTimer);
     this.root.addEventListener('mouseleave', this.restartTimer);
@@ -169,14 +198,16 @@ export class FeaturedCarousel {
     this.destroyed = true;
     this.pauseTimer();
     this.heroLayoutGuard?.destroy();
+    this.overviewFitGuard.destroy();
     document.removeEventListener('visibilitychange', this.onVisibilityChange);
     this.trailerController.destroy();
     this.root.remove();
   }
 
   /** Start after insertion so the following Jellyfin section can be measured. */
-  startHeroLayoutGuard(): void {
+  startLayoutGuards(): void {
     this.heroLayoutGuard?.start();
+    this.overviewFitGuard.start();
   }
 
   private activateSlide(nextIndex: number, restart = true): void {
@@ -254,6 +285,7 @@ export class FeaturedCarousel {
     }
     this.loadNearbyArtwork(localIndex);
     this.heroLayoutGuard?.activeContentChanged();
+    this.overviewFitGuard.activeContentChanged();
     this.trailerController.start(this.slides[localIndex], this.items[this.window.index]);
     this.reportActiveItem();
     if (this.shouldPrefetchNextBatch()) void this.loadMore();

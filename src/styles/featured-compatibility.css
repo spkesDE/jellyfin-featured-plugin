@@ -1,6 +1,6 @@
 /* Cross-browser fallbacks and stable hero fitting. Chromium 79 remains the
    oldest target; rules that shape every browser intentionally live here too.
-   If a hero has more copy, the overview gives up lines before core metadata. */
+   If a hero or banner has more copy, the overview gives up lines before core metadata. */
 
 /* Keep Featured's internal z-index layers local to the viewport instead of
    making the whole root a stacking context over following Jellyfin sections. */
@@ -23,6 +23,16 @@
 }
 
 @media (min-width: 701px) {
+  .featured-root.featured-ready:not(.featured-hero) .featured-content {
+    overflow: hidden;
+  }
+
+  /* Compact banners need the reserve before the runtime fitter has measured
+     fonts and logo artwork. Standard banners retain the regular line count. */
+  .featured-root.featured-ready.featured-height-compact:not(.featured-hero) .featured-overview {
+    -webkit-line-clamp: 2;
+  }
+
   .featured-root.featured-ready.featured-hero .featured-content {
     height: var(--featured-content-height);
     overflow: hidden;
@@ -67,19 +77,19 @@
     overflow: hidden;
   }
 
-  .featured-root.featured-ready.featured-hero .featured-content.featured-overview-lines-3 .featured-overview {
+  .featured-root.featured-ready .featured-content.featured-overview-lines-3 .featured-overview {
     -webkit-line-clamp: 3;
   }
 
-  .featured-root.featured-ready.featured-hero .featured-content.featured-overview-lines-2 .featured-overview {
+  .featured-root.featured-ready .featured-content.featured-overview-lines-2 .featured-overview {
     -webkit-line-clamp: 2;
   }
 
-  .featured-root.featured-ready.featured-hero .featured-content.featured-overview-lines-1 .featured-overview {
+  .featured-root.featured-ready .featured-content.featured-overview-lines-1 .featured-overview {
     -webkit-line-clamp: 1;
   }
 
-  .featured-root.featured-ready.featured-hero .featured-content.featured-overview-hidden .featured-overview {
+  .featured-root.featured-ready .featured-content.featured-overview-hidden .featured-overview {
     display: none;
   }
 }

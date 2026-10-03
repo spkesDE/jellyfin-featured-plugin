@@ -13,6 +13,8 @@ public sealed partial class PluginConfiguration
     public bool ShowDismissalButton { get; set; } = true;
     public string DismissalButtonPlacement { get; set; } = "metadata";
     public bool ShowNavigationArrows { get; set; } = true;
+    public string BannerNavigationPosition { get; set; } = "bottom-center";
+    public string BannerMediaControlsPosition { get; set; } = "top-right";
     public bool ShowControlsOnHoverOnly { get; set; }
     public bool InteractOnWholeBanner { get; set; } = true;
     public bool ShowSlidePosition { get; set; } = true;

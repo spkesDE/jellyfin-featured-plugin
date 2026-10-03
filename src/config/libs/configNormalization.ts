@@ -9,7 +9,13 @@ import type {
 
 type HeroLayoutSettings = Pick<
   FeaturedPluginConfig | FeaturedPresetLayoutSettings,
-  'HeroFadeStart' | 'HeroFadeEnd' | 'HeroFadeCurve' | 'HeroFadePoints' | 'HeroHeightMode'
+  | 'HeroFadeStart'
+  | 'HeroFadeEnd'
+  | 'HeroFadeCurve'
+  | 'HeroFadePoints'
+  | 'HeroHeightMode'
+  | 'BannerNavigationPosition'
+  | 'BannerMediaControlsPosition'
 >;
 
 type TrailerSettings = Pick<FeaturedPluginConfig | FeaturedPresetTrailerSettings, 'TrailerSourcePriority'>;
@@ -32,6 +38,16 @@ export function normalizeHeroLayoutSettings(settings: HeroLayoutSettings): void 
   )
     ? settings.HeroHeightMode
     : 'standard';
+  settings.BannerNavigationPosition = ['bottom-center', 'top-right', 'center'].includes(
+    settings.BannerNavigationPosition
+  )
+    ? settings.BannerNavigationPosition
+    : 'bottom-center';
+  settings.BannerMediaControlsPosition = ['bottom-center', 'top-right', 'center'].includes(
+    settings.BannerMediaControlsPosition
+  )
+    ? settings.BannerMediaControlsPosition
+    : 'top-right';
 }
 
 /** Keeps the pre-12.x boolean trailer fallback readable at the persisted-config boundary. */

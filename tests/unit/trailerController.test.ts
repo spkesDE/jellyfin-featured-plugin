@@ -38,4 +38,21 @@ describe('TrailerController', () => {
     expect(addWindow).toHaveBeenCalledWith('resize', expect.any(Function));
     expect(removeWindow).toHaveBeenCalledWith('resize', expect.any(Function));
   });
+
+  it('opens the volume slider upward from the bottom banner slot', () => {
+    const response = createResponse();
+    response.useHeroLayout = false;
+    response.bannerMediaControlsPosition = 'bottom-center';
+    const controller = new TrailerController(response, true, null, null, {
+      getActiveIndex: () => 0,
+      isDestroyed: () => false,
+      isAutoplayEnabled: () => true,
+      advance: vi.fn(),
+      pauseAutoplay: vi.fn(),
+      restartAutoplay: vi.fn()
+    });
+
+    expect(controller.controls?.querySelector('.featured-volume-up')).not.toBeNull();
+    controller.destroy();
+  });
 });
