@@ -11,6 +11,7 @@ import ManualItemAutocomplete from '../components/ManualItemAutocomplete.vue';
 import { useConfigStore } from '../libs/store';
 
 const store = useConfigStore();
+const trailerUrlPlaceholder = 'https://www.youtube.com/watch?v=…';
 const sourceOptions: SelectOption[] = [
   { value: 'prefer_local', label: t('trailers.source.preferLocal') },
   { value: 'prefer_remote', label: t('trailers.source.preferRemote') },
@@ -132,11 +133,7 @@ function addOverride(item: FeaturedSearchItem): void {
                 <span class="material-icons" aria-hidden="true">delete</span>
               </button>
             </div>
-            <ConfigText
-              v-model="entry.Url"
-              :label="t('trailers.overrideUrl')"
-              placeholder="https://www.youtube.com/watch?v=…"
-            />
+            <ConfigText v-model="entry.Url" :label="t('trailers.overrideUrl')" :placeholder="trailerUrlPlaceholder" />
             <ConfigText
               v-model="entry.LocalTrailerItemId"
               :label="t('trailers.overrideLocalId')"
