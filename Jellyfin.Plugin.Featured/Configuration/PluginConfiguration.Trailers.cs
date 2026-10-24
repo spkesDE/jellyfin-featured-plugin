@@ -21,7 +21,6 @@ public sealed partial class PluginConfiguration
     public int TrailerEndOffsetSeconds { get; set; }
     public string MultipleTrailerMode { get; set; } = FeaturedMultipleTrailerModes.First;
     public bool AllowTrailersOnMobile { get; set; } = false;
-    public string MediaExcerptMode { get; set; } = FeaturedMediaExcerptModes.Off;
     public int MediaExcerptWindowStartMinutes { get; set; } = 5;
     public int MediaExcerptWindowEndMinutes { get; set; } = 15;
     public int MediaExcerptDurationSeconds { get; set; } = 30;

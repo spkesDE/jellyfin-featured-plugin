@@ -136,7 +136,6 @@ public sealed class FeaturedPresetTrailerSettings
     public int TrailerEndOffsetSeconds { get; set; }
     public string MultipleTrailerMode { get; set; } = FeaturedMultipleTrailerModes.First;
     public bool AllowTrailersOnMobile { get; set; }
-    public string MediaExcerptMode { get; set; } = FeaturedMediaExcerptModes.Off;
     public int MediaExcerptWindowStartMinutes { get; set; } = 5;
     public int MediaExcerptWindowEndMinutes { get; set; } = 15;
     public int MediaExcerptDurationSeconds { get; set; } = 30;

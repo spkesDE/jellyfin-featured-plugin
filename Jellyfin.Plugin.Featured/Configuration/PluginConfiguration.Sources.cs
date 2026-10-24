@@ -106,15 +106,16 @@ public static class FeaturedTrailerSourcePriorities
     public const string LocalOnly = "local_only";
     public const string RemoteOnly = "remote_only";
     public const string Automatic = "automatic";
+    public const string LocalRemoteExcerpt = "local_remote_excerpt";
+    public const string LocalExcerptRemote = "local_excerpt_remote";
+    public const string ExcerptOnly = "excerpt_only";
+
+    public static bool IncludesExcerpt(string? priority)
+        => priority is LocalRemoteExcerpt or LocalExcerptRemote or ExcerptOnly;
 }
 
-public static class FeaturedMediaExcerptModes
+public static class FeaturedMediaExcerptLimits
 {
-    public const string Off = "off";
-    public const string Fallback = "fallback";
-    public const string PreferOverRemote = "prefer_over_remote";
-    public const string Always = "always";
-
     public const int MaximumWindowMinutes = 600;
     public const int MinimumDurationSeconds = 10;
     public const int MaximumDurationSeconds = 120;

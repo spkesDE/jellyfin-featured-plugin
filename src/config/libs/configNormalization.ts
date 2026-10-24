@@ -4,7 +4,6 @@ import type {
   FeaturedPresetTrailerSettings,
   HeroFadeCurve,
   HeroFadePoint,
-  MediaExcerptMode,
   TrailerSourcePriority
 } from '../../types/config';
 
@@ -24,7 +23,7 @@ type HeroLayoutSettings = Pick<
 type TrailerSettings = Pick<FeaturedPluginConfig | FeaturedPresetTrailerSettings, 'TrailerSourcePriority'>;
 type MediaExcerptSettings = Pick<
   FeaturedPluginConfig | FeaturedPresetTrailerSettings,
-  'MediaExcerptMode' | 'MediaExcerptWindowStartMinutes' | 'MediaExcerptWindowEndMinutes' | 'MediaExcerptDurationSeconds'
+  'MediaExcerptWindowStartMinutes' | 'MediaExcerptWindowEndMinutes' | 'MediaExcerptDurationSeconds'
 >;
 export type LegacyTrailerFallback = { FallBackToRemoteTrailers?: boolean };
 
@@ -74,13 +73,19 @@ export function normalizeTrailerSourcePriority(
   return settings.TrailerSourcePriority;
 }
 
-const MEDIA_EXCERPT_MODES: readonly MediaExcerptMode[] = ['off', 'fallback', 'prefer_over_remote', 'always'];
+const EXCERPT_SOURCE_PRIORITIES: readonly TrailerSourcePriority[] = [
+  'local_remote_excerpt',
+  'local_excerpt_remote',
+  'excerpt_only'
+];
+
+/** True when the trailer source plays media excerpts, so their window and length settings apply. */
+export function trailerSourceIncludesExcerpt(priority: TrailerSourcePriority): boolean {
+  return EXCERPT_SOURCE_PRIORITIES.includes(priority);
+}
 
 /** Mirrors the backend excerpt bounds so the editor never shows values the server would rewrite. */
 export function normalizeMediaExcerptSettings(settings: MediaExcerptSettings): void {
-  settings.MediaExcerptMode = MEDIA_EXCERPT_MODES.includes(settings.MediaExcerptMode)
-    ? settings.MediaExcerptMode
-    : 'off';
   const start = clampInteger(settings.MediaExcerptWindowStartMinutes, 0, 600, 5);
   settings.MediaExcerptWindowStartMinutes = start;
   settings.MediaExcerptWindowEndMinutes = clampInteger(

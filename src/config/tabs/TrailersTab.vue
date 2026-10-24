@@ -8,6 +8,7 @@ import ConfigNumber from '../components/ConfigNumber.vue';
 import ConfigSelect, { type SelectOption } from '../components/ConfigSelect.vue';
 import ConfigText from '../components/ConfigText.vue';
 import ManualItemAutocomplete from '../components/ManualItemAutocomplete.vue';
+import { trailerSourceIncludesExcerpt } from '../libs/configNormalization';
 import { useConfigStore } from '../libs/store';
 
 const store = useConfigStore();
@@ -17,13 +18,10 @@ const sourceOptions: SelectOption[] = [
   { value: 'prefer_remote', label: t('trailers.source.preferRemote') },
   { value: 'local_only', label: t('trailers.source.localOnly') },
   { value: 'remote_only', label: t('trailers.source.remoteOnly') },
-  { value: 'automatic', label: t('trailers.source.automatic') }
-];
-const excerptOptions: SelectOption[] = [
-  { value: 'off', label: t('trailers.excerpt.off') },
-  { value: 'fallback', label: t('trailers.excerpt.fallback') },
-  { value: 'prefer_over_remote', label: t('trailers.excerpt.preferOverRemote') },
-  { value: 'always', label: t('trailers.excerpt.always') }
+  { value: 'automatic', label: t('trailers.source.automatic') },
+  { value: 'local_remote_excerpt', label: t('trailers.source.localRemoteExcerpt') },
+  { value: 'local_excerpt_remote', label: t('trailers.source.localExcerptRemote') },
+  { value: 'excerpt_only', label: t('trailers.source.excerptOnly') }
 ];
 const multipleOptions: SelectOption[] = [
   { value: 'first', label: t('trailers.multiple.first') },
@@ -55,7 +53,33 @@ function addOverride(item: FeaturedSearchItem): void {
             v-model="store.config.TrailerSourcePriority"
             :label="t('trailers.sourceLabel')"
             :options="sourceOptions"
+            :help-text="t('trailers.sourceHelp')"
           />
+          <template v-if="trailerSourceIncludesExcerpt(store.config.TrailerSourcePriority)">
+            <ConfigNumber
+              v-model="store.config.MediaExcerptWindowStartMinutes"
+              :label="t('trailers.excerptWindowStart')"
+              :min="0"
+              :max="600"
+              :step="1"
+            />
+            <ConfigNumber
+              v-model="store.config.MediaExcerptWindowEndMinutes"
+              :label="t('trailers.excerptWindowEnd')"
+              :min="store.config.MediaExcerptWindowStartMinutes"
+              :max="600"
+              :step="1"
+            />
+            <ConfigNumber
+              v-model="store.config.MediaExcerptDurationSeconds"
+              :label="t('trailers.excerptDuration')"
+              :min="10"
+              :max="120"
+              :step="5"
+            />
+            <p class="jmp-note">{{ t('trailers.excerptWindowHint') }}</p>
+            <p class="jmp-note">{{ t('trailers.excerptTranscodeHint') }}</p>
+          </template>
           <ConfigCheckbox v-model="store.config.StartTrailersMuted" :label="t('trailers.startMuted')" />
           <ConfigCheckbox
             v-model="store.config.HideYouTubeTrailerUntilControlsFade"
@@ -102,44 +126,6 @@ function addOverride(item: FeaturedSearchItem): void {
           :label="t('trailers.multipleLabel')"
           :options="multipleOptions"
         />
-      </ConfigCard>
-
-      <ConfigCard
-        v-if="store.config.EnableBackgroundTrailers"
-        :title="t('trailers.excerptTitle')"
-        :help="t('trailers.excerptHelp')"
-      >
-        <ConfigSelect
-          v-model="store.config.MediaExcerptMode"
-          :label="t('trailers.excerptMode')"
-          :options="excerptOptions"
-          :help-text="t('trailers.excerptModeHelp')"
-        />
-        <template v-if="store.config.MediaExcerptMode !== 'off'">
-          <ConfigNumber
-            v-model="store.config.MediaExcerptWindowStartMinutes"
-            :label="t('trailers.excerptWindowStart')"
-            :min="0"
-            :max="600"
-            :step="1"
-          />
-          <ConfigNumber
-            v-model="store.config.MediaExcerptWindowEndMinutes"
-            :label="t('trailers.excerptWindowEnd')"
-            :min="store.config.MediaExcerptWindowStartMinutes"
-            :max="600"
-            :step="1"
-          />
-          <ConfigNumber
-            v-model="store.config.MediaExcerptDurationSeconds"
-            :label="t('trailers.excerptDuration')"
-            :min="10"
-            :max="120"
-            :step="5"
-          />
-          <p class="jmp-note">{{ t('trailers.excerptWindowHint') }}</p>
-          <p class="jmp-note">{{ t('trailers.excerptTranscodeHint') }}</p>
-        </template>
       </ConfigCard>
     </div>
 

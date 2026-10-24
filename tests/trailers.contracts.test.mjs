@@ -23,7 +23,6 @@ test('persisted trailer settings and serialized responses retain their public co
     'TrailerEndOffsetSeconds',
     'MultipleTrailerMode',
     'AllowTrailersOnMobile',
-    'MediaExcerptMode',
     'MediaExcerptWindowStartMinutes',
     'MediaExcerptWindowEndMinutes',
     'MediaExcerptDurationSeconds',

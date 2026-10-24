@@ -55,7 +55,6 @@ export const CONFIG_DEFAULTS: FeaturedPluginConfig = {
   TrailerEndOffsetSeconds: 0,
   MultipleTrailerMode: 'first',
   AllowTrailersOnMobile: false,
-  MediaExcerptMode: 'off',
   MediaExcerptWindowStartMinutes: 5,
   MediaExcerptWindowEndMinutes: 15,
   MediaExcerptDurationSeconds: 30,

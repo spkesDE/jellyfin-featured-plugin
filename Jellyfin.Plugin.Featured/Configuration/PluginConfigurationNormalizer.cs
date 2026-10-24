@@ -99,11 +99,9 @@ internal static class PluginConfigurationNormalizer
         config.TrailerVolumeSliderDirection = trailers.VolumeSliderDirection;
         config.TrailerOverrides = trailers.Overrides;
         MediaExcerptValues excerpts = NormalizeMediaExcerptValues(
-            config.MediaExcerptMode,
             config.MediaExcerptWindowStartMinutes,
             config.MediaExcerptWindowEndMinutes,
             config.MediaExcerptDurationSeconds);
-        config.MediaExcerptMode = excerpts.Mode;
         config.MediaExcerptWindowStartMinutes = excerpts.WindowStartMinutes;
         config.MediaExcerptWindowEndMinutes = excerpts.WindowEndMinutes;
         config.MediaExcerptDurationSeconds = excerpts.DurationSeconds;
@@ -283,39 +281,28 @@ internal static class PluginConfigurationNormalizer
         trailers.Overrides = normalized.Overrides;
         trailers.FallBackToRemoteTrailers = null;
         MediaExcerptValues excerpts = NormalizeMediaExcerptValues(
-            trailers.MediaExcerptMode,
             trailers.MediaExcerptWindowStartMinutes,
             trailers.MediaExcerptWindowEndMinutes,
             trailers.MediaExcerptDurationSeconds);
-        trailers.MediaExcerptMode = excerpts.Mode;
         trailers.MediaExcerptWindowStartMinutes = excerpts.WindowStartMinutes;
         trailers.MediaExcerptWindowEndMinutes = excerpts.WindowEndMinutes;
         trailers.MediaExcerptDurationSeconds = excerpts.DurationSeconds;
     }
 
     private static MediaExcerptValues NormalizeMediaExcerptValues(
-        string? mode,
         int windowStartMinutes,
         int windowEndMinutes,
         int durationSeconds)
     {
-        mode = mode switch
-        {
-            FeaturedMediaExcerptModes.Fallback => FeaturedMediaExcerptModes.Fallback,
-            FeaturedMediaExcerptModes.PreferOverRemote => FeaturedMediaExcerptModes.PreferOverRemote,
-            FeaturedMediaExcerptModes.Always => FeaturedMediaExcerptModes.Always,
-            _ => FeaturedMediaExcerptModes.Off
-        };
-        int start = Math.Clamp(windowStartMinutes, 0, FeaturedMediaExcerptModes.MaximumWindowMinutes);
-        int end = Math.Clamp(windowEndMinutes, start, FeaturedMediaExcerptModes.MaximumWindowMinutes);
+        int start = Math.Clamp(windowStartMinutes, 0, FeaturedMediaExcerptLimits.MaximumWindowMinutes);
+        int end = Math.Clamp(windowEndMinutes, start, FeaturedMediaExcerptLimits.MaximumWindowMinutes);
         return new MediaExcerptValues(
-            mode,
             start,
             end,
             Math.Clamp(
                 durationSeconds,
-                FeaturedMediaExcerptModes.MinimumDurationSeconds,
-                FeaturedMediaExcerptModes.MaximumDurationSeconds));
+                FeaturedMediaExcerptLimits.MinimumDurationSeconds,
+                FeaturedMediaExcerptLimits.MaximumDurationSeconds));
     }
 
     private static TrailerValues NormalizeTrailerValues(
@@ -334,6 +321,9 @@ internal static class PluginConfigurationNormalizer
             FeaturedTrailerSourcePriorities.LocalOnly => FeaturedTrailerSourcePriorities.LocalOnly,
             FeaturedTrailerSourcePriorities.RemoteOnly => FeaturedTrailerSourcePriorities.RemoteOnly,
             FeaturedTrailerSourcePriorities.Automatic => FeaturedTrailerSourcePriorities.Automatic,
+            FeaturedTrailerSourcePriorities.LocalRemoteExcerpt => FeaturedTrailerSourcePriorities.LocalRemoteExcerpt,
+            FeaturedTrailerSourcePriorities.LocalExcerptRemote => FeaturedTrailerSourcePriorities.LocalExcerptRemote,
+            FeaturedTrailerSourcePriorities.ExcerptOnly => FeaturedTrailerSourcePriorities.ExcerptOnly,
             _ => FeaturedTrailerSourcePriorities.PreferLocal
         };
         if (sourcePriority == FeaturedTrailerSourcePriorities.PreferLocal && fallBackToRemoteTrailers == false)
@@ -584,7 +574,6 @@ internal static class PluginConfigurationNormalizer
         FeaturedTrailerOverride[] Overrides);
 
     private sealed record MediaExcerptValues(
-        string Mode,
         int WindowStartMinutes,
         int WindowEndMinutes,
         int DurationSeconds);

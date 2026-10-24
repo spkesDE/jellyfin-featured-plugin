@@ -41,36 +41,42 @@ public sealed class TrailerResolverExcerptTests : FeaturedPreparedCacheTestBase
     }
 
     [Theory]
-    [InlineData(FeaturedMediaExcerptModes.Always, 0, new[] { "excerpt", "local", "remote" })]
-    [InlineData(FeaturedMediaExcerptModes.Always, 1, new[] { "manual", "excerpt", "remote" })]
-    [InlineData(FeaturedMediaExcerptModes.PreferOverRemote, 0, new[] { "local", "excerpt", "remote" })]
-    [InlineData(FeaturedMediaExcerptModes.Fallback, 0, new[] { "local", "remote", "excerpt" })]
-    public void ExcerptIsPlacedAccordingToMode(string mode, int manualCount, string[] expected)
+    [InlineData(FeaturedTrailerSourcePriorities.LocalRemoteExcerpt, new[] { "local", "remote", "excerpt" })]
+    [InlineData(FeaturedTrailerSourcePriorities.LocalExcerptRemote, new[] { "local", "excerpt", "remote" })]
+    [InlineData(FeaturedTrailerSourcePriorities.ExcerptOnly, new[] { "excerpt" })]
+    [InlineData(FeaturedTrailerSourcePriorities.PreferLocal, new[] { "local", "remote" })]
+    [InlineData(FeaturedTrailerSourcePriorities.Automatic, new[] { "local", "remote" })]
+    [InlineData(FeaturedTrailerSourcePriorities.PreferRemote, new[] { "remote", "local" })]
+    public void SourcePriorityOrdersExcerptWithTrailers(string priority, string[] expected)
     {
-        List<FeaturedTrailerDto> candidates = manualCount == 1
-            ? [Candidate("manual", "remote"), Candidate("remote", "remote")]
-            : [Candidate("local", "local"), Candidate("remote", "remote")];
+        List<FeaturedTrailerDto> candidates = [];
 
-        TrailerResolver.InsertExcerpt(candidates, Candidate("excerpt", "local"), mode, manualCount);
+        TrailerResolver.AddBySourcePriority(
+            candidates,
+            priority,
+            [Candidate("local", "local")],
+            [Candidate("remote", "remote")],
+            [Candidate("excerpt", "local")]);
 
         Assert.Equal(expected, candidates.Select(candidate => candidate.Name));
     }
 
-    [Fact]
-    public void PreferOverRemoteAppendsWhenOnlyLocalTrailersExist()
+    [Theory]
+    [InlineData(FeaturedTrailerSourcePriorities.LocalRemoteExcerpt, true)]
+    [InlineData(FeaturedTrailerSourcePriorities.LocalExcerptRemote, true)]
+    [InlineData(FeaturedTrailerSourcePriorities.ExcerptOnly, true)]
+    [InlineData(FeaturedTrailerSourcePriorities.PreferLocal, false)]
+    [InlineData(FeaturedTrailerSourcePriorities.Automatic, false)]
+    public void OnlyExcerptSourcesIncludeExcerpts(string priority, bool expected)
     {
-        List<FeaturedTrailerDto> candidates = [Candidate("local", "local")];
-
-        TrailerResolver.InsertExcerpt(candidates, Candidate("excerpt", "local"), FeaturedMediaExcerptModes.PreferOverRemote, 0);
-
-        Assert.Equal(["local", "excerpt"], candidates.Select(candidate => candidate.Name));
+        Assert.Equal(expected, FeaturedTrailerSourcePriorities.IncludesExcerpt(priority));
     }
 
     [Fact]
     public void ResolverOffersNoExcerptByDefault()
     {
         BaseItem movie = CreateMovie(TimeSpan.FromHours(2));
-        PluginConfiguration config = RemoteOnly();
+        PluginConfiguration config = WithSource(FeaturedTrailerSourcePriorities.RemoteOnly);
 
         IReadOnlyList<FeaturedTrailerDto> candidates = new TrailerResolver(_libraryManagerService)
             .ResolveCandidates(movie, _user, config);
@@ -84,9 +90,7 @@ public sealed class TrailerResolverExcerptTests : FeaturedPreparedCacheTestBase
         BaseItem movie = CreateMovie(TimeSpan.FromHours(2));
         PluginConfiguration config = new()
         {
-            // Local trailer lookup needs a full library; these tests only cover excerpt placement.
-            TrailerSourcePriority = FeaturedTrailerSourcePriorities.RemoteOnly,
-            MediaExcerptMode = FeaturedMediaExcerptModes.Always,
+            TrailerSourcePriority = FeaturedTrailerSourcePriorities.ExcerptOnly,
             MediaExcerptDurationSeconds = 45,
             TrailerOverrides = [new FeaturedTrailerOverride { ItemId = movie.Id.ToString(), Url = YouTubeUrl }]
         };
@@ -105,7 +109,7 @@ public sealed class TrailerResolverExcerptTests : FeaturedPreparedCacheTestBase
     public void ResolverSkipsExcerptWithoutRuntime()
     {
         BaseItem movie = CreateMovie(null);
-        PluginConfiguration config = RemoteOnly(FeaturedMediaExcerptModes.Always);
+        PluginConfiguration config = WithSource(FeaturedTrailerSourcePriorities.ExcerptOnly);
 
         IReadOnlyList<FeaturedTrailerDto> candidates = new TrailerResolver(_libraryManagerService)
             .ResolveCandidates(movie, _user, config);
@@ -126,7 +130,7 @@ public sealed class TrailerResolverExcerptTests : FeaturedPreparedCacheTestBase
             RunTimeTicks = TimeSpan.FromMinutes(45).Ticks
         };
         _libraryManager.Candidates.Add(episode);
-        PluginConfiguration config = RemoteOnly(FeaturedMediaExcerptModes.Fallback);
+        PluginConfiguration config = WithSource(FeaturedTrailerSourcePriorities.ExcerptOnly);
 
         IReadOnlyList<FeaturedTrailerDto> candidates = new TrailerResolver(_libraryManagerService)
             .ResolveCandidates(series, _user, config);
@@ -140,7 +144,7 @@ public sealed class TrailerResolverExcerptTests : FeaturedPreparedCacheTestBase
     {
         PluginConfiguration config = new()
         {
-            MediaExcerptMode = "sometimes",
+            TrailerSourcePriority = "sometimes",
             MediaExcerptWindowStartMinutes = 20,
             MediaExcerptWindowEndMinutes = 10,
             MediaExcerptDurationSeconds = 900,
@@ -150,7 +154,7 @@ public sealed class TrailerResolverExcerptTests : FeaturedPreparedCacheTestBase
                 {
                     Trailers = new FeaturedPresetTrailerSettings
                     {
-                        MediaExcerptMode = FeaturedMediaExcerptModes.PreferOverRemote,
+                        TrailerSourcePriority = FeaturedTrailerSourcePriorities.LocalExcerptRemote,
                         MediaExcerptWindowStartMinutes = -5,
                         MediaExcerptDurationSeconds = 1
                     }
@@ -160,21 +164,18 @@ public sealed class TrailerResolverExcerptTests : FeaturedPreparedCacheTestBase
 
         PluginConfigurationNormalizer.Normalize(config);
 
-        Assert.Equal(FeaturedMediaExcerptModes.Off, config.MediaExcerptMode);
+        Assert.Equal(FeaturedTrailerSourcePriorities.PreferLocal, config.TrailerSourcePriority);
         Assert.Equal(20, config.MediaExcerptWindowStartMinutes);
         Assert.Equal(20, config.MediaExcerptWindowEndMinutes);
-        Assert.Equal(FeaturedMediaExcerptModes.MaximumDurationSeconds, config.MediaExcerptDurationSeconds);
+        Assert.Equal(FeaturedMediaExcerptLimits.MaximumDurationSeconds, config.MediaExcerptDurationSeconds);
         FeaturedPresetTrailerSettings preset = config.Presets.Single().Trailers;
-        Assert.Equal(FeaturedMediaExcerptModes.PreferOverRemote, preset.MediaExcerptMode);
+        Assert.Equal(FeaturedTrailerSourcePriorities.LocalExcerptRemote, preset.TrailerSourcePriority);
         Assert.Equal(0, preset.MediaExcerptWindowStartMinutes);
-        Assert.Equal(FeaturedMediaExcerptModes.MinimumDurationSeconds, preset.MediaExcerptDurationSeconds);
+        Assert.Equal(FeaturedMediaExcerptLimits.MinimumDurationSeconds, preset.MediaExcerptDurationSeconds);
     }
 
-    private static PluginConfiguration RemoteOnly(string mode = FeaturedMediaExcerptModes.Off) => new()
-    {
-        TrailerSourcePriority = FeaturedTrailerSourcePriorities.RemoteOnly,
-        MediaExcerptMode = mode
-    };
+    // Local trailer lookup needs a full library, so resolver tests avoid sources that query local trailers.
+    private static PluginConfiguration WithSource(string priority) => new() { TrailerSourcePriority = priority };
 
     private static FeaturedTrailerDto Candidate(string name, string type) => new()
     {

@@ -35,43 +35,21 @@ public sealed class TrailerResolver
         FeaturedTrailerDto? manualTrailer = ResolveManual(manual, activeUser);
         if (manualTrailer is not null) candidates.Add(manualTrailer);
 
+        string priority = config.TrailerSourcePriority;
+        IReadOnlyList<FeaturedTrailerDto> local = [];
+        IReadOnlyList<FeaturedTrailerDto> remote = [];
         if (item is IHasTrailers trailers)
         {
-            IReadOnlyList<FeaturedTrailerDto> local = config.TrailerSourcePriority == FeaturedTrailerSourcePriorities.RemoteOnly
+            local = priority is FeaturedTrailerSourcePriorities.RemoteOnly or FeaturedTrailerSourcePriorities.ExcerptOnly
                 ? [] : ResolveLocal(trailers, activeUser, config.MultipleTrailerMode);
-            IReadOnlyList<FeaturedTrailerDto> remote = config.TrailerSourcePriority == FeaturedTrailerSourcePriorities.LocalOnly
+            remote = priority is FeaturedTrailerSourcePriorities.LocalOnly or FeaturedTrailerSourcePriorities.ExcerptOnly
                 ? [] : ResolveRemote(trailers, config.MultipleTrailerMode);
-            switch (config.TrailerSourcePriority)
-            {
-                case FeaturedTrailerSourcePriorities.LocalOnly:
-                    candidates.AddRange(local);
-                    break;
-                case FeaturedTrailerSourcePriorities.RemoteOnly:
-                    candidates.AddRange(remote);
-                    break;
-                case FeaturedTrailerSourcePriorities.PreferRemote:
-                    candidates.AddRange(remote);
-                    candidates.AddRange(local);
-                    break;
-                case FeaturedTrailerSourcePriorities.Automatic:
-                    candidates.AddRange(local);
-                    candidates.AddRange(remote);
-                    break;
-                default:
-                    candidates.AddRange(local);
-                    candidates.AddRange(remote);
-                    break;
-            }
         }
 
-        if (config.MediaExcerptMode != FeaturedMediaExcerptModes.Off)
-        {
-            FeaturedTrailerDto? excerpt = ResolveExcerpt(item, activeUser, config);
-            if (excerpt is not null)
-            {
-                InsertExcerpt(candidates, excerpt, config.MediaExcerptMode, manualTrailer is null ? 0 : 1);
-            }
-        }
+        FeaturedTrailerDto? excerpt = FeaturedTrailerSourcePriorities.IncludesExcerpt(priority)
+            ? ResolveExcerpt(item, activeUser, config)
+            : null;
+        AddBySourcePriority(candidates, priority, local, remote, excerpt is null ? [] : [excerpt]);
 
         return candidates
             .DistinctBy(GetCandidateKey, StringComparer.OrdinalIgnoreCase)
@@ -79,27 +57,45 @@ public sealed class TrailerResolver
     }
 
     /// <summary>
-    /// Places the excerpt relative to the resolved trailers. A manual override stays first because it is the
-    /// administrator's explicit per-item choice; later candidates still act as playback fallbacks.
+    /// Appends the resolved sources in the configured order. Callers add a manual override first because it is the
+    /// administrator's explicit per-item choice; every later candidate acts as a playback fallback.
     /// </summary>
-    internal static void InsertExcerpt(
+    internal static void AddBySourcePriority(
         List<FeaturedTrailerDto> candidates,
-        FeaturedTrailerDto excerpt,
-        string mode,
-        int manualCount)
+        string priority,
+        IReadOnlyList<FeaturedTrailerDto> local,
+        IReadOnlyList<FeaturedTrailerDto> remote,
+        IReadOnlyList<FeaturedTrailerDto> excerpt)
     {
-        int leading = Math.Clamp(manualCount, 0, candidates.Count);
-        switch (mode)
+        switch (priority)
         {
-            case FeaturedMediaExcerptModes.Always:
-                candidates.Insert(leading, excerpt);
+            case FeaturedTrailerSourcePriorities.LocalOnly:
+                candidates.AddRange(local);
                 break;
-            case FeaturedMediaExcerptModes.PreferOverRemote:
-                int firstRemote = candidates.FindIndex(leading, candidate => candidate.Type == "remote");
-                candidates.Insert(firstRemote < 0 ? candidates.Count : firstRemote, excerpt);
+            case FeaturedTrailerSourcePriorities.RemoteOnly:
+                candidates.AddRange(remote);
                 break;
-            case FeaturedMediaExcerptModes.Fallback:
-                candidates.Add(excerpt);
+            case FeaturedTrailerSourcePriorities.PreferRemote:
+                candidates.AddRange(remote);
+                candidates.AddRange(local);
+                break;
+            case FeaturedTrailerSourcePriorities.LocalRemoteExcerpt:
+                candidates.AddRange(local);
+                candidates.AddRange(remote);
+                candidates.AddRange(excerpt);
+                break;
+            case FeaturedTrailerSourcePriorities.LocalExcerptRemote:
+                candidates.AddRange(local);
+                candidates.AddRange(excerpt);
+                candidates.AddRange(remote);
+                break;
+            case FeaturedTrailerSourcePriorities.ExcerptOnly:
+                candidates.AddRange(excerpt);
+                break;
+            default:
+                // PreferLocal and Automatic keep their pre-excerpt behaviour.
+                candidates.AddRange(local);
+                candidates.AddRange(remote);
                 break;
         }
     }
