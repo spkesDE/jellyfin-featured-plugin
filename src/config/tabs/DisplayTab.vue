@@ -2,8 +2,12 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
 import BannerPreview from '../components/BannerPreview.vue';
 import ConfigCard from '../components/ConfigCard.vue';
-import ConfigCheckbox from '../components/ConfigCheckbox.vue';
+import ConfigGrid from '../components/ConfigGrid.vue';
+import ConfigHelpTooltip from '../components/ConfigHelpTooltip.vue';
+import ConfigListHeader from '../components/ConfigListHeader.vue';
 import ConfigNumber from '../components/ConfigNumber.vue';
+import ConfigSection from '../components/ConfigSection.vue';
+import ConfigSwitch from '../components/ConfigSwitch.vue';
 import ConfigSelect, { type SelectOption } from '../components/ConfigSelect.vue';
 import ConfigText from '../components/ConfigText.vue';
 import HeroFadeCurveEditor from '../components/HeroFadeCurveEditor.vue';
@@ -115,6 +119,17 @@ const placementOptions: SelectOption[] = [
   { value: 'metadata', label: t('display.placementMetadata') },
   { value: 'actions', label: t('display.placementActions') }
 ];
+const summary = computed(() =>
+  [
+    store.config.UseHeroLayout ? t('preset.heroLayout') : t('preset.standardLayout'),
+    heightModeOptions.find((option) => option.value === store.config.HeroHeightMode)?.label,
+    store.config.EnableAutoplay
+      ? t('display.summaryAutoplay', { seconds: store.config.AutoplayInterval })
+      : t('display.summaryNoAutoplay')
+  ]
+    .filter(Boolean)
+    .join(' · ')
+);
 const bannerControlPositionOptions: SelectOption[] = [
   { value: 'bottom-center', label: t('display.positionBottomCenter') },
   { value: 'top-right', label: t('display.positionTopRight') },
@@ -129,6 +144,8 @@ const bannerControlPositionOptions: SelectOption[] = [
     role="tabpanel"
     aria-labelledby="featuredTab-display"
   >
+    <ConfigListHeader :title="t('tab.display')" :help-text="t('display.headerHelp')" :summary="summary" />
+
     <div class="featured-displayWorkspace">
       <div ref="displayEditor" class="featured-displayEditor">
         <details
@@ -147,45 +164,47 @@ const bannerControlPositionOptions: SelectOption[] = [
             >
           </summary>
           <div class="featured-displayGroupBody">
-            <ConfigCheckbox v-model="store.config.UseHeroLayout" :label="t('display.heroLayout')" />
-            <ConfigSelect
-              v-model="store.config.HeroHeightMode"
-              :label="t('display.heightMode')"
-              :options="heightModeOptions"
-            />
-            <ConfigNumber
-              v-if="store.config.HeroHeightMode === 'custom'"
-              v-model="store.config.BannerHeight"
-              :label="t('display.desktopHeight')"
-              :min="240"
-              :max="900"
-              :step="10"
-            />
-            <div class="jmp-compactGrid">
-              <ConfigNumber
-                v-model="store.config.TabletBannerHeight"
-                :label="t('display.tabletHeight')"
-                :min="240"
-                :max="700"
-                :step="10"
-              />
-              <ConfigNumber
-                v-model="store.config.MobileBannerHeight"
-                :label="t('display.mobileHeight')"
-                :min="220"
-                :max="600"
-                :step="10"
-              />
-            </div>
-            <ConfigNumber
-              v-if="!store.config.UseHeroLayout"
-              v-model="store.config.HeroBorderRadius"
-              :label="t('display.borderRadius')"
-              :min="0"
-              :max="48"
-              :step="1"
-            />
-            <template v-if="store.config.UseHeroLayout">
+            <ConfigSwitch v-model="store.config.UseHeroLayout" :label="t('display.heroLayout')" />
+            <ConfigSection :title="t('display.heightSection')">
+              <ConfigGrid :columns="3">
+                <ConfigSelect
+                  v-model="store.config.HeroHeightMode"
+                  :label="t('display.heightMode')"
+                  :options="heightModeOptions"
+                />
+                <ConfigNumber
+                  v-model="store.config.TabletBannerHeight"
+                  :label="t('display.tabletHeight')"
+                  :min="240"
+                  :max="700"
+                  :step="10"
+                />
+                <ConfigNumber
+                  v-model="store.config.MobileBannerHeight"
+                  :label="t('display.mobileHeight')"
+                  :min="220"
+                  :max="600"
+                  :step="10"
+                />
+                <ConfigNumber
+                  v-if="store.config.HeroHeightMode === 'custom'"
+                  v-model="store.config.BannerHeight"
+                  :label="t('display.desktopHeight')"
+                  :min="240"
+                  :max="900"
+                  :step="10"
+                />
+                <ConfigNumber
+                  v-if="!store.config.UseHeroLayout"
+                  v-model="store.config.HeroBorderRadius"
+                  :label="t('display.borderRadius')"
+                  :min="0"
+                  :max="48"
+                  :step="1"
+                />
+              </ConfigGrid>
+            </ConfigSection>
+            <ConfigSection v-if="store.config.UseHeroLayout" :title="t('display.fadeSection')">
               <HeroFadeCurveEditor
                 v-model:curve="store.config.HeroFadeCurve"
                 v-model:points="store.config.HeroFadePoints"
@@ -193,40 +212,42 @@ const bannerControlPositionOptions: SelectOption[] = [
                 v-model:start="store.config.HeroFadeStart"
                 v-model:end="store.config.HeroFadeEnd"
               />
-            </template>
-            <div class="jmp-compactGrid">
-              <ConfigSelect
-                v-model="store.config.HeroTextPosition"
-                :label="t('display.textPosition')"
-                :options="textPositionOptions"
-              />
-              <ConfigSelect
-                v-model="store.config.HeroTextVerticalPosition"
-                :label="t('display.textVerticalPosition')"
-                :options="textVerticalPositionOptions"
-                :help-text="t('display.textPositionHelp')"
-              />
-            </div>
-            <div class="jmp-compactGrid">
-              <ConfigSelect
-                v-model="store.config.HeroBackdropPosition"
-                :label="t('display.backdropPosition')"
-                :options="positionOptions"
-              />
-              <ConfigSelect
-                v-model="store.config.TransitionEffect"
-                :label="t('display.transitionEffect')"
-                :options="transitionOptions"
-              />
-            </div>
-            <ConfigNumber
-              v-model="store.config.MediaPadding"
-              :label="t('display.spaceBelow')"
-              :help-text="store.config.UseHeroLayout ? t('display.heroMinimumGap') : undefined"
-              :min="-240"
-              :max="240"
-              :step="4"
-            />
+            </ConfigSection>
+            <ConfigSection :title="t('display.positionSection')">
+              <ConfigGrid :columns="3">
+                <ConfigSelect
+                  v-model="store.config.HeroTextPosition"
+                  :label="t('display.textPosition')"
+                  :options="textPositionOptions"
+                />
+                <ConfigSelect
+                  v-model="store.config.HeroTextVerticalPosition"
+                  :label="t('display.textVerticalPosition')"
+                  :options="textVerticalPositionOptions"
+                  :help-text="t('display.textPositionHelp')"
+                />
+                <ConfigSelect
+                  v-model="store.config.HeroBackdropPosition"
+                  :label="t('display.backdropPosition')"
+                  :options="positionOptions"
+                />
+              </ConfigGrid>
+              <ConfigGrid>
+                <ConfigSelect
+                  v-model="store.config.TransitionEffect"
+                  :label="t('display.transitionEffect')"
+                  :options="transitionOptions"
+                />
+                <ConfigNumber
+                  v-model="store.config.MediaPadding"
+                  :label="t('display.spaceBelow')"
+                  :help-text="store.config.UseHeroLayout ? t('display.heroMinimumGap') : undefined"
+                  :min="-240"
+                  :max="240"
+                  :step="4"
+                />
+              </ConfigGrid>
+            </ConfigSection>
           </div>
         </details>
 
@@ -245,21 +266,25 @@ const bannerControlPositionOptions: SelectOption[] = [
             >
           </summary>
           <div class="featured-displayGroupBody">
-            <ConfigSelect
-              v-model="store.config.TitleDisplayMode"
-              :label="t('display.titleDisplay')"
-              :options="titleOptions"
-            />
-            <ConfigText
-              v-if="!store.config.UseHeroLayout"
-              v-model="store.config.Heading"
-              :label="t('display.bannerHeading')"
-              :placeholder="t('common.optional')"
-            />
-            <ConfigCheckbox v-model="store.config.ShowDescription" :label="t('display.showDescription')" />
-            <ConfigCheckbox v-model="store.config.ShowRating" :label="t('display.showRatings')" />
-            <ConfigCheckbox v-model="store.config.ShowYear" :label="t('display.showYear')" />
-            <ConfigCheckbox v-model="store.config.ShowRuntime" :label="t('display.showRuntime')" />
+            <ConfigGrid>
+              <ConfigSelect
+                v-model="store.config.TitleDisplayMode"
+                :label="t('display.titleDisplay')"
+                :options="titleOptions"
+              />
+              <ConfigText
+                v-if="!store.config.UseHeroLayout"
+                v-model="store.config.Heading"
+                :label="t('display.bannerHeading')"
+                :placeholder="t('common.optional')"
+              />
+            </ConfigGrid>
+            <ConfigGrid class="featured-displaySwitches">
+              <ConfigSwitch v-model="store.config.ShowDescription" :label="t('display.showDescription')" />
+              <ConfigSwitch v-model="store.config.ShowRating" :label="t('display.showRatings')" />
+              <ConfigSwitch v-model="store.config.ShowYear" :label="t('display.showYear')" />
+              <ConfigSwitch v-model="store.config.ShowRuntime" :label="t('display.showRuntime')" />
+            </ConfigGrid>
           </div>
         </details>
 
@@ -278,51 +303,81 @@ const bannerControlPositionOptions: SelectOption[] = [
             >
           </summary>
           <div class="featured-displayGroupBody">
-            <ConfigCheckbox v-model="store.config.ShowPlayButton" :label="t('display.showPlayButton')" />
-            <ConfigText
-              v-if="store.config.ShowPlayButton"
-              v-model="store.config.PlayButtonText"
-              :label="t('display.customPlayText')"
-              :placeholder="t('common.play')"
-            />
-            <ConfigCheckbox v-model="store.config.ShowSecondaryButton" :label="t('display.showSecondaryButton')" />
-            <ConfigText
-              v-if="store.config.ShowSecondaryButton"
-              v-model="store.config.SecondaryButtonText"
-              :label="t('display.secondaryButtonText')"
-              :placeholder="t('display.moreInfo')"
-            />
-            <div class="featured-dependentSetting">
-              <ConfigCheckbox v-model="store.config.ShowFavoriteButton" :label="t('display.showFavoriteButton')" />
-              <ConfigSelect
-                v-if="store.config.ShowFavoriteButton"
-                v-model="store.config.FavoriteButtonPlacement"
-                :label="t('display.controlPlacement')"
-                :options="placementOptions"
-              />
-            </div>
-            <div class="featured-dependentSetting">
-              <ConfigCheckbox v-model="store.config.ShowPlaystateButton" :label="t('display.showPlaystateButton')" />
-              <ConfigSelect
-                v-if="store.config.ShowPlaystateButton"
-                v-model="store.config.PlaystateButtonPlacement"
-                :label="t('display.controlPlacement')"
-                :options="placementOptions"
-              />
-            </div>
-            <div class="featured-dependentSetting">
-              <ConfigCheckbox
-                v-model="store.config.ShowDismissalButton"
-                :label="t('display.showDismissalButton')"
-                :disabled="!store.config.DismissalPolicy.Enabled"
-              />
-              <ConfigSelect
-                v-if="store.config.ShowDismissalButton && store.config.DismissalPolicy.Enabled"
-                v-model="store.config.DismissalButtonPlacement"
-                :label="t('display.controlPlacement')"
-                :options="placementOptions"
-              />
-            </div>
+            <ConfigSection :title="t('display.buttonsSection')">
+              <ConfigGrid class="featured-displaySwitches">
+                <ConfigSwitch v-model="store.config.ShowPlayButton" :label="t('display.showPlayButton')" />
+                <ConfigSwitch v-model="store.config.ShowSecondaryButton" :label="t('display.showSecondaryButton')" />
+              </ConfigGrid>
+              <ConfigGrid v-if="store.config.ShowPlayButton || store.config.ShowSecondaryButton">
+                <ConfigText
+                  v-if="store.config.ShowPlayButton"
+                  v-model="store.config.PlayButtonText"
+                  :label="t('display.customPlayText')"
+                  :placeholder="t('common.play')"
+                />
+                <ConfigText
+                  v-if="store.config.ShowSecondaryButton"
+                  v-model="store.config.SecondaryButtonText"
+                  :label="t('display.secondaryButtonText')"
+                  :placeholder="t('display.moreInfo')"
+                />
+              </ConfigGrid>
+            </ConfigSection>
+            <ConfigSection :title="t('display.extraActionsSection')">
+              <div class="featured-actionRow">
+                <span>{{ t('display.showFavoriteButton') }}</span>
+                <ConfigSwitch
+                  v-model="store.config.ShowFavoriteButton"
+                  :label="t('display.showFavoriteButton')"
+                  hide-label
+                />
+                <ConfigSelect
+                  v-model="store.config.FavoriteButtonPlacement"
+                  :label="t('display.controlPlacement')"
+                  :options="placementOptions"
+                  :disabled="!store.config.ShowFavoriteButton"
+                  hide-label
+                />
+              </div>
+              <div class="featured-actionRow">
+                <span>{{ t('display.showPlaystateButton') }}</span>
+                <ConfigSwitch
+                  v-model="store.config.ShowPlaystateButton"
+                  :label="t('display.showPlaystateButton')"
+                  hide-label
+                />
+                <ConfigSelect
+                  v-model="store.config.PlaystateButtonPlacement"
+                  :label="t('display.controlPlacement')"
+                  :options="placementOptions"
+                  :disabled="!store.config.ShowPlaystateButton"
+                  hide-label
+                />
+              </div>
+              <div class="featured-actionRow" :class="{ 'is-unavailable': !store.config.DismissalPolicy.Enabled }">
+                <span class="featured-configLabelRow">
+                  {{ t('display.showDismissalButton') }}
+                  <ConfigHelpTooltip
+                    v-if="!store.config.DismissalPolicy.Enabled"
+                    :text="t('display.dismissalNeedsPolicy')"
+                    :label="`${t('display.showDismissalButton')}: ${t('display.dismissalNeedsPolicy')}`"
+                  />
+                </span>
+                <ConfigSwitch
+                  v-model="store.config.ShowDismissalButton"
+                  :label="t('display.showDismissalButton')"
+                  :disabled="!store.config.DismissalPolicy.Enabled"
+                  hide-label
+                />
+                <ConfigSelect
+                  v-model="store.config.DismissalButtonPlacement"
+                  :label="t('display.controlPlacement')"
+                  :options="placementOptions"
+                  :disabled="!store.config.ShowDismissalButton || !store.config.DismissalPolicy.Enabled"
+                  hide-label
+                />
+              </div>
+            </ConfigSection>
           </div>
         </details>
 
@@ -341,59 +396,64 @@ const bannerControlPositionOptions: SelectOption[] = [
             >
           </summary>
           <div class="featured-displayGroupBody">
-            <ConfigCheckbox v-model="store.config.ShowNavigationArrows" :label="t('display.showNavigation')" />
-            <ConfigSelect
-              v-if="!store.config.UseHeroLayout"
-              v-model="store.config.BannerNavigationPosition"
-              :label="t('display.bannerNavigationPosition')"
-              :options="bannerControlPositionOptions"
-              :help-text="t('display.bannerPositionHelp')"
-            />
-            <ConfigCheckbox
-              v-if="!store.config.EnableInfiniteLoading"
-              v-model="store.config.ShowPaginationDots"
-              :label="t('display.showPaginationDots')"
-            />
-            <ConfigCheckbox
-              v-if="!store.config.EnableInfiniteLoading && !store.config.ShowPaginationDots"
-              v-model="store.config.ShowSlidePosition"
-              :label="t('display.showPosition')"
-            />
-            <ConfigCheckbox
-              v-model="store.config.EnableAutoplay"
-              :label="t('display.enableAutoplay')"
-              :help-text="t('display.autoplayHelp')"
-            />
-            <ConfigNumber
-              v-if="store.config.EnableAutoplay"
-              v-model="store.config.AutoplayInterval"
-              :label="t('display.intervalSeconds')"
-              :min="1"
-              :max="3600"
-              :step="1"
-            />
-            <ConfigCheckbox
-              v-if="store.config.EnableAutoplay"
-              v-model="store.config.ShowAutoplayButton"
-              :label="t('display.showAutoplayControl')"
-            />
-            <ConfigCheckbox
-              v-model="store.config.ShowControlsOnHoverOnly"
-              :label="t('display.showControlsOnHoverOnly')"
-              :help-text="t('display.showControlsOnHoverOnlyHelp')"
-            />
-            <ConfigCheckbox
-              v-model="store.config.ShowTrailerControls"
-              :label="t('trailers.showControls')"
-              :help-text="t('trailers.showControlsHelp')"
-            />
-            <ConfigSelect
-              v-if="!store.config.UseHeroLayout && store.config.ShowTrailerControls"
-              v-model="store.config.BannerMediaControlsPosition"
-              :label="t('display.bannerMediaControlsPosition')"
-              :options="bannerControlPositionOptions"
-              :help-text="t('display.bannerPositionHelp')"
-            />
+            <ConfigSection :title="t('display.navigationSection')">
+              <ConfigSwitch v-model="store.config.ShowNavigationArrows" :label="t('display.showNavigation')" />
+              <ConfigSwitch
+                v-if="!store.config.EnableInfiniteLoading"
+                v-model="store.config.ShowPaginationDots"
+                :label="t('display.showPaginationDots')"
+              />
+              <ConfigSwitch
+                v-if="!store.config.EnableInfiniteLoading && !store.config.ShowPaginationDots"
+                v-model="store.config.ShowSlidePosition"
+                :label="t('display.showPosition')"
+              />
+              <ConfigSelect
+                v-if="!store.config.UseHeroLayout"
+                v-model="store.config.BannerNavigationPosition"
+                :label="t('display.bannerNavigationPosition')"
+                :options="bannerControlPositionOptions"
+                :help-text="t('display.bannerPositionHelp')"
+              />
+            </ConfigSection>
+            <ConfigSection :title="t('display.autoplaySection')" :help-text="t('display.autoplayHelp')">
+              <template #actions>
+                <ConfigSwitch v-model="store.config.EnableAutoplay" :label="t('display.enableAutoplay')" hide-label />
+              </template>
+              <ConfigGrid v-if="store.config.EnableAutoplay">
+                <ConfigNumber
+                  v-model="store.config.AutoplayInterval"
+                  :label="t('display.intervalSeconds')"
+                  :min="1"
+                  :max="3600"
+                  :step="1"
+                />
+              </ConfigGrid>
+              <ConfigSwitch
+                v-if="store.config.EnableAutoplay"
+                v-model="store.config.ShowAutoplayButton"
+                :label="t('display.showAutoplayControl')"
+              />
+            </ConfigSection>
+            <ConfigSection :title="t('display.mediaControlsSection')">
+              <ConfigSwitch
+                v-model="store.config.ShowControlsOnHoverOnly"
+                :label="t('display.showControlsOnHoverOnly')"
+                :help-text="t('display.showControlsOnHoverOnlyHelp')"
+              />
+              <ConfigSwitch
+                v-model="store.config.ShowTrailerControls"
+                :label="t('trailers.showControls')"
+                :help-text="t('trailers.showControlsHelp')"
+              />
+              <ConfigSelect
+                v-if="!store.config.UseHeroLayout && store.config.ShowTrailerControls"
+                v-model="store.config.BannerMediaControlsPosition"
+                :label="t('display.bannerMediaControlsPosition')"
+                :options="bannerControlPositionOptions"
+                :help-text="t('display.bannerPositionHelp')"
+              />
+            </ConfigSection>
           </div>
         </details>
 
@@ -412,20 +472,21 @@ const bannerControlPositionOptions: SelectOption[] = [
             >
           </summary>
           <div class="featured-displayGroupBody">
-            <ConfigCheckbox
+            <ConfigSwitch
               v-model="store.config.InteractOnWholeBanner"
               :label="t('display.interactOnWholeBanner')"
               :help-text="t('display.interactOnWholeBannerHelp')"
             />
-            <ConfigNumber
-              v-if="!store.config.EnableInfiniteLoading"
-              v-model="store.config.RandomMediaCount"
-              :label="t('display.maximumSlides')"
-              :min="1"
-              :max="100"
-              :step="1"
-            />
-            <ConfigCheckbox v-model="store.config.HideOnTvLayout" :label="t('display.hideTv')" />
+            <ConfigSwitch v-model="store.config.HideOnTvLayout" :label="t('display.hideTv')" />
+            <ConfigGrid v-if="!store.config.EnableInfiniteLoading">
+              <ConfigNumber
+                v-model="store.config.RandomMediaCount"
+                :label="t('display.maximumSlides')"
+                :min="1"
+                :max="100"
+                :step="1"
+              />
+            </ConfigGrid>
           </div>
         </details>
       </div>
@@ -491,10 +552,33 @@ const bannerControlPositionOptions: SelectOption[] = [
 .featured-displayGroupBody > :deep(.selectContainer:last-child) {
   margin-bottom: 0;
 }
-.featured-dependentSetting {
-  border-top: 1px solid rgba(255, 255, 255, 0.07);
-  margin-top: 0.7rem;
-  padding-top: 0.7rem;
+.featured-displayGroupBody {
+  display: grid;
+  gap: 0.6rem;
+}
+.featured-displayGroupBody :deep(.inputContainer),
+.featured-displayGroupBody :deep(.selectContainer) {
+  margin-bottom: 0;
+}
+.featured-displaySwitches {
+  gap: 0 1.5rem;
+}
+/* Name, placement, switch: the switch comes first in the DOM so screen readers meet the toggle before its option. */
+.featured-actionRow {
+  align-items: center;
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: minmax(0, 1fr) minmax(9rem, 13rem) auto;
+  min-height: 2.6rem;
+}
+.featured-actionRow > :nth-child(2) {
+  order: 3;
+}
+.featured-actionRow > :nth-child(3) {
+  order: 2;
+}
+.featured-actionRow.is-unavailable > span {
+  opacity: 0.6;
 }
 .featured-previewRail {
   align-self: stretch;

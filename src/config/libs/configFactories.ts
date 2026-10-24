@@ -7,10 +7,15 @@ import type {
   FeaturedPreset,
   FeaturedSourceRule,
   FeaturedUserProfile,
+  FeaturedMediaPriorityEntry,
   SourceType
 } from '../../types/config';
+import { mediaPriorityFromTrailerSource } from './configNormalization';
 
-export function createSourceRule(type: SourceType = 'RANDOM'): FeaturedSourceRule {
+export function createSourceRule(
+  type: SourceType = 'RANDOM',
+  mediaPriority: FeaturedMediaPriorityEntry[] = mediaPriorityFromTrailerSource('prefer_local')
+): FeaturedSourceRule {
   return {
     Id: createId(),
     Type: type,
@@ -20,8 +25,9 @@ export function createSourceRule(type: SourceType = 'RANDOM'): FeaturedSourceRul
     MaximumItems: 0,
     IsFallback: false,
     AllowBackgroundTrailers: true,
-    UseMediaPreviewFallback: false,
-    UseTrickplayFallback: false,
+    YouTubeQualityFilter: 'inherit',
+    // Copied field by field: the default list is usually reactive store state, which structuredClone rejects.
+    MediaPriority: mediaPriority.map(({ Type, Enabled }) => ({ Type, Enabled })),
     UserIds: [],
     EditorUserId: null,
     LibraryIds: [],
@@ -130,6 +136,8 @@ export function createPresetFromConfig(config: FeaturedPluginConfig, name = 'Fea
     Trailers: {
       EnableBackgroundTrailers: config.EnableBackgroundTrailers,
       TrailerSourcePriority: config.TrailerSourcePriority,
+      DefaultMediaPriority: config.DefaultMediaPriority.map(({ Type, Enabled }) => ({ Type, Enabled })),
+      YouTubeQualityFilter: config.YouTubeQualityFilter,
       StartTrailersMuted: config.StartTrailersMuted,
       ShowTrailerControls: config.ShowTrailerControls,
       TrailerVolumeSliderDirection: config.TrailerVolumeSliderDirection,

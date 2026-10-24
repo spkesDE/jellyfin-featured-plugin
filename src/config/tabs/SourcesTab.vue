@@ -1,35 +1,33 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import Draggable from 'vuedraggable';
 import type { SourceType } from '../../types/config';
 import { t } from '../../i18n';
-import ConfigCard from '../components/ConfigCard.vue';
-import ConfigSelect, { type SelectOption } from '../components/ConfigSelect.vue';
+import ConfigActionMenu, { type ConfigMenuAction } from '../components/ConfigActionMenu.vue';
+import ConfigListHeader from '../components/ConfigListHeader.vue';
 import SourceRuleCard from '../components/SourceRuleCard.vue';
 import { useConfigStore } from '../libs/store';
+import { SOURCE_TYPE_GROUP_LABELS, SOURCE_TYPES } from '../libs/sourceTypes';
 
 const store = useConfigStore();
-const selectedType = ref<SourceType>('LIBRARIES');
 const expandedSourceId = ref<string | null>(null);
-function addSource(): void {
-  store.addSource(selectedType.value);
+const sourceTypeActions: ConfigMenuAction[] = (Object.keys(SOURCE_TYPES) as SourceType[]).map((type) => ({
+  id: type,
+  label: t(SOURCE_TYPES[type].label),
+  description: t(SOURCE_TYPES[type].short),
+  icon: SOURCE_TYPES[type].icon,
+  group: t(SOURCE_TYPE_GROUP_LABELS[SOURCE_TYPES[type].group])
+}));
+const summary = computed(() =>
+  t(store.config.SourceRules.length === 1 ? 'source.summaryCountOne' : 'source.summaryCount', {
+    count: store.config.SourceRules.length,
+    active: store.config.SourceRules.filter((rule) => rule.Enabled).length
+  })
+);
+function addSource(type: string): void {
+  store.addSource(type as SourceType);
   expandedSourceId.value = store.config.SourceRules[store.config.SourceRules.length - 1]?.Id ?? null;
 }
-const sourceOptions: SelectOption[] = [
-  { value: 'LIBRARIES', label: t('source.type.libraries') },
-  { value: 'COLLECTIONS', label: t('source.type.collections') },
-  { value: 'FAVOURITES', label: t('source.type.favourites') },
-  { value: 'TAGS', label: t('source.type.tags') },
-  { value: 'PLAYLISTS', label: t('source.type.playlists') },
-  { value: 'RECENTLY_ADDED', label: t('source.type.recently_added') },
-  { value: 'LATEST_RELEASES', label: t('source.type.latest_releases') },
-  { value: 'RANDOM', label: t('source.type.random') },
-  { value: 'UNPLAYED', label: t('source.type.unplayed') },
-  { value: 'CONTINUE_WATCHING', label: t('source.type.continue_watching') },
-  { value: 'NEXT_UP', label: t('source.type.next_up') },
-  { value: 'RECOMMENDATIONS', label: t('source.type.recommendations') },
-  { value: 'MANUAL_LISTS', label: t('source.type.manual_lists') }
-];
 </script>
 
 <template>
@@ -39,7 +37,11 @@ const sourceOptions: SelectOption[] = [
     role="tabpanel"
     aria-labelledby="featuredTab-sources"
   >
-    <ConfigCard :title="t('source.title')" :help="t('source.help')">
+    <ConfigListHeader
+      :title="t('source.title')"
+      :help-text="`${t('source.help')} ${t('source.orderHelp')}`"
+      :summary="summary"
+    >
       <template #actions>
         <button
           type="button"
@@ -49,20 +51,15 @@ const sourceOptions: SelectOption[] = [
           <span class="material-icons" aria-hidden="true">preview</span>
           {{ t('feedPreview.open') }}
         </button>
-      </template>
-      <div class="featured-addSourceRow featured-configAddRow">
-        <ConfigSelect
-          v-model="selectedType"
-          :label="t('source.newType')"
-          :help-text="t('source.orderHelp')"
-          :options="sourceOptions"
+        <ConfigActionMenu
+          :label="t('source.add')"
+          :trigger-text="t('source.add')"
+          trigger-icon="add"
+          :actions="sourceTypeActions"
+          @select="addSource"
         />
-        <button type="button" class="raised button-submit emby-button featured-addSourceButton" @click="addSource">
-          <span class="material-icons" aria-hidden="true">add</span>
-          {{ t('source.add') }}
-        </button>
-      </div>
-    </ConfigCard>
+      </template>
+    </ConfigListHeader>
 
     <Draggable
       v-if="store.config.SourceRules.length"

@@ -10,6 +10,9 @@ const props = defineProps<{
   options: SelectOption[];
   emptyText?: string;
   helpText?: string;
+  placeholder?: string;
+  /** Keeps the label for assistive technology only, for rows that show column headings instead. */
+  hideLabel?: boolean;
 }>();
 const emit = defineEmits<{ 'update:modelValue': [value: string[]] }>();
 const root = ref<HTMLElement | null>(null);
@@ -30,7 +33,7 @@ const selectedLabels = computed(() =>
     .filter((value): value is string => Boolean(value))
 );
 const selectionText = computed(() => {
-  if (!selectedLabels.value.length) return t('common.selectOptions');
+  if (!selectedLabels.value.length) return props.placeholder ?? t('common.selectOptions');
   if (selectedLabels.value.length <= 2) return selectedLabels.value.join(', ');
   return t('common.selectionSummary', { first: selectedLabels.value[0], count: selectedLabels.value.length - 1 });
 });
@@ -126,7 +129,7 @@ onBeforeUnmount(() => {
 
 <template>
   <div ref="root" class="featured-multiPicker" :class="{ 'is-open': open }">
-    <div class="featured-multiPickerLabelRow">
+    <div v-if="!hideLabel" class="featured-multiPickerLabelRow">
       <label class="selectLabel">{{ label }}</label>
       <ConfigHelpTooltip v-if="helpText" :text="helpText" :label="`${label}: ${helpText}`" />
     </div>
@@ -134,6 +137,7 @@ onBeforeUnmount(() => {
       ref="trigger"
       type="button"
       class="emby-select emby-select-withcolor featured-multiPickerTrigger"
+      :aria-label="hideLabel ? label : undefined"
       :aria-expanded="open"
       aria-haspopup="listbox"
       @click="toggleOpen"

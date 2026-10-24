@@ -1,33 +1,54 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
-import { t } from '../../i18n';
+import { computed } from 'vue';
+import { t, type TranslationKey } from '../../i18n';
+import ConfigActionMenu, { type ConfigMenuAction } from '../components/ConfigActionMenu.vue';
 import ConfigCard from '../components/ConfigCard.vue';
-import ConfigCheckbox from '../components/ConfigCheckbox.vue';
+import ConfigGrid from '../components/ConfigGrid.vue';
+import ConfigListHeader from '../components/ConfigListHeader.vue';
 import ConfigMultiPicker from '../components/ConfigMultiPicker.vue';
 import ConfigNumber from '../components/ConfigNumber.vue';
-import ConfigSelect, { type SelectOption } from '../components/ConfigSelect.vue';
+import ConfigSection from '../components/ConfigSection.vue';
+import ConfigSwitch from '../components/ConfigSwitch.vue';
 import { useConfigStore } from '../libs/store';
-import { namedOptions, valueOptions } from '../libs/options';
+import { valueOptions } from '../libs/options';
+import { openPreferencesDialog } from '../../preferences';
+import preferencesCss from '../../styles/featured-preferences.css?inline';
+
+type BoostKey = 'UnplayedBoost' | 'FavouriteBoost' | 'PreferredGenreBoost' | 'InProgressSeriesBoost';
 
 const store = useConfigStore();
-const selectedUserId = ref('');
-const expandedProfileId = ref<string | null>(null);
-const userOptions = computed<SelectOption[]>(() => [
-  { value: '', label: t('users.selectUser') },
-  ...namedOptions(
-    store.users.value.filter((user) => !store.config.UserProfiles.some((profile) => profile.UserId === user.Id))
-  )
-]);
 const genreOptions = () => valueOptions(store.genres.value);
-const userName = (userId: string) =>
-  store.users.value.find((user) => user.Id === userId)?.Name ?? t('users.unknownUser');
+const profileActions = computed((): ConfigMenuAction[] =>
+  store.users.value.map((user) => ({ id: user.Id, label: user.Name, icon: 'person' }))
+);
 
-function addProfile(): void {
-  if (!selectedUserId.value) return;
-  store.addUserProfile(selectedUserId.value);
-  expandedProfileId.value = store.config.UserProfiles[store.config.UserProfiles.length - 1]?.Id ?? null;
-  selectedUserId.value = '';
+async function openUserProfile(userId: string): Promise<void> {
+  const user = store.users.value.find((candidate) => candidate.Id === userId);
+  if (!user) return;
+  if (!document.getElementById('featured-preferences-admin-styles')) {
+    const style = document.createElement('style');
+    style.id = 'featured-preferences-admin-styles';
+    style.textContent = preferencesCss;
+    document.head.appendChild(style);
+  }
+  await openPreferencesDialog({ userId: user.Id, userName: user.Name });
 }
+
+/** Turns both user-facing features on or off together; each keeps its own switch for finer control. */
+const allowCustomization = computed({
+  get: () => store.config.DismissalPolicy.Enabled || store.config.PersonalizationPolicy.Enabled,
+  set: (value: boolean) => {
+    store.config.DismissalPolicy.Enabled = value;
+    store.config.PersonalizationPolicy.Enabled = value;
+  }
+});
+
+const boosts: { key: BoostKey; label: TranslationKey }[] = [
+  { key: 'UnplayedBoost', label: 'users.unplayedBoost' },
+  { key: 'FavouriteBoost', label: 'users.favouriteBoost' },
+  { key: 'PreferredGenreBoost', label: 'users.genreBoost' },
+  { key: 'InProgressSeriesBoost', label: 'users.inProgressBoost' }
+];
 </script>
 
 <template>
@@ -37,298 +58,201 @@ function addProfile(): void {
     role="tabpanel"
     aria-labelledby="featuredTab-users"
   >
-    <div class="featured-userSettingsGrid">
-      <ConfigCard :title="t('users.dismissalsTitle')" :help="t('users.dismissalsHelp')">
-        <ConfigCheckbox v-model="store.config.DismissalPolicy.Enabled" :label="t('users.dismissalsEnabled')" />
-        <div class="featured-policyGrid" :class="{ 'featured-disabledGroup': !store.config.DismissalPolicy.Enabled }">
-          <ConfigCheckbox
-            v-model="store.config.DismissalPolicy.AllowTitle"
-            :label="t('users.dismissTitle')"
-            :disabled="!store.config.DismissalPolicy.Enabled"
-          />
-          <ConfigCheckbox
-            v-model="store.config.DismissalPolicy.AllowSeries"
-            :label="t('users.dismissSeries')"
-            :disabled="!store.config.DismissalPolicy.Enabled"
-          />
-          <ConfigCheckbox
-            v-model="store.config.DismissalPolicy.AllowFranchise"
-            :label="t('users.dismissFranchise')"
-            :disabled="!store.config.DismissalPolicy.Enabled"
-          />
-        </div>
-      </ConfigCard>
-
-      <ConfigCard :title="t('users.personalizationTitle')" :help="t('users.personalizationHelp')">
-        <ConfigCheckbox
-          v-model="store.config.PersonalizationPolicy.Enabled"
-          :label="t('users.personalizationEnabled')"
+    <ConfigListHeader
+      :title="t('users.title')"
+      :help-text="t('users.help')"
+      :summary="
+        store.users.value.length ? t('users.userCount', { count: store.users.value.length }) : t('users.noUsers')
+      "
+    >
+      <template #actions>
+        <ConfigActionMenu
+          v-if="store.users.value.length"
+          :label="t('users.openProfile')"
+          :trigger-text="t('users.openProfile')"
+          trigger-icon="manage_accounts"
+          :actions="profileActions"
+          @select="openUserProfile"
         />
-        <div
-          class="featured-policyGrid"
-          :class="{ 'featured-disabledGroup': !store.config.PersonalizationPolicy.Enabled }"
-        >
-          <ConfigCheckbox
-            v-model="store.config.PersonalizationPolicy.AllowSourceSelection"
-            :label="t('users.allowSources')"
-            :disabled="!store.config.PersonalizationPolicy.Enabled"
-          />
-          <ConfigCheckbox
-            v-model="store.config.PersonalizationPolicy.AllowSourceWeights"
-            :label="t('users.allowWeights')"
-            :disabled="!store.config.PersonalizationPolicy.Enabled"
-          />
-          <ConfigCheckbox
-            v-model="store.config.PersonalizationPolicy.AllowPreferredGenres"
-            :label="t('users.allowGenres')"
-            :disabled="!store.config.PersonalizationPolicy.Enabled"
-          />
-          <ConfigCheckbox
-            v-model="store.config.PersonalizationPolicy.AllowUnplayedBoost"
-            :label="t('users.allowUnplayed')"
-            :disabled="!store.config.PersonalizationPolicy.Enabled"
-          />
-          <ConfigCheckbox
-            v-model="store.config.PersonalizationPolicy.AllowFavouriteBoost"
-            :label="t('users.allowFavourites')"
-            :disabled="!store.config.PersonalizationPolicy.Enabled"
-          />
-          <ConfigCheckbox
-            v-model="store.config.PersonalizationPolicy.AllowInProgressSeriesBoost"
-            :label="t('users.allowInProgress')"
-            :disabled="!store.config.PersonalizationPolicy.Enabled"
-          />
-          <ConfigCheckbox
-            v-model="store.config.PersonalizationPolicy.AllowRepeatCooldown"
-            :label="t('users.allowCooldown')"
-            :disabled="!store.config.PersonalizationPolicy.Enabled"
-          />
+      </template>
+    </ConfigListHeader>
+
+    <div class="featured-userSettingsLayout">
+      <ConfigCard :title="t('users.permissionsTitle')" :help="t('users.personalizationHelp')">
+        <template #actions>
+          <ConfigSwitch v-model="allowCustomization" :label="t('users.permissionsTitle')" hide-label />
+        </template>
+        <div class="featured-userPermissions" :class="{ 'is-disabled': !allowCustomization }">
+          <ConfigSection :title="t('users.dismissalsTitle')" :help-text="t('users.dismissalsHelp')">
+            <template #actions>
+              <ConfigSwitch
+                v-model="store.config.DismissalPolicy.Enabled"
+                :label="t('users.dismissalsEnabled')"
+                hide-label
+              />
+            </template>
+            <div :class="{ 'is-disabled': !store.config.DismissalPolicy.Enabled }">
+              <ConfigSwitch
+                v-model="store.config.DismissalPolicy.AllowTitle"
+                :label="t('users.dismissTitle')"
+                :disabled="!store.config.DismissalPolicy.Enabled"
+              />
+              <ConfigSwitch
+                v-model="store.config.DismissalPolicy.AllowSeries"
+                :label="t('users.dismissSeries')"
+                :disabled="!store.config.DismissalPolicy.Enabled"
+              />
+              <ConfigSwitch
+                v-model="store.config.DismissalPolicy.AllowFranchise"
+                :label="t('users.dismissFranchise')"
+                :disabled="!store.config.DismissalPolicy.Enabled"
+              />
+            </div>
+          </ConfigSection>
+
+          <ConfigSection :title="t('users.personalizationTitle')">
+            <template #actions>
+              <ConfigSwitch
+                v-model="store.config.PersonalizationPolicy.Enabled"
+                :label="t('users.personalizationEnabled')"
+                hide-label
+              />
+            </template>
+            <div :class="{ 'is-disabled': !store.config.PersonalizationPolicy.Enabled }">
+              <ConfigSwitch
+                v-model="store.config.PersonalizationPolicy.AllowSourceSelection"
+                :label="t('users.allowSources')"
+                :disabled="!store.config.PersonalizationPolicy.Enabled"
+              />
+              <ConfigSwitch
+                v-model="store.config.PersonalizationPolicy.AllowSourceWeights"
+                :label="t('users.allowWeights')"
+                :disabled="!store.config.PersonalizationPolicy.Enabled"
+              />
+              <ConfigSwitch
+                v-model="store.config.PersonalizationPolicy.AllowPreferredGenres"
+                :label="t('users.allowGenres')"
+                :disabled="!store.config.PersonalizationPolicy.Enabled"
+              />
+              <ConfigSwitch
+                v-model="store.config.PersonalizationPolicy.AllowUnplayedBoost"
+                :label="t('users.allowUnplayed')"
+                :disabled="!store.config.PersonalizationPolicy.Enabled"
+              />
+              <ConfigSwitch
+                v-model="store.config.PersonalizationPolicy.AllowFavouriteBoost"
+                :label="t('users.allowFavourites')"
+                :disabled="!store.config.PersonalizationPolicy.Enabled"
+              />
+              <ConfigSwitch
+                v-model="store.config.PersonalizationPolicy.AllowInProgressSeriesBoost"
+                :label="t('users.allowInProgress')"
+                :disabled="!store.config.PersonalizationPolicy.Enabled"
+              />
+              <ConfigSwitch
+                v-model="store.config.PersonalizationPolicy.AllowRepeatCooldown"
+                :label="t('users.allowCooldown')"
+                :disabled="!store.config.PersonalizationPolicy.Enabled"
+              />
+            </div>
+          </ConfigSection>
         </div>
       </ConfigCard>
 
       <ConfigCard :title="t('users.defaultsTitle')" :help="t('users.defaultsHelp')">
+        <ol class="featured-userFlow" :aria-label="t('users.howItWorks')">
+          <li>{{ t('users.flowSelect') }}</li>
+          <li>{{ t('users.flowScore') }}</li>
+          <li>{{ t('users.flowOrder') }}</li>
+        </ol>
         <ConfigMultiPicker
           v-model="store.config.PersonalizationDefaults.PreferredGenres"
           :label="t('users.preferredGenres')"
           :options="genreOptions()"
         />
-        <div class="featured-scoreGrid">
+        <ConfigGrid :columns="2">
           <ConfigNumber
-            v-model="store.config.PersonalizationDefaults.UnplayedBoost"
-            :label="t('users.unplayedBoost')"
+            v-for="boost in boosts"
+            :key="boost.key"
+            v-model="store.config.PersonalizationDefaults[boost.key]"
+            :label="t(boost.label)"
             :min="0"
             :max="100"
             :step="1"
           />
-          <ConfigNumber
-            v-model="store.config.PersonalizationDefaults.FavouriteBoost"
-            :label="t('users.favouriteBoost')"
-            :min="0"
-            :max="100"
-            :step="1"
-          />
-          <ConfigNumber
-            v-model="store.config.PersonalizationDefaults.PreferredGenreBoost"
-            :label="t('users.genreBoost')"
-            :min="0"
-            :max="100"
-            :step="1"
-          />
-          <ConfigNumber
-            v-model="store.config.PersonalizationDefaults.InProgressSeriesBoost"
-            :label="t('users.inProgressBoost')"
-            :min="0"
-            :max="100"
-            :step="1"
-          />
-        </div>
+        </ConfigGrid>
       </ConfigCard>
-    </div>
-
-    <ConfigCard :title="t('users.title')" :help="t('users.help')">
-      <div class="featured-userExplanation">
-        <strong>{{ t('users.howItWorks') }}</strong>
-        <ol>
-          <li>{{ t('users.stepEligibility') }}</li>
-          <li>{{ t('users.stepScoring') }}</li>
-          <li>{{ t('users.stepPriority') }}</li>
-        </ol>
-      </div>
-      <div class="featured-addSourceRow featured-configAddRow">
-        <ConfigSelect v-model="selectedUserId" :label="t('users.newProfile')" :options="userOptions" />
-        <button
-          type="button"
-          class="raised button-submit emby-button featured-addSourceButton"
-          :disabled="!selectedUserId"
-          @click="addProfile"
-        >
-          <span class="material-icons" aria-hidden="true">person_add</span>{{ t('users.addProfile') }}
-        </button>
-      </div>
-    </ConfigCard>
-
-    <div v-if="store.config.UserProfiles.length" class="featured-userProfiles featured-configStack">
-      <article
-        v-for="(profile, index) in store.config.UserProfiles"
-        :key="profile.Id"
-        class="featured-userProfile featured-configCard featured-configCardPadded"
-      >
-        <header class="featured-userProfileHeader featured-configCardHeader">
-          <button
-            type="button"
-            class="featured-userProfileToggle featured-configCardToggle"
-            :aria-expanded="expandedProfileId === profile.Id"
-            @click="expandedProfileId = expandedProfileId === profile.Id ? null : profile.Id"
-          >
-            <span>
-              <span class="featured-sourceRuleEyebrow featured-configEyebrow">{{ t('users.profile') }}</span>
-              <strong>{{ userName(profile.UserId) }}</strong>
-              <small>
-                {{ profile.Enabled ? t('source.statusActive') : t('source.statusInactive') }}
-                · {{ t('users.summaryUnplayed', { value: profile.UnplayedBoost }) }} ·
-                {{ t('users.summaryFavorite', { value: profile.FavouriteBoost }) }} ·
-                {{ t('users.summaryGenre', { value: profile.PreferredGenreBoost }) }} ·
-                {{ t('users.summarySeries', { value: profile.InProgressSeriesBoost }) }}
-              </small>
-            </span>
-            <span class="material-icons featured-userProfileChevron featured-configChevron" aria-hidden="true"
-              >expand_more</span
-            >
-          </button>
-          <div class="featured-userProfileActions featured-configActions">
-            <button
-              type="button"
-              class="paper-icon-button-light featured-ruleIconButton featured-removeRule"
-              :title="t('users.removeProfile')"
-              @click="store.removeUserProfile(index)"
-            >
-              <span class="material-icons" aria-hidden="true">delete</span>
-            </button>
-          </div>
-        </header>
-        <div v-show="expandedProfileId === profile.Id" class="featured-userProfileBody featured-configCardBody">
-          <ConfigCheckbox v-model="profile.Enabled" :label="t('users.enabled')" />
-          <p class="jmp-subsectionHelp">{{ t('users.scoringHelp') }}</p>
-          <ConfigMultiPicker
-            v-model="profile.PreferredGenres"
-            :label="t('users.preferredGenres')"
-            :options="genreOptions()"
-          />
-          <div class="featured-scoreGrid jmp-compactGrid">
-            <ConfigNumber
-              v-model="profile.UnplayedBoost"
-              :label="t('users.unplayedBoost')"
-              :min="0"
-              :max="100"
-              :step="1"
-            />
-            <ConfigNumber
-              v-model="profile.FavouriteBoost"
-              :label="t('users.favouriteBoost')"
-              :min="0"
-              :max="100"
-              :step="1"
-            />
-            <ConfigNumber
-              v-model="profile.PreferredGenreBoost"
-              :label="t('users.genreBoost')"
-              :min="0"
-              :max="100"
-              :step="1"
-            />
-            <ConfigNumber
-              v-model="profile.InProgressSeriesBoost"
-              :label="t('users.inProgressBoost')"
-              :min="0"
-              :max="100"
-              :step="1"
-            />
-          </div>
-        </div>
-      </article>
-    </div>
-    <div v-else class="featured-emptySources">
-      <span class="material-icons" aria-hidden="true">group</span>
-      <h3>{{ t('users.emptyTitle') }}</h3>
-      <p>{{ t('users.emptyHelp') }}</p>
     </div>
   </section>
 </template>
 
 <style scoped>
-.featured-userExplanation {
-  background: var(--featured-theme-action-focus);
-  border: 1px solid var(--featured-theme-primary);
-  border-radius: var(--featured-theme-radius);
+.featured-userSettingsLayout {
+  align-items: start;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
   margin-bottom: 1rem;
-  padding: 0.75rem 0.85rem;
 }
-.featured-userExplanation strong {
-  display: block;
-  margin-bottom: 0.35rem;
-}
-.featured-userExplanation ol {
-  display: grid;
-  gap: 0.25rem;
-  margin: 0;
-  padding-left: 1.25rem;
-}
-.featured-userExplanation li {
-  line-height: 1.35;
-  opacity: 0.85;
-}
-.featured-userProfileToggle > span:first-child {
-  gap: 0.16rem;
-}
-.featured-userProfileToggle strong {
-  font-size: 1.08rem;
-}
-.featured-userProfileToggle small {
-  display: flex;
-  flex-wrap: wrap;
-  font-size: 0.78rem;
-  gap: 0.15rem;
-  opacity: 0.68;
-}
-.featured-userProfileToggle[aria-expanded='true'] .featured-userProfileChevron {
-  transform: rotate(180deg);
-}
-.featured-userProfileActions > :deep(.checkboxContainer) {
+.featured-userSettingsLayout > :deep(.jmp-subsection) {
   margin-bottom: 0;
 }
-.featured-userProfileBody > .jmp-subsectionHelp {
-  margin-bottom: 0.75rem;
-}
-.featured-scoreGrid :deep(.inputContainer) {
-  margin-bottom: 0;
-}
-.featured-policyGrid {
+.featured-userPermissions {
   display: grid;
-  gap: 0.25rem 1rem;
+  gap: 0 2rem;
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
-.featured-policyGrid :deep(.checkboxContainer) {
-  margin-bottom: 0.35rem;
+.featured-userPermissions > :deep(.featured-configSection) {
+  border-top: 0;
+  padding-top: 0;
 }
-.featured-disabledGroup {
+.featured-userPermissions .is-disabled,
+.featured-userPermissions.is-disabled {
   opacity: 0.55;
 }
-.featured-userSettingsGrid {
-  display: grid;
-  gap: 1.5rem;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  margin-bottom: 1rem;
-}
 
-@media (max-width: 900px) {
-  .featured-userSettingsGrid {
-    grid-template-columns: 1fr;
+@media (max-width: 1000px) {
+  .featured-userSettingsLayout {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
-@media (max-width: 600px) {
-  .featured-policyGrid {
-    grid-template-columns: 1fr;
+@media (max-width: 700px) {
+  .featured-userPermissions {
+    grid-template-columns: minmax(0, 1fr);
   }
+}
+.featured-userFlow {
+  counter-reset: flow;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.5rem;
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+}
+.featured-userFlow li {
+  align-items: center;
+  background: var(--featured-theme-action-hover);
+  border: 1px solid var(--featured-theme-divider);
+  border-radius: 999px;
+  counter-increment: flow;
+  display: inline-flex;
+  font-size: 0.82rem;
+  gap: 0.4rem;
+  padding: 0.25rem 0.7rem 0.25rem 0.3rem;
+}
+.featured-userFlow li::before {
+  align-items: center;
+  background: var(--featured-theme-primary);
+  border-radius: 50%;
+  color: var(--featured-theme-primary-contrast);
+  content: counter(flow);
+  display: inline-flex;
+  font-size: 0.72rem;
+  font-weight: 700;
+  height: 1.2rem;
+  justify-content: center;
+  width: 1.2rem;
 }
 </style>

@@ -3,6 +3,7 @@ import {
   inject,
   reactive,
   ref,
+  toRaw,
   type ComputedRef,
   type InjectionKey,
   type Ref,
@@ -32,7 +33,6 @@ import {
   createManualList,
   createPresetFromConfig,
   createSourceRule,
-  createUserProfile,
   normalizeConfig,
   refreshPresetFromConfig
 } from './defaults';
@@ -49,7 +49,7 @@ import type {
 
 const PLUGIN_ID = '08880a95-8467-4538-bab9-da69c7f4793f';
 const snapshot = (value: FeaturedPluginConfig): string => JSON.stringify(value);
-const cloneConfig = (value: FeaturedPluginConfig): FeaturedPluginConfig => cloneJsonValue(value);
+const cloneConfig = (value: FeaturedPluginConfig): FeaturedPluginConfig => cloneJsonValue(toRaw(value));
 
 export interface ConfigStore {
   config: FeaturedPluginConfig;
@@ -69,6 +69,7 @@ export interface ConfigStore {
   diagnosticsError: Ref<string | null>;
   diagnosticsLoading: Ref<boolean>;
   injectionMethodsAvailable: Ref<Record<FrontendInjectionMethod, boolean>>;
+  youTubeApiKeyConfigured: Ref<boolean | null>;
   feedPreview: Ref<FeaturedFeedPreview | null>;
   feedPreviewOpen: Ref<boolean>;
   feedPreviewLoading: Ref<boolean>;
@@ -96,9 +97,8 @@ export interface ConfigStore {
   addManualItem(list: FeaturedManualList, item: FeaturedSearchItem): void;
   removeManualItem(list: FeaturedManualList, index: number): void;
   moveManualItem(list: FeaturedManualList, from: number, to: number): void;
-  addUserProfile(userId: string): void;
-  removeUserProfile(index: number): void;
   addPreset(name?: string): void;
+  loadPreset(index: number): void;
   updatePresetSnapshot(index: number): void;
   duplicatePreset(index: number): void;
   removePreset(index: number): void;
@@ -122,6 +122,7 @@ export function createConfigStore(): ConfigStore {
   const diagnostics = ref<FeaturedDiagnostics | null>(null);
   const diagnosticsError = ref<string | null>(null);
   const diagnosticsLoading = ref(false);
+  const youTubeApiKeyConfigured = ref<boolean | null>(null);
   const injectionMethodsAvailable = ref<Record<FrontendInjectionMethod, boolean>>({
     automatic: true,
     'file-transformation': false,
@@ -231,6 +232,14 @@ export function createConfigStore(): ConfigStore {
         configLoadPromise = null;
       });
     configLoadPromise = primaryLoad;
+    youTubeApiKeyConfigured.value = null;
+    void requestJson<{ apiKeyConfigured?: boolean }>('featured/config/youtube-api-key')
+      .then((status) => {
+        youTubeApiKeyConfigured.value = typeof status?.apiKeyConfigured === 'boolean' ? status.apiKeyConfigured : null;
+      })
+      .catch(() => {
+        youTubeApiKeyConfigured.value = null;
+      });
     void requestJson<Record<FrontendInjectionMethod, boolean>>('featured/config/injection-methods')
       .then((availability) => {
         injectionMethodsAvailable.value = availability;
@@ -308,7 +317,7 @@ export function createConfigStore(): ConfigStore {
   }
 
   function addSource(type: SourceType): void {
-    config.SourceRules.push(createSourceRule(type));
+    config.SourceRules.push(createSourceRule(type, config.DefaultMediaPriority));
   }
   function removeSource(index: number): void {
     config.SourceRules.splice(index, 1);
@@ -363,25 +372,34 @@ export function createConfigStore(): ConfigStore {
       candidate.Position = position;
     });
   }
-  function addUserProfile(userId: string): void {
-    if (!userId || config.UserProfiles.some((profile) => profile.UserId === userId)) return;
-    config.UserProfiles.push(createUserProfile(userId));
-  }
-  function removeUserProfile(index: number): void {
-    config.UserProfiles.splice(index, 1);
-  }
   function addPreset(name = t('preset.defaultName')): void {
-    config.Presets.push(createPresetFromConfig(config, name));
+    config.Presets.push(createPresetFromConfig(toRaw(config), name));
   }
   function updatePresetSnapshot(index: number): void {
     const preset = config.Presets[index];
     if (!preset) return;
-    config.Presets.splice(index, 1, refreshPresetFromConfig(preset, config));
+    config.Presets.splice(index, 1, refreshPresetFromConfig(toRaw(preset), toRaw(config)));
+  }
+  function loadPreset(index: number): void {
+    const preset = config.Presets[index];
+    if (!preset) return;
+    // Load into the editor only. Keep schedules, saved snapshots, and unrelated server settings intact.
+    const copy = cloneJsonValue(toRaw(preset));
+    const { Overrides, ...trailers } = copy.Trailers;
+    Object.assign(config, copy.Mixer, copy.Layout, trailers, {
+      SourceRules: copy.SourceRules,
+      GlobalFilters: copy.GlobalFilters,
+      PersonalizationPolicy: copy.PersonalizationPolicy,
+      TrailerOverrides: Overrides,
+      Heading: copy.Layout.Heading ?? '',
+      PlayButtonText: copy.Layout.PlayButtonText ?? '',
+      SecondaryButtonText: copy.Layout.SecondaryButtonText ?? ''
+    });
   }
   function duplicatePreset(index: number): void {
     const preset = config.Presets[index];
     if (!preset) return;
-    const copy = cloneJsonValue(preset) as FeaturedPreset;
+    const copy = cloneJsonValue(toRaw(preset)) as FeaturedPreset;
     copy.Id = createId();
     copy.Name = t('preset.copyName', { name: preset.Name });
     copy.Enabled = false;
@@ -415,6 +433,7 @@ export function createConfigStore(): ConfigStore {
     diagnosticsError,
     diagnosticsLoading,
     injectionMethodsAvailable,
+    youTubeApiKeyConfigured,
     feedPreview,
     feedPreviewOpen,
     feedPreviewLoading,
@@ -445,9 +464,8 @@ export function createConfigStore(): ConfigStore {
     addManualItem,
     removeManualItem,
     moveManualItem,
-    addUserProfile,
-    removeUserProfile,
     addPreset,
+    loadPreset,
     updatePresetSnapshot,
     duplicatePreset,
     removePreset,

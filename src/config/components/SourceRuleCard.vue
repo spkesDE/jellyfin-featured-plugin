@@ -1,51 +1,32 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import type { FeaturedSourceRule, SourceType } from '../../types/config';
-import { t, type TranslationKey } from '../../i18n';
-import ConfigCheckbox from './ConfigCheckbox.vue';
+import type { FeaturedMediaPriorityEntry, FeaturedSourceRule, SourceType } from '../../types/config';
+import { t } from '../../i18n';
+import ConfigActionMenu, { type ConfigMenuAction } from './ConfigActionMenu.vue';
+import ConfigGrid from './ConfigGrid.vue';
 import ConfigMultiPicker from './ConfigMultiPicker.vue';
 import ConfigNumber from './ConfigNumber.vue';
+import ConfigPanel from './ConfigPanel.vue';
+import ConfigPriorityList from './ConfigPriorityList.vue';
+import ConfigSection from './ConfigSection.vue';
 import ConfigSelect, { type SelectOption } from './ConfigSelect.vue';
+import ConfigSwitch from './ConfigSwitch.vue';
 import FilterRuleEditor from './FilterRuleEditor.vue';
 import { useConfigStore } from '../libs/store';
 import { namedOptions, valueOptions } from '../libs/options';
+import { mediaPriorityLabel, SOURCE_TYPES } from '../libs/sourceTypes';
 
 const props = defineProps<{ rule: FeaturedSourceRule; index: number; count: number; expanded: boolean }>();
 defineEmits<{ toggle: [] }>();
 const store = useConfigStore();
 
-const labelKeys: Record<SourceType, TranslationKey> = {
-  LIBRARIES: 'source.type.libraries',
-  COLLECTIONS: 'source.type.collections',
-  FAVOURITES: 'source.type.favourites',
-  TAGS: 'source.type.tags',
-  PLAYLISTS: 'source.type.playlists',
-  RECENTLY_ADDED: 'source.type.recently_added',
-  LATEST_RELEASES: 'source.type.latest_releases',
-  RANDOM: 'source.type.random',
-  UNPLAYED: 'source.type.unplayed',
-  MANUAL_LISTS: 'source.type.manual_lists',
-  RECOMMENDATIONS: 'source.type.recommendations',
-  CONTINUE_WATCHING: 'source.type.continue_watching',
-  NEXT_UP: 'source.type.next_up'
-};
-const helpKeys: Record<SourceType, TranslationKey> = {
-  LIBRARIES: 'source.help.libraries',
-  COLLECTIONS: 'source.help.collections',
-  FAVOURITES: 'source.help.favourites',
-  TAGS: 'source.help.tags',
-  PLAYLISTS: 'source.help.playlists',
-  RECENTLY_ADDED: 'source.help.recently_added',
-  LATEST_RELEASES: 'source.help.latest_releases',
-  RANDOM: 'source.help.random',
-  UNPLAYED: 'source.help.unplayed',
-  MANUAL_LISTS: 'source.help.manual_lists',
-  RECOMMENDATIONS: 'source.help.recommendations',
-  CONTINUE_WATCHING: 'source.help.continue_watching',
-  NEXT_UP: 'source.help.next_up'
-};
-const sourceLabel = (type: SourceType): string => t(labelKeys[type]);
-const sourceHelp = (type: SourceType): string => t(helpKeys[type]);
+const qualityOptions: SelectOption[] = [
+  { value: 'inherit', label: t('trailers.quality.inherit') },
+  { value: 'enabled', label: t('trailers.quality.enabled') },
+  { value: 'disabled', label: t('trailers.quality.disabled') }
+];
+const sourceLabel = (type: SourceType): string => t(SOURCE_TYPES[type].label);
+const sourceHelp = (type: SourceType): string => t(SOURCE_TYPES[type].help);
 const userOptions = (): SelectOption[] => [
   { value: '', label: t('source.selectUser') },
   ...namedOptions(store.users.value)
@@ -56,99 +37,143 @@ const collectionOptions = (): SelectOption[] => namedOptions(store.collections.v
 const playlistOptions = (): SelectOption[] => namedOptions(store.playlists.value);
 const manualListOptions = (): SelectOption[] => namedOptions(store.config.ManualLists);
 const tagOptions = (): SelectOption[] => valueOptions(store.tags.value);
-const mediaFallbackOptions = (): SelectOption[] => [
-  { value: 'none', label: t('source.mediaFallback.none') },
-  { value: 'media-preview', label: t('source.mediaFallback.mediaPreview') },
-  { value: 'trickplay', label: t('source.mediaFallback.trickplay') },
-  { value: 'media-preview-then-trickplay', label: t('source.mediaFallback.mediaPreviewThenTrickplay') }
-];
-const mediaFallbackMode = computed({
-  get: () =>
-    props.rule.UseMediaPreviewFallback
-      ? props.rule.UseTrickplayFallback
-        ? 'media-preview-then-trickplay'
-        : 'media-preview'
-      : props.rule.UseTrickplayFallback
-        ? 'trickplay'
-        : 'none',
-  set: (value: string) => {
-    props.rule.UseMediaPreviewFallback = value === 'media-preview' || value === 'media-preview-then-trickplay';
-    props.rule.UseTrickplayFallback = value === 'trickplay' || value === 'media-preview-then-trickplay';
-  }
-});
-const selectionCount = computed(() => {
+
+const trailersPlay = computed(() => store.config.EnableBackgroundTrailers && props.rule.AllowBackgroundTrailers);
+/** Trailer rows keep their place while trailers are off; excerpts and Trickplay still cover missing artwork. */
+const mediaPriorityInactive = (entry: FeaturedMediaPriorityEntry): boolean =>
+  !trailersPlay.value && (entry.Type === 'local_trailer' || entry.Type === 'remote_trailer');
+
+const selection = computed((): { values: string[]; options: SelectOption[] } | null => {
   const rule = props.rule;
-  if (rule.Type === 'LIBRARIES') return rule.LibraryIds.length;
-  if (rule.Type === 'COLLECTIONS') return rule.CollectionIds.length;
-  if (rule.Type === 'PLAYLISTS') return rule.PlaylistIds.length;
-  if (rule.Type === 'MANUAL_LISTS') return rule.ManualListIds.length;
-  if (rule.Type === 'TAGS') return rule.Tags.length;
-  return 0;
+  if (rule.Type === 'LIBRARIES') return { values: rule.LibraryIds, options: libraryOptions() };
+  if (rule.Type === 'COLLECTIONS') return { values: rule.CollectionIds, options: collectionOptions() };
+  if (rule.Type === 'PLAYLISTS') return { values: rule.PlaylistIds, options: playlistOptions() };
+  if (rule.Type === 'MANUAL_LISTS') return { values: rule.ManualListIds, options: manualListOptions() };
+  if (rule.Type === 'TAGS') return { values: rule.Tags, options: tagOptions() };
+  return null;
 });
+const selectionSummary = computed((): string | null => {
+  if (!selection.value?.values.length) return null;
+  const { values, options } = selection.value;
+  const labels = values.map((value) => options.find((option) => option.value === value)?.label ?? value);
+  if (labels.length <= 2) return labels.join(', ');
+  return t('common.selectionSummary', { first: labels[0], count: labels.length - 1 });
+});
+const summary = computed(() =>
+  [
+    props.rule.Enabled ? null : t('source.statusInactive'),
+    t('source.summaryWeight', { weight: props.rule.Weight }),
+    selectionSummary.value,
+    props.rule.Filters.length === 1
+      ? t('source.summaryFiltersOne')
+      : props.rule.Filters.length
+        ? t('source.summaryFilters', { count: props.rule.Filters.length })
+        : null,
+    props.rule.IsFallback ? t('source.summaryFallback') : null,
+    props.rule.UserIds.length ? t('source.summaryUsers', { count: props.rule.UserIds.length }) : null,
+    trailersPlay.value ? null : t('source.summaryTrailersOff')
+  ].filter((entry): entry is string => Boolean(entry))
+);
+
+const menuActions = computed((): ConfigMenuAction[] => [
+  { id: 'up', label: t('source.moveUp'), icon: 'arrow_upward', disabled: props.index === 0 },
+  { id: 'down', label: t('source.moveDown'), icon: 'arrow_downward', disabled: props.index === props.count - 1 },
+  { id: 'remove', label: t('source.remove'), icon: 'delete', danger: true }
+]);
+function runAction(id: string): void {
+  if (id === 'up') store.moveSource(props.index, -1);
+  else if (id === 'down') store.moveSource(props.index, 1);
+  else if (id === 'remove') store.removeSource(props.index);
+}
 </script>
 
 <template>
-  <article class="featured-sourceRule featured-configCard" :class="{ 'is-disabled': !rule.Enabled }">
-    <header class="featured-sourceRuleHeader">
-      <button type="button" class="featured-sourceDragHandle featured-configDragHandle" :title="t('source.drag')">
-        <span class="material-icons" aria-hidden="true">drag_indicator</span>
-      </button>
-      <button
-        type="button"
-        class="featured-sourceRuleToggle featured-configCardToggle"
-        :aria-expanded="expanded"
-        @click="$emit('toggle')"
-      >
-        <div>
-          <p class="featured-sourceRuleEyebrow featured-configEyebrow">
-            {{ t('source.ruleNumber', { number: index + 1 }) }}
-          </p>
-          <h3>{{ sourceLabel(rule.Type) }}</h3>
-          <p class="featured-sourceRuleSummary">
-            <span>{{ rule.Enabled ? t('source.statusActive') : t('source.statusInactive') }}</span>
-            <span>{{ t('source.summaryWeight', { weight: rule.Weight }) }}</span>
-            <span v-if="selectionCount">{{ t('source.summarySelections', { count: selectionCount }) }}</span>
-            <span v-if="rule.Filters.length">{{ t('source.summaryFilters', { count: rule.Filters.length }) }}</span>
-            <span v-if="rule.IsFallback">{{ t('source.summaryFallback') }}</span>
-            <span v-if="rule.UserIds.length">{{ t('source.summaryUsers', { count: rule.UserIds.length }) }}</span>
-          </p>
-        </div>
-        <span class="material-icons featured-sourceChevron featured-configChevron" aria-hidden="true">expand_more</span>
-      </button>
-      <div class="featured-sourceRuleActions">
-        <button
-          type="button"
-          class="paper-icon-button-light featured-ruleIconButton"
-          :disabled="index === 0"
-          :title="t('source.moveUp')"
-          @click="store.moveSource(index, -1)"
-        >
-          <span class="material-icons" aria-hidden="true">arrow_upward</span>
-        </button>
-        <button
-          type="button"
-          class="paper-icon-button-light featured-ruleIconButton"
-          :disabled="index === count - 1"
-          :title="t('source.moveDown')"
-          @click="store.moveSource(index, 1)"
-        >
-          <span class="material-icons" aria-hidden="true">arrow_downward</span>
-        </button>
-        <button
-          type="button"
-          class="paper-icon-button-light featured-ruleIconButton featured-removeRule"
-          :title="t('source.remove')"
-          @click="store.removeSource(index)"
-        >
-          <span class="material-icons" aria-hidden="true">delete</span>
-        </button>
-      </div>
-    </header>
+  <ConfigPanel
+    v-model:enabled="rule.Enabled"
+    class="featured-sourceRule"
+    :title="sourceLabel(rule.Type)"
+    :eyebrow="t('source.ruleNumber', { number: index + 1 })"
+    :summary="summary"
+    :expanded="expanded"
+    drag-handle-class="featured-sourceDragHandle"
+    :drag-label="t('source.drag')"
+    :enabled-label="t('source.statusActive')"
+    @toggle="$emit('toggle')"
+  >
+    <template #actions>
+      <ConfigActionMenu :label="t('source.moreActions')" :actions="menuActions" @select="runAction" />
+    </template>
 
-    <div v-show="expanded" class="featured-sourceRuleBody">
-      <p class="jmp-subsectionHelp">{{ sourceHelp(rule.Type) }}</p>
-      <div class="featured-sourceRuleBasics">
-        <ConfigCheckbox v-model="rule.Enabled" :label="t('source.enabled')" />
+    <ConfigSection :title="t('source.section.content')" :help-text="sourceHelp(rule.Type)">
+      <ConfigSelect
+        v-if="rule.Type === 'FAVOURITES'"
+        v-model="rule.EditorUserId"
+        :label="t('source.favouritesOwner')"
+        :help-text="t('source.editorAccountHelp')"
+        :options="userOptions()"
+      />
+      <ConfigMultiPicker
+        v-else-if="rule.Type === 'LIBRARIES'"
+        v-model="rule.LibraryIds"
+        :label="t('source.chooseLibraries')"
+        :options="libraryOptions()"
+        :empty-text="t('filter.noLibraries')"
+      />
+      <ConfigMultiPicker
+        v-else-if="rule.Type === 'COLLECTIONS'"
+        v-model="rule.CollectionIds"
+        :label="t('source.chooseCollections')"
+        :help-text="t('source.collectionsHelp')"
+        :options="collectionOptions()"
+        :empty-text="t('source.noCollections')"
+      />
+      <ConfigMultiPicker
+        v-else-if="rule.Type === 'PLAYLISTS'"
+        v-model="rule.PlaylistIds"
+        :label="t('source.choosePlaylists')"
+        :options="playlistOptions()"
+        :empty-text="t('source.noPlaylists')"
+      />
+      <ConfigMultiPicker
+        v-else-if="rule.Type === 'MANUAL_LISTS'"
+        v-model="rule.ManualListIds"
+        :label="t('source.chooseManualLists')"
+        :options="manualListOptions()"
+        :empty-text="t('source.noManualLists')"
+      />
+      <ConfigMultiPicker
+        v-else-if="rule.Type === 'TAGS'"
+        v-model="rule.Tags"
+        :label="t('source.chooseTags')"
+        :options="tagOptions()"
+        :empty-text="t('source.noTags')"
+      />
+      <ConfigNumber
+        v-else-if="rule.Type === 'RECENTLY_ADDED'"
+        v-model="rule.RecentDays"
+        :label="t('source.recentDays')"
+        :help-text="t('source.recentWindowHelp')"
+        :min="1"
+        :max="3650"
+        :step="1"
+      />
+      <ConfigNumber
+        v-else-if="rule.Type === 'LATEST_RELEASES'"
+        v-model="rule.RecentDays"
+        :label="t('source.releaseDays')"
+        :min="1"
+        :max="3650"
+        :step="1"
+      />
+      <FilterRuleEditor
+        :filters="rule.Filters"
+        :label="t('source.additionalFilters')"
+        :help-text="t('source.additionalFiltersHelp')"
+      />
+    </ConfigSection>
+
+    <ConfigSection :title="t('source.section.distribution')">
+      <ConfigGrid :columns="3">
         <ConfigNumber
           v-model="rule.Weight"
           :label="t('source.weight')"
@@ -161,6 +186,7 @@ const selectionCount = computed(() => {
           v-model="rule.MinimumItems"
           :label="t('source.minimumItems')"
           :help-text="t('source.minimumItemsHelp')"
+          :zero-label="t('source.zeroNone')"
           :min="0"
           :max="100"
           :step="1"
@@ -169,186 +195,54 @@ const selectionCount = computed(() => {
           v-model="rule.MaximumItems"
           :label="t('source.maximumItems')"
           :help-text="t('source.maximumItemsHelp')"
+          :zero-label="t('source.zeroUnlimited')"
           :min="0"
           :max="100"
           :step="1"
         />
-        <ConfigCheckbox v-model="rule.IsFallback" :label="t('source.fallback')" :help-text="t('source.fallbackHelp')" />
-        <ConfigCheckbox
+      </ConfigGrid>
+      <ConfigSwitch v-model="rule.IsFallback" :label="t('source.fallback')" :help-text="t('source.fallbackHelp')" />
+    </ConfigSection>
+
+    <ConfigSection :title="t('source.section.playback')">
+      <p v-if="!store.config.EnableBackgroundTrailers" class="featured-warningNotice">
+        <span class="material-icons" aria-hidden="true">warning</span>
+        {{ t('source.mediaPriority.trailersGloballyOff') }}
+      </p>
+      <template v-else>
+        <ConfigSwitch
           v-model="rule.AllowBackgroundTrailers"
           :label="t('source.allowBackgroundTrailers')"
           :help-text="t('source.allowBackgroundTrailersHelp')"
         />
         <ConfigSelect
-          v-model="mediaFallbackMode"
-          :label="t('source.mediaFallback')"
-          :help-text="t('source.mediaFallbackHelp')"
-          :options="mediaFallbackOptions()"
+          v-model="rule.YouTubeQualityFilter"
+          :label="t('trailers.quality.label')"
+          :options="qualityOptions"
+          :help-text="t('source.youtubeQualityHelp')"
         />
-      </div>
+        <ConfigPriorityList
+          v-model="rule.MediaPriority"
+          item-key="Type"
+          :label="t('source.mediaPriority')"
+          :help-text="t('source.mediaPriorityHelp')"
+          :item-label="mediaPriorityLabel"
+          :item-inactive="mediaPriorityInactive"
+          :fixed-label="t('source.mediaPriority.stillImage')"
+          :fixed-hint="t('source.mediaPriority.stillImageHint')"
+        />
+      </template>
+    </ConfigSection>
 
-      <div v-if="rule.Enabled" class="featured-sourceSettings">
-        <ConfigMultiPicker
-          v-model="rule.UserIds"
-          :label="t('source.onlyUsers')"
-          :help-text="t('source.onlyUsersHelp')"
-          :options="restrictedUserOptions()"
-          :empty-text="t('source.noUsers')"
-        />
-        <ConfigSelect
-          v-if="rule.Type === 'FAVOURITES'"
-          v-model="rule.EditorUserId"
-          :label="t('source.favouritesOwner')"
-          :help-text="t('source.editorAccountHelp')"
-          :options="userOptions()"
-        />
-        <ConfigMultiPicker
-          v-else-if="rule.Type === 'LIBRARIES'"
-          v-model="rule.LibraryIds"
-          :label="t('source.chooseLibraries')"
-          :options="libraryOptions()"
-          :empty-text="t('filter.noLibraries')"
-        />
-        <ConfigMultiPicker
-          v-else-if="rule.Type === 'COLLECTIONS'"
-          v-model="rule.CollectionIds"
-          :label="t('source.chooseCollections')"
-          :help-text="t('source.collectionsHelp')"
-          :options="collectionOptions()"
-          :empty-text="t('source.noCollections')"
-        />
-        <ConfigMultiPicker
-          v-else-if="rule.Type === 'PLAYLISTS'"
-          v-model="rule.PlaylistIds"
-          :label="t('source.choosePlaylists')"
-          :options="playlistOptions()"
-          :empty-text="t('source.noPlaylists')"
-        />
-        <ConfigMultiPicker
-          v-else-if="rule.Type === 'MANUAL_LISTS'"
-          v-model="rule.ManualListIds"
-          :label="t('source.chooseManualLists')"
-          :options="manualListOptions()"
-          :empty-text="t('source.noManualLists')"
-        />
-        <ConfigMultiPicker
-          v-else-if="rule.Type === 'TAGS'"
-          v-model="rule.Tags"
-          :label="t('source.chooseTags')"
-          :options="tagOptions()"
-          :empty-text="t('source.noTags')"
-        />
-        <ConfigNumber
-          v-else-if="rule.Type === 'RECENTLY_ADDED'"
-          v-model="rule.RecentDays"
-          :label="t('source.recentDays')"
-          :help-text="t('source.recentWindowHelp')"
-          :min="1"
-          :max="3650"
-          :step="1"
-        />
-        <ConfigNumber
-          v-else-if="rule.Type === 'LATEST_RELEASES'"
-          v-model="rule.RecentDays"
-          :label="t('source.releaseDays')"
-          :min="1"
-          :max="3650"
-          :step="1"
-        />
-
-        <details class="featured-sourceFilters">
-          <summary>{{ t('source.additionalFilters', { count: rule.Filters.length }) }}</summary>
-          <p class="jmp-note">{{ t('source.additionalFiltersHelp') }}</p>
-          <FilterRuleEditor :filters="rule.Filters" />
-        </details>
-      </div>
-    </div>
-  </article>
+    <ConfigSection :title="t('source.section.visibility')">
+      <ConfigMultiPicker
+        v-model="rule.UserIds"
+        :label="t('source.onlyUsers')"
+        :help-text="t('source.onlyUsersHelp')"
+        :options="restrictedUserOptions()"
+        :empty-text="t('source.noUsers')"
+        :placeholder="t('source.allUsers')"
+      />
+    </ConfigSection>
+  </ConfigPanel>
 </template>
-
-<style scoped>
-.featured-sourceRule {
-  padding: 1rem 1.1rem 1.15rem;
-}
-.featured-sourceRule.is-disabled {
-  opacity: 0.72;
-}
-.featured-sourceRuleHeader {
-  align-items: center;
-  display: grid;
-  gap: 0.55rem;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-}
-.featured-sourceRuleHeader h3 {
-  font-size: 1.08rem;
-  margin: 0.12rem 0 0.25rem;
-}
-.featured-sourceRuleSummary {
-  display: flex;
-  flex-wrap: wrap;
-  font-size: 0.78rem;
-  gap: 0.2rem 0.75rem;
-  margin: 0;
-  opacity: 0.68;
-}
-.featured-sourceRuleSummary span + span::before {
-  content: '·';
-  margin-right: 0.75rem;
-}
-.featured-sourceRuleToggle[aria-expanded='true'] .featured-sourceChevron {
-  transform: rotate(180deg);
-}
-.featured-sourceRuleActions {
-  display: flex;
-  gap: 0.2rem;
-}
-.featured-sourceRuleBody {
-  border-top: 1px solid rgba(255, 255, 255, 0.07);
-  margin-top: 0.8rem;
-  padding-top: 0.8rem;
-}
-.featured-sourceRuleBasics {
-  align-items: center;
-  display: grid;
-  gap: 0.75rem 1.25rem;
-  grid-template-columns: repeat(2, minmax(10rem, 1fr));
-  margin-top: 0;
-}
-.featured-sourceRule > .jmp-subsectionHelp {
-  margin-bottom: 0.4rem;
-}
-.featured-sourceRuleBasics > :deep(.checkboxContainer),
-.featured-sourceRuleBasics > :deep(.inputContainer) {
-  margin-bottom: 0;
-}
-.featured-sourceSettings {
-  border-top: 1px solid rgba(255, 255, 255, 0.07);
-  margin-top: 0.7rem;
-  padding-top: 1rem;
-}
-.featured-sourceFilters {
-  margin-top: 0.35rem;
-  padding-top: 0;
-}
-.featured-sourceFilters > summary {
-  cursor: pointer;
-  font-weight: 600;
-  padding: 0.25rem 0;
-}
-.featured-sourceFilters > .jmp-note {
-  margin: 0.3rem 0 0.65rem;
-}
-
-@media (max-width: 700px) {
-  .featured-sourceRuleBasics {
-    grid-template-columns: 1fr;
-  }
-  .featured-sourceRuleHeader {
-    grid-template-columns: auto minmax(0, 1fr);
-  }
-  .featured-sourceRuleActions {
-    grid-column: 1 / -1;
-    justify-content: flex-end;
-  }
-}
-</style>

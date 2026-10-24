@@ -1,6 +1,12 @@
 import { cloneJsonValue } from '../../core/clone';
 import { createId } from '../../core/id';
-import type { FeaturedFilterRule, FeaturedPluginConfig } from '../../types/config';
+import type {
+  FeaturedFilterRule,
+  FeaturedMediaPriorityEntry,
+  FeaturedPluginConfig,
+  FeaturedSourceRule,
+  TrailerSourcePriority
+} from '../../types/config';
 import { createDefaultConfig } from './configDefaults';
 import {
   createFilterRule,
@@ -10,9 +16,13 @@ import {
   createUserProfile
 } from './configFactories';
 import {
+  type LegacySourceMediaFallback,
   type LegacyTrailerFallback,
   normalizeHeroLayoutSettings,
+  mediaPriorityFromTrailerSource,
   normalizeMediaExcerptSettings,
+  normalizeMediaPriority,
+  normalizeSourceMediaPriority,
   normalizeTrailerSourcePriority
 } from './configNormalization';
 
@@ -21,19 +31,18 @@ export function normalizeConfig(value: unknown): FeaturedPluginConfig {
     value && typeof value === 'object' ? (value as Partial<FeaturedPluginConfig> & LegacyTrailerFallback) : {};
   const defaults = createDefaultConfig();
   const config = { ...defaults, ...source };
+  config.YouTubeQualityFilter = config.YouTubeQualityFilter === 'hd_only' ? 'hd_only' : 'disabled';
   normalizeHeroLayoutSettings(config);
   config.TrailerSourcePriority = normalizeTrailerSourcePriority(config, source);
   delete config.FallBackToRemoteTrailers;
   normalizeMediaExcerptSettings(config);
+  config.DefaultMediaPriority = normalizeDefaultMediaPriority(
+    source.DefaultMediaPriority,
+    config.TrailerSourcePriority
+  );
   config.SourceRules = Array.isArray(source.SourceRules)
-    ? source.SourceRules.map((rule) => ({
-        ...createSourceRule(rule.Type),
-        ...rule,
-        UserIds: Array.isArray(rule.UserIds) ? rule.UserIds : [],
-        ManualListIds: Array.isArray(rule.ManualListIds) ? rule.ManualListIds : [],
-        Filters: normalizeFilters(rule.Filters)
-      }))
-    : [createSourceRule('RANDOM')];
+    ? source.SourceRules.map((rule) => normalizeSourceRule(rule, config.TrailerSourcePriority))
+    : [createSourceRule('RANDOM', config.DefaultMediaPriority)];
   config.GlobalFilters = normalizeFilters(source.GlobalFilters);
   config.ManualLists = Array.isArray(source.ManualLists)
     ? source.ManualLists.map((list) => ({
@@ -67,7 +76,12 @@ export function normalizeConfig(value: unknown): FeaturedPluginConfig {
         const legacyTrailers = preset.Trailers as (typeof preset.Trailers & LegacyTrailerFallback) | undefined;
         const trailers = { ...fallback.Trailers, ...(legacyTrailers ?? {}) };
         trailers.TrailerSourcePriority = normalizeTrailerSourcePriority(trailers, legacyTrailers);
+        trailers.DefaultMediaPriority = normalizeDefaultMediaPriority(
+          legacyTrailers?.DefaultMediaPriority,
+          trailers.TrailerSourcePriority
+        );
         delete (trailers as typeof trailers & LegacyTrailerFallback).FallBackToRemoteTrailers;
+        trailers.YouTubeQualityFilter = legacyTrailers?.YouTubeQualityFilter === 'hd_only' ? 'hd_only' : 'disabled';
         normalizeMediaExcerptSettings(trailers);
         const normalized = {
           ...fallback,
@@ -84,13 +98,9 @@ export function normalizeConfig(value: unknown): FeaturedPluginConfig {
           AnnualStart: preset.AnnualStart || fallback.AnnualStart,
           AnnualEnd: preset.AnnualEnd || fallback.AnnualEnd,
           SourceRules: Array.isArray(preset.SourceRules)
-            ? preset.SourceRules.map((rule) => ({
-                ...createSourceRule(rule.Type),
-                ...cloneJsonValue(rule),
-                UserIds: Array.isArray(rule.UserIds) ? [...rule.UserIds] : [],
-                ManualListIds: Array.isArray(rule.ManualListIds) ? [...rule.ManualListIds] : [],
-                Filters: normalizeFilters(rule.Filters)
-              }))
+            ? preset.SourceRules.map((rule) =>
+                normalizeSourceRule(cloneJsonValue(rule), trailers.TrailerSourcePriority)
+              )
             : fallback.SourceRules,
           GlobalFilters: normalizeFilters(preset.GlobalFilters),
           PersonalizationPolicy: { ...fallback.PersonalizationPolicy, ...(preset.PersonalizationPolicy ?? {}) },
@@ -132,6 +142,36 @@ export function normalizeConfig(value: unknown): FeaturedPluginConfig {
   config.PlaystateButtonPlacement = config.PlaystateButtonPlacement === 'actions' ? 'actions' : 'metadata';
   config.DismissalButtonPlacement = config.DismissalButtonPlacement === 'actions' ? 'actions' : 'metadata';
   return config;
+}
+
+function normalizeSourceRule(
+  rule: FeaturedSourceRule,
+  trailerSourcePriority: TrailerSourcePriority
+): FeaturedSourceRule {
+  const { UseTrickplayFallback, UseMediaPreviewFallback, ...current } = rule as FeaturedSourceRule &
+    LegacySourceMediaFallback;
+  return {
+    ...createSourceRule(rule.Type),
+    ...current,
+    YouTubeQualityFilter: ['enabled', 'disabled'].includes(rule.YouTubeQualityFilter)
+      ? rule.YouTubeQualityFilter
+      : 'inherit',
+    MediaPriority: normalizeSourceMediaPriority(
+      { MediaPriority: rule.MediaPriority, UseTrickplayFallback, UseMediaPreviewFallback },
+      trailerSourcePriority
+    ),
+    UserIds: Array.isArray(rule.UserIds) ? [...rule.UserIds] : [],
+    ManualListIds: Array.isArray(rule.ManualListIds) ? [...rule.ManualListIds] : [],
+    Filters: normalizeFilters(rule.Filters)
+  };
+}
+
+/** Configurations saved before the list existed derive it from the trailer source priority of the same scope. */
+function normalizeDefaultMediaPriority(
+  value: unknown,
+  trailerSourcePriority: TrailerSourcePriority
+): FeaturedMediaPriorityEntry[] {
+  return Array.isArray(value) ? normalizeMediaPriority(value) : mediaPriorityFromTrailerSource(trailerSourcePriority);
 }
 
 function normalizeFilters(value: unknown): FeaturedFilterRule[] {

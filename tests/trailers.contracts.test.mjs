@@ -13,7 +13,7 @@ test('persisted trailer settings and serialized responses retain their public co
     read('src/styles/featured.css')
   ]);
   for (const setting of [
-    'TrailerSourcePriority',
+    'DefaultMediaPriority',
     'StartTrailersMuted',
     'ShowTrailerControls',
     'HideYouTubeTrailerUntilControlsFade',

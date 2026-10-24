@@ -1,6 +1,7 @@
 import { cloneJsonValue } from '../../core/clone';
 import type { FeaturedPluginConfig } from '../../types/config';
 import { createSourceRule } from './configFactories';
+import { mediaPriorityFromTrailerSource } from './configNormalization';
 
 export const CONFIG_DEFAULTS: FeaturedPluginConfig = {
   FrontendInjectionMethod: 'automatic',
@@ -45,6 +46,8 @@ export const CONFIG_DEFAULTS: FeaturedPluginConfig = {
   ShowAutoplayButton: true,
   EnableBackgroundTrailers: false,
   TrailerSourcePriority: 'prefer_local',
+  DefaultMediaPriority: mediaPriorityFromTrailerSource('prefer_local'),
+  YouTubeQualityFilter: 'disabled',
   StartTrailersMuted: true,
   ShowTrailerControls: true,
   TrailerVolumeSliderDirection: 'down',

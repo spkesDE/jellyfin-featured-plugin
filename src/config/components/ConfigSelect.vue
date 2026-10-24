@@ -14,6 +14,8 @@ defineProps<{
   modelValue?: unknown;
   options: SelectOption[];
   disabled?: boolean;
+  /** Keeps the label for assistive technology only, for rows that show column headings instead. */
+  hideLabel?: boolean;
 }>();
 const emit = defineEmits<{ 'update:modelValue': [value: string] }>();
 const fieldId = useId();
@@ -21,8 +23,8 @@ const focused = ref(false);
 </script>
 
 <template>
-  <div class="selectContainer">
-    <div class="featured-selectLabelRow featured-configLabelRow">
+  <div class="selectContainer" :class="{ 'featured-selectNoLabel': hideLabel }">
+    <div v-if="!hideLabel" class="featured-selectLabelRow featured-configLabelRow">
       <label class="selectLabel" :class="{ selectLabelFocused: focused }" :for="fieldId">
         {{ label }}
       </label>
@@ -31,6 +33,7 @@ const focused = ref(false);
     <select
       :id="fieldId"
       class="emby-select emby-select-withcolor"
+      :aria-label="hideLabel ? label : undefined"
       :value="String(modelValue ?? '')"
       :disabled="disabled"
       @focus="focused = true"
@@ -47,3 +50,14 @@ const focused = ref(false);
     </div>
   </div>
 </template>
+
+<style scoped>
+/* Jellyfin offsets the arrow by the height of the label above the select; without a label it centers on the field. */
+.featured-selectNoLabel > .selectArrowContainer {
+  top: 50%;
+  transform: translateY(-50%);
+}
+.featured-selectNoLabel .selectArrow {
+  margin-top: 0;
+}
+</style>

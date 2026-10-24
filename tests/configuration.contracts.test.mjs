@@ -146,7 +146,9 @@ test('featured presets resolve schedules and override all roadmap sections', asy
     presetTab,
     /preset\.ScheduleType === 'one_time'[\s\S]*?ConfigDateTime v-model="preset\.StartsAt"[\s\S]*?ConfigDateTime v-model="preset\.EndsAt"/
   );
-  assert.match(presetTab, /store\.updatePresetSnapshot\(index\)[\s\S]*?store\.duplicatePreset\(index\)/);
+  for (const action of ['updatePresetSnapshot', 'duplicatePreset', 'loadPreset']) {
+    assert.match(presetTab, new RegExp(`store\\.${action}\\(index\\)`));
+  }
 });
 
 test('frontend bootstrap can be disabled independently of frontend injection', async () => {
@@ -293,11 +295,11 @@ test('source-scoped media fallback, resolution, and user visibility flow through
   );
   assert.match(
     defaults,
-    /UseMediaPreviewFallback:\s*false[\s\S]*?UseTrickplayFallback:\s*false[\s\S]*?UserIds:\s*\[\]/
+    /normalizeSourceRule\(rule, config\.TrailerSourcePriority\)[\s\S]*?normalizeSourceMediaPriority\(/
   );
   assert.match(
     card,
-    /mediaFallbackMode = computed[\s\S]*?UseMediaPreviewFallback[\s\S]*?UseTrickplayFallback[\s\S]*?v-model="mediaFallbackMode"/
+    /v-model="rule\.AllowBackgroundTrailers"[\s\S]*?<ConfigPriorityList[\s\S]*?v-model="rule\.MediaPriority"/
   );
   assert.match(configuration, /VideoResolution = "VIDEO_RESOLUTION"/);
   assert.match(normalizer, /FeaturedFilterFields\.VideoResolution/);

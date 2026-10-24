@@ -1,13 +1,17 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import Draggable from 'vuedraggable';
 import type { FeaturedManualList } from '../../types/config';
 import type { FeaturedSearchItem } from '../../types/featured';
 import { t } from '../../i18n';
 import { mediaTypeLabel } from '../../mediaTypes';
-import ConfigCard from '../components/ConfigCard.vue';
-import ConfigCheckbox from '../components/ConfigCheckbox.vue';
+import { posterUrl } from '../../slider/images';
+import ConfigActionMenu, { type ConfigMenuAction } from '../components/ConfigActionMenu.vue';
 import ConfigDateTime from '../components/ConfigDateTime.vue';
+import ConfigGrid from '../components/ConfigGrid.vue';
+import ConfigListHeader from '../components/ConfigListHeader.vue';
+import ConfigPanel from '../components/ConfigPanel.vue';
+import ConfigSection from '../components/ConfigSection.vue';
 import ConfigText from '../components/ConfigText.vue';
 import ManualItemAutocomplete from '../components/ManualItemAutocomplete.vue';
 import { useConfigStore } from '../libs/store';
@@ -15,9 +19,65 @@ import { useConfigStore } from '../libs/store';
 const store = useConfigStore();
 const expandedManualListId = ref<string | null>(null);
 
+const summary = computed(() => {
+  const items = store.config.ManualLists.reduce((total, list) => total + list.Items.length, 0);
+  const lists = store.config.ManualLists.length;
+  return lists === 1 ? t('manual.summaryCountOne', { items }) : t('manual.summaryCount', { lists, items });
+});
+
+/** Source numbers (as shown in Sources & Mix) that draw from each manual list. */
+const sourceNumbersByList = computed(() => {
+  const numbers = new Map<string, number[]>();
+  store.config.SourceRules.forEach((rule, index) => {
+    if (rule.Type !== 'MANUAL_LISTS') return;
+    rule.ManualListIds.forEach((id) => numbers.set(id, [...(numbers.get(id) ?? []), index + 1]));
+  });
+  return numbers;
+});
+
+function formatDate(value: string): string {
+  return new Date(value).toLocaleDateString(document.documentElement.lang || undefined, {
+    day: '2-digit',
+    month: '2-digit'
+  });
+}
+
+function scheduleLabel(startsAt: string | null, endsAt: string | null): string | null {
+  if (startsAt && endsAt) return `${formatDate(startsAt)} – ${formatDate(endsAt)}`;
+  if (startsAt) return t('manual.scheduleFrom', { date: formatDate(startsAt) });
+  if (endsAt) return t('manual.scheduleUntil', { date: formatDate(endsAt) });
+  return null;
+}
+
+function listSummary(list: FeaturedManualList): string[] {
+  const sources = sourceNumbersByList.value.get(list.Id);
+  return [
+    t('manual.summaryItems', { count: list.Items.length }),
+    scheduleLabel(list.StartsAt, list.EndsAt) ?? t('manual.scheduleAlways'),
+    sources ? t('manual.usedBy', { numbers: sources.join(', ') }) : t('manual.unused')
+  ];
+}
+
+const listActions = (): ConfigMenuAction[] => [
+  { id: 'add-source', label: t('manual.addAsSource'), icon: 'playlist_add' },
+  { id: 'remove', label: t('manual.removeList'), icon: 'delete', danger: true }
+];
+
+function runListAction(index: number, id: string): void {
+  const list = store.config.ManualLists[index];
+  if (id === 'add-source' && list) addAsSource(list);
+  else if (id === 'remove') store.removeManualList(index);
+}
+
 function addManualList(): void {
   store.addManualList();
   expandedManualListId.value = store.config.ManualLists[store.config.ManualLists.length - 1]?.Id ?? null;
+}
+
+function addAsSource(list: FeaturedManualList): void {
+  store.addSource('MANUAL_LISTS');
+  const rule = store.config.SourceRules[store.config.SourceRules.length - 1];
+  if (rule) rule.ManualListIds = [list.Id];
 }
 
 function addResult(list: FeaturedManualList, item: FeaturedSearchItem): void {
@@ -29,6 +89,10 @@ function syncItemPositions(list: FeaturedManualList): void {
     item.Position = position;
   });
 }
+
+function hidePoster(event: Event): void {
+  (event.target as HTMLImageElement).style.visibility = 'hidden';
+}
 </script>
 
 <template>
@@ -38,69 +102,57 @@ function syncItemPositions(list: FeaturedManualList): void {
     role="tabpanel"
     aria-labelledby="featuredTab-manual"
   >
-    <ConfigCard :title="t('manual.title')" :help="t('manual.help')">
-      <button type="button" class="raised button-submit emby-button featured-primaryAction" @click="addManualList">
-        <span class="material-icons" aria-hidden="true">add</span>{{ t('manual.addList') }}
-      </button>
-    </ConfigCard>
+    <ConfigListHeader :title="t('manual.title')" :help-text="t('manual.help')" :summary="summary">
+      <template #actions>
+        <button type="button" class="raised button-submit emby-button featured-addSourceButton" @click="addManualList">
+          <span class="material-icons" aria-hidden="true">add</span>{{ t('manual.addList') }}
+        </button>
+      </template>
+    </ConfigListHeader>
 
     <div v-if="store.config.ManualLists.length" class="featured-manualLists featured-configStack">
-      <article
+      <ConfigPanel
         v-for="(list, listIndex) in store.config.ManualLists"
         :key="list.Id"
-        class="featured-manualList featured-configCard featured-configCardPadded"
+        v-model:enabled="list.Enabled"
+        :title="list.Name || t('manual.defaultName')"
+        :summary="listSummary(list)"
+        :expanded="expandedManualListId === list.Id"
+        @toggle="expandedManualListId = expandedManualListId === list.Id ? null : list.Id"
       >
-        <header class="featured-manualListSummary featured-configCardHeader">
-          <button
-            type="button"
-            class="featured-manualListToggle featured-configCardToggle"
-            :aria-expanded="expandedManualListId === list.Id"
-            @click="expandedManualListId = expandedManualListId === list.Id ? null : list.Id"
-          >
-            <span>
-              <strong>{{ list.Name || t('manual.defaultName') }}</strong>
-              <small>
-                {{ list.Enabled ? t('source.statusActive') : t('source.statusInactive') }}
-                · {{ t('manual.summaryItems', { count: list.Items.length }) }}
-                <template v-if="list.StartsAt || list.EndsAt"> · {{ t('manual.summaryScheduled') }}</template>
-              </small>
-            </span>
-            <span class="material-icons featured-manualListChevron featured-configChevron" aria-hidden="true"
-              >expand_more</span
-            >
+        <template #actions>
+          <ConfigActionMenu
+            :label="t('manual.moreActions')"
+            :actions="listActions()"
+            @select="runListAction(listIndex, $event)"
+          />
+        </template>
+
+        <div v-if="!sourceNumbersByList.has(list.Id)" class="featured-manualUnused">
+          <span class="material-icons" aria-hidden="true">info</span>
+          <span>{{ t('manual.unusedHint') }}</span>
+          <button type="button" class="featured-textButton" @click="addAsSource(list)">
+            {{ t('manual.addAsSource') }}
           </button>
-          <button
-            type="button"
-            class="paper-icon-button-light featured-ruleIconButton featured-removeRule"
-            :title="t('manual.removeList')"
-            @click="store.removeManualList(listIndex)"
-          >
-            <span class="material-icons" aria-hidden="true">delete</span>
-          </button>
-        </header>
+        </div>
 
-        <div v-show="expandedManualListId === list.Id" class="featured-manualListBody featured-configCardBody">
-          <div class="featured-manualListHeader">
-            <ConfigText v-model="list.Name" :label="t('manual.listName')" />
-            <ConfigCheckbox v-model="list.Enabled" :label="t('manual.listEnabled')" />
-          </div>
+        <ConfigSection :title="t('manual.section.general')">
+          <ConfigText v-model="list.Name" :label="t('manual.listName')" />
+        </ConfigSection>
 
-          <details class="featured-manualSchedule">
-            <summary>{{ t('manual.schedule') }}</summary>
-            <p class="jmp-note">{{ t('manual.scheduleHelp') }}</p>
-            <div class="jmp-compactGrid">
-              <ConfigDateTime v-model="list.StartsAt" :label="t('manual.startsAt')" />
-              <ConfigDateTime v-model="list.EndsAt" :label="t('manual.endsAt')" />
-            </div>
-          </details>
+        <ConfigSection :title="t('manual.section.schedule')" :help-text="t('manual.scheduleHelp')">
+          <ConfigGrid :columns="2">
+            <ConfigDateTime v-model="list.StartsAt" :label="t('manual.startsAt')" />
+            <ConfigDateTime v-model="list.EndsAt" :label="t('manual.endsAt')" />
+          </ConfigGrid>
+        </ConfigSection>
 
-          <div class="featured-manualSearch">
-            <ManualItemAutocomplete
-              :input-id="`manual-search-${list.Id}`"
-              :exclude-ids="list.Items.map((item) => item.ItemId)"
-              @select="addResult(list, $event)"
-            />
-          </div>
+        <ConfigSection :title="t('manual.section.items')">
+          <ManualItemAutocomplete
+            :input-id="`manual-search-${list.Id}`"
+            :exclude-ids="list.Items.map((item) => item.ItemId)"
+            @select="addResult(list, $event)"
+          />
 
           <Draggable
             v-if="list.Items.length"
@@ -127,15 +179,24 @@ function syncItemPositions(list: FeaturedManualList): void {
                 >
                   <span class="material-icons" aria-hidden="true">drag_indicator</span>
                 </button>
+                <span class="featured-manualItemIndex" aria-hidden="true">{{ itemIndex + 1 }}</span>
+                <img class="featured-manualItemPoster" :src="posterUrl(item.ItemId)" alt="" @error="hidePoster" />
                 <div class="featured-manualItemText">
-                  <strong>{{ item.Name }}</strong
-                  ><small
+                  <span>{{ item.Name }}</span>
+                  <small
                     >{{ mediaTypeLabel(item.MediaType)
                     }}<template v-if="item.ProductionYear"> · {{ item.ProductionYear }}</template></small
                   >
                 </div>
+                <span v-if="scheduleLabel(item.StartsAt, item.EndsAt)" class="featured-manualItemSchedule">
+                  {{ scheduleLabel(item.StartsAt, item.EndsAt) }}
+                </span>
                 <details class="featured-itemSchedule">
-                  <summary :title="t('manual.itemSchedule')">
+                  <summary
+                    class="featured-manualItemAction"
+                    :class="{ 'is-active': item.StartsAt || item.EndsAt }"
+                    :title="t('manual.itemSchedule')"
+                  >
                     <span class="material-icons" aria-hidden="true">schedule</span>
                   </summary>
                   <div class="featured-itemSchedulePanel">
@@ -143,40 +204,38 @@ function syncItemPositions(list: FeaturedManualList): void {
                     <ConfigDateTime v-model="item.EndsAt" :label="t('manual.endsAt')" />
                   </div>
                 </details>
-                <div class="featured-manualItemActions featured-configActions">
-                  <button
-                    type="button"
-                    class="paper-icon-button-light featured-ruleIconButton"
-                    :disabled="itemIndex === 0"
-                    :title="t('source.moveUp')"
-                    @click="store.moveManualItem(list, itemIndex, itemIndex - 1)"
-                  >
-                    <span class="material-icons" aria-hidden="true">arrow_upward</span>
-                  </button>
-                  <button
-                    type="button"
-                    class="paper-icon-button-light featured-ruleIconButton"
-                    :disabled="itemIndex === list.Items.length - 1"
-                    :title="t('source.moveDown')"
-                    @click="store.moveManualItem(list, itemIndex, itemIndex + 1)"
-                  >
-                    <span class="material-icons" aria-hidden="true">arrow_downward</span>
-                  </button>
-                  <button
-                    type="button"
-                    class="paper-icon-button-light featured-ruleIconButton featured-removeRule"
-                    :title="t('manual.removeItem')"
-                    @click="store.removeManualItem(list, itemIndex)"
-                  >
-                    <span class="material-icons" aria-hidden="true">close</span>
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  class="featured-manualItemAction"
+                  :disabled="itemIndex === 0"
+                  :title="t('common.moveUp')"
+                  @click="store.moveManualItem(list, itemIndex, itemIndex - 1)"
+                >
+                  <span class="material-icons" aria-hidden="true">keyboard_arrow_up</span>
+                </button>
+                <button
+                  type="button"
+                  class="featured-manualItemAction"
+                  :disabled="itemIndex === list.Items.length - 1"
+                  :title="t('common.moveDown')"
+                  @click="store.moveManualItem(list, itemIndex, itemIndex + 1)"
+                >
+                  <span class="material-icons" aria-hidden="true">keyboard_arrow_down</span>
+                </button>
+                <button
+                  type="button"
+                  class="featured-manualItemAction featured-removeRule"
+                  :title="t('manual.removeItem')"
+                  @click="store.removeManualItem(list, itemIndex)"
+                >
+                  <span class="material-icons" aria-hidden="true">close</span>
+                </button>
               </article>
             </template>
           </Draggable>
           <p v-else class="featured-emptyInline">{{ t('manual.emptyList') }}</p>
-        </div>
-      </article>
+        </ConfigSection>
+      </ConfigPanel>
     </div>
     <div v-else class="featured-emptySources">
       <span class="material-icons" aria-hidden="true">featured_play_list</span>
@@ -187,108 +246,119 @@ function syncItemPositions(list: FeaturedManualList): void {
 </template>
 
 <style scoped>
-.featured-manualListToggle > span:first-child {
-  gap: 0.18rem;
-}
-.featured-manualListToggle small {
-  opacity: 0.68;
-}
-.featured-manualListToggle[aria-expanded='true'] .featured-manualListChevron {
-  transform: rotate(180deg);
-}
-
-.featured-manualListHeader {
+.featured-manualUnused {
   align-items: center;
-  display: grid;
-  gap: 1rem;
-  grid-template-columns: minmax(15rem, 1fr) auto;
+  background: var(--featured-theme-action-hover);
+  border-radius: var(--featured-theme-radius);
+  display: flex;
+  font-size: 0.9rem;
+  gap: 0.5rem;
+  margin-bottom: 0.9rem;
+  padding: 0.35rem 0.4rem 0.35rem 0.7rem;
 }
-
-.featured-manualListHeader > :deep(.inputContainer),
-.featured-manualListHeader > :deep(.checkboxContainer) {
-  margin-bottom: 0;
+.featured-manualUnused > span:nth-child(2) {
+  flex: 1 1 auto;
 }
-
-.featured-manualSchedule {
-  border-top: 1px solid rgba(255, 255, 255, 0.07);
-  margin-top: 0.8rem;
-  padding-top: 0.7rem;
+.featured-manualUnused > .material-icons {
+  font-size: 1.15rem;
+  opacity: 0.7;
 }
-
-.featured-manualSchedule > summary {
-  cursor: pointer;
-  font-weight: 600;
+.featured-manualItems {
+  border: 1px solid var(--featured-theme-divider);
+  border-radius: var(--featured-theme-radius);
+  margin-top: 0.5rem;
 }
-
-.featured-manualSchedule > .jmp-note {
-  margin: 0.35rem 0 0.75rem;
+.featured-manualItem {
+  align-items: center;
+  background: var(--featured-config-card-background);
+  border-top: 1px solid var(--featured-theme-divider);
+  display: flex;
+  gap: 0.6rem;
+  min-height: 3.4rem;
+  padding: 0.3rem 0.5rem 0.3rem 0.35rem;
 }
-
-.featured-manualSchedule :deep(.inputContainer),
-.featured-itemSchedulePanel :deep(.inputContainer) {
-  margin-bottom: 0;
+.featured-manualItem:first-child {
+  border-top: 0;
 }
-
-.featured-manualSearch {
-  margin-top: 1rem;
+.featured-manualItemIndex {
+  font-size: 0.8rem;
+  min-width: 1.1rem;
+  opacity: 0.55;
+  text-align: right;
 }
-
+.featured-manualItemPoster {
+  aspect-ratio: 2 / 3;
+  background: var(--featured-theme-action-hover);
+  border-radius: 0.2rem;
+  flex: 0 0 auto;
+  object-fit: cover;
+  width: 1.8rem;
+}
 .featured-manualItemText {
   display: grid;
-  gap: 0.12rem;
+  flex: 1 1 auto;
+  gap: 0.1rem;
+  min-width: 0;
 }
-
+.featured-manualItemText > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .featured-manualItemText small {
   opacity: 0.65;
 }
-
-.featured-manualItems {
-  display: grid;
-  gap: 0.45rem;
-  margin-top: 1rem;
+.featured-manualItemSchedule {
+  background: color-mix(in srgb, var(--featured-theme-primary) 18%, transparent);
+  border-radius: 999px;
+  color: var(--featured-theme-primary);
+  font-size: 0.75rem;
+  padding: 0.15rem 0.55rem;
+  white-space: nowrap;
 }
-
-.featured-manualItem {
+.featured-manualItemAction {
   align-items: center;
-  background: rgba(0, 0, 0, 0.14);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 0.55rem;
-  display: grid;
-  gap: 0.7rem;
-  grid-template-columns: auto minmax(10rem, 1fr) auto auto;
-  padding: 0.6rem 0.7rem;
-  transition:
-    border-color 0.15s ease,
-    opacity 0.15s ease;
+  background: transparent;
+  border: 0;
+  border-radius: 50%;
+  color: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  list-style: none;
+  padding: 0.25rem;
 }
-
+.featured-manualItemAction::-webkit-details-marker {
+  display: none;
+}
+.featured-manualItemAction .material-icons {
+  font-size: 1.25rem;
+}
+.featured-manualItemAction:disabled {
+  cursor: default;
+  opacity: 0.24;
+}
+.featured-manualItemAction.is-active {
+  color: var(--featured-theme-primary);
+}
 .featured-manualDragGhost,
 .featured-manualDragChosen:not(.featured-manualDragPreview) {
   opacity: 0 !important;
 }
-
 .featured-manualDragPreview {
-  border-color: var(--featured-theme-primary);
+  border: 1px solid var(--featured-theme-primary);
   box-shadow: 0 0.8rem 2rem rgba(0, 0, 0, 0.45);
   opacity: 0.96;
   pointer-events: none;
 }
-
 .featured-itemSchedule {
   position: relative;
 }
-
-.featured-itemSchedule > summary {
-  cursor: pointer;
-  list-style: none;
-}
-
 .featured-itemSchedulePanel {
   background: var(--featured-theme-paper);
   border: 1px solid var(--featured-theme-divider);
   border-radius: var(--featured-theme-radius);
-  color: var(--featured-theme-text-primary);
   box-shadow: 0 0.85rem 2.4rem rgba(0, 0, 0, 0.55);
+  color: var(--featured-theme-text-primary);
   display: grid;
   gap: 0.75rem;
   min-width: min(28rem, 85vw);
@@ -298,30 +368,23 @@ function syncItemPositions(list: FeaturedManualList): void {
   top: calc(100% + 0.3rem);
   z-index: 90;
 }
-
-.featured-emptyInline {
-  margin: 1rem 0 0;
-  opacity: 0.68;
+.featured-itemSchedulePanel :deep(.inputContainer) {
+  margin-bottom: 0;
 }
-
-@media (max-width: 850px) {
-  .featured-manualListHeader {
-    grid-template-columns: 1fr auto;
-  }
-
-  .featured-manualListHeader > :deep(.inputContainer) {
-    grid-column: 1 / -1;
-  }
+.featured-emptyInline {
+  margin: 0.5rem 0 0;
+  opacity: 0.68;
 }
 
 @media (max-width: 600px) {
   .featured-manualItem {
-    grid-template-columns: auto minmax(0, 1fr) auto;
+    flex-wrap: wrap;
   }
-
-  .featured-manualItemActions {
-    grid-column: 1 / -1;
-    justify-content: flex-end;
+  .featured-manualItemText {
+    flex-basis: calc(100% - 6rem);
+  }
+  .featured-manualItemIndex {
+    display: none;
   }
 }
 </style>

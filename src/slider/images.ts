@@ -21,3 +21,7 @@ export function heroImageUrl(itemId: string, imageType: 'Backdrop' | 'Primary', 
 export function logoUrl(itemId: string, reduce: boolean): string {
   return itemImageUrl(itemId, 'Logo', reduce ? 600 : 1200);
 }
+
+export function posterUrl(itemId: string): string {
+  return itemImageUrl(itemId, 'Primary', 120);
+}

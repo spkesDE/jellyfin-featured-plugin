@@ -1,9 +1,11 @@
 import type {
+  FeaturedMediaPriorityEntry,
   FeaturedPluginConfig,
   FeaturedPresetLayoutSettings,
   FeaturedPresetTrailerSettings,
   HeroFadeCurve,
   HeroFadePoint,
+  MediaPriorityType,
   TrailerSourcePriority
 } from '../../types/config';
 
@@ -26,6 +28,7 @@ type MediaExcerptSettings = Pick<
   'MediaExcerptWindowStartMinutes' | 'MediaExcerptWindowEndMinutes' | 'MediaExcerptDurationSeconds'
 >;
 export type LegacyTrailerFallback = { FallBackToRemoteTrailers?: boolean };
+export type LegacySourceMediaFallback = { UseTrickplayFallback?: boolean; UseMediaPreviewFallback?: boolean };
 
 /** Normalizes the duplicated root/preset layout boundary through one compatibility path. */
 export function normalizeHeroLayoutSettings(settings: HeroLayoutSettings): void {
@@ -73,15 +76,98 @@ export function normalizeTrailerSourcePriority(
   return settings.TrailerSourcePriority;
 }
 
-const EXCERPT_SOURCE_PRIORITIES: readonly TrailerSourcePriority[] = [
-  'local_remote_excerpt',
-  'local_excerpt_remote',
-  'excerpt_only'
+export const MEDIA_PRIORITY_TYPES: readonly MediaPriorityType[] = [
+  'local_trailer',
+  'remote_trailer',
+  'media_excerpt',
+  'trickplay'
 ];
 
-/** True when the trailer source plays media excerpts, so their window and length settings apply. */
-export function trailerSourceIncludesExcerpt(priority: TrailerSourcePriority): boolean {
-  return EXCERPT_SOURCE_PRIORITIES.includes(priority);
+const TRAILER_SOURCE_ORDER: Record<TrailerSourcePriority, readonly [MediaPriorityType, boolean][]> = {
+  prefer_local: [
+    ['local_trailer', true],
+    ['remote_trailer', true]
+  ],
+  automatic: [
+    ['local_trailer', true],
+    ['remote_trailer', true]
+  ],
+  prefer_remote: [
+    ['remote_trailer', true],
+    ['local_trailer', true]
+  ],
+  local_only: [
+    ['local_trailer', true],
+    ['remote_trailer', false]
+  ],
+  remote_only: [
+    ['remote_trailer', true],
+    ['local_trailer', false]
+  ],
+  local_remote_excerpt: [
+    ['local_trailer', true],
+    ['remote_trailer', true],
+    ['media_excerpt', true]
+  ],
+  local_excerpt_remote: [
+    ['local_trailer', true],
+    ['media_excerpt', true],
+    ['remote_trailer', true]
+  ],
+  excerpt_only: [
+    ['media_excerpt', true],
+    ['local_trailer', false],
+    ['remote_trailer', false]
+  ]
+};
+
+/**
+ * Mirrors the backend mapping from a trailer source priority to a source's media priority list. New sources start
+ * from it, and sources saved before the list existed migrate through it together with their fallback flags.
+ */
+export function mediaPriorityFromTrailerSource(
+  priority: TrailerSourcePriority,
+  legacy: LegacySourceMediaFallback = {}
+): FeaturedMediaPriorityEntry[] {
+  const entries: FeaturedMediaPriorityEntry[] = (
+    TRAILER_SOURCE_ORDER[priority] ?? TRAILER_SOURCE_ORDER.prefer_local
+  ).map(([Type, Enabled]) => ({
+    Type,
+    Enabled: Enabled || (Type === 'media_excerpt' && legacy.UseMediaPreviewFallback === true)
+  }));
+  if (!entries.some((entry) => entry.Type === 'media_excerpt')) {
+    entries.push({ Type: 'media_excerpt', Enabled: legacy.UseMediaPreviewFallback === true });
+  }
+  entries.push({ Type: 'trickplay', Enabled: legacy.UseTrickplayFallback === true });
+  return entries;
+}
+
+/** Keeps each known type once in its saved order and appends missing types disabled, like the backend. */
+export function normalizeMediaPriority(value: unknown): FeaturedMediaPriorityEntry[] {
+  const entries: FeaturedMediaPriorityEntry[] = [];
+  for (const candidate of Array.isArray(value) ? value : []) {
+    const type = MEDIA_PRIORITY_TYPES.find(
+      (known) => known === String((candidate as Partial<FeaturedMediaPriorityEntry>)?.Type ?? '').toLowerCase()
+    );
+    if (type && !entries.some((entry) => entry.Type === type)) {
+      entries.push({ Type: type, Enabled: (candidate as FeaturedMediaPriorityEntry).Enabled === true });
+    }
+  }
+  for (const type of MEDIA_PRIORITY_TYPES) {
+    if (!entries.some((entry) => entry.Type === type)) entries.push({ Type: type, Enabled: false });
+  }
+  return entries;
+}
+
+/** Resolves a persisted source's media priority, migrating the pre-list fallback flags of its scope. */
+export function normalizeSourceMediaPriority(
+  rule: { MediaPriority?: unknown } & LegacySourceMediaFallback,
+  trailerSourcePriority: TrailerSourcePriority
+): FeaturedMediaPriorityEntry[] {
+  if (rule.UseTrickplayFallback !== undefined || rule.UseMediaPreviewFallback !== undefined) {
+    return mediaPriorityFromTrailerSource(trailerSourcePriority, rule);
+  }
+  return normalizeMediaPriority(rule.MediaPriority);
 }
 
 /** Mirrors the backend excerpt bounds so the editor never shows values the server would rewrite. */

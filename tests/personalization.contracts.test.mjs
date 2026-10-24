@@ -203,7 +203,7 @@ test('feed preview reuses mixer diagnostics for unsaved configs, users, and forc
     /class FeaturedFeedPreviewResponse[\s\S]*?DuplicatesRemoved[\s\S]*?CooldownExcluded[\s\S]*?DiversitySkipped/
   );
   assert.match(engine + allocation, /ItemReasons[\s\S]*?FeaturedItemSelectionReason|itemReasons\[item\.Id\]/);
-  assert.match(store, /cloneConfig[\s\S]*?cloneJsonValue\(value\)/);
+  assert.match(store, /cloneConfig[\s\S]*?cloneJsonValue\(toRaw\(value\)\)/);
   assert.match(store, /featured\/config\/preview[\s\S]*?configuration: cloneConfig\(config\)/);
   assert.match(modal, /feedPreview\.value\.items[\s\S]*?feedPreview\.value\.rules[\s\S]*?duplicatesRemoved/);
   assert.match(sources, /#actions[\s\S]*?featured-feedPreviewAction[\s\S]*?store\.openFeedPreview\(\)/);

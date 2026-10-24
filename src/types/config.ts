@@ -44,6 +44,7 @@ export type TrailerSourcePriority =
   | 'local_remote_excerpt'
   | 'local_excerpt_remote'
   | 'excerpt_only';
+export type MediaPriorityType = 'local_trailer' | 'remote_trailer' | 'media_excerpt' | 'trickplay';
 export type MultipleTrailerMode = 'first' | 'random';
 export type TrailerVolumeSliderDirection = 'side' | 'up' | 'down';
 export type FeatureControlPlacement = 'metadata' | 'actions';
@@ -65,6 +66,11 @@ export interface FeaturedFilterRule {
   Values: string[];
 }
 
+export interface FeaturedMediaPriorityEntry {
+  Type: MediaPriorityType;
+  Enabled: boolean;
+}
+
 export interface FeaturedSourceRule {
   Id: string;
   Type: SourceType;
@@ -74,8 +80,8 @@ export interface FeaturedSourceRule {
   MaximumItems: number;
   IsFallback: boolean;
   AllowBackgroundTrailers: boolean;
-  UseTrickplayFallback: boolean;
-  UseMediaPreviewFallback: boolean;
+  YouTubeQualityFilter: 'inherit' | 'enabled' | 'disabled';
+  MediaPriority: FeaturedMediaPriorityEntry[];
   UserIds: string[];
   EditorUserId: string | null;
   LibraryIds: string[];
@@ -110,6 +116,9 @@ export interface FeaturedPluginConfig {
   ShowAutoplayButton: boolean;
   EnableBackgroundTrailers: boolean;
   TrailerSourcePriority: TrailerSourcePriority;
+  /** Playback order new sources start with. */
+  DefaultMediaPriority: FeaturedMediaPriorityEntry[];
+  YouTubeQualityFilter: 'disabled' | 'hd_only';
   StartTrailersMuted: boolean;
   ShowTrailerControls: boolean;
   TrailerVolumeSliderDirection: TrailerVolumeSliderDirection;
@@ -256,6 +265,8 @@ export interface FeaturedPresetTrailerSettings extends Pick<
   FeaturedPluginConfig,
   | 'EnableBackgroundTrailers'
   | 'TrailerSourcePriority'
+  | 'DefaultMediaPriority'
+  | 'YouTubeQualityFilter'
   | 'StartTrailersMuted'
   | 'ShowTrailerControls'
   | 'TrailerVolumeSliderDirection'
