@@ -102,6 +102,11 @@ const textPositionOptions: SelectOption[] = [
   { value: 'center', label: t('option.center') },
   { value: 'right', label: t('option.right') }
 ];
+const textVerticalPositionOptions: SelectOption[] = [
+  { value: 'top', label: t('option.top') },
+  { value: 'center', label: t('option.center') },
+  { value: 'bottom', label: t('option.bottom') }
+];
 const titleOptions: SelectOption[] = [
   { value: 'logo', label: t('option.preferLogo') },
   { value: 'title', label: t('option.alwaysTitle') }
@@ -196,16 +201,24 @@ const bannerControlPositionOptions: SelectOption[] = [
                 :options="textPositionOptions"
               />
               <ConfigSelect
+                v-model="store.config.HeroTextVerticalPosition"
+                :label="t('display.textVerticalPosition')"
+                :options="textVerticalPositionOptions"
+                :help-text="t('display.textPositionHelp')"
+              />
+            </div>
+            <div class="jmp-compactGrid">
+              <ConfigSelect
                 v-model="store.config.HeroBackdropPosition"
                 :label="t('display.backdropPosition')"
                 :options="positionOptions"
               />
+              <ConfigSelect
+                v-model="store.config.TransitionEffect"
+                :label="t('display.transitionEffect')"
+                :options="transitionOptions"
+              />
             </div>
-            <ConfigSelect
-              v-model="store.config.TransitionEffect"
-              :label="t('display.transitionEffect')"
-              :options="transitionOptions"
-            />
             <ConfigNumber
               v-model="store.config.MediaPadding"
               :label="t('display.spaceBelow')"

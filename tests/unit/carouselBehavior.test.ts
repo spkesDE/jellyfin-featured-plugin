@@ -57,6 +57,20 @@ describe('FeaturedCarousel behaviour', () => {
     expect(carousel.root.querySelector('.featured-control-slot-top-right > .featured-trailer-controls')).not.toBeNull();
     carousel.destroy();
   });
+
+  it('anchors the text block and marks only occupied control slots', () => {
+    const response = createResponse([createItem('one'), createItem('two')]);
+    response.heroTextPosition = 'right';
+    response.heroTextVerticalPosition = 'bottom';
+    response.bannerNavigationPosition = 'top-right';
+    const carousel = new FeaturedCarousel(response);
+
+    expect(carousel.root.classList.contains('featured-text-right')).toBe(true);
+    expect(carousel.root.classList.contains('featured-text-v-bottom')).toBe(true);
+    expect(carousel.root.classList.contains('featured-has-slot-top-right')).toBe(true);
+    expect(carousel.root.classList.contains('featured-has-slot-center')).toBe(false);
+    carousel.destroy();
+  });
 });
 
 function createResponse(items: FeaturedItem[]): FeaturedResponse {

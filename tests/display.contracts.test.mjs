@@ -360,3 +360,50 @@ test('vertical hero fade is editable and rendered in the banner preview', async 
   assert.match(editor, /@selectstart\.prevent[\s\S]*?@dragstart\.prevent/);
   assert.match(editor, /fadeAddPoint[\s\S]*?fadeRemovePoint/);
 });
+
+test('text anchors stay below the Jellyfin header and match in the admin preview', async () => {
+  const [carousel, placement, compatibility, hero, preview, previewStyles] = await Promise.all([
+    read('src/slider/carousel.ts'),
+    read('src/styles/featured-text-placement.css'),
+    read('src/styles/featured-compatibility.css'),
+    read('src/styles/featured-hero.css'),
+    read('src/config/components/BannerPreview.vue'),
+    read('src/config/components/BannerPreview.css')
+  ]);
+
+  assert.match(carousel, /featured-text-v-\$\{response\.heroTextVerticalPosition\}/);
+  assert.match(carousel, /featured-has-slot-\$\{position\}/);
+  assert.match(preview, /`text-v-\$\{store\.config\.HeroTextVerticalPosition\}`/);
+  assert.match(preview, /`has-slot-\$\{position\}`/);
+
+  // Runtime anchors only apply above the phone breakpoint, where the copy is bottom-left anyway.
+  assert.match(placement, /^@media \(min-width: 701px\) \{/m);
+  for (const [styles, prefix] of [
+    [placement, '\\.featured-text-v-'],
+    [previewStyles, '\\.text-v-']
+  ]) {
+    assert.match(styles, new RegExp(`${prefix}center [^{]*::before,[\\s\\S]*?${prefix}center [^{]*::after,`));
+    assert.match(styles, new RegExp(`${prefix}bottom [^{]*::before \\{\\s*content: '';\\s*flex: 1 1 0;`));
+  }
+
+  assert.match(
+    compatibility,
+    /\.featured-root\.featured-ready\.featured-hero \.featured-content \{[^}]*padding-top: max\([^;]*var\(--featured-header-offset, 0px\)/
+  );
+  assert.match(
+    placement,
+    /\.featured-root\.featured-ready:not\(\.featured-hero\) \.featured-content \{[^}]*var\(--featured-header-offset, 0px\)/
+  );
+  assert.match(hero, /top: max\(120px, calc\(var\(--featured-header-offset, 0px\)/);
+  assert.match(
+    previewStyles,
+    /\.is-hero \{[^}]*--featured-preview-content-top: calc\(var\(--featured-preview-header-height\)/
+  );
+
+  for (const position of ['bottom-center', 'top-right', 'center']) {
+    assert.match(placement, new RegExp(`\\.featured-has-slot-${position}[.:]`));
+    assert.match(previewStyles, new RegExp(`\\.has-slot-${position}[.:]`));
+  }
+  assert.match(placement, /\.featured-hero\.featured-text-right \.featured-navigation \{[^}]*right: auto;/);
+  assert.match(previewStyles, /\.is-hero\.text-right \.featured-configPreviewNavigation \{[^}]*right: auto;/);
+});

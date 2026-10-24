@@ -108,6 +108,7 @@ internal static class PluginConfigurationNormalizer
         NormalizeHeroFade(config);
         config.HeroHeightMode = config.HeroHeightMode is "auto" or "compact" or "cinematic" or "fullscreen" or "custom" ? config.HeroHeightMode : "standard";
         config.HeroTextPosition = config.HeroTextPosition is "center" or "right" ? config.HeroTextPosition : "left";
+        config.HeroTextVerticalPosition = NormalizeHeroTextVerticalPosition(config.HeroTextVerticalPosition);
         config.MediaPadding = Math.Clamp(config.MediaPadding, -240, 240);
         config.TransitionEffect = config.TransitionEffect is "fade" ? "fade" : "slide";
         config.HeroBackdropPosition = config.HeroBackdropPosition is "top" or "bottom" ? config.HeroBackdropPosition : "center";
@@ -180,6 +181,7 @@ internal static class PluginConfigurationNormalizer
         NormalizeHeroFade(layout);
         layout.HeroHeightMode = layout.HeroHeightMode is "auto" or "compact" or "cinematic" or "fullscreen" or "custom" ? layout.HeroHeightMode : "standard";
         layout.HeroTextPosition = layout.HeroTextPosition is "center" or "right" ? layout.HeroTextPosition : "left";
+        layout.HeroTextVerticalPosition = NormalizeHeroTextVerticalPosition(layout.HeroTextVerticalPosition);
         layout.MediaPadding = Math.Clamp(layout.MediaPadding, -240, 240);
         layout.TransitionEffect = layout.TransitionEffect is "fade" ? "fade" : "slide";
         layout.HeroBackdropPosition = layout.HeroBackdropPosition is "top" or "bottom" ? layout.HeroBackdropPosition : "center";
@@ -514,6 +516,9 @@ internal static class PluginConfigurationNormalizer
 
     private static string NormalizeControlPlacement(string? value)
         => value == "actions" ? "actions" : "metadata";
+
+    private static string NormalizeHeroTextVerticalPosition(string? value)
+        => value is "center" or "bottom" ? value : "top";
 
     private static string NormalizeBannerNavigationPosition(string? value)
         => value is "top-right" or "center" ? value : "bottom-center";

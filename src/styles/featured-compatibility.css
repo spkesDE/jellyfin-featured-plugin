@@ -36,7 +36,8 @@
   .featured-root.featured-ready.featured-hero .featured-content {
     height: var(--featured-content-height);
     overflow: hidden;
-    padding-top: clamp(4.5rem, 7vw, 7rem);
+    /* The hero is lifted under Jellyfin's header; never start the copy behind it. */
+    padding-top: max(clamp(4.5rem, 7vw, 7rem), calc(var(--featured-header-offset, 0px) + var(--featured-header-gap)));
     padding-bottom: clamp(1.5rem, 3vw, 3rem);
   }
 

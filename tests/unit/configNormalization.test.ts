@@ -33,6 +33,23 @@ describe('configuration normalization boundaries', () => {
     }
   });
 
+  it('keeps valid text anchors and resets unknown ones to the top-left default', () => {
+    const root = createDefaultConfig();
+    const preset = createPresetFromConfig(root).Layout;
+    expect(root.HeroTextVerticalPosition).toBe('top');
+    expect(preset.HeroTextVerticalPosition).toBe('top');
+
+    root.HeroTextPosition = 'right';
+    root.HeroTextVerticalPosition = 'bottom';
+    preset.HeroTextPosition = 'middle' as typeof preset.HeroTextPosition;
+    preset.HeroTextVerticalPosition = 'middle' as typeof preset.HeroTextVerticalPosition;
+    normalizeHeroLayoutSettings(root);
+    normalizeHeroLayoutSettings(preset);
+
+    expect([root.HeroTextPosition, root.HeroTextVerticalPosition]).toEqual(['right', 'bottom']);
+    expect([preset.HeroTextPosition, preset.HeroTextVerticalPosition]).toEqual(['left', 'top']);
+  });
+
   it('maps the legacy trailer fallback flag consistently', () => {
     expect(
       normalizeTrailerSourcePriority({ TrailerSourcePriority: 'prefer_local' }, { FallBackToRemoteTrailers: false })

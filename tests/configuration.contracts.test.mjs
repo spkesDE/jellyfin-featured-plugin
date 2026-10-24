@@ -35,6 +35,7 @@ test('critical C# and TypeScript defaults stay in parity', async () => {
     HeroFadeEnd: '100',
     HeroFadeCurve: "'custom'",
     HeroTextPosition: "'left'",
+    HeroTextVerticalPosition: "'top'",
     TransitionEffect: "'slide'",
     HeroBackdropPosition: "'center'",
     EnableFrontendBootstrap: 'true',

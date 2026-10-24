@@ -34,6 +34,7 @@ export type HeroBackdropPosition = 'top' | 'center' | 'bottom';
 export type HeroHeightMode = 'auto' | 'compact' | 'standard' | 'cinematic' | 'fullscreen' | 'custom';
 export type HeroFadeCurve = 'soft' | 'balanced' | 'strong' | 'custom';
 export type HeroTextPosition = 'left' | 'center' | 'right';
+export type HeroTextVerticalPosition = 'top' | 'center' | 'bottom';
 export type TrailerSourcePriority = 'prefer_local' | 'prefer_remote' | 'local_only' | 'remote_only' | 'automatic';
 export type MultipleTrailerMode = 'first' | 'random';
 export type TrailerVolumeSliderDirection = 'side' | 'up' | 'down';
@@ -142,6 +143,7 @@ export interface FeaturedPluginConfig {
   HeroFadeCurve: HeroFadeCurve;
   HeroFadePoints: HeroFadePoint[];
   HeroTextPosition: HeroTextPosition;
+  HeroTextVerticalPosition: HeroTextVerticalPosition;
   TransitionEffect: TransitionEffect;
   HeroBackdropPosition: HeroBackdropPosition;
   ReduceImageSize: boolean;
@@ -223,6 +225,7 @@ type FeaturedPresetLayoutSharedSettings = Pick<
   | 'HeroFadeCurve'
   | 'HeroFadePoints'
   | 'HeroTextPosition'
+  | 'HeroTextVerticalPosition'
   | 'TransitionEffect'
   | 'HeroBackdropPosition'
   | 'BannerHeight'

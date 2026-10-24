@@ -100,6 +100,7 @@ public sealed class FeaturedPresetLayoutSettings
         new() { Position = 100, Fade = 100 }
     ];
     public string HeroTextPosition { get; set; } = "left";
+    public string HeroTextVerticalPosition { get; set; } = "top";
     public string TransitionEffect { get; set; } = "slide";
     public string HeroBackdropPosition { get; set; } = "center";
     public int BannerHeight { get; set; } = 360;

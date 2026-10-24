@@ -50,6 +50,7 @@ const companions = {
   ],
   'src/slider/carousel.ts': [
     'src/slider/heroLayoutGuard.ts',
+    'src/slider/layoutInsets.ts',
     'src/slider/carouselControls.ts',
     'src/slider/carouselWindow.ts',
     'src/slider/trailerVolume.ts',
@@ -71,6 +72,7 @@ const companions = {
     'src/styles/featured-controls.css',
     'src/styles/featured-trailers.css',
     'src/styles/featured-hero.css',
+    'src/styles/featured-text-placement.css',
     'src/styles/featured-compatibility.css'
   ]
 };

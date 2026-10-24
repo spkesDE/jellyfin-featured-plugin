@@ -91,6 +91,7 @@ export const CONFIG_DEFAULTS: FeaturedPluginConfig = {
     { Position: 100, Fade: 100 }
   ],
   HeroTextPosition: 'left',
+  HeroTextVerticalPosition: 'top',
   TransitionEffect: 'slide',
   HeroBackdropPosition: 'center',
   ReduceImageSize: false,

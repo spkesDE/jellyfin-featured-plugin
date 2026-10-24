@@ -115,6 +115,7 @@ export function createPresetFromConfig(config: FeaturedPluginConfig, name = 'Fea
       HeroFadeCurve: config.HeroFadeCurve,
       HeroFadePoints: cloneJsonValue(config.HeroFadePoints),
       HeroTextPosition: config.HeroTextPosition,
+      HeroTextVerticalPosition: config.HeroTextVerticalPosition,
       TransitionEffect: config.TransitionEffect,
       HeroBackdropPosition: config.HeroBackdropPosition,
       BannerHeight: config.BannerHeight,

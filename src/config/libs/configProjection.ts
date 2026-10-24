@@ -45,6 +45,7 @@ export function createDisplaySettings(config: FeaturedPluginConfig): FeaturedDis
     heroFadeCurve: config.HeroFadeCurve,
     heroFadePoints: config.HeroFadePoints.map((point) => ({ position: point.Position, fade: point.Fade })),
     heroTextPosition: config.HeroTextPosition,
+    heroTextVerticalPosition: config.HeroTextVerticalPosition,
     transitionEffect: config.TransitionEffect,
     heroBackdropPosition: config.HeroBackdropPosition,
     bannerHeight: config.BannerHeight,

@@ -124,4 +124,37 @@ public sealed class HeroDisplaySettingsTests
         Assert.Equal("bottom-center", normalized.Presets[0].Layout.BannerNavigationPosition);
         Assert.Equal("center", normalized.Presets[0].Layout.BannerMediaControlsPosition);
     }
+
+    [Fact]
+    public void Normalize_SanitizesHeroTextVerticalPositionForRootAndPresets()
+    {
+        PluginConfiguration config = new()
+        {
+            HeroTextVerticalPosition = "bottom",
+            Presets =
+            [
+                new FeaturedPreset
+                {
+                    Layout = new FeaturedPresetLayoutSettings { HeroTextVerticalPosition = "middle" }
+                },
+                new FeaturedPreset
+                {
+                    Layout = new FeaturedPresetLayoutSettings { HeroTextVerticalPosition = "center" }
+                }
+            ]
+        };
+
+        PluginConfiguration normalized = PluginConfigurationNormalizer.Normalize(config);
+
+        Assert.Equal("bottom", normalized.HeroTextVerticalPosition);
+        Assert.Equal("top", normalized.Presets[0].Layout.HeroTextVerticalPosition);
+        Assert.Equal("center", normalized.Presets[1].Layout.HeroTextVerticalPosition);
+    }
+
+    [Fact]
+    public void HeroTextVerticalPosition_DefaultsToTopToKeepExistingLayout()
+    {
+        Assert.Equal("top", new PluginConfiguration().HeroTextVerticalPosition);
+        Assert.Equal("top", new FeaturedPresetLayoutSettings().HeroTextVerticalPosition);
+    }
 }

@@ -1,6 +1,12 @@
 .featured-root {
   --featured-banner-border-radius: var(--featured-banner-radius, var(--featured-radius));
+  --featured-content-max-width: min(max(42rem, 40vw), 62%);
   --featured-content-padding: clamp(1.4rem, 4vw, 4.5rem);
+  /* Distance of banner controls from the viewport edge, and the free space
+     the text block keeps from those controls and from Jellyfin's header. */
+  --featured-control-inset: 0.8rem;
+  --featured-control-gap: 0.75rem;
+  --featured-header-gap: 1.25rem;
   --featured-controls-reveal-transition: opacity 0.2s ease, transform 0.2s ease;
   --featured-media-opacity-transition: opacity 0.8s ease;
   --featured-radius: 0px;
@@ -178,7 +184,7 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  max-width: min(max(42rem, 40vw), 62%);
+  max-width: min(var(--featured-content-max-width), var(--featured-content-inline-limit, 100%));
   padding: var(--featured-content-padding);
   position: relative;
   text-shadow: 0 2px 12px rgba(0, 0, 0, 0.72);
@@ -363,15 +369,15 @@
 }
 
 .featured-root:not(.featured-hero) .featured-control-slot-bottom-center {
-  bottom: 0.8rem;
+  bottom: var(--featured-control-inset);
   left: 50%;
   transform: translateX(-50%);
 }
 
 .featured-root:not(.featured-hero) .featured-control-slot-top-right {
   align-items: flex-end;
-  right: 0.8rem;
-  top: 0.8rem;
+  right: var(--featured-control-inset);
+  top: var(--featured-control-inset);
 }
 
 .featured-root:not(.featured-hero) .featured-control-slot-center {

@@ -51,6 +51,7 @@ public abstract class FeaturedDisplaySettingsDto
             .Select(point => new HeroFadePointDto(point.Position, point.Fade))
             .ToArray();
         HeroTextPosition = config.HeroTextPosition;
+        HeroTextVerticalPosition = config.HeroTextVerticalPosition;
         TransitionEffect = config.TransitionEffect;
         HeroBackdropPosition = config.HeroBackdropPosition;
         BannerHeight = config.BannerHeight;
@@ -103,6 +104,7 @@ public abstract class FeaturedDisplaySettingsDto
     public string HeroFadeCurve { get; }
     public IReadOnlyList<HeroFadePointDto> HeroFadePoints { get; }
     public string HeroTextPosition { get; }
+    public string HeroTextVerticalPosition { get; }
     public string TransitionEffect { get; }
     public string HeroBackdropPosition { get; }
     public int BannerHeight { get; }

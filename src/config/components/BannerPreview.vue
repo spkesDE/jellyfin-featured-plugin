@@ -148,6 +148,39 @@ function showsMediaAt(position: PreviewControlPosition): boolean {
 function showsPaginationAt(position: PreviewControlPosition): boolean {
   return showPagination.value && (position === 'hero' || position === 'bottom-center');
 }
+/** Approximate mock control sizes so the text keeps the same clearances as the live banner. */
+const PREVIEW_CONTROL_REM = 1.7;
+const PREVIEW_CONTROL_ROW_REM = 1.9;
+function previewSlotSize(position: PreviewControlPosition): { width: number; height: number } {
+  const rows: number[] = [];
+  if (showsNavigationAt(position)) {
+    const buttons = (store.config.ShowNavigationArrows ? 2 : 0) + (showAutoplayControl.value ? 1 : 0);
+    rows.push(buttons * PREVIEW_CONTROL_REM + (showSlidePosition.value ? 2.4 : 0));
+  }
+  if (showsMediaAt(position)) rows.push(2 * PREVIEW_CONTROL_REM);
+  const dots = showsPaginationAt(position) ? Math.min(itemCount.value, 10) * 0.65 : 0;
+  return {
+    width: Math.max(dots, ...rows, 0),
+    height: rows.length * PREVIEW_CONTROL_ROW_REM + (dots ? 0.6 : 0)
+  };
+}
+const previewPlacementClasses = computed(() => {
+  const classes = [`text-${store.config.HeroTextPosition}`, `text-v-${store.config.HeroTextVerticalPosition}`];
+  if (!showNavigation.value) return classes;
+  for (const position of previewControlPositions.value) {
+    if (position !== 'hero' && previewSlotSize(position).height > 0) classes.push(`has-slot-${position}`);
+  }
+  return classes;
+});
+const previewSlotStyle = computed(() => {
+  const style: Record<string, string> = {};
+  for (const position of previewControlPositions.value) {
+    const size = previewSlotSize(position);
+    style[`--featured-preview-slot-${position}-width`] = `${size.width}rem`;
+    style[`--featured-preview-slot-${position}-height`] = `${size.height}rem`;
+  }
+  return style;
+});
 function mediaCardStyle(index: number): Record<string, string> | undefined {
   const cards = libraryItems.value;
   if (!cards.length) return undefined;
@@ -227,10 +260,10 @@ function mediaCardStyle(index: number): Record<string, string> | undefined {
         <div
           class="featured-configPreview"
           :class="[
-            `text-${store.config.HeroTextPosition}`,
+            previewPlacementClasses,
             { 'is-hero': store.config.UseHeroLayout, 'controls-on-hover': store.config.ShowControlsOnHoverOnly }
           ]"
-          :style="previewStyle"
+          :style="[previewStyle, previewSlotStyle]"
           @click="$emit('focusSection', 'layout')"
         >
           <div class="featured-configPreviewBackdrop" :style="backdropStyle" />

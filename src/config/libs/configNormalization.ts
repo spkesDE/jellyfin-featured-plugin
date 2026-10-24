@@ -14,6 +14,8 @@ type HeroLayoutSettings = Pick<
   | 'HeroFadeCurve'
   | 'HeroFadePoints'
   | 'HeroHeightMode'
+  | 'HeroTextPosition'
+  | 'HeroTextVerticalPosition'
   | 'BannerNavigationPosition'
   | 'BannerMediaControlsPosition'
 >;
@@ -38,6 +40,12 @@ export function normalizeHeroLayoutSettings(settings: HeroLayoutSettings): void 
   )
     ? settings.HeroHeightMode
     : 'standard';
+  settings.HeroTextPosition = ['left', 'center', 'right'].includes(settings.HeroTextPosition)
+    ? settings.HeroTextPosition
+    : 'left';
+  settings.HeroTextVerticalPosition = ['top', 'center', 'bottom'].includes(settings.HeroTextVerticalPosition)
+    ? settings.HeroTextVerticalPosition
+    : 'top';
   settings.BannerNavigationPosition = ['bottom-center', 'top-right', 'center'].includes(
     settings.BannerNavigationPosition
   )

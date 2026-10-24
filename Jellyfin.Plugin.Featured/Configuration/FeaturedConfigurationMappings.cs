@@ -64,6 +64,7 @@ internal static class FeaturedConfigurationMappings
             .Select(point => new HeroFadePoint { Position = point.Position, Fade = point.Fade })
             .ToArray();
         target.HeroTextPosition = source.HeroTextPosition;
+        target.HeroTextVerticalPosition = source.HeroTextVerticalPosition;
         target.TransitionEffect = source.TransitionEffect;
         target.HeroBackdropPosition = source.HeroBackdropPosition;
         target.BannerHeight = source.BannerHeight;

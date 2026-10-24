@@ -1,0 +1,89 @@
+/* Text anchoring for tablets and desktops. Phones keep the bottom-left layout
+   from featured-hero.css whatever anchor is configured.
+   LayoutInsetGuard publishes the measured --featured-header-offset,
+   --featured-viewport-height, --featured-navigation-width and
+   --featured-slot-<position>-width/-height variables used below. */
+@media (min-width: 701px) {
+  /* Flexible spacers instead of justify-content: Chromium 79 lacks `safe`
+     alignment, and collapsing spacers keep overflowing copy spilling past the
+     bottom edge, where the overview fitter measures it. */
+  .featured-text-v-center .featured-content::before,
+  .featured-text-v-center .featured-content::after,
+  .featured-text-v-bottom .featured-content::before {
+    content: '';
+    flex: 1 1 0;
+  }
+
+  /* Banner mode: start below Jellyfin's header and keep clear of every
+     occupied control slot. */
+  .featured-root.featured-ready:not(.featured-hero) .featured-content {
+    padding-top: max(
+      var(--featured-content-padding),
+      calc(var(--featured-header-offset, 0px) + var(--featured-header-gap)),
+      var(--featured-reserve-top-slot, 0px),
+      var(--featured-reserve-top-center, 0px)
+    );
+    padding-bottom: max(
+      var(--featured-content-padding),
+      var(--featured-reserve-bottom-slot, 0px),
+      var(--featured-reserve-bottom-center, 0px)
+    );
+  }
+
+  .featured-root.featured-has-slot-bottom-center:not(.featured-hero) .featured-content {
+    --featured-reserve-bottom-slot: calc(
+      var(--featured-slot-bottom-center-height, 2.15rem) + var(--featured-control-inset) + var(--featured-control-gap)
+    );
+  }
+
+  .featured-root.featured-has-slot-top-right.featured-text-right:not(.featured-hero) .featured-content {
+    --featured-reserve-top-slot: calc(
+      var(--featured-slot-top-right-height, 2.15rem) + var(--featured-control-inset) + var(--featured-control-gap)
+    );
+  }
+
+  .featured-root.featured-has-slot-top-right.featured-text-center:not(.featured-hero) .featured-content {
+    --featured-content-inline-limit: calc(
+      100% - 2 *
+        (var(--featured-slot-top-right-width, 8rem) + var(--featured-control-inset) + var(--featured-control-gap))
+    );
+  }
+
+  /* Side-aligned copy stops before controls in the middle of the banner. */
+  .featured-root.featured-has-slot-center.featured-text-left:not(.featured-hero) .featured-content,
+  .featured-root.featured-has-slot-center.featured-text-right:not(.featured-hero) .featured-content {
+    --featured-content-inline-limit: calc(
+      50% - var(--featured-slot-center-width, 8rem) / 2 - var(--featured-control-gap)
+    );
+  }
+
+  /* Centered copy cannot step aside, so it takes the half above the middle
+     controls, or the half below them when anchored to the bottom. */
+  .featured-root.featured-has-slot-center.featured-text-center:not(.featured-hero) .featured-content {
+    --featured-center-slot-half: calc(
+      (var(--featured-viewport-height, var(--featured-height)) + var(--featured-slot-center-height, 2.15rem)) / 2 +
+        var(--featured-control-gap)
+    );
+    --featured-reserve-bottom-center: var(--featured-center-slot-half);
+  }
+
+  .featured-root.featured-has-slot-center.featured-text-center.featured-text-v-bottom:not(.featured-hero)
+    .featured-content {
+    --featured-reserve-bottom-center: 0px;
+    --featured-reserve-top-center: var(--featured-center-slot-half);
+  }
+
+  /* Hero mode keeps its controls in one top-right column. Right-aligned copy
+     swaps sides with it; centered copy narrows so both columns stay apart. */
+  .featured-root.featured-hero.featured-text-right .featured-navigation {
+    left: max(env(safe-area-inset-left), 3.3%);
+    right: auto;
+  }
+
+  .featured-root.featured-hero.featured-text-center .featured-content {
+    --featured-content-inline-limit: calc(
+      100% - 2 *
+        (var(--featured-navigation-width, 0px) + max(env(safe-area-inset-right), 3.3%) + var(--featured-control-gap))
+    );
+  }
+}

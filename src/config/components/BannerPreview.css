@@ -108,7 +108,13 @@
 
 #FeaturedConfigPage .featured-configPreview {
   --featured-preview-background: #181b22 radial-gradient(circle at 72% 28%, #465267 0, #222936 35%, #11151d 72%);
+  --featured-preview-content-bottom: 10%;
   --featured-preview-content-inline-inset: 8%;
+  --featured-preview-content-max-width: 58%;
+  --featured-preview-content-top: 10%;
+  --featured-preview-control-gap: 0.4rem;
+  --featured-preview-control-inset: 0.55rem;
+  --featured-preview-header-height: 3.15rem;
   --featured-preview-shade: linear-gradient(
     0deg,
     rgb(4 6 10 / calc(var(--featured-preview-gradient, 0.85) * 0.74)),
@@ -133,6 +139,10 @@
 }
 
 #FeaturedConfigPage .featured-configPreview.is-hero {
+  /* Like the live hero, the preview starts under the header, and its copy
+     starts below it. */
+  --featured-preview-content-bottom: 18%;
+  --featured-preview-content-top: calc(var(--featured-preview-header-height) + 0.75rem);
   --featured-preview-shade: none;
   background: transparent;
   margin: 0;
@@ -166,29 +176,102 @@
   position: absolute;
 }
 
+/* Mirrors featured-text-placement.css: a full-height column whose spacers
+   anchor the copy, with the same clearances for header and control slots. */
 #FeaturedConfigPage .featured-configPreviewContent {
-  bottom: 18%;
+  align-items: flex-start;
+  bottom: max(
+    var(--featured-preview-content-bottom),
+    var(--featured-preview-reserve-bottom-slot, 0px),
+    var(--featured-preview-reserve-bottom-center, 0px)
+  );
+  display: flex;
+  flex-direction: column;
   left: var(--featured-preview-content-inline-inset);
-  max-width: 58%;
+  max-width: min(var(--featured-preview-content-max-width), var(--featured-preview-inline-limit, 100%));
   position: absolute;
+  top: max(
+    var(--featured-preview-content-top),
+    var(--featured-preview-reserve-top-slot, 0px),
+    var(--featured-preview-reserve-top-center, 0px)
+  );
   z-index: 2;
+}
+
+#FeaturedConfigPage .featured-configPreview.text-v-center .featured-configPreviewContent::before,
+#FeaturedConfigPage .featured-configPreview.text-v-center .featured-configPreviewContent::after,
+#FeaturedConfigPage .featured-configPreview.text-v-bottom .featured-configPreviewContent::before {
+  content: '';
+  flex: 1 1 0;
 }
 
 #FeaturedConfigPage .featured-configPreview.text-center .featured-configPreviewContent {
   align-items: center;
-  display: flex;
-  flex-direction: column;
-  left: 23%;
+  left: 0;
+  margin: 0 auto;
+  right: 0;
   text-align: center;
 }
 
 #FeaturedConfigPage .featured-configPreview.text-right .featured-configPreviewContent {
   align-items: flex-end;
-  display: flex;
-  flex-direction: column;
   left: auto;
   right: var(--featured-preview-content-inline-inset);
   text-align: right;
+}
+
+#FeaturedConfigPage .featured-configPreview.has-slot-bottom-center:not(.is-hero) .featured-configPreviewContent {
+  --featured-preview-reserve-bottom-slot: calc(
+    var(--featured-preview-slot-bottom-center-height) + var(--featured-preview-control-inset) +
+      var(--featured-preview-control-gap)
+  );
+}
+
+#FeaturedConfigPage .featured-configPreview.has-slot-top-right.text-right:not(.is-hero) .featured-configPreviewContent {
+  --featured-preview-reserve-top-slot: calc(
+    var(--featured-preview-slot-top-right-height) + var(--featured-preview-control-inset) +
+      var(--featured-preview-control-gap)
+  );
+}
+
+#FeaturedConfigPage
+  .featured-configPreview.has-slot-top-right.text-center:not(.is-hero)
+  .featured-configPreviewContent {
+  --featured-preview-inline-limit: calc(
+    100% - 2 *
+      (
+        var(--featured-preview-slot-top-right-width) + var(--featured-preview-control-inset) +
+          var(--featured-preview-control-gap)
+      )
+  );
+}
+
+#FeaturedConfigPage .featured-configPreview.has-slot-center.text-left:not(.is-hero) .featured-configPreviewContent,
+#FeaturedConfigPage .featured-configPreview.has-slot-center.text-right:not(.is-hero) .featured-configPreviewContent {
+  --featured-preview-inline-limit: calc(
+    50% - var(--featured-preview-content-inline-inset) - var(--featured-preview-slot-center-width) / 2 -
+      var(--featured-preview-control-gap)
+  );
+}
+
+#FeaturedConfigPage .featured-configPreview.has-slot-center.text-center:not(.is-hero) .featured-configPreviewContent {
+  --featured-preview-center-slot-half: calc(
+    50% + var(--featured-preview-slot-center-height) / 2 + var(--featured-preview-control-gap)
+  );
+  --featured-preview-reserve-bottom-center: var(--featured-preview-center-slot-half);
+}
+
+#FeaturedConfigPage
+  .featured-configPreview.has-slot-center.text-center.text-v-bottom:not(.is-hero)
+  .featured-configPreviewContent {
+  --featured-preview-reserve-bottom-center: 0px;
+  --featured-preview-reserve-top-center: var(--featured-preview-center-slot-half);
+}
+
+#FeaturedConfigPage .featured-configPreview.is-hero.text-center .featured-configPreviewContent {
+  --featured-preview-inline-limit: calc(
+    100% - 2 * (var(--featured-preview-slot-hero-width) + max(1rem, 3.3%) + var(--featured-preview-control-gap))
+  );
 }
 
 #FeaturedConfigPage .featured-configPreviewLogo {
@@ -336,8 +419,13 @@
   bottom: auto;
   left: auto;
   right: max(1rem, 3.3%);
-  top: 0.55rem;
+  top: calc(var(--featured-preview-header-height) + var(--featured-preview-control-inset));
   transform: none;
+}
+
+#FeaturedConfigPage .featured-configPreview.is-hero.text-right .featured-configPreviewNavigation {
+  left: max(1rem, 3.3%);
+  right: auto;
 }
 
 #FeaturedConfigPage .featured-configPreviewControlSlot-hero {
@@ -470,9 +558,9 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  #FeaturedConfigPage .featured-configPreviewContent {
-    left: 6%;
-    max-width: 72%;
+  #FeaturedConfigPage .featured-configPreview {
+    --featured-preview-content-inline-inset: 6%;
+    --featured-preview-content-max-width: 72%;
   }
 }
 #FeaturedConfigPage .jmp-appearancePreviewItem {

@@ -76,7 +76,8 @@
   bottom: auto;
   left: auto;
   right: max(env(safe-area-inset-right), 3.3%);
-  top: 120px;
+  /* 120px matches the #homeTab lift; taller Jellyfin headers push it down. */
+  top: max(120px, calc(var(--featured-header-offset, 0px) + var(--featured-control-inset)));
   transform: none;
 }
 
@@ -108,8 +109,8 @@
 }
 
 @media (max-width: 1000px) {
-  .featured-content {
-    max-width: min(38rem, 70%);
+  .featured-root {
+    --featured-content-max-width: min(38rem, 70%);
   }
 }
 

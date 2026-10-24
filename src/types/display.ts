@@ -6,6 +6,7 @@ import type {
   HeroFadeCurve,
   HeroHeightMode,
   HeroTextPosition,
+  HeroTextVerticalPosition,
   TrailerVolumeSliderDirection,
   TransitionEffect
 } from './config';
@@ -56,6 +57,7 @@ export interface FeaturedDisplaySettings {
   heroFadeCurve: HeroFadeCurve;
   heroFadePoints: HeroFadeDisplayPoint[];
   heroTextPosition: HeroTextPosition;
+  heroTextVerticalPosition: HeroTextVerticalPosition;
   transitionEffect: TransitionEffect;
   heroBackdropPosition: HeroBackdropPosition;
   bannerHeight: number;
