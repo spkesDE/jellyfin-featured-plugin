@@ -37,6 +37,7 @@ export type HeroTextPosition = 'left' | 'center' | 'right';
 export type HeroTextVerticalPosition = 'top' | 'center' | 'bottom';
 export type TrailerSourcePriority = 'prefer_local' | 'prefer_remote' | 'local_only' | 'remote_only' | 'automatic';
 export type MultipleTrailerMode = 'first' | 'random';
+export type MediaExcerptMode = 'off' | 'fallback' | 'prefer_over_remote' | 'always';
 export type TrailerVolumeSliderDirection = 'side' | 'up' | 'down';
 export type FeatureControlPlacement = 'metadata' | 'actions';
 export type BannerControlPosition = 'bottom-center' | 'top-right' | 'center';
@@ -112,6 +113,10 @@ export interface FeaturedPluginConfig {
   TrailerEndOffsetSeconds: number;
   MultipleTrailerMode: MultipleTrailerMode;
   AllowTrailersOnMobile: boolean;
+  MediaExcerptMode: MediaExcerptMode;
+  MediaExcerptWindowStartMinutes: number;
+  MediaExcerptWindowEndMinutes: number;
+  MediaExcerptDurationSeconds: number;
   TrailerOverrides: FeaturedTrailerOverride[];
   AutoplayInterval: number;
   ShowPlayButton: boolean;
@@ -255,6 +260,10 @@ export interface FeaturedPresetTrailerSettings extends Pick<
   | 'TrailerEndOffsetSeconds'
   | 'MultipleTrailerMode'
   | 'AllowTrailersOnMobile'
+  | 'MediaExcerptMode'
+  | 'MediaExcerptWindowStartMinutes'
+  | 'MediaExcerptWindowEndMinutes'
+  | 'MediaExcerptDurationSeconds'
 > {
   Overrides: FeaturedTrailerOverride[];
 }

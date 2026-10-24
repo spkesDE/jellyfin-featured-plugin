@@ -144,4 +144,10 @@ public sealed class FeaturedTrailerDto
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? ItemId { get; init; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? StartSeconds { get; init; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? DurationSeconds { get; init; }
 }

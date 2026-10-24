@@ -98,6 +98,15 @@ internal static class PluginConfigurationNormalizer
         config.MultipleTrailerMode = trailers.MultipleMode;
         config.TrailerVolumeSliderDirection = trailers.VolumeSliderDirection;
         config.TrailerOverrides = trailers.Overrides;
+        MediaExcerptValues excerpts = NormalizeMediaExcerptValues(
+            config.MediaExcerptMode,
+            config.MediaExcerptWindowStartMinutes,
+            config.MediaExcerptWindowEndMinutes,
+            config.MediaExcerptDurationSeconds);
+        config.MediaExcerptMode = excerpts.Mode;
+        config.MediaExcerptWindowStartMinutes = excerpts.WindowStartMinutes;
+        config.MediaExcerptWindowEndMinutes = excerpts.WindowEndMinutes;
+        config.MediaExcerptDurationSeconds = excerpts.DurationSeconds;
         // The nullable boolean only exists to migrate configurations saved before source priorities.
         config.FallBackToRemoteTrailers = null;
         config.BannerHeight = Math.Clamp(config.BannerHeight, 240, 900);
@@ -273,6 +282,40 @@ internal static class PluginConfigurationNormalizer
         trailers.TrailerVolumeSliderDirection = normalized.VolumeSliderDirection;
         trailers.Overrides = normalized.Overrides;
         trailers.FallBackToRemoteTrailers = null;
+        MediaExcerptValues excerpts = NormalizeMediaExcerptValues(
+            trailers.MediaExcerptMode,
+            trailers.MediaExcerptWindowStartMinutes,
+            trailers.MediaExcerptWindowEndMinutes,
+            trailers.MediaExcerptDurationSeconds);
+        trailers.MediaExcerptMode = excerpts.Mode;
+        trailers.MediaExcerptWindowStartMinutes = excerpts.WindowStartMinutes;
+        trailers.MediaExcerptWindowEndMinutes = excerpts.WindowEndMinutes;
+        trailers.MediaExcerptDurationSeconds = excerpts.DurationSeconds;
+    }
+
+    private static MediaExcerptValues NormalizeMediaExcerptValues(
+        string? mode,
+        int windowStartMinutes,
+        int windowEndMinutes,
+        int durationSeconds)
+    {
+        mode = mode switch
+        {
+            FeaturedMediaExcerptModes.Fallback => FeaturedMediaExcerptModes.Fallback,
+            FeaturedMediaExcerptModes.PreferOverRemote => FeaturedMediaExcerptModes.PreferOverRemote,
+            FeaturedMediaExcerptModes.Always => FeaturedMediaExcerptModes.Always,
+            _ => FeaturedMediaExcerptModes.Off
+        };
+        int start = Math.Clamp(windowStartMinutes, 0, FeaturedMediaExcerptModes.MaximumWindowMinutes);
+        int end = Math.Clamp(windowEndMinutes, start, FeaturedMediaExcerptModes.MaximumWindowMinutes);
+        return new MediaExcerptValues(
+            mode,
+            start,
+            end,
+            Math.Clamp(
+                durationSeconds,
+                FeaturedMediaExcerptModes.MinimumDurationSeconds,
+                FeaturedMediaExcerptModes.MaximumDurationSeconds));
     }
 
     private static TrailerValues NormalizeTrailerValues(
@@ -539,4 +582,10 @@ internal static class PluginConfigurationNormalizer
         string MultipleMode,
         string VolumeSliderDirection,
         FeaturedTrailerOverride[] Overrides);
+
+    private sealed record MediaExcerptValues(
+        string Mode,
+        int WindowStartMinutes,
+        int WindowEndMinutes,
+        int DurationSeconds);
 }

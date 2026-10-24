@@ -108,6 +108,18 @@ public static class FeaturedTrailerSourcePriorities
     public const string Automatic = "automatic";
 }
 
+public static class FeaturedMediaExcerptModes
+{
+    public const string Off = "off";
+    public const string Fallback = "fallback";
+    public const string PreferOverRemote = "prefer_over_remote";
+    public const string Always = "always";
+
+    public const int MaximumWindowMinutes = 600;
+    public const int MinimumDurationSeconds = 10;
+    public const int MaximumDurationSeconds = 120;
+}
+
 public static class FeaturedMultipleTrailerModes
 {
     public const string First = "first";

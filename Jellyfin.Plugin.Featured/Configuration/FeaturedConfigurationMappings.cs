@@ -91,6 +91,10 @@ internal static class FeaturedConfigurationMappings
         target.TrailerEndOffsetSeconds = source.TrailerEndOffsetSeconds;
         target.MultipleTrailerMode = source.MultipleTrailerMode;
         target.AllowTrailersOnMobile = source.AllowTrailersOnMobile;
+        target.MediaExcerptMode = source.MediaExcerptMode;
+        target.MediaExcerptWindowStartMinutes = source.MediaExcerptWindowStartMinutes;
+        target.MediaExcerptWindowEndMinutes = source.MediaExcerptWindowEndMinutes;
+        target.MediaExcerptDurationSeconds = source.MediaExcerptDurationSeconds;
         target.TrailerOverrides = source.Overrides;
     }
 }

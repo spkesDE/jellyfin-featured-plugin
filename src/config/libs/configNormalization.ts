@@ -4,6 +4,7 @@ import type {
   FeaturedPresetTrailerSettings,
   HeroFadeCurve,
   HeroFadePoint,
+  MediaExcerptMode,
   TrailerSourcePriority
 } from '../../types/config';
 
@@ -21,6 +22,10 @@ type HeroLayoutSettings = Pick<
 >;
 
 type TrailerSettings = Pick<FeaturedPluginConfig | FeaturedPresetTrailerSettings, 'TrailerSourcePriority'>;
+type MediaExcerptSettings = Pick<
+  FeaturedPluginConfig | FeaturedPresetTrailerSettings,
+  'MediaExcerptMode' | 'MediaExcerptWindowStartMinutes' | 'MediaExcerptWindowEndMinutes' | 'MediaExcerptDurationSeconds'
+>;
 export type LegacyTrailerFallback = { FallBackToRemoteTrailers?: boolean };
 
 /** Normalizes the duplicated root/preset layout boundary through one compatibility path. */
@@ -67,6 +72,29 @@ export function normalizeTrailerSourcePriority(
     return 'local_only';
   }
   return settings.TrailerSourcePriority;
+}
+
+const MEDIA_EXCERPT_MODES: readonly MediaExcerptMode[] = ['off', 'fallback', 'prefer_over_remote', 'always'];
+
+/** Mirrors the backend excerpt bounds so the editor never shows values the server would rewrite. */
+export function normalizeMediaExcerptSettings(settings: MediaExcerptSettings): void {
+  settings.MediaExcerptMode = MEDIA_EXCERPT_MODES.includes(settings.MediaExcerptMode)
+    ? settings.MediaExcerptMode
+    : 'off';
+  const start = clampInteger(settings.MediaExcerptWindowStartMinutes, 0, 600, 5);
+  settings.MediaExcerptWindowStartMinutes = start;
+  settings.MediaExcerptWindowEndMinutes = clampInteger(
+    settings.MediaExcerptWindowEndMinutes,
+    start,
+    600,
+    Math.max(start, 15)
+  );
+  settings.MediaExcerptDurationSeconds = clampInteger(settings.MediaExcerptDurationSeconds, 10, 120, 30);
+}
+
+function clampInteger(value: unknown, min: number, max: number, fallback: number): number {
+  const number = typeof value === 'number' && Number.isFinite(value) ? Math.round(value) : fallback;
+  return Math.max(min, Math.min(max, number));
 }
 
 function normalizeHeroFade(

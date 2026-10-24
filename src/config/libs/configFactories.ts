@@ -140,6 +140,10 @@ export function createPresetFromConfig(config: FeaturedPluginConfig, name = 'Fea
       TrailerEndOffsetSeconds: config.TrailerEndOffsetSeconds,
       MultipleTrailerMode: config.MultipleTrailerMode,
       AllowTrailersOnMobile: config.AllowTrailersOnMobile,
+      MediaExcerptMode: config.MediaExcerptMode,
+      MediaExcerptWindowStartMinutes: config.MediaExcerptWindowStartMinutes,
+      MediaExcerptWindowEndMinutes: config.MediaExcerptWindowEndMinutes,
+      MediaExcerptDurationSeconds: config.MediaExcerptDurationSeconds,
       Overrides: cloneJsonValue(config.TrailerOverrides)
     }
   };

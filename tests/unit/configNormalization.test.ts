@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { createDefaultConfig } from '../../src/config/libs/configDefaults';
 import { createPresetFromConfig } from '../../src/config/libs/configFactories';
-import { normalizeHeroLayoutSettings, normalizeTrailerSourcePriority } from '../../src/config/libs/configNormalization';
+import {
+  normalizeHeroLayoutSettings,
+  normalizeMediaExcerptSettings,
+  normalizeTrailerSourcePriority
+} from '../../src/config/libs/configNormalization';
+import { normalizeConfig } from '../../src/config/libs/defaults';
 
 describe('configuration normalization boundaries', () => {
   it('normalizes root and preset hero layouts through the same rules', () => {
@@ -57,5 +62,46 @@ describe('configuration normalization boundaries', () => {
     expect(
       normalizeTrailerSourcePriority({ TrailerSourcePriority: 'remote_only' }, { FallBackToRemoteTrailers: false })
     ).toBe('remote_only');
+  });
+
+  it('keeps media excerpts off by default and clamps root and preset excerpt settings', () => {
+    const defaults = createDefaultConfig();
+    expect(defaults.MediaExcerptMode).toBe('off');
+    expect(createPresetFromConfig(defaults).Trailers.MediaExcerptMode).toBe('off');
+
+    const root = createDefaultConfig();
+    const preset = createPresetFromConfig(root).Trailers;
+    for (const target of [root, preset]) {
+      target.MediaExcerptMode = 'sometimes' as typeof target.MediaExcerptMode;
+      target.MediaExcerptWindowStartMinutes = 20.4;
+      target.MediaExcerptWindowEndMinutes = 10;
+      target.MediaExcerptDurationSeconds = 900;
+      normalizeMediaExcerptSettings(target);
+      expect(target.MediaExcerptMode).toBe('off');
+      expect(target.MediaExcerptWindowStartMinutes).toBe(20);
+      expect(target.MediaExcerptWindowEndMinutes).toBe(20);
+      expect(target.MediaExcerptDurationSeconds).toBe(120);
+    }
+  });
+
+  it('fills excerpt settings missing from configurations saved before the feature existed', () => {
+    const legacy = createDefaultConfig() as Partial<ReturnType<typeof createDefaultConfig>>;
+    delete legacy.MediaExcerptMode;
+    delete legacy.MediaExcerptDurationSeconds;
+    const preset = createPresetFromConfig(createDefaultConfig());
+    const legacyTrailers = { ...preset.Trailers } as Partial<typeof preset.Trailers>;
+    delete legacyTrailers.MediaExcerptWindowStartMinutes;
+
+    const config = normalizeConfig({
+      ...legacy,
+      MediaExcerptWindowStartMinutes: -3,
+      Presets: [{ ...preset, Trailers: { ...legacyTrailers, MediaExcerptMode: 'always' } }]
+    });
+
+    expect(config.MediaExcerptMode).toBe('off');
+    expect(config.MediaExcerptWindowStartMinutes).toBe(0);
+    expect(config.MediaExcerptDurationSeconds).toBe(30);
+    expect(config.Presets[0].Trailers.MediaExcerptMode).toBe('always');
+    expect(config.Presets[0].Trailers.MediaExcerptWindowStartMinutes).toBe(0);
   });
 });

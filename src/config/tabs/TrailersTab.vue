@@ -19,6 +19,12 @@ const sourceOptions: SelectOption[] = [
   { value: 'remote_only', label: t('trailers.source.remoteOnly') },
   { value: 'automatic', label: t('trailers.source.automatic') }
 ];
+const excerptOptions: SelectOption[] = [
+  { value: 'off', label: t('trailers.excerpt.off') },
+  { value: 'fallback', label: t('trailers.excerpt.fallback') },
+  { value: 'prefer_over_remote', label: t('trailers.excerpt.preferOverRemote') },
+  { value: 'always', label: t('trailers.excerpt.always') }
+];
 const multipleOptions: SelectOption[] = [
   { value: 'first', label: t('trailers.multiple.first') },
   { value: 'random', label: t('trailers.multiple.random') }
@@ -96,6 +102,44 @@ function addOverride(item: FeaturedSearchItem): void {
           :label="t('trailers.multipleLabel')"
           :options="multipleOptions"
         />
+      </ConfigCard>
+
+      <ConfigCard
+        v-if="store.config.EnableBackgroundTrailers"
+        :title="t('trailers.excerptTitle')"
+        :help="t('trailers.excerptHelp')"
+      >
+        <ConfigSelect
+          v-model="store.config.MediaExcerptMode"
+          :label="t('trailers.excerptMode')"
+          :options="excerptOptions"
+          :help-text="t('trailers.excerptModeHelp')"
+        />
+        <template v-if="store.config.MediaExcerptMode !== 'off'">
+          <ConfigNumber
+            v-model="store.config.MediaExcerptWindowStartMinutes"
+            :label="t('trailers.excerptWindowStart')"
+            :min="0"
+            :max="600"
+            :step="1"
+          />
+          <ConfigNumber
+            v-model="store.config.MediaExcerptWindowEndMinutes"
+            :label="t('trailers.excerptWindowEnd')"
+            :min="store.config.MediaExcerptWindowStartMinutes"
+            :max="600"
+            :step="1"
+          />
+          <ConfigNumber
+            v-model="store.config.MediaExcerptDurationSeconds"
+            :label="t('trailers.excerptDuration')"
+            :min="10"
+            :max="120"
+            :step="5"
+          />
+          <p class="jmp-note">{{ t('trailers.excerptWindowHint') }}</p>
+          <p class="jmp-note">{{ t('trailers.excerptTranscodeHint') }}</p>
+        </template>
       </ConfigCard>
     </div>
 

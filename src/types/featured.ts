@@ -59,6 +59,8 @@ export interface FeaturedTrailer {
   url?: string | null;
   videoId?: string | null;
   itemId?: string | null;
+  startSeconds?: number | null;
+  durationSeconds?: number | null;
 }
 
 import type { FeaturedDisplaySettings } from './display';

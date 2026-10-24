@@ -12,6 +12,7 @@ import {
 import {
   type LegacyTrailerFallback,
   normalizeHeroLayoutSettings,
+  normalizeMediaExcerptSettings,
   normalizeTrailerSourcePriority
 } from './configNormalization';
 
@@ -23,6 +24,7 @@ export function normalizeConfig(value: unknown): FeaturedPluginConfig {
   normalizeHeroLayoutSettings(config);
   config.TrailerSourcePriority = normalizeTrailerSourcePriority(config, source);
   delete config.FallBackToRemoteTrailers;
+  normalizeMediaExcerptSettings(config);
   config.SourceRules = Array.isArray(source.SourceRules)
     ? source.SourceRules.map((rule) => ({
         ...createSourceRule(rule.Type),
@@ -66,6 +68,7 @@ export function normalizeConfig(value: unknown): FeaturedPluginConfig {
         const trailers = { ...fallback.Trailers, ...(legacyTrailers ?? {}) };
         trailers.TrailerSourcePriority = normalizeTrailerSourcePriority(trailers, legacyTrailers);
         delete (trailers as typeof trailers & LegacyTrailerFallback).FallBackToRemoteTrailers;
+        normalizeMediaExcerptSettings(trailers);
         const normalized = {
           ...fallback,
           ...preset,
