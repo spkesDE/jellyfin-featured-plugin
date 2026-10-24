@@ -6,6 +6,7 @@ import {
   localMediaPreviewUrl,
   localTrailerUrl
 } from './htmlVideoPlayer';
+import { MediaExcerptPlayer } from './mediaExcerptPlayer';
 import { TrickplayPlayer } from './trickplayPlayer';
 import type { TrailerPlaybackOptions, TrailerPlayer } from './trailerTypes';
 import { YouTubePlayer } from './youtubePlayer';
@@ -25,6 +26,9 @@ export function createTrailerPlayer(trailer: FeaturedTrailer, options: TrailerPl
   if (trailer.provider === 'media-preview' && trailer.itemId) {
     const url = localMediaPreviewUrl(trailer.itemId);
     return url ? new JellyfinMediaPreviewPlayer(trailer.itemId, options) : null;
+  }
+  if (trailer.provider === 'media-excerpt' && trailer.itemId) {
+    return new MediaExcerptPlayer(trailer.itemId, trailer.startSeconds ?? 0, trailer.durationSeconds ?? 30, options);
   }
   if (trailer.type === 'local' && trailer.itemId) {
     const url = localTrailerUrl(trailer.itemId);

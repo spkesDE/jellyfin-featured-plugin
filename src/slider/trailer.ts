@@ -1,4 +1,5 @@
 export { DirectVideoPlayer, JellyfinLocalPlayer, JellyfinMediaPreviewPlayer } from './htmlVideoPlayer';
+export { MediaExcerptPlayer } from './mediaExcerptPlayer';
 export { TrickplayPlayer } from './trickplayPlayer';
 export { ExternalPlayer, createTrailerPlayer, isMobileTrailerClient } from './trailerFactory';
 export type { TrailerPlaybackOptions, TrailerPlayer } from './trailerTypes';

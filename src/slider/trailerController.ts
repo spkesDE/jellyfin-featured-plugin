@@ -74,6 +74,8 @@ export class TrailerController {
     const trailer = candidates[candidateIndex];
     const isTrickplay = trailer?.provider === 'trickplay';
     const isMediaPreview = trailer?.provider === 'media-preview';
+    // Excerpts and media previews are finite segments: once they end, the backdrop returns instead of looping.
+    const isFiniteSegment = isMediaPreview || trailer?.provider === 'media-excerpt';
     const isFallbackMedia = isTrickplay || isMediaPreview;
     if ((!this.response.enableBackgroundTrailers && !isFallbackMedia) || !trailer || document.hidden) return;
     if (!isTrickplay && !this.response.allowTrailersOnMobile && isMobileTrailerClient()) return;
@@ -130,7 +132,7 @@ export class TrailerController {
             this.callbacks.getActiveIndex() === expectedIndex
           ) {
             this.callbacks.advance();
-          } else if (isMediaPreview && this.callbacks.getActiveIndex() === expectedIndex) {
+          } else if (isFiniteSegment && this.callbacks.getActiveIndex() === expectedIndex) {
             this.stop();
             this.callbacks.restartAutoplay();
           }

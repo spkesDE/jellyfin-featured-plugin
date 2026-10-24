@@ -14,6 +14,28 @@ export function localTrailerUrl(trailerId: string): string {
   );
 }
 
+/** Builds the muted-autoplay-friendly background video shared by every HTML video provider. */
+export function createTrailerVideoElement(url: string, options: TrailerPlaybackOptions): HTMLVideoElement {
+  const element = document.createElement('video');
+  element.className = 'featured-trailer';
+  if (url) element.src = url;
+  element.muted = options.muted;
+  element.defaultMuted = options.muted;
+  element.volume = clamp(options.volume, 0, 100) / 100;
+  element.loop = options.loop && options.endOffsetSeconds === 0;
+  element.autoplay = true;
+  element.playsInline = true;
+  element.preload = 'auto';
+  element.controls = false;
+  element.disablePictureInPicture = true;
+  element.tabIndex = -1;
+  element.setAttribute('playsinline', '');
+  element.setAttribute('webkit-playsinline', '');
+  element.setAttribute('aria-hidden', 'true');
+  if (options.muted) element.setAttribute('muted', '');
+  return element;
+}
+
 abstract class HtmlVideoPlayer implements TrailerPlayer {
   readonly element: HTMLVideoElement;
 
@@ -39,23 +61,7 @@ abstract class HtmlVideoPlayer implements TrailerPlayer {
     this.onEnded = options.onEnded;
     this.onError = options.onError;
 
-    this.element = document.createElement('video');
-    this.element.className = 'featured-trailer';
-    this.element.src = url;
-    this.element.muted = options.muted;
-    this.element.defaultMuted = options.muted;
-    this.element.volume = clamp(options.volume, 0, 100) / 100;
-    this.element.loop = options.loop && options.endOffsetSeconds === 0;
-    this.element.autoplay = true;
-    this.element.playsInline = true;
-    this.element.preload = 'auto';
-    this.element.controls = false;
-    this.element.disablePictureInPicture = true;
-    this.element.tabIndex = -1;
-    this.element.setAttribute('playsinline', '');
-    this.element.setAttribute('webkit-playsinline', '');
-    this.element.setAttribute('aria-hidden', 'true');
-    if (options.muted) this.element.setAttribute('muted', '');
+    this.element = createTrailerVideoElement(url, options);
 
     this.element.addEventListener('loadedmetadata', this.handleLoadedMetadata);
     this.element.addEventListener('timeupdate', this.handleTimeUpdate);
