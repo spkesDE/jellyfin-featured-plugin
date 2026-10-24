@@ -6,7 +6,12 @@
     <title>Jellyfin Featured Config</title>
   </head>
   <body class="dashboardDocument withSectionTabs">
-    <div id="FeaturedConfigPage"><div id="FeaturedConfigApp"></div></div>
+    <!-- Mirrors Jellyfin's dashboard page wrappers so proxied Jellyfin styles lay the page out the same way. -->
+    <main class="mainAnimatedPages skinBody">
+      <div id="FeaturedConfigPage" data-role="page" class="page type-interior pluginConfigurationPage mainAnimatedPage">
+        <div data-role="content"><div id="FeaturedConfigApp"></div></div>
+      </div>
+    </main>
     <script type="module" src="./main.ts"></script>
   </body>
 </html>

@@ -9,3 +9,4 @@ node_modules/
 *.suo
 *.log
 docs/product-roadmap.md
+.env*.local

@@ -1,3 +1,4 @@
+import { mockPreferences } from './mockPreferences';
 import type { FeaturedPluginConfig } from '../../types/config';
 import { cloneJsonValue } from '../../core/clone';
 import { createDefaultConfig, createFeaturedResponseDefaults } from '../libs/defaults';
@@ -31,7 +32,9 @@ export function installMockJellyfin(): void {
       { Name: 'PG-13', RatingScore: { score: 8, subScore: 0 } },
       { Name: 'R', RatingScore: { score: 10, subScore: 0 } }
     ],
-    ajax: async ({ url }) => {
+    ajax: async ({ url, type, data }) => {
+      if (url.includes('featured/preferences'))
+        return mockPreferences(config, url, type, typeof data === 'string' ? data : undefined);
       if (url.includes('featured/config/search')) {
         return {
           items: [
@@ -53,6 +56,7 @@ export function installMockJellyfin(): void {
         };
       }
       if (url.includes('featured/items/displayed')) return { ok: true };
+      if (url.includes('featured/config/youtube-api-key')) return { apiKeyConfigured: false };
       if (url.includes('featured/config/history/clear')) return { ok: true, selectedUsers: 1, historiesRemoved: 1 };
       if (url.includes('Items/Filters')) {
         return {
@@ -97,7 +101,7 @@ export function installMockJellyfin(): void {
                 (rule) => rule.Enabled && rule.Type === 'MANUAL_LISTS' && rule.ManualListIds.includes(list.Id)
               )
           ).length,
-          userProfileApplied: config.UserProfiles.some((profile) => profile.Enabled && profile.UserId === 'editor-1'),
+          userProfileApplied: true,
           repeatCooldownDays: config.RepeatCooldownDays,
           repeatCooldownHours: config.RepeatCooldownDays * 24,
           historyEntries: 12,
