@@ -131,12 +131,12 @@ internal sealed partial class FeaturedRuleEngine
         HashSet<Guid> allowedItemIds,
         HashSet<Guid> excludedIds,
         bool allowEpisodes,
-        bool useTrickplayFallback)
+        bool allowImagelessVideos)
     {
         return allowedItemIds.Contains(item.Id)
             && !excludedIds.Contains(item.Id)
             && IsSupportedItemType(item, allowEpisodes)
-            && ((useTrickplayFallback && item is Video)
+            && ((allowImagelessVideos && item is Video)
                 || item.HasImage(MediaBrowser.Model.Entities.ImageType.Backdrop)
                 || item.HasImage(MediaBrowser.Model.Entities.ImageType.Primary));
     }

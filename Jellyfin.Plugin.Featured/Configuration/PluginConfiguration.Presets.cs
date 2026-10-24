@@ -123,9 +123,11 @@ public sealed class FeaturedPresetTrailerSettings
 {
     public bool EnableBackgroundTrailers { get; set; }
     public string TrailerSourcePriority { get; set; } = FeaturedTrailerSourcePriorities.PreferLocal;
+    public FeaturedMediaPriorityEntry[]? DefaultMediaPriority { get; set; }
     // Read only for migration of presets saved before trailer source owned the fallback.
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public bool? FallBackToRemoteTrailers { get; set; }
+    public string YouTubeQualityFilter { get; set; } = "disabled";
     public bool StartTrailersMuted { get; set; } = true;
     public bool ShowTrailerControls { get; set; } = true;
     public string TrailerVolumeSliderDirection { get; set; } = "down";

@@ -28,8 +28,11 @@ public sealed class FeaturedPersonalizationDisplayTests : FeaturedPreparedCacheT
                     Id = visibleSourceId,
                     Type = FeaturedSourceTypes.Random,
                     UserIds = [_user.Id.ToString("N")],
-                    UseTrickplayFallback = true,
-                    UseMediaPreviewFallback = true
+                    MediaPriority =
+                    [
+                        new FeaturedMediaPriorityEntry { Type = FeaturedMediaPriorityTypes.Trickplay, Enabled = true },
+                        new FeaturedMediaPriorityEntry { Type = FeaturedMediaPriorityTypes.LocalTrailer, Enabled = false }
+                    ]
                 },
                 new FeaturedSourceRule
                 {
@@ -44,8 +47,10 @@ public sealed class FeaturedPersonalizationDisplayTests : FeaturedPreparedCacheT
 
         FeaturedSourceRule source = Assert.Single(effective.SourceRules);
         Assert.Equal(visibleSourceId, source.Id);
-        Assert.True(source.UseTrickplayFallback);
-        Assert.True(source.UseMediaPreviewFallback);
+        Assert.Equal(
+            [FeaturedMediaPriorityTypes.Trickplay, FeaturedMediaPriorityTypes.LocalTrailer],
+            source.MediaPriority.Select(entry => entry.Type));
+        Assert.True(source.MediaPriority[0].Enabled);
         Assert.Equal(_user.Id.ToString("N"), Assert.Single(source.UserIds));
     }
 

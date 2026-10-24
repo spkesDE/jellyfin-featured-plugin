@@ -133,6 +133,9 @@ public sealed class FeaturedTrailerDto
     public required string Type { get; init; }
     public required string Provider { get; init; }
 
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public bool YouTubeQualityFilterEnabled { get; set; }
+
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Name { get; init; }
 

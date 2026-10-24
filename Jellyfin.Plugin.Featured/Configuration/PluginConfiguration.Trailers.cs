@@ -7,10 +7,15 @@ public sealed partial class PluginConfiguration
     public bool EnableBackgroundTrailers { get; set; } = false;
     public string TrailerSourcePriority { get; set; } = FeaturedTrailerSourcePriorities.PreferLocal;
 
+    // Playback order new sources start with. Null in configurations saved before it existed; the normalizer then
+    // derives it from TrailerSourcePriority.
+    public FeaturedMediaPriorityEntry[]? DefaultMediaPriority { get; set; }
+
     // Read only for migration of configurations saved before trailer source owned the fallback.
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public bool? FallBackToRemoteTrailers { get; set; }
 
+    public string YouTubeQualityFilter { get; set; } = "disabled";
     public bool StartTrailersMuted { get; set; } = true;
     public bool ShowTrailerControls { get; set; } = true;
     public string TrailerVolumeSliderDirection { get; set; } = "down";

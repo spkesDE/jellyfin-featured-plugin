@@ -36,7 +36,10 @@ test('persisted trailer settings and serialized responses retain their public co
   assert.doesNotMatch(trailerTab, /TrailerVolumeSliderDirection|trailers\.volumeDirection/);
   assert.doesNotMatch(displayTab, /TrailerVolumeSliderDirection|trailers\.volumeDirection/);
   assert.match(normalizer, /NormalizeTrailerUrl[\s\S]*?Uri\.UriSchemeHttp[\s\S]*?Uri\.UriSchemeHttps/);
-  assert.match(resolver, /LocalOnly:[\s\S]*?AddRange\(local\)[\s\S]*?RemoteOnly:[\s\S]*?AddRange\(remote\)/);
+  assert.match(
+    resolver,
+    /LocalTrailer when includeTrailers[\s\S]*?ResolveLocal\([\s\S]*?RemoteTrailer when includeTrailers[\s\S]*?ResolveRemote\(/
+  );
   assert.match(resolver, /provider = videoId is not null[\s\S]*?"youtube"[\s\S]*?"direct"[\s\S]*?"external"/);
   assert.match(response, /public FeaturedTrailerDto\? Trailer \{ get; init; \}/);
   assert.match(response, /IReadOnlyList<FeaturedTrailerDto>\? Trailers \{ get; init; \}/);

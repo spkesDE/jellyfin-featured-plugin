@@ -18,86 +18,58 @@ public sealed class TrailerResolver
         _libraryManager = libraryManager;
     }
 
-    public FeaturedTrailerDto? Resolve(
-        BaseItem item,
-        Jellyfin.Database.Implementations.Entities.User activeUser,
-        PluginConfiguration config)
-        => ResolveCandidates(item, activeUser, config).FirstOrDefault();
-
+    /// <summary>
+    /// Resolves playback candidates in the source's media priority order. Trailers, including the manual override,
+    /// are only offered when <paramref name="includeTrailers"/> is set; excerpts and trickplay come from the item's
+    /// own video and also stand in for missing artwork.
+    /// </summary>
     public IReadOnlyList<FeaturedTrailerDto> ResolveCandidates(
         BaseItem item,
         Jellyfin.Database.Implementations.Entities.User activeUser,
-        PluginConfiguration config)
+        PluginConfiguration config,
+        IReadOnlyList<string> mediaPriority,
+        bool includeTrailers,
+        string youTubeQualityFilter = "inherit")
     {
         List<FeaturedTrailerDto> candidates = [];
-        FeaturedTrailerOverride? manual = config.TrailerOverrides
-            .FirstOrDefault(entry => string.Equals(entry.ItemId, item.Id.ToString(), StringComparison.OrdinalIgnoreCase));
-        FeaturedTrailerDto? manualTrailer = ResolveManual(manual, activeUser);
-        if (manualTrailer is not null) candidates.Add(manualTrailer);
-
-        string priority = config.TrailerSourcePriority;
-        IReadOnlyList<FeaturedTrailerDto> local = [];
-        IReadOnlyList<FeaturedTrailerDto> remote = [];
-        if (item is IHasTrailers trailers)
+        if (includeTrailers)
         {
-            local = priority is FeaturedTrailerSourcePriorities.RemoteOnly or FeaturedTrailerSourcePriorities.ExcerptOnly
-                ? [] : ResolveLocal(trailers, activeUser, config.MultipleTrailerMode);
-            remote = priority is FeaturedTrailerSourcePriorities.LocalOnly or FeaturedTrailerSourcePriorities.ExcerptOnly
-                ? [] : ResolveRemote(trailers, config.MultipleTrailerMode);
+            // The manual override is the administrator's explicit per-item choice, so it always plays first.
+            FeaturedTrailerOverride? manual = config.TrailerOverrides
+                .FirstOrDefault(entry => string.Equals(entry.ItemId, item.Id.ToString(), StringComparison.OrdinalIgnoreCase));
+            FeaturedTrailerDto? manualTrailer = ResolveManual(manual, activeUser);
+            if (manualTrailer is not null) candidates.Add(manualTrailer);
         }
 
-        FeaturedTrailerDto? excerpt = FeaturedTrailerSourcePriorities.IncludesExcerpt(priority)
-            ? ResolveExcerpt(item, activeUser, config)
-            : null;
-        AddBySourcePriority(candidates, priority, local, remote, excerpt is null ? [] : [excerpt]);
+        foreach (string type in mediaPriority)
+        {
+            switch (type)
+            {
+                case FeaturedMediaPriorityTypes.LocalTrailer when includeTrailers && item is IHasTrailers trailers:
+                    candidates.AddRange(ResolveLocal(trailers, activeUser, config.MultipleTrailerMode));
+                    break;
+                case FeaturedMediaPriorityTypes.RemoteTrailer when includeTrailers && item is IHasTrailers trailers:
+                    candidates.AddRange(ResolveRemote(trailers, config.MultipleTrailerMode));
+                    break;
+                case FeaturedMediaPriorityTypes.MediaExcerpt:
+                    FeaturedTrailerDto? excerpt = ResolveExcerpt(item, activeUser, config);
+                    if (excerpt is not null) candidates.Add(excerpt);
+                    break;
+                case FeaturedMediaPriorityTypes.Trickplay when item is Video:
+                    candidates.Add(CreateTrickplay(item));
+                    break;
+            }
+        }
+
+        bool filterEnabled = IsYouTubeQualityFilterEnabled(youTubeQualityFilter, config.YouTubeQualityFilter);
+        foreach (FeaturedTrailerDto candidate in candidates)
+        {
+            candidate.YouTubeQualityFilterEnabled = candidate.Provider == "youtube" && filterEnabled;
+        }
 
         return candidates
             .DistinctBy(GetCandidateKey, StringComparer.OrdinalIgnoreCase)
             .ToArray();
-    }
-
-    /// <summary>
-    /// Appends the resolved sources in the configured order. Callers add a manual override first because it is the
-    /// administrator's explicit per-item choice; every later candidate acts as a playback fallback.
-    /// </summary>
-    internal static void AddBySourcePriority(
-        List<FeaturedTrailerDto> candidates,
-        string priority,
-        IReadOnlyList<FeaturedTrailerDto> local,
-        IReadOnlyList<FeaturedTrailerDto> remote,
-        IReadOnlyList<FeaturedTrailerDto> excerpt)
-    {
-        switch (priority)
-        {
-            case FeaturedTrailerSourcePriorities.LocalOnly:
-                candidates.AddRange(local);
-                break;
-            case FeaturedTrailerSourcePriorities.RemoteOnly:
-                candidates.AddRange(remote);
-                break;
-            case FeaturedTrailerSourcePriorities.PreferRemote:
-                candidates.AddRange(remote);
-                candidates.AddRange(local);
-                break;
-            case FeaturedTrailerSourcePriorities.LocalRemoteExcerpt:
-                candidates.AddRange(local);
-                candidates.AddRange(remote);
-                candidates.AddRange(excerpt);
-                break;
-            case FeaturedTrailerSourcePriorities.LocalExcerptRemote:
-                candidates.AddRange(local);
-                candidates.AddRange(excerpt);
-                candidates.AddRange(remote);
-                break;
-            case FeaturedTrailerSourcePriorities.ExcerptOnly:
-                candidates.AddRange(excerpt);
-                break;
-            default:
-                // PreferLocal and Automatic keep their pre-excerpt behaviour.
-                candidates.AddRange(local);
-                candidates.AddRange(remote);
-                break;
-        }
     }
 
     /// <summary>
@@ -219,8 +191,24 @@ public sealed class TrailerResolver
         return CollectionRandomizer.ShuffledCopy(candidates);
     }
 
+    internal static bool IsYouTubeQualityFilterEnabled(string? sourceOverride, string? globalSetting)
+        => sourceOverride switch
+        {
+            "enabled" => true,
+            "disabled" => false,
+            _ => globalSetting == "hd_only"
+        };
+
     private static string GetCandidateKey(FeaturedTrailerDto trailer)
         => $"{trailer.Provider}|{trailer.ItemId ?? trailer.VideoId ?? trailer.Url}";
+
+    private static FeaturedTrailerDto CreateTrickplay(BaseItem item) => new()
+    {
+        Type = "trickplay",
+        Provider = "trickplay",
+        Name = item.Name,
+        ItemId = item.Id.ToString()
+    };
 
     private static FeaturedTrailerDto CreateLocal(Guid itemId, string? name) => new()
     {

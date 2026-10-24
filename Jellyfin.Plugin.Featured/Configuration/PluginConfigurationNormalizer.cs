@@ -59,12 +59,6 @@ internal static class PluginConfigurationNormalizer
             _ => FrontendInjectionMethods.Automatic
         };
 
-        config.SourceRules ??= [];
-        config.SourceRules = config.SourceRules
-            .Where(rule => rule is not null && ValidSourceTypes.Contains(rule.Type))
-            .Select(NormalizeSourceRule)
-            .Take(50)
-            .ToArray();
         config.GlobalFilters = NormalizeFilters(config.GlobalFilters);
         config.ManualLists = NormalizeManualLists(config.ManualLists);
         config.UserProfiles = NormalizeUserProfiles(config.UserProfiles);
@@ -91,7 +85,10 @@ internal static class PluginConfigurationNormalizer
             config.MultipleTrailerMode,
             config.TrailerVolumeSliderDirection,
             config.TrailerOverrides);
+        config.YouTubeQualityFilter = config.YouTubeQualityFilter == "hd_only" ? "hd_only" : "disabled";
         config.TrailerSourcePriority = trailers.SourcePriority;
+        config.SourceRules = NormalizeSourceRules(config.SourceRules, config.TrailerSourcePriority);
+        config.DefaultMediaPriority = NormalizeDefaultMediaPriority(config.DefaultMediaPriority, config.TrailerSourcePriority);
         config.TrailerDelayMilliseconds = trailers.DelayMilliseconds;
         config.TrailerStartOffsetSeconds = trailers.StartOffsetSeconds;
         config.TrailerEndOffsetSeconds = trailers.EndOffsetSeconds;
@@ -154,11 +151,6 @@ internal static class PluginConfigurationNormalizer
                 preset.EndTime = NormalizeTime(preset.EndTime, "23:59");
                 preset.AnnualStart = NormalizeMonthDay(preset.AnnualStart, "12-01");
                 preset.AnnualEnd = NormalizeMonthDay(preset.AnnualEnd, "12-31");
-                preset.SourceRules = (preset.SourceRules ?? [])
-                    .Where(rule => rule is not null && ValidSourceTypes.Contains(rule.Type))
-                    .Select(NormalizeSourceRule)
-                    .Take(50)
-                    .ToArray();
                 preset.GlobalFilters = NormalizeFilters(preset.GlobalFilters);
                 preset.PersonalizationPolicy ??= new FeaturedPersonalizationPolicy();
                 preset.Mixer ??= new FeaturedPresetMixerSettings();
@@ -170,6 +162,10 @@ internal static class PluginConfigurationNormalizer
                 NormalizePresetLayout(preset.Layout);
                 preset.Trailers ??= new FeaturedPresetTrailerSettings();
                 NormalizePresetTrailers(preset.Trailers);
+                preset.SourceRules = NormalizeSourceRules(preset.SourceRules, preset.Trailers.TrailerSourcePriority);
+                preset.Trailers.DefaultMediaPriority = NormalizeDefaultMediaPriority(
+                    preset.Trailers.DefaultMediaPriority,
+                    preset.Trailers.TrailerSourcePriority);
                 return preset;
             })
             .DistinctBy(preset => preset.Id, StringComparer.OrdinalIgnoreCase)
@@ -272,6 +268,7 @@ internal static class PluginConfigurationNormalizer
             trailers.MultipleTrailerMode,
             trailers.TrailerVolumeSliderDirection,
             trailers.Overrides);
+        trailers.YouTubeQualityFilter = trailers.YouTubeQualityFilter == "hd_only" ? "hd_only" : "disabled";
         trailers.TrailerSourcePriority = normalized.SourcePriority;
         trailers.TrailerDelayMilliseconds = normalized.DelayMilliseconds;
         trailers.TrailerStartOffsetSeconds = normalized.StartOffsetSeconds;
@@ -343,10 +340,25 @@ internal static class PluginConfigurationNormalizer
             NormalizeTrailerOverrides(overrides));
     }
 
-    private static FeaturedSourceRule NormalizeSourceRule(FeaturedSourceRule rule)
+    private static FeaturedMediaPriorityEntry[] NormalizeDefaultMediaPriority(
+        FeaturedMediaPriorityEntry[]? entries,
+        string trailerSourcePriority)
+        => entries is null
+            ? FeaturedMediaPriorityTypes.FromTrailerSourcePriority(trailerSourcePriority)
+            : FeaturedMediaPriorityTypes.Normalize(entries);
+
+    private static FeaturedSourceRule[] NormalizeSourceRules(FeaturedSourceRule[]? rules, string trailerSourcePriority)
+        => (rules ?? [])
+            .Where(rule => rule is not null && ValidSourceTypes.Contains(rule.Type))
+            .Select(rule => NormalizeSourceRule(rule, trailerSourcePriority))
+            .Take(50)
+            .ToArray();
+
+    private static FeaturedSourceRule NormalizeSourceRule(FeaturedSourceRule rule, string trailerSourcePriority)
     {
         rule.Id = string.IsNullOrWhiteSpace(rule.Id) ? Guid.NewGuid().ToString("N") : rule.Id.Trim();
         rule.Type = rule.Type.ToUpperInvariant();
+        rule.YouTubeQualityFilter = rule.YouTubeQualityFilter is "enabled" or "disabled" ? rule.YouTubeQualityFilter : "inherit";
         rule.Weight = Math.Clamp(rule.Weight, 1, 100);
         rule.MinimumItems = Math.Clamp(rule.MinimumItems, 0, 100);
         rule.MaximumItems = Math.Clamp(rule.MaximumItems, 0, 100);
@@ -363,6 +375,16 @@ internal static class PluginConfigurationNormalizer
         rule.Tags = NormalizeValues(rule.Tags);
         rule.RecentDays = Math.Clamp(rule.RecentDays, 1, 3650);
         rule.Filters = NormalizeFilters(rule.Filters);
+        // Sources saved before the media priority list still carry the fallback booleans; their trailer order came
+        // from the trailer source priority of the same scope.
+        rule.MediaPriority = rule.UseTrickplayFallback is not null || rule.UseMediaPreviewFallback is not null
+            ? FeaturedMediaPriorityTypes.FromTrailerSourcePriority(
+                trailerSourcePriority,
+                rule.UseMediaPreviewFallback == true,
+                rule.UseTrickplayFallback == true)
+            : FeaturedMediaPriorityTypes.Normalize(rule.MediaPriority ?? []);
+        rule.UseTrickplayFallback = null;
+        rule.UseMediaPreviewFallback = null;
         return rule;
     }
 

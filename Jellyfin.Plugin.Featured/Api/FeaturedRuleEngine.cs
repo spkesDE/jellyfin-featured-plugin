@@ -50,10 +50,7 @@ internal sealed partial class FeaturedRuleEngine
         Dictionary<Guid, FeaturedItemSelectionReason> itemReasons = [];
         HashSet<string> selectedKeys = new(StringComparer.OrdinalIgnoreCase);
         FeaturedDiversityTracker diversity = new(_config);
-        FeaturedUserProfile? profile = personalization?.Profile ?? _config.UserProfiles.FirstOrDefault(candidate =>
-            candidate.Enabled
-            && Guid.TryParse(candidate.UserId, out Guid userId)
-            && userId == activeUser.Id);
+        FeaturedUserProfile? profile = personalization?.Profile;
         string[] excludedGenres = personalization?.ExcludedGenres ?? [];
 
         List<(FeaturedSourceRule Rule, List<BaseItem> Items)> candidatesByRule = (personalization?.SourceRules ?? _config.SourceRules)
@@ -120,7 +117,7 @@ internal sealed partial class FeaturedRuleEngine
                     allowedItemIds,
                     requestExcludedIds,
                     rule.Type is FeaturedSourceTypes.ContinueWatching or FeaturedSourceTypes.NextUp,
-                    rule.UseTrickplayFallback || rule.UseMediaPreviewFallback))
+                    FeaturedMediaPriorityTypes.CanFillMissingImages(rule.MediaPriority)))
                 .DistinctBy(item => item.Id)
                 .ToList();
             List<BaseItem> eligible = eligibleBeforeCooldown

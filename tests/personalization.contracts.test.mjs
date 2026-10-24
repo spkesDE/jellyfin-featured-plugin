@@ -253,7 +253,7 @@ test('warm prepared responses reuse prebuilt DTOs and expose bypass diagnostics'
   assert.match(itemsController, /\$"cold-filled \(\{initialPreparedCacheStatus\}\)"/);
   assert.match(preparedCache, /eagerlyBuildDtos: false, replaceExisting: false/);
   assert.match(preparedCache, /eagerlyBuildDtos: true, replaceExisting: true/);
-  assert.match(dtoFactory, /ResolveCandidates\(item, activeUser, config\)/);
+  assert.match(dtoFactory, /ResolveCandidates\(\s*item,\s*activeUser,\s*config,/);
 });
 
 test('rule engine user access stays in memory and is evaluated once per distinct candidate', async () => {

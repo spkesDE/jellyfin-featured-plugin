@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Jellyfin.Plugin.Featured;
 
 public sealed class FeaturedSourceRule
@@ -18,9 +20,17 @@ public sealed class FeaturedSourceRule
 
     public bool AllowBackgroundTrailers { get; set; } = true;
 
-    public bool UseTrickplayFallback { get; set; }
+    public string YouTubeQualityFilter { get; set; } = "inherit";
 
-    public bool UseMediaPreviewFallback { get; set; }
+    public FeaturedMediaPriorityEntry[] MediaPriority { get; set; } = FeaturedMediaPriorityTypes.CreateDefault();
+
+    // Read only for migration of sources saved before the media priority list.
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public bool? UseTrickplayFallback { get; set; }
+
+    // Read only for migration of sources saved before the media priority list.
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public bool? UseMediaPreviewFallback { get; set; }
 
     public string[] UserIds { get; set; } = [];
 
@@ -39,6 +49,100 @@ public sealed class FeaturedSourceRule
     public int RecentDays { get; set; } = 30;
 
     public FeaturedFilterRule[] Filters { get; set; } = [];
+}
+
+public sealed class FeaturedMediaPriorityEntry
+{
+    public string Type { get; set; } = FeaturedMediaPriorityTypes.LocalTrailer;
+
+    public bool Enabled { get; set; } = true;
+}
+
+/// <summary>
+/// The media a source tries, in order, before the banner falls back to its still image.
+/// </summary>
+public static class FeaturedMediaPriorityTypes
+{
+    public const string LocalTrailer = "local_trailer";
+    public const string RemoteTrailer = "remote_trailer";
+    public const string MediaExcerpt = "media_excerpt";
+    public const string Trickplay = "trickplay";
+
+    public static readonly string[] All = [LocalTrailer, RemoteTrailer, MediaExcerpt, Trickplay];
+
+    public static bool IsTrailer(string type) => type is LocalTrailer or RemoteTrailer;
+
+    public static FeaturedMediaPriorityEntry[] CreateDefault()
+        => FromTrailerSourcePriority(FeaturedTrailerSourcePriorities.PreferLocal);
+
+    /// <summary>
+    /// Maps a trailer source priority onto a priority list. Used for new sources and to migrate sources saved
+    /// before each source owned its own list.
+    /// </summary>
+    public static FeaturedMediaPriorityEntry[] FromTrailerSourcePriority(
+        string? priority,
+        bool useMediaPreviewFallback = false,
+        bool useTrickplayFallback = false)
+    {
+        (string Type, bool Enabled)[] trailers = priority switch
+        {
+            FeaturedTrailerSourcePriorities.PreferRemote => [(RemoteTrailer, true), (LocalTrailer, true)],
+            FeaturedTrailerSourcePriorities.LocalOnly => [(LocalTrailer, true), (RemoteTrailer, false)],
+            FeaturedTrailerSourcePriorities.RemoteOnly => [(RemoteTrailer, true), (LocalTrailer, false)],
+            FeaturedTrailerSourcePriorities.LocalRemoteExcerpt =>
+                [(LocalTrailer, true), (RemoteTrailer, true), (MediaExcerpt, true)],
+            FeaturedTrailerSourcePriorities.LocalExcerptRemote =>
+                [(LocalTrailer, true), (MediaExcerpt, true), (RemoteTrailer, true)],
+            FeaturedTrailerSourcePriorities.ExcerptOnly =>
+                [(MediaExcerpt, true), (LocalTrailer, false), (RemoteTrailer, false)],
+            _ => [(LocalTrailer, true), (RemoteTrailer, true)]
+        };
+        List<FeaturedMediaPriorityEntry> entries = trailers
+            .Select(entry => new FeaturedMediaPriorityEntry
+            {
+                Type = entry.Type,
+                Enabled = entry.Enabled || (entry.Type == MediaExcerpt && useMediaPreviewFallback)
+            })
+            .ToList();
+        if (entries.All(entry => entry.Type != MediaExcerpt))
+        {
+            entries.Add(new FeaturedMediaPriorityEntry { Type = MediaExcerpt, Enabled = useMediaPreviewFallback });
+        }
+
+        entries.Add(new FeaturedMediaPriorityEntry { Type = Trickplay, Enabled = useTrickplayFallback });
+        return entries.ToArray();
+    }
+
+    /// <summary>
+    /// Keeps each known type exactly once in its saved order and appends missing types disabled.
+    /// </summary>
+    public static FeaturedMediaPriorityEntry[] Normalize(IEnumerable<FeaturedMediaPriorityEntry?> entries)
+    {
+        List<FeaturedMediaPriorityEntry> normalized = entries
+            .Where(entry => entry is not null)
+            .Select(entry => new FeaturedMediaPriorityEntry
+            {
+                Type = All.FirstOrDefault(type => string.Equals(type, entry!.Type?.Trim(), StringComparison.OrdinalIgnoreCase))
+                    ?? string.Empty,
+                Enabled = entry!.Enabled
+            })
+            .Where(entry => entry.Type.Length > 0)
+            .DistinctBy(entry => entry.Type)
+            .ToList();
+        normalized.AddRange(All
+            .Where(type => normalized.All(entry => entry.Type != type))
+            .Select(type => new FeaturedMediaPriorityEntry { Type = type, Enabled = false }));
+        return normalized.ToArray();
+    }
+
+    /// <summary>
+    /// Excerpts and trickplay come from the video itself, so they can stand in for missing artwork.
+    /// </summary>
+    public static bool CanFillMissingImages(IEnumerable<FeaturedMediaPriorityEntry> entries)
+        => entries.Any(entry => entry.Enabled && !IsTrailer(entry.Type));
+
+    public static string[] EnabledTypes(IEnumerable<FeaturedMediaPriorityEntry> entries)
+        => entries.Where(entry => entry.Enabled).Select(entry => entry.Type).ToArray();
 }
 
 public sealed class FeaturedFilterRule
@@ -109,9 +213,6 @@ public static class FeaturedTrailerSourcePriorities
     public const string LocalRemoteExcerpt = "local_remote_excerpt";
     public const string LocalExcerptRemote = "local_excerpt_remote";
     public const string ExcerptOnly = "excerpt_only";
-
-    public static bool IncludesExcerpt(string? priority)
-        => priority is LocalRemoteExcerpt or LocalExcerptRemote or ExcerptOnly;
 }
 
 public static class FeaturedMediaExcerptLimits

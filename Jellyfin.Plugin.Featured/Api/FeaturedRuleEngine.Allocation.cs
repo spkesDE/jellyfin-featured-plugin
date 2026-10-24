@@ -120,8 +120,8 @@ internal sealed partial class FeaturedRuleEngine
                 pool.Rule.Id,
                 pool.Rule.Type,
                 pool.Rule.AllowBackgroundTrailers,
-                pool.Rule.UseTrickplayFallback,
-                pool.Rule.UseMediaPreviewFallback);
+                FeaturedMediaPriorityTypes.EnabledTypes(pool.Rule.MediaPriority),
+                pool.Rule.YouTubeQualityFilter);
             pool.Stats.Returned += 1;
             if (cooldownRelaxed) pool.Stats.CooldownRelaxed += 1;
             return true;

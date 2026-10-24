@@ -17,6 +17,9 @@ public sealed class PluginServiceRegistrator : IPluginServiceRegistrator
         serviceCollection.AddSingleton<FeaturedDismissalStore>();
         serviceCollection.AddSingleton<FeaturedPersonalizationService>();
         serviceCollection.AddSingleton<FeaturedPreferenceOptionsCache>();
+        serviceCollection.AddHttpClient(YouTubeTrailerQualityService.HttpClientName)
+            .RedactLoggedHeaders(["X-Goog-Api-Key"]);
+        serviceCollection.AddSingleton<YouTubeTrailerQualityService>();
         serviceCollection.AddSingleton<TrailerResolver>();
         serviceCollection.AddSingleton<FeaturedItemDtoFactory>();
         serviceCollection.AddSingleton<FeaturedCandidateCache>();

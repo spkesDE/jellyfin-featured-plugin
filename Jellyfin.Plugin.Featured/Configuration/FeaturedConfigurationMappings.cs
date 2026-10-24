@@ -81,6 +81,8 @@ internal static class FeaturedConfigurationMappings
     {
         target.EnableBackgroundTrailers = source.EnableBackgroundTrailers;
         target.TrailerSourcePriority = source.TrailerSourcePriority;
+        target.DefaultMediaPriority = source.DefaultMediaPriority;
+        target.YouTubeQualityFilter = source.YouTubeQualityFilter;
         target.StartTrailersMuted = source.StartTrailersMuted;
         target.ShowTrailerControls = source.ShowTrailerControls;
         target.TrailerVolumeSliderDirection = source.TrailerVolumeSliderDirection;

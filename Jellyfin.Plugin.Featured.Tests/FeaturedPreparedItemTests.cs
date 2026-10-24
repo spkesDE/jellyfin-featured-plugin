@@ -22,7 +22,6 @@ public sealed class FeaturedPreparedItemTests : FeaturedPreparedCacheTestBase
         PluginConfiguration config = new()
         {
             EnableBackgroundTrailers = true,
-            TrailerSourcePriority = FeaturedTrailerSourcePriorities.RemoteOnly,
             TrailerOverrides = source.Select(item => new FeaturedTrailerOverride
             {
                 ItemId = item.Id.ToString(),
@@ -35,8 +34,9 @@ public sealed class FeaturedPreparedItemTests : FeaturedPreparedCacheTestBase
             [], 0, new FeaturedDisplayPreferences(true, true, true, true, true), false);
         Dictionary<Guid, FeaturedItemSelectionReason> reasons = new()
         {
-            [source[0].Id] = new("source", FeaturedSourceTypes.Random, false),
-            [source[1].Id] = new("source", FeaturedSourceTypes.Random, true)
+            // Local trailer lookup needs a full library, so the sources only try remote trailers.
+            [source[0].Id] = new("source", FeaturedSourceTypes.Random, false, [FeaturedMediaPriorityTypes.RemoteTrailer]),
+            [source[1].Id] = new("source", FeaturedSourceTypes.Random, true, [FeaturedMediaPriorityTypes.RemoteTrailer])
         };
         _cache.StoreRequestPool(_user, config, personalization,
             new FeaturedSelection(source, [], false,

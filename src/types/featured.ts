@@ -58,6 +58,7 @@ export interface FeaturedTrailer {
   name?: string | null;
   url?: string | null;
   videoId?: string | null;
+  youTubeQualityFilterEnabled?: boolean;
   itemId?: string | null;
   startSeconds?: number | null;
   durationSeconds?: number | null;

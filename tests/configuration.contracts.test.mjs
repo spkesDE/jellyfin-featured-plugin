@@ -281,12 +281,16 @@ test('source-scoped media fallback, resolution, and user visibility flow through
   ]);
   assert.match(
     configuration,
-    /class FeaturedSourceRule[\s\S]*?UseTrickplayFallback[\s\S]*?UseMediaPreviewFallback[\s\S]*?UserIds/
+    /class FeaturedSourceRule[\s\S]*?MediaPriority[\s\S]*?UseTrickplayFallback[\s\S]*?UseMediaPreviewFallback[\s\S]*?UserIds/
   );
   assert.match(normalizer, /rule\.UserIds = NormalizeValues\(rule\.UserIds\)/);
   assert.match(personalization, /rule\.UserIds\.Length ===? 0|rule\.UserIds\.Length == 0/);
   assert.match(engine, /IsSourceVisibleToUser\(rule, activeUser\.Id\)/);
-  assert.match(factory, /trailers\.Count == 0[\s\S]*?Provider = "media-preview"[\s\S]*?Provider = "trickplay"/);
+  assert.match(factory, /includeTrailers \|\| !hasImage[\s\S]*?ResolveCandidates\([\s\S]*?mediaPriority/);
+  assert.match(
+    normalizer,
+    /FeaturedMediaPriorityTypes\.FromTrailerSourcePriority\([\s\S]*?rule\.UseTrickplayFallback = null/
+  );
   assert.match(
     defaults,
     /UseMediaPreviewFallback:\s*false[\s\S]*?UseTrickplayFallback:\s*false[\s\S]*?UserIds:\s*\[\]/

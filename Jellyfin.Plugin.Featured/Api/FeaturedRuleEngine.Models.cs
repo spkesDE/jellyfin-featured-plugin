@@ -35,8 +35,8 @@ internal sealed record FeaturedItemSelectionReason(
     string RuleId,
     string SourceType,
     bool AllowBackgroundTrailers,
-    bool UseTrickplayFallback = false,
-    bool UseMediaPreviewFallback = false);
+    IReadOnlyList<string>? MediaPriority = null,
+    string YouTubeQualityFilter = "inherit");
 
 internal sealed record FeaturedRuleEngineTiming(
     double SourceCandidatesMilliseconds,

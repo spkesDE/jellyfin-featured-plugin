@@ -9,6 +9,7 @@ namespace Jellyfin.Plugin.Featured.Tests;
 public sealed class TrailerResolverExcerptTests : FeaturedPreparedCacheTestBase
 {
     private const string YouTubeUrl = "https://www.youtube.com/watch?v=example12345";
+    private static readonly string[] ExcerptOnly = [FeaturedMediaPriorityTypes.MediaExcerpt];
 
     [Theory]
     [InlineData(0d, 300)]
@@ -41,45 +42,70 @@ public sealed class TrailerResolverExcerptTests : FeaturedPreparedCacheTestBase
     }
 
     [Theory]
-    [InlineData(FeaturedTrailerSourcePriorities.LocalRemoteExcerpt, new[] { "local", "remote", "excerpt" })]
-    [InlineData(FeaturedTrailerSourcePriorities.LocalExcerptRemote, new[] { "local", "excerpt", "remote" })]
-    [InlineData(FeaturedTrailerSourcePriorities.ExcerptOnly, new[] { "excerpt" })]
-    [InlineData(FeaturedTrailerSourcePriorities.PreferLocal, new[] { "local", "remote" })]
-    [InlineData(FeaturedTrailerSourcePriorities.Automatic, new[] { "local", "remote" })]
-    [InlineData(FeaturedTrailerSourcePriorities.PreferRemote, new[] { "remote", "local" })]
-    public void SourcePriorityOrdersExcerptWithTrailers(string priority, string[] expected)
+    [InlineData(FeaturedTrailerSourcePriorities.LocalRemoteExcerpt, "local_trailer,remote_trailer,media_excerpt")]
+    [InlineData(FeaturedTrailerSourcePriorities.LocalExcerptRemote, "local_trailer,media_excerpt,remote_trailer")]
+    [InlineData(FeaturedTrailerSourcePriorities.ExcerptOnly, "media_excerpt")]
+    [InlineData(FeaturedTrailerSourcePriorities.PreferLocal, "local_trailer,remote_trailer")]
+    [InlineData(FeaturedTrailerSourcePriorities.Automatic, "local_trailer,remote_trailer")]
+    [InlineData(FeaturedTrailerSourcePriorities.PreferRemote, "remote_trailer,local_trailer")]
+    [InlineData(FeaturedTrailerSourcePriorities.LocalOnly, "local_trailer")]
+    [InlineData(FeaturedTrailerSourcePriorities.RemoteOnly, "remote_trailer")]
+    public void TrailerSourcePriorityMapsToMediaPriority(string priority, string expected)
     {
-        List<FeaturedTrailerDto> candidates = [];
+        FeaturedMediaPriorityEntry[] entries = FeaturedMediaPriorityTypes.FromTrailerSourcePriority(priority);
 
-        TrailerResolver.AddBySourcePriority(
-            candidates,
-            priority,
-            [Candidate("local", "local")],
-            [Candidate("remote", "remote")],
-            [Candidate("excerpt", "local")]);
-
-        Assert.Equal(expected, candidates.Select(candidate => candidate.Name));
+        Assert.Equal(expected.Split(','), FeaturedMediaPriorityTypes.EnabledTypes(entries));
+        Assert.Equal(FeaturedMediaPriorityTypes.All.Order(), entries.Select(entry => entry.Type).Order());
     }
 
-    [Theory]
-    [InlineData(FeaturedTrailerSourcePriorities.LocalRemoteExcerpt, true)]
-    [InlineData(FeaturedTrailerSourcePriorities.LocalExcerptRemote, true)]
-    [InlineData(FeaturedTrailerSourcePriorities.ExcerptOnly, true)]
-    [InlineData(FeaturedTrailerSourcePriorities.PreferLocal, false)]
-    [InlineData(FeaturedTrailerSourcePriorities.Automatic, false)]
-    public void OnlyExcerptSourcesIncludeExcerpts(string priority, bool expected)
+    [Fact]
+    public void ResolverFollowsMediaPriorityOrder()
     {
-        Assert.Equal(expected, FeaturedTrailerSourcePriorities.IncludesExcerpt(priority));
+        BaseItem movie = CreateMovie(TimeSpan.FromHours(2));
+        PluginConfiguration config = new()
+        {
+            TrailerOverrides = [new FeaturedTrailerOverride { ItemId = movie.Id.ToString(), Url = YouTubeUrl }]
+        };
+
+        IReadOnlyList<FeaturedTrailerDto> candidates = new TrailerResolver(_libraryManagerService)
+            .ResolveCandidates(
+                movie,
+                _user,
+                config,
+                [FeaturedMediaPriorityTypes.Trickplay, FeaturedMediaPriorityTypes.MediaExcerpt],
+                true);
+
+        Assert.Equal(
+            ["youtube", "trickplay", TrailerResolver.MediaExcerptProvider],
+            candidates.Select(candidate => candidate.Provider));
+    }
+
+    [Fact]
+    public void ResolverSkipsTrailersButKeepsVideoFallbacksWhenTrailersAreOff()
+    {
+        BaseItem movie = CreateMovie(TimeSpan.FromHours(2));
+        PluginConfiguration config = new()
+        {
+            TrailerOverrides = [new FeaturedTrailerOverride { ItemId = movie.Id.ToString(), Url = YouTubeUrl }]
+        };
+
+        IReadOnlyList<FeaturedTrailerDto> candidates = new TrailerResolver(_libraryManagerService)
+            .ResolveCandidates(
+                movie,
+                _user,
+                config,
+                [FeaturedMediaPriorityTypes.RemoteTrailer, FeaturedMediaPriorityTypes.Trickplay],
+                false);
+
+        Assert.Equal(["trickplay"], candidates.Select(candidate => candidate.Provider));
     }
 
     [Fact]
     public void ResolverOffersNoExcerptByDefault()
     {
         BaseItem movie = CreateMovie(TimeSpan.FromHours(2));
-        PluginConfiguration config = WithSource(FeaturedTrailerSourcePriorities.RemoteOnly);
-
         IReadOnlyList<FeaturedTrailerDto> candidates = new TrailerResolver(_libraryManagerService)
-            .ResolveCandidates(movie, _user, config);
+            .ResolveCandidates(movie, _user, new PluginConfiguration(), [FeaturedMediaPriorityTypes.RemoteTrailer], true);
 
         Assert.DoesNotContain(candidates, candidate => candidate.Provider == TrailerResolver.MediaExcerptProvider);
     }
@@ -90,13 +116,12 @@ public sealed class TrailerResolverExcerptTests : FeaturedPreparedCacheTestBase
         BaseItem movie = CreateMovie(TimeSpan.FromHours(2));
         PluginConfiguration config = new()
         {
-            TrailerSourcePriority = FeaturedTrailerSourcePriorities.ExcerptOnly,
             MediaExcerptDurationSeconds = 45,
             TrailerOverrides = [new FeaturedTrailerOverride { ItemId = movie.Id.ToString(), Url = YouTubeUrl }]
         };
 
         IReadOnlyList<FeaturedTrailerDto> candidates = new TrailerResolver(_libraryManagerService)
-            .ResolveCandidates(movie, _user, config);
+            .ResolveCandidates(movie, _user, config, ExcerptOnly, true);
 
         Assert.Equal(["youtube", TrailerResolver.MediaExcerptProvider], candidates.Select(candidate => candidate.Provider));
         FeaturedTrailerDto excerpt = candidates[1];
@@ -109,10 +134,8 @@ public sealed class TrailerResolverExcerptTests : FeaturedPreparedCacheTestBase
     public void ResolverSkipsExcerptWithoutRuntime()
     {
         BaseItem movie = CreateMovie(null);
-        PluginConfiguration config = WithSource(FeaturedTrailerSourcePriorities.ExcerptOnly);
-
         IReadOnlyList<FeaturedTrailerDto> candidates = new TrailerResolver(_libraryManagerService)
-            .ResolveCandidates(movie, _user, config);
+            .ResolveCandidates(movie, _user, new PluginConfiguration(), ExcerptOnly, true);
 
         Assert.Empty(candidates);
     }
@@ -130,10 +153,8 @@ public sealed class TrailerResolverExcerptTests : FeaturedPreparedCacheTestBase
             RunTimeTicks = TimeSpan.FromMinutes(45).Ticks
         };
         _libraryManager.Candidates.Add(episode);
-        PluginConfiguration config = WithSource(FeaturedTrailerSourcePriorities.ExcerptOnly);
-
         IReadOnlyList<FeaturedTrailerDto> candidates = new TrailerResolver(_libraryManagerService)
-            .ResolveCandidates(series, _user, config);
+            .ResolveCandidates(series, _user, new PluginConfiguration(), ExcerptOnly, true);
 
         FeaturedTrailerDto excerpt = Assert.Single(candidates, candidate => candidate.Provider == TrailerResolver.MediaExcerptProvider);
         Assert.Equal(episode.Id.ToString(), excerpt.ItemId);
@@ -173,17 +194,6 @@ public sealed class TrailerResolverExcerptTests : FeaturedPreparedCacheTestBase
         Assert.Equal(0, preset.MediaExcerptWindowStartMinutes);
         Assert.Equal(FeaturedMediaExcerptLimits.MinimumDurationSeconds, preset.MediaExcerptDurationSeconds);
     }
-
-    // Local trailer lookup needs a full library, so resolver tests avoid sources that query local trailers.
-    private static PluginConfiguration WithSource(string priority) => new() { TrailerSourcePriority = priority };
-
-    private static FeaturedTrailerDto Candidate(string name, string type) => new()
-    {
-        Type = type,
-        Provider = type == "remote" ? "youtube" : "jellyfin",
-        Name = name,
-        ItemId = Guid.NewGuid().ToString()
-    };
 
     private static BaseItem CreateMovie(TimeSpan? runtime) => new TestMovie
     {

@@ -3,6 +3,7 @@ import { t } from '../i18n';
 import type { FeaturedItem, FeaturedResponse } from '../types/featured';
 import { createTrailerPlayer, isMobileTrailerClient, type TrailerPlayer } from './trailer';
 import { readTrailerVolume, requiresLegacyVerticalRangeAppearance, saveTrailerVolume } from './trailerVolume';
+import { shouldSkipYouTubeTrailer } from './youtubeTrailerFilter';
 
 const YOUTUBE_CONTROL_CONCEALMENT_MS = 5000;
 const TRAILER_VOLUME_PLACEMENTS = ['right', 'left', 'up', 'down'] as const;
@@ -39,6 +40,8 @@ export class TrailerController {
   private delayTimer: number | null = null;
   private itemId: string | null = null;
   private candidateIndex = -1;
+  private playbackVersion = 0;
+  private checkingQuality = false;
   private muted: boolean;
   private volume: number;
   private paused = false;
@@ -76,13 +79,19 @@ export class TrailerController {
     const isMediaPreview = trailer?.provider === 'media-preview';
     // Excerpts and media previews are finite segments: once they end, the backdrop returns instead of looping.
     const isFiniteSegment = isMediaPreview || trailer?.provider === 'media-excerpt';
-    const isFallbackMedia = isTrickplay || isMediaPreview;
+    // The server only sends video fallbacks when the source allows trailers or the item lacks artwork.
+    const isFallbackMedia = isTrickplay || isFiniteSegment;
     if ((!this.response.enableBackgroundTrailers && !isFallbackMedia) || !trailer || document.hidden) return;
     if (!isTrickplay && !this.response.allowTrailersOnMobile && isMobileTrailerClient()) return;
-    if (this.itemId === item.id && this.candidateIndex === candidateIndex && (this.player || this.delayTimer !== null))
+    if (
+      this.itemId === item.id &&
+      this.candidateIndex === candidateIndex &&
+      (this.player || this.delayTimer !== null || this.checkingQuality)
+    )
       return;
 
     this.stop();
+    const playbackVersion = this.playbackVersion;
     this.itemId = item.id;
     this.candidateIndex = candidateIndex;
     const expectedIndex = this.callbacks.getActiveIndex();
@@ -95,19 +104,38 @@ export class TrailerController {
     if (concealYouTube) this.startCountdown();
     else if (launchDelayMilliseconds > 0) this.startCountdown(launchDelayMilliseconds);
 
-    this.delayTimer = window.setTimeout(() => {
+    this.delayTimer = window.setTimeout(async () => {
       this.delayTimer = null;
-      if (this.callbacks.isDestroyed() || document.hidden || this.callbacks.getActiveIndex() !== expectedIndex) return;
+      const isCurrent = (): boolean =>
+        this.playbackVersion === playbackVersion &&
+        !this.callbacks.isDestroyed() &&
+        !document.hidden &&
+        this.callbacks.getActiveIndex() === expectedIndex;
+      if (!isCurrent()) return;
       if (!concealYouTube) this.stopCountdown();
       let player: TrailerPlayer | null = null;
       const recover = (error?: Error): void => {
-        if (this.callbacks.isDestroyed() || this.callbacks.getActiveIndex() !== expectedIndex) return;
+        if (!isCurrent()) return;
         if (player && this.player !== player) return;
         if (error) console.warn(`${CONSOLE_PREFIX} Background media fallback failed.`, error);
         this.stop();
         if (candidateIndex + 1 < candidates.length) this.start(slide, item, candidateIndex + 1);
         else this.callbacks.restartAutoplay();
       };
+      if (trailer.provider === 'youtube' && trailer.youTubeQualityFilterEnabled) {
+        this.checkingQuality = true;
+        const skip = await shouldSkipYouTubeTrailer(trailer);
+        if (this.playbackVersion !== playbackVersion) return;
+        this.checkingQuality = false;
+        if (!isCurrent()) {
+          this.stop();
+          return;
+        }
+        if (skip) {
+          recover();
+          return;
+        }
+      }
       player = createTrailerPlayer(trailer, {
         muted: concealYouTube ? true : this.muted,
         volume: this.volume,
@@ -159,6 +187,8 @@ export class TrailerController {
   }
 
   stop(): void {
+    this.playbackVersion += 1;
+    this.checkingQuality = false;
     if (this.delayTimer !== null) window.clearTimeout(this.delayTimer);
     this.delayTimer = null;
     this.stopCountdown();

@@ -37,10 +37,10 @@ public sealed class FeaturedItemDtoFactory
                         config,
                         personalization,
                         reason?.AllowBackgroundTrailers ?? true,
-                        reason?.UseTrickplayFallback == true,
-                        reason?.UseMediaPreviewFallback == true,
+                        reason?.MediaPriority,
                         data?.IsFavorite == true,
-                        data?.Played == true),
+                        data?.Played == true,
+                        reason?.YouTubeQualityFilter ?? "inherit"),
                     LazyThreadSafetyMode.ExecutionAndPublication));
         }).ToArray();
     }
@@ -51,44 +51,24 @@ public sealed class FeaturedItemDtoFactory
         PluginConfiguration config,
         FeaturedPersonalizationContext personalization,
         bool allowBackgroundTrailers = true,
-        bool useTrickplayFallback = false,
-        bool useMediaPreviewFallback = false,
+        IReadOnlyList<string>? mediaPriority = null,
         bool isFavorite = false,
-        bool isPlayed = false)
+        bool isPlayed = false,
+        string youTubeQualityFilter = "inherit")
     {
         bool hasImage = item.HasImage(MediaBrowser.Model.Entities.ImageType.Backdrop)
             || item.HasImage(MediaBrowser.Model.Entities.ImageType.Primary);
-        IReadOnlyList<FeaturedTrailerDto> trailers = personalization.Display.EnableBackgroundTrailers && allowBackgroundTrailers
-            ? _trailerResolver.ResolveCandidates(item, activeUser, config)
+        bool includeTrailers = personalization.Display.EnableBackgroundTrailers && allowBackgroundTrailers;
+        // Without trailers the banner only needs motion when the item has no artwork to show.
+        IReadOnlyList<FeaturedTrailerDto> trailers = includeTrailers || !hasImage
+            ? _trailerResolver.ResolveCandidates(
+                item,
+                activeUser,
+                config,
+                mediaPriority ?? FeaturedMediaPriorityTypes.EnabledTypes(FeaturedMediaPriorityTypes.CreateDefault()),
+                includeTrailers,
+                youTubeQualityFilter)
             : [];
-        if (item is Video && trailers.Count == 0
-            && (!hasImage || (personalization.Display.EnableBackgroundTrailers && allowBackgroundTrailers)))
-        {
-            List<FeaturedTrailerDto> fallbackCandidates = [];
-            if (useMediaPreviewFallback)
-            {
-                fallbackCandidates.Add(new FeaturedTrailerDto
-                {
-                    Type = "local",
-                    Provider = "media-preview",
-                    Name = item.Name,
-                    ItemId = item.Id.ToString()
-                });
-            }
-
-            if (useTrickplayFallback)
-            {
-                fallbackCandidates.Add(new FeaturedTrailerDto
-                {
-                    Type = "trickplay",
-                    Provider = "trickplay",
-                    Name = item.Name,
-                    ItemId = item.Id.ToString()
-                });
-            }
-
-            trailers = fallbackCandidates;
-        }
         List<FeaturedDismissalOptionDto> dismissalOptions = [];
         if (config.DismissalPolicy.Enabled)
         {
