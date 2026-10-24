@@ -1,9 +1,16 @@
+using Jellyfin.Data;
+using Jellyfin.Database.Implementations.Enums;
 using MediaBrowser.Controller.Entities;
 
 namespace Jellyfin.Plugin.Featured.Api;
 
 internal static class FeaturedUserAccess
 {
+    internal static bool CanManagePreferences(
+        Jellyfin.Database.Implementations.Entities.User activeUser,
+        Guid targetUserId)
+        => activeUser.Id == targetUserId || activeUser.HasPermission(PermissionKind.IsAdministrator);
+
     internal static HashSet<Guid> GetAllowedItemIds(
         IEnumerable<BaseItem> candidates,
         Jellyfin.Database.Implementations.Entities.User activeUser)

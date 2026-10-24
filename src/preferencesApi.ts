@@ -5,7 +5,13 @@ const BOOTSTRAP_CACHE_LIFETIME_MS = 5 * 60_000;
 let cachedBootstrap: { userId: string; value: FeaturedPreferencesBootstrapResponse; expiresAt: number } | null = null;
 let pendingBootstrap: { userId: string; promise: Promise<FeaturedPreferencesBootstrapResponse> } | null = null;
 
-export function loadPreferencesBootstrap(): Promise<FeaturedPreferencesBootstrapResponse> {
+export function loadPreferencesBootstrap(targetUserId?: string): Promise<FeaturedPreferencesBootstrapResponse> {
+  // Admin inspection always loads fresh data and never reuses the signed-in user's cache.
+  if (targetUserId) {
+    return requestJson<FeaturedPreferencesBootstrapResponse>(
+      `featured/preferences/bootstrap?userId=${encodeURIComponent(targetUserId)}`
+    );
+  }
   const userId = getApiClient()?.getCurrentUserId?.() ?? '';
   if (cachedBootstrap?.userId === userId && cachedBootstrap.expiresAt > Date.now()) {
     return Promise.resolve(cachedBootstrap.value);

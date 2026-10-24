@@ -1,4 +1,4 @@
-import { requestJson } from './core/apiClient';
+import { getCurrentUserId, requestJson } from './core/apiClient';
 import { replaceElementChildren } from './core/dom';
 import { t, type TranslationKey } from './i18n';
 import type { FeaturedEffectiveDisplayPreferences, FeaturedUserPreferences } from './types/featured';
@@ -38,17 +38,19 @@ const sourceKeys: Record<string, TranslationKey> = {
   RECOMMENDATIONS: 'source.type.recommendations'
 };
 
-function notifyPreferencesChanged(): void {
+function notifyPreferencesChanged(targetUserId?: string): void {
+  if (targetUserId && targetUserId !== getCurrentUserId()) return;
   document.dispatchEvent(new CustomEvent(USER_PREFERENCES_CHANGED_EVENT));
 }
 
-export async function openPreferencesDialog(): Promise<void> {
+export async function openPreferencesDialog(profile?: { userId: string; userName: string }): Promise<void> {
+  const userQuery = profile ? `?userId=${encodeURIComponent(profile.userId)}` : '';
   if (document.querySelector('.featured-preferences-backdrop')) return;
   const shell = new PreferencesDialogShell();
   shell.attach();
 
   try {
-    const { current, options, dismissals } = await loadPreferencesBootstrap();
+    const { current, options, dismissals } = await loadPreferencesBootstrap(profile?.userId);
     if (!shell.isConnected) return;
     if (!options.policy.enabled && !dismissals.policy.enabled && !dismissals.entries.length) {
       throw new Error(t('preferences.disabled'));
@@ -59,7 +61,7 @@ export async function openPreferencesDialog(): Promise<void> {
     dialog.setAttribute('role', 'dialog');
     dialog.setAttribute('aria-modal', 'true');
     dialog.setAttribute('aria-labelledby', 'featured-preferences-title');
-    dialog.appendChild(createPreferencesHeader());
+    dialog.appendChild(createPreferencesHeader(profile?.userName));
     const actions = createPreferencesActions(options.policy.enabled || dismissals.policy.enabled);
     const actionStatus = new PreferencesActionStatus(dialog, actions.status);
     const content = document.createElement('div');
@@ -160,7 +162,7 @@ export async function openPreferencesDialog(): Promise<void> {
     }
 
     if (dismissals.policy.enabled || dismissals.entries.length) {
-      content.appendChild(createDismissalsSection(dismissals, actionStatus));
+      content.appendChild(createDismissalsSection(dismissals, actionStatus, profile?.userId));
     }
 
     dialog.appendChild(content);
@@ -169,12 +171,12 @@ export async function openPreferencesDialog(): Promise<void> {
     shell.replaceContent(dialog);
     dialog.querySelector('.featured-preferences-reset')?.addEventListener('click', async () => {
       const succeeded = await actionStatus.run(async () => {
-        await requestJson('featured/preferences', { method: 'PUT', body: { reset: true } });
+        await requestJson(`featured/preferences${userQuery}`, { method: 'PUT', body: { reset: true } });
       });
       if (succeeded) {
         invalidatePreferencesBootstrap();
         shell.close();
-        notifyPreferencesChanged();
+        notifyPreferencesChanged(profile?.userId);
       }
     });
     dialog.addEventListener('submit', async (event) => {
@@ -182,12 +184,12 @@ export async function openPreferencesDialog(): Promise<void> {
       if (!options.policy.enabled && !dismissals.policy.enabled) return;
       const preferences: FeaturedUserPreferences = serializePreferencesForm(dialog, current, options);
       const succeeded = await actionStatus.run(async () => {
-        await requestJson('featured/preferences', { method: 'PUT', body: { preferences } });
+        await requestJson(`featured/preferences${userQuery}`, { method: 'PUT', body: { preferences } });
       });
       if (succeeded) {
         invalidatePreferencesBootstrap();
         shell.close();
-        notifyPreferencesChanged();
+        notifyPreferencesChanged(profile?.userId);
       }
     });
     dialog.querySelector<HTMLInputElement>('input, button')?.focus();

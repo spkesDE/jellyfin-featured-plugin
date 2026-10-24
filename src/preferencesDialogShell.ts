@@ -15,12 +15,12 @@ function createIconButton(iconName: string, label: string, className: string): H
   return button;
 }
 
-export function createPreferencesHeader(): HTMLElement {
+export function createPreferencesHeader(userName?: string): HTMLElement {
   const header = document.createElement('header');
   header.className = 'featured-preferences-header';
   const title = document.createElement('h2');
   title.id = 'featured-preferences-title';
-  title.textContent = t('preferences.title');
+  title.textContent = userName ? `${t('preferences.title')} · ${userName}` : t('preferences.title');
   header.append(
     title,
     createIconButton('close', t('preferences.close'), 'paper-icon-button-light featured-preferences-close')

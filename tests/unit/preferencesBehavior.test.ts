@@ -7,7 +7,10 @@ const mocks = vi.hoisted(() => ({
   loadPreferencesBootstrap: vi.fn(),
   invalidatePreferencesBootstrap: vi.fn()
 }));
-vi.mock('../../src/core/apiClient', () => ({ requestJson: mocks.requestJson }));
+vi.mock('../../src/core/apiClient', () => ({
+  requestJson: mocks.requestJson,
+  getCurrentUserId: () => 'administrator'
+}));
 vi.mock('../../src/preferencesApi', () => ({
   loadPreferencesBootstrap: mocks.loadPreferencesBootstrap,
   invalidatePreferencesBootstrap: mocks.invalidatePreferencesBootstrap,
@@ -49,6 +52,40 @@ describe('preferences dialog behaviour', () => {
 
     await vi.waitFor(() => expect(mocks.invalidatePreferencesBootstrap).toHaveBeenCalledTimes(2));
     expect(changed).toHaveBeenCalledTimes(2);
+    document.removeEventListener(USER_PREFERENCES_CHANGED_EVENT, changed);
+  });
+  it('refreshes the signed-in administrator feed when opening their own profile', async () => {
+    const changed = vi.fn();
+    document.addEventListener(USER_PREFERENCES_CHANGED_EVENT, changed, { once: true });
+    await openPreferencesDialog({ userId: 'administrator', userName: 'Administrator' });
+    document.querySelector<HTMLButtonElement>('.featured-preferences-reset')!.click();
+    await vi.waitFor(() => expect(changed).toHaveBeenCalledOnce());
+  });
+
+  it('loads, saves, and resets the selected user without refreshing the administrator feed', async () => {
+    const changed = vi.fn();
+    document.addEventListener(USER_PREFERENCES_CHANGED_EVENT, changed);
+    const profile = { userId: 'other-user', userName: '<Other User>' };
+
+    await openPreferencesDialog(profile);
+    expect(mocks.loadPreferencesBootstrap).toHaveBeenCalledWith(profile.userId);
+    expect(document.querySelector('#featured-preferences-title')?.textContent).toContain(profile.userName);
+    expect(document.querySelector('#featured-preferences-title')?.children).toHaveLength(0);
+    document.querySelector<HTMLFormElement>('.featured-preferences-dialog')!.requestSubmit();
+    await vi.waitFor(() => expect(document.querySelector('.featured-preferences-backdrop')).toBeNull());
+    expect(mocks.requestJson).toHaveBeenCalledWith(
+      'featured/preferences?userId=other-user',
+      expect.objectContaining({ method: 'PUT', body: { preferences: expect.any(Object) } })
+    );
+
+    await openPreferencesDialog(profile);
+    document.querySelector<HTMLButtonElement>('.featured-preferences-reset')!.click();
+    await vi.waitFor(() => expect(document.querySelector('.featured-preferences-backdrop')).toBeNull());
+    expect(mocks.requestJson).toHaveBeenCalledWith('featured/preferences?userId=other-user', {
+      method: 'PUT',
+      body: { reset: true }
+    });
+    expect(changed).not.toHaveBeenCalled();
     document.removeEventListener(USER_PREFERENCES_CHANGED_EVENT, changed);
   });
 });

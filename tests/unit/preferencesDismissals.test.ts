@@ -5,7 +5,7 @@ import { createDismissalsSection } from '../../src/preferencesDismissals';
 import type { FeaturedDismissalsResponse } from '../../src/types/featured';
 
 const { requestJson } = vi.hoisted(() => ({ requestJson: vi.fn() }));
-vi.mock('../../src/core/apiClient', () => ({ requestJson }));
+vi.mock('../../src/core/apiClient', () => ({ requestJson, getCurrentUserId: () => 'administrator' }));
 
 function createDismissals(): FeaturedDismissalsResponse {
   return {
@@ -25,6 +25,29 @@ function createDismissals(): FeaturedDismissalsResponse {
 
 describe('createDismissalsSection', () => {
   beforeEach(() => requestJson.mockReset().mockResolvedValue({}));
+
+  it('restores recommendations only for the user inspected by the administrator', async () => {
+    const dialog = document.createElement('form');
+    const dismissals = createDismissals();
+    const section = createDismissalsSection(
+      dismissals,
+      new PreferencesActionStatus(dialog, document.createElement('div')),
+      'other-user'
+    );
+    dialog.appendChild(section);
+    section.querySelector<HTMLButtonElement>('[aria-label]')!.click();
+    await vi.waitFor(() => expect(dismissals.entries).toEqual([]));
+    expect(requestJson).toHaveBeenCalledWith('featured/dismissals/undo?userId=other-user', {
+      method: 'POST',
+      body: { dismissalId: 'dismissal-1' }
+    });
+
+    dismissals.entries = createDismissals().entries;
+    section.querySelector<HTMLButtonElement>('.raised')!.click();
+    await vi.waitFor(() =>
+      expect(requestJson).toHaveBeenCalledWith('featured/dismissals/reset?userId=other-user', { method: 'POST' })
+    );
+  });
 
   it('renders dynamic names as text and applies undo through the shared action state', async () => {
     const dialog = document.createElement('form');

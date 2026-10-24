@@ -12,20 +12,20 @@ public sealed partial class FeaturedController
     [HttpGet("preferences")]
     [Authorize]
     [Produces(MediaTypeNames.Application.Json)]
-    public ActionResult<FeaturedPreferencesResponse> GetPreferences()
+    public ActionResult<FeaturedPreferencesResponse> GetPreferences([FromQuery] Guid? userId = null)
     {
-        Jellyfin.Database.Implementations.Entities.User? activeUser = GetActiveUser();
-        if (activeUser == null) return NotFound();
+        Jellyfin.Database.Implementations.Entities.User? activeUser = GetPreferencesUser(userId, out ActionResult? error);
+        if (activeUser == null) return error!;
         return new JsonResult(CreatePreferencesResponse(activeUser), RuntimeConfigJsonOptions);
     }
 
     [HttpPut("preferences")]
     [Authorize]
     [Produces(MediaTypeNames.Application.Json)]
-    public ActionResult<FeaturedPreferencesResponse> PutPreferences([FromBody] FeaturedPreferencesUpdate? request)
+    public ActionResult<FeaturedPreferencesResponse> PutPreferences([FromBody] FeaturedPreferencesUpdate? request, [FromQuery] Guid? userId = null)
     {
-        Jellyfin.Database.Implementations.Entities.User? activeUser = GetActiveUser();
-        if (activeUser == null) return NotFound();
+        Jellyfin.Database.Implementations.Entities.User? activeUser = GetPreferencesUser(userId, out ActionResult? error);
+        if (activeUser == null) return error!;
         if (!_config.PersonalizationPolicy.Enabled && !_config.DismissalPolicy.Enabled) return Forbid();
         if (request?.Reset == true)
         {
@@ -48,10 +48,10 @@ public sealed partial class FeaturedController
     [HttpGet("preferences/options")]
     [Authorize]
     [Produces(MediaTypeNames.Application.Json)]
-    public ActionResult<FeaturedPreferenceOptionsResponse> GetPreferenceOptions()
+    public ActionResult<FeaturedPreferenceOptionsResponse> GetPreferenceOptions([FromQuery] Guid? userId = null)
     {
-        Jellyfin.Database.Implementations.Entities.User? activeUser = GetActiveUser();
-        if (activeUser == null) return NotFound();
+        Jellyfin.Database.Implementations.Entities.User? activeUser = GetPreferencesUser(userId, out ActionResult? error);
+        if (activeUser == null) return error!;
         FeaturedPersonalizationContext effective = _personalization.Resolve(_config, activeUser.Id);
         return new JsonResult(CreatePreferenceOptionsResponse(activeUser, effective), RuntimeConfigJsonOptions);
     }
@@ -59,11 +59,11 @@ public sealed partial class FeaturedController
     [HttpGet("preferences/bootstrap")]
     [Authorize]
     [Produces(MediaTypeNames.Application.Json)]
-    public ActionResult<FeaturedPreferencesBootstrapResponse> GetPreferencesBootstrap()
+    public ActionResult<FeaturedPreferencesBootstrapResponse> GetPreferencesBootstrap([FromQuery] Guid? userId = null)
     {
         Stopwatch totalTimer = Stopwatch.StartNew();
-        Jellyfin.Database.Implementations.Entities.User? activeUser = GetActiveUser();
-        if (activeUser == null) return NotFound();
+        Jellyfin.Database.Implementations.Entities.User? activeUser = GetPreferencesUser(userId, out ActionResult? error);
+        if (activeUser == null) return error!;
 
         Stopwatch stageTimer = Stopwatch.StartNew();
         FeaturedPersonalizationContext effective = _personalization.Resolve(_config, activeUser.Id);

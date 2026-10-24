@@ -1,5 +1,5 @@
 import { USER_PREFERENCES_CHANGED_EVENT } from './constants';
-import { requestJson } from './core/apiClient';
+import { getCurrentUserId, requestJson } from './core/apiClient';
 import { replaceElementChildren } from './core/dom';
 import { t, type TranslationKey } from './i18n';
 import { PreferencesActionStatus } from './preferencesActionStatus';
@@ -9,8 +9,10 @@ import type { FeaturedDismissalsResponse } from './types/featured';
 
 export function createDismissalsSection(
   dismissals: FeaturedDismissalsResponse,
-  actions: PreferencesActionStatus
+  actions: PreferencesActionStatus,
+  userId?: string
 ): HTMLFieldSetElement {
+  const userQuery = userId ? `?userId=${encodeURIComponent(userId)}` : '';
   const section = createPreferenceFieldset(t('preferences.dismissals'));
   const list = document.createElement('div');
   list.className = 'itemsContainer';
@@ -22,7 +24,8 @@ export function createDismissalsSection(
   const changed = (): void => {
     invalidatePreferencesBootstrap();
     render();
-    document.dispatchEvent(new CustomEvent(USER_PREFERENCES_CHANGED_EVENT));
+    if (!userId || userId === getCurrentUserId())
+      document.dispatchEvent(new CustomEvent(USER_PREFERENCES_CHANGED_EVENT));
   };
 
   const render = (): void => {
@@ -49,7 +52,7 @@ export function createDismissalsSection(
       remove.appendChild(createMaterialIcon('restore'));
       remove.addEventListener('click', async () => {
         const succeeded = await actions.run(async () => {
-          await requestJson('featured/dismissals/undo', {
+          await requestJson(`featured/dismissals/undo${userQuery}`, {
             method: 'POST',
             body: { dismissalId: entry.id }
           });
@@ -65,7 +68,7 @@ export function createDismissalsSection(
 
   reset.addEventListener('click', async () => {
     const succeeded = await actions.run(async () => {
-      await requestJson('featured/dismissals/reset', { method: 'POST' });
+      await requestJson(`featured/dismissals/reset${userQuery}`, { method: 'POST' });
     });
     if (!succeeded) return;
     dismissals.entries = [];

@@ -13,10 +13,10 @@ public sealed partial class FeaturedController
     [HttpGet("dismissals")]
     [Authorize]
     [Produces(MediaTypeNames.Application.Json)]
-    public ActionResult<FeaturedDismissalsResponse> GetDismissals()
+    public ActionResult<FeaturedDismissalsResponse> GetDismissals([FromQuery] Guid? userId = null)
     {
-        Jellyfin.Database.Implementations.Entities.User? activeUser = GetActiveUser();
-        if (activeUser is null) return NotFound();
+        Jellyfin.Database.Implementations.Entities.User? activeUser = GetPreferencesUser(userId, out ActionResult? error);
+        if (activeUser is null) return error!;
         return new JsonResult(
             new FeaturedDismissalsResponse(_config.DismissalPolicy, _dismissalStore.Get(activeUser.Id)),
             RuntimeConfigJsonOptions);
@@ -45,10 +45,10 @@ public sealed partial class FeaturedController
     [HttpPost("dismissals/undo")]
     [Authorize]
     [Produces(MediaTypeNames.Application.Json)]
-    public ActionResult<FeaturedDismissalsResponse> UndoDismissal([FromBody] FeaturedDismissalUndoRequest? request)
+    public ActionResult<FeaturedDismissalsResponse> UndoDismissal([FromBody] FeaturedDismissalUndoRequest? request, [FromQuery] Guid? userId = null)
     {
-        Jellyfin.Database.Implementations.Entities.User? activeUser = GetActiveUser();
-        if (activeUser is null) return NotFound();
+        Jellyfin.Database.Implementations.Entities.User? activeUser = GetPreferencesUser(userId, out ActionResult? error);
+        if (activeUser is null) return error!;
         if (request is null || string.IsNullOrWhiteSpace(request.DismissalId)) return BadRequest();
         if (!_dismissalStore.Remove(activeUser.Id, request.DismissalId)) return NotFound();
         InvalidateDismissalCache(activeUser.Id);
@@ -60,10 +60,10 @@ public sealed partial class FeaturedController
     [HttpPost("dismissals/reset")]
     [Authorize]
     [Produces(MediaTypeNames.Application.Json)]
-    public ActionResult<FeaturedDismissalsResponse> ResetDismissals()
+    public ActionResult<FeaturedDismissalsResponse> ResetDismissals([FromQuery] Guid? userId = null)
     {
-        Jellyfin.Database.Implementations.Entities.User? activeUser = GetActiveUser();
-        if (activeUser is null) return NotFound();
+        Jellyfin.Database.Implementations.Entities.User? activeUser = GetPreferencesUser(userId, out ActionResult? error);
+        if (activeUser is null) return error!;
         _dismissalStore.Clear(activeUser.Id);
         InvalidateDismissalCache(activeUser.Id);
         return new JsonResult(

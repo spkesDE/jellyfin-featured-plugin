@@ -63,22 +63,20 @@ public sealed class FeaturedPersonalizationService
     {
         FeaturedPersonalizationPolicy policy = config.PersonalizationPolicy;
         FeaturedUserPreferences? personalized = policy.Enabled ? saved : null;
-        FeaturedUserProfile? adminProfile = config.UserProfiles.FirstOrDefault(candidate =>
-            candidate.Enabled && Guid.TryParse(candidate.UserId, out Guid id) && id == userId);
         FeaturedPersonalizationDefaults defaults = config.PersonalizationDefaults;
         FeaturedUserProfile effectiveProfile = new()
         {
             UserId = userId.ToString("N"),
             Enabled = true,
             UnplayedBoost = policy.AllowUnplayedBoost && personalized?.UnplayedBoost is int unplayed
-                ? unplayed : adminProfile?.UnplayedBoost ?? defaults.UnplayedBoost,
+                ? unplayed : defaults.UnplayedBoost,
             FavouriteBoost = policy.AllowFavouriteBoost && personalized?.FavouriteBoost is int favourite
-                ? favourite : adminProfile?.FavouriteBoost ?? defaults.FavouriteBoost,
-            PreferredGenreBoost = adminProfile?.PreferredGenreBoost ?? defaults.PreferredGenreBoost,
+                ? favourite : defaults.FavouriteBoost,
+            PreferredGenreBoost = defaults.PreferredGenreBoost,
             InProgressSeriesBoost = policy.AllowInProgressSeriesBoost && personalized?.InProgressSeriesBoost is int inProgress
-                ? inProgress : adminProfile?.InProgressSeriesBoost ?? defaults.InProgressSeriesBoost,
+                ? inProgress : defaults.InProgressSeriesBoost,
             PreferredGenres = policy.AllowPreferredGenres && personalized?.PreferredGenres is not null
-                ? personalized.PreferredGenres : adminProfile?.PreferredGenres ?? defaults.PreferredGenres
+                ? personalized.PreferredGenres : defaults.PreferredGenres
         };
         FeaturedSourceRule[] sources = config.SourceRules
             .Where(rule => rule.UserIds.Length == 0

@@ -66,4 +66,26 @@ public sealed partial class FeaturedController : ControllerBase
         string? name = User.Identity?.Name;
         return string.IsNullOrWhiteSpace(name) ? null : _userManager.GetUserByName(name);
     }
+
+    private Jellyfin.Database.Implementations.Entities.User? GetPreferencesUser(Guid? userId, out ActionResult? error)
+    {
+        Jellyfin.Database.Implementations.Entities.User? activeUser = GetActiveUser();
+        error = null;
+        if (activeUser is null)
+        {
+            error = NotFound();
+            return null;
+        }
+
+        if (!userId.HasValue || userId.Value == activeUser.Id) return activeUser;
+        if (!FeaturedUserAccess.CanManagePreferences(activeUser, userId.Value))
+        {
+            error = Forbid();
+            return null;
+        }
+
+        Jellyfin.Database.Implementations.Entities.User? targetUser = _userManager.GetUserById(userId.Value);
+        if (targetUser is null) error = NotFound();
+        return targetUser;
+    }
 }

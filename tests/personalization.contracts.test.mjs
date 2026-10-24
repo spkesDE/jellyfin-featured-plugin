@@ -124,7 +124,7 @@ test('personalization is authenticated, policy-bound, user scoped, and fast to r
   );
   assert.match(constants, /USER_PREFERENCES_CHANGED_EVENT = 'jellyfin-featured:preferences-changed'/);
   assert.match(frontend, /new CustomEvent\(USER_PREFERENCES_CHANGED_EVENT\)/);
-  assert.equal((frontend.match(/notifyPreferencesChanged\(\)/g) ?? []).length, 3);
+  assert.equal((frontend.match(/notifyPreferencesChanged\(profile\?\.userId\)/g) ?? []).length, 2);
   assert.match(runtime, /addEventListener\(USER_PREFERENCES_CHANGED_EVENT, refreshForPreferenceChange\)/);
   assert.match(
     runtime,

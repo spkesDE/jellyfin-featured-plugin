@@ -23,6 +23,7 @@ public sealed partial class PluginConfiguration : BasePluginConfiguration
 
     public FeaturedManualList[] ManualLists { get; set; } = [];
 
+    // Retained for configuration compatibility; scoring uses global defaults and user preferences.
     public FeaturedUserProfile[] UserProfiles { get; set; } = [];
 
     public FeaturedPersonalizationDefaults PersonalizationDefaults { get; set; } = new();
