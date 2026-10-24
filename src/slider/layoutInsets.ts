@@ -84,6 +84,7 @@ export class LayoutInsetGuard {
       ? this.root.querySelector<HTMLElement>('.featured-navigation')
       : null;
     this.setLength('--featured-navigation-width', navigation?.offsetWidth ?? 0);
+    this.setLength('--featured-navigation-height', navigation?.offsetHeight ?? 0);
 
     const slotSizes = new Map<string, { width: number; height: number }>();
     this.root.querySelectorAll<HTMLElement>('.featured-control-slot').forEach((slot) => {

@@ -9,6 +9,8 @@
     (var(--featured-hero-overlap, 150px) * -1) + 52px + var(--featured-media-padding, 0px)
   );
   --featured-hero-content-padding-top: clamp(5em, 10vw, 9rem);
+  /* 120px matches the #homeTab lift; taller Jellyfin headers push it down. */
+  --featured-hero-navigation-top: max(120px, calc(var(--featured-header-offset, 0px) + var(--featured-control-inset)));
   --featured-hero-media-mask: linear-gradient(
     to bottom,
     #000 18%,
@@ -76,8 +78,7 @@
   bottom: auto;
   left: auto;
   right: max(env(safe-area-inset-right), 3.3%);
-  /* 120px matches the #homeTab lift; taller Jellyfin headers push it down. */
-  top: max(120px, calc(var(--featured-header-offset, 0px) + var(--featured-control-inset)));
+  top: var(--featured-hero-navigation-top);
   transform: none;
 }
 

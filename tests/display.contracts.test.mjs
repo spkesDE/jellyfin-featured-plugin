@@ -394,7 +394,11 @@ test('text anchors stay below the Jellyfin header and match in the admin preview
     placement,
     /\.featured-root\.featured-ready:not\(\.featured-hero\) \.featured-content \{[^}]*var\(--featured-header-offset, 0px\)/
   );
-  assert.match(hero, /top: max\(120px, calc\(var\(--featured-header-offset, 0px\)/);
+  assert.match(hero, /--featured-hero-navigation-top: max\(120px, calc\(var\(--featured-header-offset, 0px\)/);
+  assert.match(
+    hero,
+    /\.featured-root\.featured-hero \.featured-navigation \{[^}]*top: var\(--featured-hero-navigation-top\);/
+  );
   assert.match(
     previewStyles,
     /\.is-hero \{[^}]*--featured-preview-content-top: calc\(var\(--featured-preview-header-height\)/
@@ -404,6 +408,17 @@ test('text anchors stay below the Jellyfin header and match in the admin preview
     assert.match(placement, new RegExp(`\\.featured-has-slot-${position}[.:]`));
     assert.match(previewStyles, new RegExp(`\\.has-slot-${position}[.:]`));
   }
-  assert.match(placement, /\.featured-hero\.featured-text-right \.featured-navigation \{[^}]*right: auto;/);
-  assert.match(previewStyles, /\.is-hero\.text-right \.featured-configPreviewNavigation \{[^}]*right: auto;/);
+  // Right-aligned hero copy keeps the controls on its side and starts below them.
+  assert.doesNotMatch(placement, /\.featured-text-right \.featured-navigation/);
+  assert.match(
+    placement,
+    /\.featured-hero\.featured-has-navigation\.featured-text-right \.featured-content \{[^}]*--featured-reserve-top-navigation: calc\(\s*var\(--featured-hero-navigation-top\) \+ var\(--featured-navigation-height/
+  );
+  assert.match(compatibility, /padding-top: max\([^;]*var\(--featured-reserve-top-navigation, 0px\)/);
+  assert.match(carousel, /classList\.add\('featured-has-navigation'\)/);
+  assert.doesNotMatch(previewStyles, /\.text-right \.featured-configPreviewNavigation/);
+  assert.match(
+    previewStyles,
+    /\.is-hero\.has-slot-hero\.text-right \.featured-configPreviewContent \{[^}]*--featured-preview-slot-hero-height/
+  );
 });

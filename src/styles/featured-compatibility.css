@@ -37,7 +37,11 @@
     height: var(--featured-content-height);
     overflow: hidden;
     /* The hero is lifted under Jellyfin's header; never start the copy behind it. */
-    padding-top: max(clamp(4.5rem, 7vw, 7rem), calc(var(--featured-header-offset, 0px) + var(--featured-header-gap)));
+    padding-top: max(
+      clamp(4.5rem, 7vw, 7rem),
+      calc(var(--featured-header-offset, 0px) + var(--featured-header-gap)),
+      var(--featured-reserve-top-navigation, 0px)
+    );
     padding-bottom: clamp(1.5rem, 3vw, 3rem);
   }
 

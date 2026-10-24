@@ -74,10 +74,12 @@
   }
 
   /* Hero mode keeps its controls in one top-right column. Right-aligned copy
-     swaps sides with it; centered copy narrows so both columns stay apart. */
-  .featured-root.featured-hero.featured-text-right .featured-navigation {
-    left: max(env(safe-area-inset-left), 3.3%);
-    right: auto;
+     shares that side and starts below the column; centered copy narrows so
+     both stay apart. */
+  .featured-root.featured-hero.featured-has-navigation.featured-text-right .featured-content {
+    --featured-reserve-top-navigation: calc(
+      var(--featured-hero-navigation-top) + var(--featured-navigation-height, 2.15rem) + var(--featured-control-gap)
+    );
   }
 
   .featured-root.featured-hero.featured-text-center .featured-content {

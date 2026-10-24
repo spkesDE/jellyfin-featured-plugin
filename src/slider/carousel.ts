@@ -176,7 +176,10 @@ export class FeaturedCarousel {
       }
       if (paginationRoot) getSlot('bottom-center').appendChild(paginationRoot);
     }
-    if (navigation.childElementCount) viewport.appendChild(navigation);
+    if (navigation.childElementCount) {
+      viewport.appendChild(navigation);
+      if (response.useHeroLayout) this.root.classList.add('featured-has-navigation');
+    }
     this.layoutInsetGuard = new LayoutInsetGuard(this.root);
 
     this.root.addEventListener('mouseenter', this.pauseTimer);

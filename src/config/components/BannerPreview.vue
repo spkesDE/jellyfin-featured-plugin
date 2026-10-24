@@ -168,7 +168,7 @@ const previewPlacementClasses = computed(() => {
   const classes = [`text-${store.config.HeroTextPosition}`, `text-v-${store.config.HeroTextVerticalPosition}`];
   if (!showNavigation.value) return classes;
   for (const position of previewControlPositions.value) {
-    if (position !== 'hero' && previewSlotSize(position).height > 0) classes.push(`has-slot-${position}`);
+    if (previewSlotSize(position).height > 0) classes.push(`has-slot-${position}`);
   }
   return classes;
 });

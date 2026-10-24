@@ -268,6 +268,13 @@
   --featured-preview-reserve-top-center: var(--featured-preview-center-slot-half);
 }
 
+#FeaturedConfigPage .featured-configPreview.is-hero.has-slot-hero.text-right .featured-configPreviewContent {
+  --featured-preview-reserve-top-slot: calc(
+    var(--featured-preview-header-height) + var(--featured-preview-control-inset) +
+      var(--featured-preview-slot-hero-height) + var(--featured-preview-control-gap)
+  );
+}
+
 #FeaturedConfigPage .featured-configPreview.is-hero.text-center .featured-configPreviewContent {
   --featured-preview-inline-limit: calc(
     100% - 2 * (var(--featured-preview-slot-hero-width) + max(1rem, 3.3%) + var(--featured-preview-control-gap))
@@ -421,11 +428,6 @@
   right: max(1rem, 3.3%);
   top: calc(var(--featured-preview-header-height) + var(--featured-preview-control-inset));
   transform: none;
-}
-
-#FeaturedConfigPage .featured-configPreview.is-hero.text-right .featured-configPreviewNavigation {
-  left: max(1rem, 3.3%);
-  right: auto;
 }
 
 #FeaturedConfigPage .featured-configPreviewControlSlot-hero {

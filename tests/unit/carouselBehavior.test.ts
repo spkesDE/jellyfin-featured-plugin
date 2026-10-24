@@ -69,6 +69,20 @@ describe('FeaturedCarousel behaviour', () => {
     expect(carousel.root.classList.contains('featured-text-v-bottom')).toBe(true);
     expect(carousel.root.classList.contains('featured-has-slot-top-right')).toBe(true);
     expect(carousel.root.classList.contains('featured-has-slot-center')).toBe(false);
+    expect(carousel.root.classList.contains('featured-has-navigation')).toBe(false);
+    carousel.destroy();
+  });
+
+  it('keeps hero controls in their column and flags them for right-aligned copy', () => {
+    const response = createResponse([createItem('one'), createItem('two')]);
+    response.useHeroLayout = true;
+    response.heroTextPosition = 'right';
+    const carousel = new FeaturedCarousel(response);
+
+    expect(carousel.root.classList.contains('featured-has-navigation')).toBe(true);
+    expect(
+      carousel.root.querySelector('.featured-viewport > .featured-navigation > .featured-controls')
+    ).not.toBeNull();
     carousel.destroy();
   });
 });

@@ -87,6 +87,24 @@ describe('LayoutInsetGuard', () => {
     guard.destroy();
   });
 
+  it('publishes the hero control column size so right-aligned copy can start below it', () => {
+    vi.spyOn(window, 'requestAnimationFrame').mockImplementation(() => 1);
+    const root = document.createElement('section');
+    root.className = 'featured-root featured-hero';
+    root.innerHTML = '<div class="featured-viewport"><div class="featured-navigation"></div></div>';
+    setLayoutBox(root.querySelector<HTMLElement>('.featured-viewport')!, { height: 500 });
+    setLayoutBox(root.querySelector<HTMLElement>('.featured-navigation')!, { width: 150, height: 72.5 });
+    document.body.appendChild(root);
+
+    const guard = new LayoutInsetGuard(root);
+    guard.start();
+    runNextFrame();
+
+    expect(root.style.getPropertyValue('--featured-navigation-width')).toBe('150px');
+    expect(root.style.getPropertyValue('--featured-navigation-height')).toBe('73px');
+    guard.destroy();
+  });
+
   it('registers and tears down its lifecycle listeners symmetrically', () => {
     const root = document.createElement('section');
     document.body.appendChild(root);
