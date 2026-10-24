@@ -10,3 +10,4 @@ node_modules/
 *.log
 docs/product-roadmap.md
 .env*.local
+.claude
