@@ -1,5 +1,38 @@
 # Changelog
 
+## v12.9.0.0 - 2026-10-24
+
+### Features
+
+- feat(hero): add vertical text position and keep text clear of header and controls
+- feat(trailer): resolve media excerpts as trailer candidates
+- feat(trailer): play media excerpts in the banner
+- feat(preferences): let administrators manage another user's preferences
+- feat(trailer): order banner media per source and filter SD YouTube trailers
+- feat(presets): resolve the active preset and schedule state in the editor
+- feat(config): add shared settings components
+
+### Fixes
+
+- fix(hero): keep controls on the right for right-aligned text
+
+### Refactoring
+
+- refactor(trailer): select media excerpts through the trailer source
+- refactor(config): rebuild the settings tabs on the shared components
+
+### Other
+
+- deps(deps-dev): bump the npm-minor-and-patch group with 4 updates (#18)
+- deps(deps): bump source-map-js from 1.2.1 to 1.2.2 (#19)
+- deps: Bump the nuget-minor-and-patch group with 4 updates (#21)
+- deps(deps-dev): bump the npm-minor-and-patch group with 5 updates (#20)
+- deps: Bump the nuget-minor-and-patch group with 1 update (#23)
+- deps(deps): bump the npm-minor-and-patch group with 6 updates (#22)
+- deps(deps-dev): bump happy-dom from 20.14.6 to 21.0.4 (#24)
+- chore(dev): load Jellyfin Web styles in the config harness
+- chore(gitignore): add .claude to ignore list
+
 ## v12.8.0.0 - 2026-10-03
 
 ### Features
