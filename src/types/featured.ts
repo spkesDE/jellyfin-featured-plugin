@@ -150,7 +150,7 @@ export interface FeaturedPreferencePolicy {
 
 export interface FeaturedPreferenceOptions {
   policy: FeaturedPreferencePolicy;
-  sources: Array<{ id: string; type: string; enabled: boolean; weight: number }>;
+  sources: Array<{ id: string; type: string; name?: string; enabled: boolean; weight: number }>;
   genres: string[];
 }
 
@@ -187,6 +187,7 @@ export interface FeaturedDiagnostics {
 export interface FeaturedRuleDiagnostics {
   id: string;
   type: string;
+  name?: string;
   candidateItems: number;
   filteredOut: number;
   afterFilters: number;
@@ -209,6 +210,7 @@ export interface FeaturedFeedPreviewItem {
   productionYear?: number | null;
   sourceId: string;
   sourceType: string;
+  sourceName?: string;
 }
 
 export interface FeaturedFeedPreview {

@@ -4,7 +4,8 @@ import ConfigSwitch from './ConfigSwitch.vue';
 
 /**
  * A collapsible settings card: drag handle, title with a one-line summary, an optional enable switch, and an actions
- * slot in the header. Disabled panels stay editable but are dimmed.
+ * slot in the header. Disabled panels stay editable but are dimmed. A `heading` slot replaces the title and summary,
+ * for example with an inline rename field.
  */
 defineProps<{
   title: string;
@@ -40,7 +41,16 @@ defineEmits<{ toggle: [] }>();
       >
         <span class="material-icons" aria-hidden="true">drag_indicator</span>
       </button>
-      <button type="button" class="featured-configPanelToggle" :aria-expanded="expanded" @click="$emit('toggle')">
+      <div v-if="$slots.heading" class="featured-configPanelToggle">
+        <slot name="heading" />
+      </div>
+      <button
+        v-else
+        type="button"
+        class="featured-configPanelToggle"
+        :aria-expanded="expanded"
+        @click="$emit('toggle')"
+      >
         <span class="featured-configPanelHeading">
           <span class="featured-configPanelTitle">{{ title }}</span>
           <span v-if="eyebrow" class="featured-configPanelEyebrow">· {{ eyebrow }}</span>

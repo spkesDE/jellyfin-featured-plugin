@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, nextTick, ref } from 'vue';
 import type { FeaturedMediaPriorityEntry, FeaturedSourceRule, SourceType } from '../../types/config';
 import { t } from '../../i18n';
 import ConfigActionMenu, { type ConfigMenuAction } from './ConfigActionMenu.vue';
@@ -14,7 +14,7 @@ import ConfigSwitch from './ConfigSwitch.vue';
 import FilterRuleEditor from './FilterRuleEditor.vue';
 import { useConfigStore } from '../libs/store';
 import { namedOptions, valueOptions } from '../libs/options';
-import { mediaPriorityLabel, SOURCE_TYPES } from '../libs/sourceTypes';
+import { mediaPriorityLabel, sourceDisplayName, SOURCE_TYPES } from '../libs/sourceTypes';
 
 const props = defineProps<{ rule: FeaturedSourceRule; index: number; count: number; expanded: boolean }>();
 defineEmits<{ toggle: [] }>();
@@ -75,13 +75,43 @@ const summary = computed(() =>
   ].filter((entry): entry is string => Boolean(entry))
 );
 
+const MAXIMUM_NAME_LENGTH = 80;
+const title = computed(() => sourceDisplayName(props.rule.Name, props.rule.Type));
+/** A renamed source keeps its type visible next to the number. */
+const eyebrow = computed(() => {
+  const number = t('source.ruleNumber', { number: props.index + 1 });
+  return props.rule.Name.trim() ? `${number} · ${sourceLabel(props.rule.Type)}` : number;
+});
+const renaming = ref(false);
+const nameDraft = ref('');
+const nameInput = ref<HTMLInputElement | null>(null);
+
+async function startRename(): Promise<void> {
+  nameDraft.value = props.rule.Name;
+  renaming.value = true;
+  await nextTick();
+  nameInput.value?.select();
+}
+function commitRename(): void {
+  if (!renaming.value) return;
+  props.rule.Name = nameDraft.value.trim().slice(0, MAXIMUM_NAME_LENGTH);
+  renaming.value = false;
+}
+function cancelRename(): void {
+  renaming.value = false;
+}
+
 const menuActions = computed((): ConfigMenuAction[] => [
+  { id: 'rename', label: t('source.rename'), icon: 'edit' },
+  ...(props.rule.Name.trim() ? [{ id: 'reset-name', label: t('source.resetName'), icon: 'restart_alt' }] : []),
   { id: 'up', label: t('source.moveUp'), icon: 'arrow_upward', disabled: props.index === 0 },
   { id: 'down', label: t('source.moveDown'), icon: 'arrow_downward', disabled: props.index === props.count - 1 },
   { id: 'remove', label: t('source.remove'), icon: 'delete', danger: true }
 ]);
 function runAction(id: string): void {
-  if (id === 'up') store.moveSource(props.index, -1);
+  if (id === 'rename') void startRename();
+  else if (id === 'reset-name') props.rule.Name = '';
+  else if (id === 'up') store.moveSource(props.index, -1);
   else if (id === 'down') store.moveSource(props.index, 1);
   else if (id === 'remove') store.removeSource(props.index);
 }
@@ -91,8 +121,8 @@ function runAction(id: string): void {
   <ConfigPanel
     v-model:enabled="rule.Enabled"
     class="featured-sourceRule"
-    :title="sourceLabel(rule.Type)"
-    :eyebrow="t('source.ruleNumber', { number: index + 1 })"
+    :title="title"
+    :eyebrow="eyebrow"
     :summary="summary"
     :expanded="expanded"
     drag-handle-class="featured-sourceDragHandle"
@@ -100,6 +130,20 @@ function runAction(id: string): void {
     :enabled-label="t('source.statusActive')"
     @toggle="$emit('toggle')"
   >
+    <template v-if="renaming" #heading>
+      <input
+        ref="nameInput"
+        v-model="nameDraft"
+        class="emby-input featured-sourceNameInput"
+        type="text"
+        :maxlength="MAXIMUM_NAME_LENGTH"
+        :placeholder="sourceLabel(rule.Type)"
+        :aria-label="t('source.name')"
+        @keydown.enter.prevent="commitRename"
+        @keydown.esc.stop.prevent="cancelRename"
+        @blur="commitRename"
+      />
+    </template>
     <template #actions>
       <ConfigActionMenu :label="t('source.moreActions')" :actions="menuActions" @select="runAction" />
     </template>
@@ -246,3 +290,12 @@ function runAction(id: string): void {
     </ConfigSection>
   </ConfigPanel>
 </template>
+
+<style scoped>
+.featured-sourceNameInput {
+  font-size: 1.05rem;
+  font-weight: 600;
+  padding: 0.35rem 0.6rem;
+  width: 100%;
+}
+</style>

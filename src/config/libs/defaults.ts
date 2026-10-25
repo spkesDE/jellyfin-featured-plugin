@@ -153,6 +153,7 @@ function normalizeSourceRule(
   return {
     ...createSourceRule(rule.Type),
     ...current,
+    Name: typeof rule.Name === 'string' ? rule.Name.trim() : '',
     YouTubeQualityFilter: ['enabled', 'disabled'].includes(rule.YouTubeQualityFilter)
       ? rule.YouTubeQualityFilter
       : 'inherit',

@@ -6,6 +6,7 @@ import ConfigSelect, { type SelectOption } from '../components/ConfigSelect.vue'
 import ConfigSwitch from '../components/ConfigSwitch.vue';
 import { t, type TranslationKey } from '../../i18n';
 import { useConfigStore } from '../libs/store';
+import { sourceDisplayName } from '../libs/sourceTypes';
 
 const store = useConfigStore();
 const injectionOptions = computed<SelectOption[]>(() => [
@@ -181,7 +182,9 @@ watch(
               </thead>
               <tbody>
                 <tr v-for="rule in store.diagnostics.value.rules" :key="rule.id">
-                  <td>{{ rule.type }}{{ rule.fallback ? ` · ${t('source.fallback')}` : '' }}</td>
+                  <td>
+                    {{ sourceDisplayName(rule.name, rule.type) }}{{ rule.fallback ? ` · ${t('source.fallback')}` : '' }}
+                  </td>
                   <td>{{ rule.candidateItems }}</td>
                   <td>{{ rule.filteredOut }}</td>
                   <td>{{ rule.ineligible }}</td>

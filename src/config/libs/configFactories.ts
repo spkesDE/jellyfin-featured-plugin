@@ -19,6 +19,7 @@ export function createSourceRule(
   return {
     Id: createId(),
     Type: type,
+    Name: '',
     Enabled: true,
     Weight: 100,
     MinimumItems: 0,

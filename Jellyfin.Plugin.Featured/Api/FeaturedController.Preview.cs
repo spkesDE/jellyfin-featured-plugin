@@ -58,6 +58,9 @@ public sealed partial class FeaturedController
                 _dismissalStore.GetSnapshot(previewUser.Id));
             LogRuleEngineTiming(selection.Timing);
 
+            Dictionary<string, string> sourceNames = effective.SourceRules
+                .DistinctBy(rule => rule.Id)
+                .ToDictionary(rule => rule.Id, rule => rule.Name);
             FeaturedFeedPreviewItem[] items = selection.Items.Select(item =>
             {
                 selection.ItemReasons.TryGetValue(item.Id, out FeaturedItemSelectionReason? reason);
@@ -68,7 +71,8 @@ public sealed partial class FeaturedController
                     MediaType = item.GetBaseItemKind().ToString(),
                     ProductionYear = item.ProductionYear,
                     SourceId = reason?.RuleId ?? string.Empty,
-                    SourceType = reason?.SourceType ?? string.Empty
+                    SourceType = reason?.SourceType ?? string.Empty,
+                    SourceName = reason is not null ? sourceNames.GetValueOrDefault(reason.RuleId, string.Empty) : string.Empty
                 };
             }).ToArray();
 

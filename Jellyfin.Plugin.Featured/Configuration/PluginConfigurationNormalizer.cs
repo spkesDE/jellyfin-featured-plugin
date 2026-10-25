@@ -2,6 +2,8 @@ namespace Jellyfin.Plugin.Featured;
 
 internal static class PluginConfigurationNormalizer
 {
+    private const int MaximumSourceNameLength = 80;
+
     private static readonly HashSet<string> ValidSourceTypes = new(StringComparer.OrdinalIgnoreCase)
     {
         FeaturedSourceTypes.Libraries,
@@ -358,6 +360,7 @@ internal static class PluginConfigurationNormalizer
     {
         rule.Id = string.IsNullOrWhiteSpace(rule.Id) ? Guid.NewGuid().ToString("N") : rule.Id.Trim();
         rule.Type = rule.Type.ToUpperInvariant();
+        rule.Name = NormalizeSourceName(rule.Name);
         rule.YouTubeQualityFilter = rule.YouTubeQualityFilter is "enabled" or "disabled" ? rule.YouTubeQualityFilter : "inherit";
         rule.Weight = Math.Clamp(rule.Weight, 1, 100);
         rule.MinimumItems = Math.Clamp(rule.MinimumItems, 0, 100);
@@ -567,6 +570,12 @@ internal static class PluginConfigurationNormalizer
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .Take(100)
             .ToArray();
+    }
+
+    private static string NormalizeSourceName(string? value)
+    {
+        string name = value?.Trim() ?? string.Empty;
+        return name.Length > MaximumSourceNameLength ? name[..MaximumSourceNameLength].TrimEnd() : name;
     }
 
     private static string NormalizeControlPlacement(string? value)

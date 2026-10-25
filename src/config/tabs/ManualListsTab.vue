@@ -15,6 +15,7 @@ import ConfigSection from '../components/ConfigSection.vue';
 import ConfigText from '../components/ConfigText.vue';
 import ManualItemAutocomplete from '../components/ManualItemAutocomplete.vue';
 import { useConfigStore } from '../libs/store';
+import { sourceDisplayName } from '../libs/sourceTypes';
 
 const store = useConfigStore();
 const expandedManualListId = ref<string | null>(null);
@@ -25,14 +26,17 @@ const summary = computed(() => {
   return lists === 1 ? t('manual.summaryCountOne', { items }) : t('manual.summaryCount', { lists, items });
 });
 
-/** Source numbers (as shown in Sources & Mix) that draw from each manual list. */
-const sourceNumbersByList = computed(() => {
-  const numbers = new Map<string, number[]>();
+/** Sources (named as in Sources & Mix, by number while unnamed) that draw from each manual list. */
+const sourceLabelsByList = computed(() => {
+  const labels = new Map<string, string[]>();
   store.config.SourceRules.forEach((rule, index) => {
     if (rule.Type !== 'MANUAL_LISTS') return;
-    rule.ManualListIds.forEach((id) => numbers.set(id, [...(numbers.get(id) ?? []), index + 1]));
+    const label = rule.Name.trim()
+      ? sourceDisplayName(rule.Name, rule.Type)
+      : t('source.ruleNumber', { number: index + 1 });
+    rule.ManualListIds.forEach((id) => labels.set(id, [...(labels.get(id) ?? []), label]));
   });
-  return numbers;
+  return labels;
 });
 
 function formatDate(value: string): string {
@@ -50,11 +54,11 @@ function scheduleLabel(startsAt: string | null, endsAt: string | null): string |
 }
 
 function listSummary(list: FeaturedManualList): string[] {
-  const sources = sourceNumbersByList.value.get(list.Id);
+  const sources = sourceLabelsByList.value.get(list.Id);
   return [
     t('manual.summaryItems', { count: list.Items.length }),
     scheduleLabel(list.StartsAt, list.EndsAt) ?? t('manual.scheduleAlways'),
-    sources ? t('manual.usedBy', { numbers: sources.join(', ') }) : t('manual.unused')
+    sources ? t('manual.usedBy', { sources: sources.join(', ') }) : t('manual.unused')
   ];
 }
 
@@ -128,7 +132,7 @@ function hidePoster(event: Event): void {
           />
         </template>
 
-        <div v-if="!sourceNumbersByList.has(list.Id)" class="featured-manualUnused">
+        <div v-if="!sourceLabelsByList.has(list.Id)" class="featured-manualUnused">
           <span class="material-icons" aria-hidden="true">info</span>
           <span>{{ t('manual.unusedHint') }}</span>
           <button type="button" class="featured-textButton" @click="addAsSource(list)">

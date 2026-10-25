@@ -121,3 +121,14 @@ const MEDIA_PRIORITY_LABELS: Record<MediaPriorityType, TranslationKey> = {
 };
 
 export const mediaPriorityLabel = (entry: FeaturedMediaPriorityEntry): string => t(MEDIA_PRIORITY_LABELS[entry.Type]);
+
+/** Type label for a raw source type as the API reports it; unknown types are shown as is. */
+export function sourceTypeLabel(type: string): string {
+  const info = SOURCE_TYPES[type.toUpperCase() as SourceType] as SourceTypeInfo | undefined;
+  return info ? t(info.label) : type;
+}
+
+/** The admin-chosen name of a source, or its type label while it has none. */
+export function sourceDisplayName(name: string | null | undefined, type: string): string {
+  return name?.trim() || sourceTypeLabel(type);
+}

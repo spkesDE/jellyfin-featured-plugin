@@ -55,7 +55,7 @@ public sealed partial class FeaturedController
                 ["activePresetId"] = _presetResolution.ActivePresetId ?? string.Empty,
                 ["activePresetName"] = _presetResolution.ActivePresetName ?? "Default",
                 ["nextPresetChange"] = _presetResolution.NextScheduleChange?.ToString("O") ?? string.Empty,
-                ["sources"] = personalization.SourceRules.Where(rule => rule.Enabled).Select(rule => rule.Type).ToArray(),
+                ["sources"] = personalization.SourceRules.Where(rule => rule.Enabled).Select(rule => string.IsNullOrEmpty(rule.Name) ? rule.Type : rule.Name).ToArray(),
                 ["matchingItems"] = selection.RuleStats.Sum(stat => stat.AfterFilters),
                 ["eligibleItems"] = selection.RuleStats.Sum(stat => stat.Eligible),
                 ["heroItemsReturned"] = selection.Items.Count,

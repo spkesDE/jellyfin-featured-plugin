@@ -74,6 +74,8 @@ export interface FeaturedMediaPriorityEntry {
 export interface FeaturedSourceRule {
   Id: string;
   Type: SourceType;
+  /** Admin-chosen label; empty shows the source by its type. */
+  Name: string;
   Enabled: boolean;
   Weight: number;
   MinimumItems: number;

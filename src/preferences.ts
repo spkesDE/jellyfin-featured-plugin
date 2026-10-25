@@ -102,7 +102,7 @@ export async function openPreferencesDialog(profile?: { userId: string; userName
       const row = document.createElement('div');
       row.className = 'featured-preference-source';
       const enabled = createCheckbox(
-        t(sourceKeys[source.type] ?? 'source.type.random'),
+        source.name?.trim() || t(sourceKeys[source.type] ?? 'source.type.random'),
         effective.sourceEnabled[source.id] ?? source.enabled,
         !options.policy.allowSourceSelection
       );

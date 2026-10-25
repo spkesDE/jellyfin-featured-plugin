@@ -105,7 +105,13 @@ export function mockPreferences(
         allowInProgressSeriesBoost: policy.AllowInProgressSeriesBoost,
         allowRepeatCooldown: policy.AllowRepeatCooldown
       },
-      sources: sources.map((rule) => ({ id: rule.Id, type: rule.Type, enabled: rule.Enabled, weight: rule.Weight })),
+      sources: sources.map((rule) => ({
+        id: rule.Id,
+        type: rule.Type,
+        name: rule.Name,
+        enabled: rule.Enabled,
+        weight: rule.Weight
+      })),
       genres: ['Action', 'Comedy', 'Drama', 'Science Fiction']
     },
     dismissals: {

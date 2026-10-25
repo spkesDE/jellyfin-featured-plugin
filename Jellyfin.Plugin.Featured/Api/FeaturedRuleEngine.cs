@@ -149,6 +149,7 @@ internal sealed partial class FeaturedRuleEngine
             {
                 Id = rule.Id,
                 Type = rule.Type,
+                Name = rule.Name,
                 CandidateItems = candidates.Count,
                 FilteredOut = candidates.Count - afterFilters.Count,
                 DismissedExcluded = filteredCandidates.Count - afterFilters.Count,

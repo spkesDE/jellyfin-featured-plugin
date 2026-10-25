@@ -8,6 +8,7 @@ public sealed class FeaturedRuleDiagnostic
 {
     public string Id { get; set; } = string.Empty;
     public string Type { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
     public int CandidateItems { get; set; }
     public int FilteredOut { get; set; }
     public int AfterFilters { get; set; }

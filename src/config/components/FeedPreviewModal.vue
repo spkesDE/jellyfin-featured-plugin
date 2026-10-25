@@ -3,6 +3,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { t } from '../../i18n';
 import ConfigSelect from './ConfigSelect.vue';
 import { useConfigStore } from '../libs/store';
+import { sourceDisplayName } from '../libs/sourceTypes';
 
 const store = useConfigStore();
 const dialog = ref<HTMLElement | null>(null);
@@ -18,10 +19,6 @@ const presetOptions = computed(() => [
 
 function refresh(): void {
   void store.runFeedPreview(store.feedPreviewUserId.value, store.feedPreviewPresetId.value);
-}
-
-function sourceLabel(source: string): string {
-  return t(`source.type.${source.toLowerCase()}` as Parameters<typeof t>[0]);
 }
 
 function handleKeydown(event: KeyboardEvent): void {
@@ -103,7 +100,7 @@ watch(
               <span>{{ item.productionYear ? `${item.mediaType} · ${item.productionYear}` : item.mediaType }}</span>
             </div>
             <span class="featured-feedPreviewReason" :title="t('feedPreview.whyHelp')">
-              {{ t('feedPreview.selectedBy', { source: sourceLabel(item.sourceType) }) }}
+              {{ t('feedPreview.selectedBy', { source: sourceDisplayName(item.sourceName, item.sourceType) }) }}
             </span>
           </li>
         </ol>
@@ -112,7 +109,7 @@ watch(
         <h3>{{ t('feedPreview.diagnostics') }}</h3>
         <div class="featured-feedPreviewStats">
           <div v-for="rule in store.feedPreview.value.rules ?? []" :key="rule.id">
-            <span>{{ sourceLabel(rule.type) }}</span>
+            <span>{{ sourceDisplayName(rule.name, rule.type) }}</span>
             <strong>{{ t('feedPreview.selectedCount', { count: rule.returned }) }}</strong>
           </div>
           <div>

@@ -111,6 +111,7 @@ public sealed partial class FeaturedController
         {
             Id = rule.Id,
             Type = rule.Type,
+            Name = rule.Name,
             Enabled = rule.Enabled,
             Weight = rule.Weight
         }).ToArray();

@@ -8,6 +8,11 @@ public sealed class FeaturedSourceRule
 
     public string Type { get; set; } = FeaturedSourceTypes.Random;
 
+    /// <summary>
+    /// Optional admin-chosen label. Empty means the source is shown by its type.
+    /// </summary>
+    public string Name { get; set; } = string.Empty;
+
     public bool Enabled { get; set; } = true;
 
     public int Weight { get; set; } = 100;

@@ -90,7 +90,7 @@ export function installMockJellyfin(): void {
           jellyfinVersion: '12.0.0.0',
           pluginVersion: '12.1.0.0',
           currentUser: 'Administrator',
-          sources: config.SourceRules.filter((rule) => rule.Enabled).map((rule) => rule.Type),
+          sources: config.SourceRules.filter((rule) => rule.Enabled).map((rule) => rule.Name.trim() || rule.Type),
           matchingItems: 184,
           eligibleItems: 37,
           heroItemsReturned: 8,
