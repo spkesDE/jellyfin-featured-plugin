@@ -29,7 +29,7 @@ Jellyfin Featured adds a rotating hero banner to the Jellyfin home page.
 2. Add this plugin repository:
 
    ```text
-   https://raw.githubusercontent.com/spkesDE/jellyfin-featured-plugin/main/manifest.json
+   https://jellyfin.spkes.dev
    ```
 
 3. Install **Jellyfin Featured** from the plugin catalog.
@@ -110,3 +110,13 @@ The interface is available in English and German and follows the Jellyfin or bro
 Licensed under the [MIT License](./LICENSE).
 
 Jellyfin Featured is a remake of the original [Jellyfin Editor's Choice plugin](https://github.com/lachlandcp/jellyfin-editors-choice-plugin) by [lachlandcp](https://github.com/lachlandcp).
+
+## Star History
+
+<a href="https://www.star-history.com/?repos=spkesde%2Fjellyfin-featured-plugin&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=spkesde/jellyfin-featured-plugin&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=spkesde/jellyfin-featured-plugin&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=spkesde/jellyfin-featured-plugin&type=date&legend=top-left" />
+ </picture>
+</a>
