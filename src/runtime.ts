@@ -14,6 +14,7 @@ import { CONSOLE_PREFIX, USER_PREFERENCES_CHANGED_EVENT } from './constants';
 import {
   clearFeaturedCache,
   getFeaturedCacheScope,
+  isSameFeaturedResponse,
   keepCurrentItem,
   readFeaturedCache,
   saveFeaturedCache
@@ -292,6 +293,12 @@ async function mount(container: Element): Promise<void> {
       )
     )
       return;
+
+    // A rebuild would restart the trailer and timer, so it only happens when the view has to change.
+    if (cachedCarousel && cachedResponse && isSameFeaturedResponse(cachedResponse, response)) {
+      log(`Kept ${response.items.length} cached featured items; the fresh response is identical.`);
+      return;
+    }
 
     const currentItem = cachedCarousel?.getActiveItem();
     const displayResponse = keepCurrentItem(response, currentItem);

@@ -87,6 +87,14 @@ export function clearFeaturedCache(): void {
   }
 }
 
+/** True when a fresh response would render exactly what the cached carousel already shows. */
+export function isSameFeaturedResponse(cached: FeaturedResponse, fresh: FeaturedResponse): boolean {
+  return (
+    fresh.items.length <= CACHE_ITEM_LIMIT &&
+    JSON.stringify(cached) === JSON.stringify({ ...fresh, items: fresh.items.slice(0, CACHE_ITEM_LIMIT) })
+  );
+}
+
 export function keepCurrentItem(response: FeaturedResponse, currentItem?: FeaturedItem): FeaturedResponse {
   if (!currentItem || !response.items.length) return response;
   const freshCurrentItem = response.items.find((item) => item.id === currentItem.id) ?? currentItem;
