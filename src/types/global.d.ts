@@ -10,6 +10,7 @@ declare global {
       refresh(): void;
     };
     JellyfinFeaturedPluginConfig?: RuntimeConfig;
+    JellyfinFeaturedConfig?: { mount(): void };
     JellyfinFeaturedBootstrap?: { stop(): void };
     JellyfinFeaturedBootstrapSettings?: {
       hero: boolean;

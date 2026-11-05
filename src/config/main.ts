@@ -1,5 +1,6 @@
 import { createApp } from 'vue';
 import App from './App.vue';
+import { createConfigAppMounter } from './appMounts';
 import configCss from './config.css?inline';
 import { injectJellyfinThemeTokens } from '../styles/jellyfin-theme';
 
@@ -13,13 +14,13 @@ function injectStyles(): void {
   document.head.appendChild(style);
 }
 
-function mountConfigApp(): void {
-  const mountPoint = document.querySelector<HTMLElement>('#FeaturedConfigApp');
-  if (!mountPoint || mountPoint.dataset.vueMounted === 'true') return;
-  mountPoint.dataset.vueMounted = 'true';
-  injectJellyfinThemeTokens();
-  injectStyles();
-  createApp(App).mount(mountPoint);
-}
+const mountConfigApp = createConfigAppMounter(
+  () => createApp(App),
+  () => {
+    injectJellyfinThemeTokens();
+    injectStyles();
+  }
+);
 
+window.JellyfinFeaturedConfig = { mount: mountConfigApp };
 mountConfigApp();

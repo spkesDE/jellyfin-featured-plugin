@@ -341,3 +341,13 @@ test('config bundle can be re-executed because its style injection stays out of 
   assert.match(build, /'\}\)\(\);'\s*\]\.join\(''\)/);
   assert.match(build, /declares a global binding/);
 });
+
+test('config page reuses the loaded bundle instead of executing it again', async () => {
+  const page = await read('Jellyfin.Plugin.Featured/Configuration/configPage.html');
+  const main = await read('src/config/main.ts');
+
+  assert.match(page, /if \(window\.JellyfinFeaturedConfig\) \{\s*window\.JellyfinFeaturedConfig\.mount\(\);\s*return;/);
+  assert.match(page, /document\.getElementById\(scriptId\)/);
+  assert.match(main, /window\.JellyfinFeaturedConfig = \{ mount: mountConfigApp \}/);
+  assert.doesNotMatch(page, /\$\(|\$\.|jQuery/);
+});

@@ -12,6 +12,16 @@
 
       <script type="text/javascript">
         (function () {
+          // The bundle stays loaded for the whole session, so a rebuilt page only needs mounting.
+          if (window.JellyfinFeaturedConfig) {
+            window.JellyfinFeaturedConfig.mount();
+            return;
+          }
+
+          // A first load still in flight mounts whichever page is current when it finishes.
+          const scriptId = 'featuredConfigBundle';
+          if (document.getElementById(scriptId)) return;
+
           const apiClient = window.ApiClient || window.apiClient;
           const scriptUrl =
             apiClient && typeof apiClient.getUrl === 'function'
@@ -25,7 +35,11 @@
           const script = document.createElement('script');
           const separator = scriptUrl.includes('?') ? '&' : '?';
           script.src = scriptUrl + separator + 'instance=' + Date.now().toString(36);
+          script.id = scriptId;
           script.async = false;
+          script.onerror = function () {
+            script.remove();
+          };
           document.head.appendChild(script);
         })();
       </script>
