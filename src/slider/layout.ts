@@ -106,6 +106,27 @@ export function calculateHeroClearance(
   return Math.max(0, Math.ceil(currentClearance + contentBottom + gap - sectionTop));
 }
 
+/**
+ * Finds the section rendered directly below the hero. Other plugins put hidden or
+ * flex-reordered elements next to it (Home Screen Sections adds a hidden loading
+ * indicator), and those report a top of 0 or sit far below the real first section.
+ */
+export function findFollowingSection(root: Element): Element | null {
+  let following: Element | null = null;
+  let followingTop = Number.POSITIVE_INFINITY;
+  for (let sibling = root.nextElementSibling; sibling; sibling = sibling.nextElementSibling) {
+    if (!sibling.getClientRects().length) continue;
+    const { position } = getComputedStyle(sibling);
+    if (position === 'absolute' || position === 'fixed') continue;
+    const { top } = sibling.getBoundingClientRect();
+    if (top < followingTop) {
+      following = sibling;
+      followingTop = top;
+    }
+  }
+  return following;
+}
+
 export function applyHeroLayoutVariables(element: HTMLElement, settings: HeroLayoutSettings): void {
   element.style.setProperty('--featured-height', getHeroHeightCssValue(settings.heroHeightMode, settings.bannerHeight));
   element.style.setProperty('--featured-tablet-height', `${settings.tabletBannerHeight}px`);

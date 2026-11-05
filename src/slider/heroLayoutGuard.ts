@@ -1,4 +1,4 @@
-import { calculateHeroClearance } from './layout';
+import { calculateHeroClearance, findFollowingSection } from './layout';
 
 /**
  * Keeps hero text clear of the following Jellyfin section. The guard owns every
@@ -73,7 +73,7 @@ export class HeroLayoutGuard {
 
   private updateClearance(): void {
     if (!this.root.isConnected) return;
-    const section = this.root.nextElementSibling;
+    const section = findFollowingSection(this.root);
     const content = this.getActiveContent();
     if (!section || !content) return;
     const visibleChildren = Array.from(content.children).filter((child) => child.getClientRects().length);

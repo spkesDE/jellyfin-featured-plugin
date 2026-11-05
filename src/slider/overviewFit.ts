@@ -1,3 +1,5 @@
+import { findFollowingSection } from './layout';
+
 const CONTENT_FIT_MEDIA_QUERY = '(min-width: 701px)';
 const HERO_CONTENT_GAP_PX = 12;
 const OVERFLOW_TOLERANCE_PX = 1;
@@ -24,8 +26,8 @@ function getAvailableContentBottom(content: HTMLElement): number {
   const contentBoxBottom = contentBottom - paddingBottom;
   const root = content.closest<HTMLElement>('.featured-root.featured-ready');
   if (!root?.classList.contains('featured-hero')) return contentBoxBottom;
-  const nextSection = root.nextElementSibling;
-  if (!(nextSection instanceof HTMLElement)) return contentBoxBottom;
+  const nextSection = root ? findFollowingSection(root) : null;
+  if (!nextSection) return contentBoxBottom;
   return Math.min(contentBoxBottom, nextSection.getBoundingClientRect().top - HERO_CONTENT_GAP_PX);
 }
 
