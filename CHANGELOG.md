@@ -1,5 +1,29 @@
 # Changelog
 
+## v12.9.1.0 - 2026-11-05
+
+### Features
+
+- feat(sources): allow custom source names
+- feat(readme): update plugin repository link and add star history section
+
+### Fixes
+
+- fix(hero): measure against the visible following section
+- fix(config): keep style injection out of the global scope
+- fix(trailer): tolerate key events dispatched on document
+- fix(config): load the settings bundle once per session
+- fix(hero): lift the home tab with a margin instead of a transform
+- fix(runtime): keep the cached carousel when the fresh response is identical
+- fix(runtime): update upcoming slides without rebuilding the carousel
+
+### Other
+
+- deps: Bump the nuget-minor-and-patch group with 3 updates (#28)
+- deps: Bump the nuget-minor-and-patch group with 3 updates (#29)
+- deps(deps-dev): bump the npm-minor-and-patch group across 1 directory with 5 updates (#30)
+- chore(release): bump version to 12.9.1.0
+
 ## v12.9.0.0 - 2026-10-24
 
 ### Features
