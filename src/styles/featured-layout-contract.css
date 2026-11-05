@@ -3,7 +3,7 @@
 #homeTab.featured-hero-page,
 #homeTab.featured-bootstrap-hero-page {
   padding-top: 0 !important;
-  transform: translateY(-120px);
+  margin-top: -120px;
 }
 
 .featured-root,
