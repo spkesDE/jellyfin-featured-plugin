@@ -419,7 +419,8 @@ export class TrailerController {
 
   private onHotkey = (event: KeyboardEvent): void => {
     if (!this.player || event.repeat || event.altKey || event.ctrlKey || event.metaKey) return;
-    const target = event.target as HTMLElement | null;
+    // Synthetic key events dispatched on document have no closest().
+    const target = event.target instanceof Element ? event.target : null;
     if (target?.closest('input, textarea, select, button, [contenteditable="true"], [role="dialog"]')) return;
     if (event.key.toLowerCase() === 'm') {
       event.preventDefault();

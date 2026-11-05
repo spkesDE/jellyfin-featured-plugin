@@ -55,4 +55,24 @@ describe('TrailerController', () => {
     expect(controller.controls?.querySelector('.featured-volume-up')).not.toBeNull();
     controller.destroy();
   });
+
+  it('tolerates key events dispatched on document while a trailer player exists', () => {
+    const controller = new TrailerController(createResponse(), true, null, null, {
+      getActiveIndex: () => 0,
+      isDestroyed: () => false,
+      isAutoplayEnabled: () => true,
+      advance: vi.fn(),
+      pauseAutoplay: vi.fn(),
+      restartAutoplay: vi.fn()
+    });
+    const internals = controller as unknown as { player: object; onHotkey: (event: KeyboardEvent) => void };
+    internals.player = {};
+    const event = new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape' });
+    Object.defineProperty(event, 'target', { value: document });
+
+    expect(() => internals.onHotkey(event)).not.toThrow();
+
+    internals.player = null as unknown as object;
+    controller.destroy();
+  });
 });
