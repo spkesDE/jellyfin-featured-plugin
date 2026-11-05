@@ -22,6 +22,61 @@ describe('FeaturedCarousel behaviour', () => {
     carousel.destroy();
   });
 
+  it('replaces the upcoming slides while the active slide stays untouched', () => {
+    const first = createItem('one');
+    const carousel = new FeaturedCarousel(createResponse([first, createItem('two'), createItem('three')]));
+    document.body.appendChild(carousel.root);
+    const activeSlide = carousel.root.querySelector('.featured-slide.is-active');
+
+    const replaced = carousel.replaceUpcomingItems([first, createItem('four'), createItem('five')]);
+
+    const slides = [...carousel.root.querySelectorAll<HTMLElement>('.featured-slide')];
+    expect(replaced).toBe(true);
+    expect(slides).toHaveLength(3);
+    expect(slides[0]).toBe(activeSlide);
+    expect(slides[0].classList.contains('is-active')).toBe(true);
+    expect(slides.some((slide) => slide.classList.contains('featured-no-transition'))).toBe(false);
+    expect(slides.map((slide) => slide.dataset.ecOffset)).toEqual(['0', '1', '-1']);
+
+    carousel.root.querySelector<HTMLButtonElement>('.featured-arrow-next')?.click();
+    expect(carousel.getActiveItem()?.id).toBe('four');
+    carousel.destroy();
+  });
+
+  it('asks for a rebuild when the replacement does not fit the rendered carousel', () => {
+    const first = createItem('one');
+    const withTrailer = createItem('three');
+    withTrailer.trailer = { type: 'remote', provider: 'youtube', videoId: 'trailer' };
+    const carousel = new FeaturedCarousel(createResponse([first, createItem('two')]));
+    document.body.appendChild(carousel.root);
+
+    expect(carousel.replaceUpcomingItems([first])).toBe(false);
+    expect(carousel.replaceUpcomingItems([{ ...first, overview: 'changed' }, createItem('three')])).toBe(false);
+    expect(carousel.replaceUpcomingItems([first, withTrailer])).toBe(false);
+
+    carousel.root.querySelector<HTMLButtonElement>('.featured-arrow-next')?.click();
+    expect(carousel.replaceUpcomingItems([createItem('two'), createItem('three')])).toBe(false);
+    expect(carousel.root.querySelectorAll('.featured-slide')).toHaveLength(2);
+    carousel.destroy();
+  });
+
+  it('keeps a running trailer through the replacement without restarting it', () => {
+    const first = createItem('one');
+    first.trailer = { type: 'remote', provider: 'youtube', videoId: 'trailer-one' };
+    const carousel = new FeaturedCarousel(createResponse([first, createItem('two')]));
+    document.body.appendChild(carousel.root);
+    const controller = (carousel as unknown as { trailerController: { start(): void; stop(): void } })
+      .trailerController;
+    const start = vi.spyOn(controller, 'start');
+    const stop = vi.spyOn(controller, 'stop');
+
+    expect(carousel.replaceUpcomingItems([first, createItem('three')])).toBe(true);
+
+    expect(start).not.toHaveBeenCalled();
+    expect(stop).not.toHaveBeenCalled();
+    carousel.destroy();
+  });
+
   it('loads the next batch at the navigation boundary and activates the pending item', async () => {
     const response = createResponse([createItem('one'), createItem('two')]);
     response.infiniteLoading = true;

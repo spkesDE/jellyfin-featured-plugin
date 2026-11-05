@@ -201,6 +201,45 @@ export class FeaturedCarousel {
     return this.items[this.window.index];
   }
 
+  /**
+   * Swaps the slides behind the active one without touching it, so a running trailer, the
+   * autoplay timer, and focus survive a background refresh. `items` must start with the active
+   * item. Returns false when the rendered controls would not fit and the caller has to rebuild.
+   */
+  replaceUpcomingItems(items: readonly FeaturedItem[]): boolean {
+    const active = this.getActiveItem();
+    const hasTrailer = (item: FeaturedItem): boolean => Boolean(item.trailer || item.trailers?.length);
+    if (
+      this.destroyed ||
+      this.loadingMore ||
+      !active ||
+      this.window.index !== 0 ||
+      this.window.windowStart !== 0 ||
+      this.window.discardedItemCount !== 0 ||
+      items.length !== this.items.length ||
+      this.slides.length !== this.items.length ||
+      JSON.stringify(items[0]) !== JSON.stringify(active) ||
+      items.some(hasTrailer) !== this.items.some(hasTrailer)
+    )
+      return false;
+
+    const [activeSlide, ...replacedSlides] = this.slides;
+    const upcomingSlides = items.slice(1).map((item) => createSlide(item, this.response));
+    replacedSlides.forEach((slide) => slide.remove());
+    // New slides must not sweep across the banner while they move to their resting offset.
+    upcomingSlides.forEach((slide) => {
+      slide.classList.add('featured-no-transition');
+      this.track.appendChild(slide);
+    });
+    this.items.splice(0, this.items.length, ...items);
+    this.slides = [activeSlide, ...upcomingSlides];
+    this.window.restart(items.map((item) => item.id));
+    this.activateSlide(0, false, false);
+    void this.root.offsetWidth;
+    upcomingSlides.forEach((slide) => slide.classList.remove('featured-no-transition'));
+    return true;
+  }
+
   destroy(): void {
     if (this.destroyed) return;
     this.destroyed = true;
@@ -220,7 +259,7 @@ export class FeaturedCarousel {
     this.overviewFitGuard.start();
   }
 
-  private activateSlide(nextIndex: number, restart = true): void {
+  private activateSlide(nextIndex: number, restart = true, startTrailer = true): void {
     if (!this.slides.length) return;
     const previous = this.window.index;
     const activeSlide = this.slides[previous - this.window.windowStart];
@@ -297,7 +336,7 @@ export class FeaturedCarousel {
     this.layoutInsetGuard.activeContentChanged();
     this.heroLayoutGuard?.activeContentChanged();
     this.overviewFitGuard.activeContentChanged();
-    this.trailerController.start(this.slides[localIndex], this.items[this.window.index]);
+    if (startTrailer) this.trailerController.start(this.slides[localIndex], this.items[this.window.index]);
     this.reportActiveItem();
     if (this.shouldPrefetchNextBatch()) void this.loadMore();
     if (restart) this.restartTimer();

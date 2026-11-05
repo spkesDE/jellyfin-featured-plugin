@@ -59,6 +59,17 @@ export class CarouselWindowModel {
     this.windowStart = start;
   }
 
+  /** Restarts the bookkeeping for a replaced queue whose first item stays active. */
+  restart(itemIds: Iterable<string>): void {
+    this.index = 0;
+    this.windowStart = 0;
+    this.discardedItemCount = 0;
+    this.pendingIndex = null;
+    this.hasLeftInitialSlide = false;
+    this.seenItemIds.clear();
+    for (const itemId of itemIds) this.seenItemIds.add(itemId);
+  }
+
   acceptBatch<T extends IdentifiedItem>(items: readonly T[], responseHasMore: boolean, maximumSeenIds: number): T[] {
     const accepted = items.filter((item) => {
       if (this.seenItemIds.has(item.id)) return false;

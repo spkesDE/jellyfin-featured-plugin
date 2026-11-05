@@ -95,6 +95,11 @@ export function isSameFeaturedResponse(cached: FeaturedResponse, fresh: Featured
   );
 }
 
+/** True when only the items differ, so the rendered layout and controls still fit. */
+export function hasSameFeaturedSettings(cached: FeaturedResponse, fresh: FeaturedResponse): boolean {
+  return JSON.stringify({ ...cached, items: [] }) === JSON.stringify({ ...fresh, items: [] });
+}
+
 export function keepCurrentItem(response: FeaturedResponse, currentItem?: FeaturedItem): FeaturedResponse {
   if (!currentItem || !response.items.length) return response;
   const freshCurrentItem = response.items.find((item) => item.id === currentItem.id) ?? currentItem;

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { isSameFeaturedResponse } from '../../src/core/featuredCache';
+import { hasSameFeaturedSettings, isSameFeaturedResponse } from '../../src/core/featuredCache';
 import type { FeaturedItem, FeaturedResponse } from '../../src/types/featured';
 
 const item = (id: string): FeaturedItem => ({ id, name: id }) as FeaturedItem;
@@ -19,5 +19,10 @@ describe('fresh response comparison', () => {
   it('does not treat a longer fresh response as the truncated cached one', () => {
     const six = ['a', 'b', 'c', 'd', 'e', 'f'];
     expect(isSameFeaturedResponse(response(six.slice(0, 5)), response(six))).toBe(false);
+  });
+
+  it('compares settings independently of the items', () => {
+    expect(hasSameFeaturedSettings(response(['a']), response(['b', 'c']))).toBe(true);
+    expect(hasSameFeaturedSettings(response(['a']), response(['a'], { hasMore: true }))).toBe(false);
   });
 });

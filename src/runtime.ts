@@ -14,6 +14,7 @@ import { CONSOLE_PREFIX, USER_PREFERENCES_CHANGED_EVENT } from './constants';
 import {
   clearFeaturedCache,
   getFeaturedCacheScope,
+  hasSameFeaturedSettings,
   isSameFeaturedResponse,
   keepCurrentItem,
   readFeaturedCache,
@@ -302,6 +303,16 @@ async function mount(container: Element): Promise<void> {
 
     const currentItem = cachedCarousel?.getActiveItem();
     const displayResponse = keepCurrentItem(response, currentItem);
+    if (
+      cachedCarousel &&
+      cachedResponse &&
+      hasSameFeaturedSettings(cachedResponse, response) &&
+      cachedCarousel.replaceUpcomingItems(displayResponse.items)
+    ) {
+      log('Updated the upcoming featured items and kept the active banner.');
+      return;
+    }
+
     const carousel = createCarousel(displayResponse, currentItem?.id);
     attachCarousel(container, carousel, displayResponse, cachedCarousel);
     cachedCarousel = undefined;
