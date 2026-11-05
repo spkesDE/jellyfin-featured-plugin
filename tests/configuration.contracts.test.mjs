@@ -333,3 +333,11 @@ test('source-scoped media fallback, resolution, and user visibility flow through
   );
   assert.match(apiClient, /value\.call\(apiClient\)/);
 });
+
+test('config bundle can be re-executed because its style injection stays out of the global scope', async () => {
+  const build = await read('scripts/build.mjs');
+
+  assert.match(build, /'\(function\(\)\{',\s*`const __styleId=/);
+  assert.match(build, /'\}\)\(\);'\s*\]\.join\(''\)/);
+  assert.match(build, /declares a global binding/);
+});

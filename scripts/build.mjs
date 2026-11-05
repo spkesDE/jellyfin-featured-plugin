@@ -23,14 +23,18 @@ function injectEmittedCss(styleId) {
         .join('\n');
       for (const [fileName] of cssAssets) delete bundle[fileName];
 
+      // Jellyfin re-executes this classic script whenever the config page is rebuilt, so
+      // nothing may be declared in the global lexical scope: a redeclaration aborts the script.
       const injection = [
+        '(function(){',
         `const __styleId=${JSON.stringify(styleId)};`,
         'if(!document.getElementById(__styleId)){',
         'const __style=document.createElement("style");',
         '__style.id=__styleId;',
         `__style.textContent=${JSON.stringify(css)};`,
         '(document.head||document.documentElement).appendChild(__style);',
-        '}'
+        '}',
+        '})();'
       ].join('');
 
       for (const output of Object.values(bundle)) {
@@ -111,6 +115,9 @@ if (!isWatch) {
   for (const { fileName, source } of bundleSources) {
     if (/\bprocess(?:\.env|\[)/.test(source)) {
       throw new Error(`${fileName} contains a Node.js process reference that is unavailable in Jellyfin clients.`);
+    }
+    if (/^\s*(?:const|let|class)\s/.test(source)) {
+      throw new Error(`${fileName} declares a global binding and would fail when Jellyfin loads it a second time.`);
     }
   }
   await Promise.all([
