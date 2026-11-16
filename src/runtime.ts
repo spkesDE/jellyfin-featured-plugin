@@ -23,6 +23,7 @@ import {
 import { FreshResponseCache } from './core/freshResponseCache';
 import { RuntimeCoordinator } from './core/runtimeCoordinator';
 import { shouldScheduleRuntimeScan } from './core/runtimeMutationPolicy';
+import { withSessionTrailerAudio } from './slider/trailerAudioPreference';
 
 /**
  * Runtime lifecycle invariants:
@@ -234,7 +235,8 @@ async function mount(container: Element): Promise<void> {
   let cachedCarousel: FeaturedCarousel | undefined;
   try {
     const freshResponse = getFreshFeaturedResponse();
-    const cachedResponse = readFeaturedCache();
+    const storedResponse = readFeaturedCache();
+    const cachedResponse = storedResponse && withSessionTrailerAudio(storedResponse);
     if (cachedResponse?.items.length && !(cachedResponse.hideOnTvLayout && isTvLayout())) {
       try {
         setUserSettingsMenuEnabled(cachedResponse.personalizationEnabled || cachedResponse.dismissalsEnabled);
@@ -251,7 +253,7 @@ async function mount(container: Element): Promise<void> {
       }
     }
 
-    const response = await freshResponse;
+    const response = withSessionTrailerAudio(await freshResponse);
     setUserSettingsMenuEnabled(response.personalizationEnabled || response.dismissalsEnabled);
     schedulePresetRefresh(response.nextPresetChange);
     if (

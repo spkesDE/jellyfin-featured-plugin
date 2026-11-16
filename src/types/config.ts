@@ -342,6 +342,7 @@ export interface FeaturedPersonalizationPolicy {
   AllowFavouriteBoost: boolean;
   AllowInProgressSeriesBoost: boolean;
   AllowRepeatCooldown: boolean;
+  AllowRememberTrailerAudio: boolean;
 }
 
 export interface FeaturedDismissalPolicy {

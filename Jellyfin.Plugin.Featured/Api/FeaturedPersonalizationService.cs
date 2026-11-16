@@ -27,7 +27,8 @@ public sealed record FeaturedPersonalizationContext(
         },
         ExcludedGenres,
         RepeatCooldownHours,
-        Display
+        // Trailer audio only affects the response envelope, so changing it must not discard prepared items.
+        Display = Display with { StartTrailersMuted = false, TrailerVolume = null, AutoSaveTrailerAudio = true }
     });
 }
 
@@ -39,7 +40,10 @@ public sealed record FeaturedDisplayPreferences(
     bool ShowRuntime,
     bool ShowFavoriteButton = true,
     bool ShowPlaystateButton = true,
-    bool ShowDismissalButton = true);
+    bool ShowDismissalButton = true,
+    bool StartTrailersMuted = true,
+    int? TrailerVolume = null,
+    bool AutoSaveTrailerAudio = true);
 
 public sealed class FeaturedPersonalizationService
 {
@@ -126,12 +130,29 @@ public sealed class FeaturedPersonalizationService
             config.ShowPlaystateButton && display?.ShowPlaystateButton is not false,
             config.DismissalPolicy.Enabled
                 && config.ShowDismissalButton
-                && saved?.Display?.ShowDismissalButton is not false);
+                && saved?.Display?.ShowDismissalButton is not false,
+            policy.AllowRememberTrailerAudio && display?.StartTrailersMuted is bool muted
+                ? muted : config.StartTrailersMuted,
+            policy.AllowRememberTrailerAudio ? display?.TrailerVolume : null,
+            policy.AllowRememberTrailerAudio && display?.AutoSaveTrailerAudio is not false);
         return new FeaturedPersonalizationContext(sources, effectiveProfile, excludedGenres, cooldown, effectiveDisplay, saved is not null);
     }
 
     internal FeaturedUserPreferences? Get(Guid userId) => _store.Get(userId);
     internal void Remove(Guid userId) => _store.Remove(userId);
+
+    internal static bool CanRememberTrailerAudio(PluginConfiguration config)
+        => config.PersonalizationPolicy.Enabled && config.PersonalizationPolicy.AllowRememberTrailerAudio;
+
+    internal void SetTrailerAudio(Guid userId, bool? muted, int? volume)
+        => _store.Update(userId, saved =>
+        {
+            FeaturedUserPreferences preferences = saved ?? new FeaturedUserPreferences();
+            preferences.Display ??= new FeaturedUserDisplayPreferences();
+            if (muted.HasValue) preferences.Display.StartTrailersMuted = muted;
+            if (volume.HasValue) preferences.Display.TrailerVolume = Math.Clamp(volume.Value, 0, 100);
+            return preferences;
+        });
 
     internal FeaturedUserPreferences NormalizeAndSave(
         PluginConfiguration config,
@@ -152,7 +173,14 @@ public sealed class FeaturedPersonalizationService
             ShowRuntime = submittedDisplay.ShowRuntime is false ? false : null,
             ShowFavoriteButton = submittedDisplay.ShowFavoriteButton is false ? false : null,
             ShowPlaystateButton = submittedDisplay.ShowPlaystateButton is false ? false : null,
-            ShowDismissalButton = submittedDisplay.ShowDismissalButton is false ? false : null
+            ShowDismissalButton = submittedDisplay.ShowDismissalButton is false ? false : null,
+            StartTrailersMuted = policy.AllowRememberTrailerAudio ? submittedDisplay.StartTrailersMuted : null,
+            TrailerVolume = policy.AllowRememberTrailerAudio && submittedDisplay.TrailerVolume is int volume
+                ? Math.Clamp(volume, 0, 100)
+                : null,
+            AutoSaveTrailerAudio = policy.AllowRememberTrailerAudio && submittedDisplay.AutoSaveTrailerAudio is false
+                ? false
+                : null
         };
         if (policy.AllowSourceSelection)
         {

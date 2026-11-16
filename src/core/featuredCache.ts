@@ -77,6 +77,21 @@ export function saveFeaturedCache(response: FeaturedResponse): void {
   }
 }
 
+/** Rewrites the stored response in place, keeping its original expiry. */
+export function updateFeaturedCache(update: (response: FeaturedResponse) => FeaturedResponse): void {
+  const key = getStorageKey();
+  if (!key) return;
+  try {
+    const serialized = window.localStorage.getItem(key);
+    if (!serialized) return;
+    const entry = JSON.parse(serialized) as FeaturedCacheEntry;
+    if (!entry?.response || typeof entry.response !== 'object') return;
+    window.localStorage.setItem(key, JSON.stringify({ ...entry, response: update(entry.response) }));
+  } catch {
+    // Storage can be unavailable or contain a partially written value.
+  }
+}
+
 export function clearFeaturedCache(): void {
   const key = getStorageKey();
   if (!key) return;

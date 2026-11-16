@@ -45,6 +45,21 @@ public sealed partial class FeaturedController
         return new JsonResult(CreatePreferencesResponse(activeUser), RuntimeConfigJsonOptions);
     }
 
+    /// <summary>Remembers the signed-in user's trailer mute state and volume without re-preparing their feed.</summary>
+    [HttpPut("preferences/trailer-audio")]
+    [Authorize]
+    public ActionResult PutTrailerAudio([FromBody] FeaturedTrailerAudioUpdate? request)
+    {
+        Jellyfin.Database.Implementations.Entities.User? activeUser = GetActiveUser();
+        if (activeUser == null) return NotFound();
+        if (request is null || (!request.Muted.HasValue && !request.Volume.HasValue)) return BadRequest();
+        if (!FeaturedPersonalizationService.CanRememberTrailerAudio(_config)) return Forbid();
+        // With automatic saving off, the player keeps changes for the session and the saved values stay the defaults.
+        if (!_personalization.Resolve(_config, activeUser.Id).Display.AutoSaveTrailerAudio) return Forbid();
+        _personalization.SetTrailerAudio(activeUser.Id, request.Muted, request.Volume);
+        return Ok(new { ok = true });
+    }
+
     [HttpGet("preferences/options")]
     [Authorize]
     [Produces(MediaTypeNames.Application.Json)]

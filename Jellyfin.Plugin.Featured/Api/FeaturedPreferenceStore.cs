@@ -37,6 +37,29 @@ public sealed class FeaturedPreferenceStore
         }
     }
 
+    /// <summary>Applies a read-modify-write under the store lock; returning null removes the user's entry.</summary>
+    internal FeaturedUserPreferences? Update(Guid userId, Func<FeaturedUserPreferences?, FeaturedUserPreferences?> update)
+    {
+        lock (_syncRoot)
+        {
+            EnsureLoaded();
+            string key = userId.ToString("N");
+            FeaturedUserPreferences? current = _preferences!.TryGetValue(key, out FeaturedUserPreferences? value)
+                ? value.Copy()
+                : null;
+            FeaturedUserPreferences? updated = update(current);
+            if (updated is null)
+            {
+                if (_preferences.Remove(key)) Save();
+                return null;
+            }
+
+            _preferences[key] = updated.Copy();
+            Save();
+            return updated.Copy();
+        }
+    }
+
     internal void Remove(Guid userId)
     {
         lock (_syncRoot)
@@ -99,6 +122,18 @@ public sealed class FeaturedUserDisplayPreferences
     public bool? ShowPlaystateButton { get; set; }
     public bool? ShowDismissalButton { get; set; }
 
+    /// <summary>Remembered trailer mute state; unlike the other display flags both values are stored explicitly.</summary>
+    public bool? StartTrailersMuted { get; set; }
+
+    /// <summary>Remembered trailer volume (0-100); null keeps the browser's own volume.</summary>
+    public int? TrailerVolume { get; set; }
+
+    /// <summary>
+    /// False keeps player mute and volume changes for the page session only; the saved values above stay the
+    /// user's defaults. Only false is stored, because saving automatically is the default.
+    /// </summary>
+    public bool? AutoSaveTrailerAudio { get; set; }
+
     internal FeaturedUserDisplayPreferences Copy() => new()
     {
         EnableBackgroundTrailers = EnableBackgroundTrailers,
@@ -108,7 +143,10 @@ public sealed class FeaturedUserDisplayPreferences
         ShowRuntime = ShowRuntime,
         ShowFavoriteButton = ShowFavoriteButton,
         ShowPlaystateButton = ShowPlaystateButton,
-        ShowDismissalButton = ShowDismissalButton
+        ShowDismissalButton = ShowDismissalButton,
+        StartTrailersMuted = StartTrailersMuted,
+        TrailerVolume = TrailerVolume,
+        AutoSaveTrailerAudio = AutoSaveTrailerAudio
     };
 
     internal bool IsEmpty()
@@ -119,5 +157,8 @@ public sealed class FeaturedUserDisplayPreferences
             && !ShowRuntime.HasValue
             && !ShowFavoriteButton.HasValue
             && !ShowPlaystateButton.HasValue
-            && !ShowDismissalButton.HasValue;
+            && !ShowDismissalButton.HasValue
+            && !StartTrailersMuted.HasValue
+            && !TrailerVolume.HasValue
+            && !AutoSaveTrailerAudio.HasValue;
 }

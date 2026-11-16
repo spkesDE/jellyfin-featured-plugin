@@ -8,6 +8,7 @@ import {
   createCooldownField,
   createGenreSelector,
   createNumberField,
+  createRangeField,
   type GenrePreferenceState
 } from './preferencesFields';
 import { invalidatePreferencesBootstrap, loadPreferencesBootstrap } from './preferencesApi';
@@ -20,6 +21,8 @@ import {
 } from './preferencesDialogShell';
 import { PreferencesActionStatus } from './preferencesActionStatus';
 import { createDismissalsSection } from './preferencesDismissals';
+import { flushTrailerAudio, forgetSessionTrailerAudio } from './slider/trailerAudioPreference';
+import { DEFAULT_TRAILER_VOLUME } from './slider/trailerVolume';
 import { createPreferenceFieldset, createTextElement } from './preferencesDom';
 
 export { invalidatePreferencesBootstrap, preloadPreferencesDialog } from './preferencesApi';
@@ -40,6 +43,8 @@ const sourceKeys: Record<string, TranslationKey> = {
 
 function notifyPreferencesChanged(targetUserId?: string): void {
   if (targetUserId && targetUserId !== getCurrentUserId()) return;
+  // The saved profile now wins over any mute toggle made earlier in this page session.
+  forgetSessionTrailerAudio();
   document.dispatchEvent(new CustomEvent(USER_PREFERENCES_CHANGED_EVENT));
 }
 
@@ -50,6 +55,8 @@ export async function openPreferencesDialog(profile?: { userId: string; userName
   shell.attach();
 
   try {
+    // A mute or volume change may still be waiting to be saved; load the profile only once it is.
+    await flushTrailerAudio();
     const { current, options, dismissals } = await loadPreferencesBootstrap(profile?.userId);
     if (!shell.isConnected) return;
     if (!options.policy.enabled && !dismissals.policy.enabled && !dismissals.entries.length) {
@@ -70,17 +77,18 @@ export async function openPreferencesDialog(profile?: { userId: string; userName
     const hotkeys = createPreferencesHotkeys();
     if (effective.display.enableBackgroundTrailers) content.appendChild(hotkeys);
 
-    const displayFields: Array<[keyof FeaturedEffectiveDisplayPreferences, TranslationKey]> = options.policy.enabled
-      ? [
-          ['enableBackgroundTrailers', 'trailers.enabled'],
-          ['showDescription', 'display.showDescription'],
-          ['showRating', 'display.showRatings'],
-          ['showYear', 'display.showYear'],
-          ['showRuntime', 'display.showRuntime'],
-          ['showFavoriteButton', 'display.showFavoriteButton'],
-          ['showPlaystateButton', 'display.showPlaystateButton']
-        ]
-      : [];
+    const displayFields: Array<[Exclude<keyof FeaturedEffectiveDisplayPreferences, 'trailerVolume'>, TranslationKey]> =
+      options.policy.enabled
+        ? [
+            ['enableBackgroundTrailers', 'trailers.enabled'],
+            ['showDescription', 'display.showDescription'],
+            ['showRating', 'display.showRatings'],
+            ['showYear', 'display.showYear'],
+            ['showRuntime', 'display.showRuntime'],
+            ['showFavoriteButton', 'display.showFavoriteButton'],
+            ['showPlaystateButton', 'display.showPlaystateButton']
+          ]
+        : [];
     if (dismissals.policy.enabled) displayFields.push(['showDismissalButton', 'display.showDismissalButton']);
     const display = createPreferenceFieldset(
       t('preferences.display'),
@@ -94,6 +102,32 @@ export async function openPreferencesDialog(profile?: { userId: string; userName
       field.dataset.displayPreferenceKey = key;
       display.appendChild(field);
       displayOptionCount += 1;
+    }
+    if (
+      options.policy.enabled &&
+      options.policy.allowRememberTrailerAudio &&
+      effective.display.enableBackgroundTrailers
+    ) {
+      const autoSave = createCheckbox(
+        t('preferences.autoSaveTrailerAudio'),
+        effective.display.autoSaveTrailerAudio,
+        false
+      );
+      autoSave.dataset.displayPreferenceKey = 'autoSaveTrailerAudio';
+      autoSave.title = t('preferences.autoSaveTrailerAudioHelp');
+      display.appendChild(autoSave);
+      const field = createCheckbox(t('preferences.startTrailersMuted'), effective.display.startTrailersMuted, false);
+      field.dataset.displayPreferenceKey = 'startTrailersMuted';
+      display.appendChild(field);
+      // Without a saved volume the user's browser decides; the field then starts at the player default.
+      const volume = createRangeField(
+        t('preferences.trailerVolume'),
+        effective.display.trailerVolume ?? DEFAULT_TRAILER_VOLUME,
+        100
+      );
+      volume.dataset.trailerVolume = 'true';
+      display.appendChild(volume);
+      displayOptionCount += 3;
     }
     if (displayOptionCount > 0) content.appendChild(display);
 

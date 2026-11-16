@@ -50,7 +50,9 @@ export function mockPreferences(
       showRuntime: config.ShowRuntime,
       showFavoriteButton: config.ShowFavoriteButton,
       showPlaystateButton: config.ShowPlaystateButton,
-      showDismissalButton: config.DismissalPolicy.Enabled && config.ShowDismissalButton
+      showDismissalButton: config.DismissalPolicy.Enabled && config.ShowDismissalButton,
+      startTrailersMuted: config.StartTrailersMuted,
+      autoSaveTrailerAudio: config.PersonalizationPolicy.AllowRememberTrailerAudio
     },
     preferredGenres: config.PersonalizationDefaults.PreferredGenres,
     excludedGenres: [],
@@ -73,7 +75,12 @@ export function mockPreferences(
       showRuntime: defaults.display.showRuntime && personalized?.display.showRuntime !== false,
       showFavoriteButton: defaults.display.showFavoriteButton && personalized?.display.showFavoriteButton !== false,
       showPlaystateButton: defaults.display.showPlaystateButton && personalized?.display.showPlaystateButton !== false,
-      showDismissalButton: defaults.display.showDismissalButton && preferences.display.showDismissalButton !== false
+      showDismissalButton: defaults.display.showDismissalButton && preferences.display.showDismissalButton !== false,
+      startTrailersMuted:
+        (policy.AllowRememberTrailerAudio ? personalized?.display.startTrailersMuted : null) ??
+        defaults.display.startTrailersMuted,
+      trailerVolume: (policy.AllowRememberTrailerAudio ? personalized?.display.trailerVolume : null) ?? null,
+      autoSaveTrailerAudio: policy.AllowRememberTrailerAudio && personalized?.display.autoSaveTrailerAudio !== false
     },
     preferredGenres: policy.AllowPreferredGenres
       ? (personalized?.preferredGenres ?? defaults.preferredGenres)
@@ -103,7 +110,8 @@ export function mockPreferences(
         allowUnplayedBoost: policy.AllowUnplayedBoost,
         allowFavouriteBoost: policy.AllowFavouriteBoost,
         allowInProgressSeriesBoost: policy.AllowInProgressSeriesBoost,
-        allowRepeatCooldown: policy.AllowRepeatCooldown
+        allowRepeatCooldown: policy.AllowRepeatCooldown,
+        allowRememberTrailerAudio: policy.AllowRememberTrailerAudio
       },
       sources: sources.map((rule) => ({
         id: rule.Id,

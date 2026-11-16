@@ -154,6 +154,11 @@ const boosts: { key: BoostKey; label: TranslationKey }[] = [
                 :label="t('users.allowCooldown')"
                 :disabled="!store.config.PersonalizationPolicy.Enabled"
               />
+              <ConfigSwitch
+                v-model="store.config.PersonalizationPolicy.AllowRememberTrailerAudio"
+                :label="t('users.allowTrailerAudio')"
+                :disabled="!store.config.PersonalizationPolicy.Enabled"
+              />
             </div>
           </ConfigSection>
         </div>

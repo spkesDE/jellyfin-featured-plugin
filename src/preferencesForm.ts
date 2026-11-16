@@ -1,3 +1,4 @@
+import { DEFAULT_TRAILER_VOLUME } from './slider/trailerVolume';
 import type {
   FeaturedPreferencesBootstrapResponse,
   FeaturedUserDisplayPreferences,
@@ -25,10 +26,26 @@ export function serializePreferencesForm(
     repeatCooldownHours: null
   };
   dialog.querySelectorAll<HTMLElement>('[data-display-preference-key]').forEach((field) => {
-    const key = field.dataset.displayPreferenceKey as keyof FeaturedUserDisplayPreferences;
+    const key = field.dataset.displayPreferenceKey as Exclude<keyof FeaturedUserDisplayPreferences, 'trailerVolume'>;
     const checked = field.querySelector<HTMLInputElement>('input')!.checked;
+    if (key === 'startTrailersMuted') {
+      // The mute state is remembered explicitly: an untouched box keeps what is saved, a changed one is stored as-is.
+      preferences.display[key] =
+        checked === current.effective.display[key] ? (current.preferences.display[key] ?? null) : checked;
+      return;
+    }
     preferences.display[key] = checked === current.defaults.display[key] ? null : checked;
   });
+  const volumeInput = dialog.querySelector<HTMLInputElement>('[data-trailer-volume] input');
+  if (volumeInput) {
+    // Like mute, volume is stored explicitly once changed; an untouched field keeps whatever is saved.
+    const value = Number(volumeInput.value);
+    const shown = current.effective.display.trailerVolume ?? DEFAULT_TRAILER_VOLUME;
+    preferences.display.trailerVolume =
+      Number.isFinite(value) && value !== shown
+        ? Math.max(0, Math.min(100, Math.round(value)))
+        : (current.preferences.display.trailerVolume ?? null);
+  }
   dialog.querySelectorAll<HTMLElement>('[data-source-id]').forEach((field) => {
     const id = field.dataset.sourceId!;
     const input = field.querySelector<HTMLInputElement>('input')!;

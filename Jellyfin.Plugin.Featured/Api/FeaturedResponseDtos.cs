@@ -10,7 +10,8 @@ public abstract class FeaturedDisplaySettingsDto
     {
         ShowAutoplayButton = config.ShowAutoplayButton;
         EnableBackgroundTrailers = personalization?.Display.EnableBackgroundTrailers ?? config.EnableBackgroundTrailers;
-        StartTrailersMuted = config.StartTrailersMuted;
+        StartTrailersMuted = personalization?.Display.StartTrailersMuted ?? config.StartTrailersMuted;
+        TrailerVolume = personalization?.Display.TrailerVolume;
         ShowTrailerControls = config.ShowTrailerControls;
         TrailerVolumeSliderDirection = config.TrailerVolumeSliderDirection;
         HideYouTubeTrailerUntilControlsFade = config.HideYouTubeTrailerUntilControlsFade;
@@ -67,6 +68,9 @@ public abstract class FeaturedDisplaySettingsDto
     public bool ShowAutoplayButton { get; }
     public bool EnableBackgroundTrailers { get; }
     public bool StartTrailersMuted { get; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? TrailerVolume { get; }
     public bool ShowTrailerControls { get; }
     public string TrailerVolumeSliderDirection { get; }
     public bool HideYouTubeTrailerUntilControlsFade { get; }

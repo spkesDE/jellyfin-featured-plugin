@@ -151,6 +151,38 @@
   width: 100%;
 }
 
+.featured-preference-range {
+  display: flex;
+  flex-direction: column;
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+.featured-preference-range-header {
+  align-items: baseline;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.2rem;
+}
+
+.featured-preference-range .inputLabel {
+  font-size: 0.82rem;
+  opacity: 0.75;
+}
+
+.featured-preference-range-value {
+  font-size: 0.82rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.featured-preference-range-input {
+  accent-color: var(--featured-theme-primary, #00a4dc);
+  box-sizing: border-box;
+  cursor: pointer;
+  margin: 0;
+  width: 100%;
+}
+
 .featured-preference-cooldown {
   margin: 0;
 }

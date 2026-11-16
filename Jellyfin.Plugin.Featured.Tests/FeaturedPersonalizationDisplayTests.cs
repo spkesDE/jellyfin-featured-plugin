@@ -119,6 +119,121 @@ public sealed class FeaturedPersonalizationDisplayTests : FeaturedPreparedCacheT
     }
 
     [Fact]
+    public void RememberedTrailerAudioOverridesAdminDefaultWhenAllowed()
+    {
+        PluginConfiguration config = new() { StartTrailersMuted = true };
+        Assert.True(config.PersonalizationPolicy.AllowRememberTrailerAudio);
+        Assert.True(FeaturedPersonalizationService.CanRememberTrailerAudio(config));
+        string fingerprint = _personalization.Resolve(config, _user.Id).Fingerprint;
+
+        Assert.Null(new FeaturedItemsResponseDto(
+            config, [], 5, 5, _personalization.Resolve(config, _user.Id), null, null, null).TrailerVolume);
+
+        _personalization.SetTrailerAudio(_user.Id, false, null);
+        _personalization.SetTrailerAudio(_user.Id, null, 140);
+        FeaturedPersonalizationContext effective = _personalization.Resolve(config, _user.Id);
+
+        // Partial updates keep the other value, and the volume is clamped to 0-100.
+        Assert.False(effective.Display.StartTrailersMuted);
+        Assert.Equal(100, effective.Display.TrailerVolume);
+        _personalization.SetTrailerAudio(_user.Id, null, 35);
+        effective = _personalization.Resolve(config, _user.Id);
+        FeaturedItemsResponseDto response = new(config, [], 5, 5, effective, null, null, null);
+        Assert.False(response.StartTrailersMuted);
+        Assert.Equal(35, response.TrailerVolume);
+        Assert.True(response.RememberTrailerAudio);
+        Assert.True(_personalization.ResolveDefaults(config, _user.Id).Display.StartTrailersMuted);
+        Assert.Null(_personalization.ResolveDefaults(config, _user.Id).Display.TrailerVolume);
+        // Changing trailer audio must not invalidate the prepared feed.
+        Assert.Equal(fingerprint, effective.Fingerprint);
+
+        // A dialog save keeps the explicit value, and a reset returns to the admin default.
+        config.StartTrailersMuted = false;
+        _personalization.NormalizeAndSave(
+            config,
+            _user.Id,
+            new FeaturedUserPreferences
+            {
+                Display = new FeaturedUserDisplayPreferences { StartTrailersMuted = true, TrailerVolume = -5 }
+            },
+            new HashSet<string>());
+        Assert.True(_personalization.Resolve(config, _user.Id).Display.StartTrailersMuted);
+        Assert.Equal(0, _personalization.Resolve(config, _user.Id).Display.TrailerVolume);
+        _personalization.Remove(_user.Id);
+        Assert.False(_personalization.Resolve(config, _user.Id).Display.StartTrailersMuted);
+        Assert.Null(_personalization.Resolve(config, _user.Id).Display.TrailerVolume);
+    }
+
+    [Fact]
+    public void UserCanKeepTrailerAudioForTheSessionOnly()
+    {
+        PluginConfiguration config = new() { StartTrailersMuted = true };
+        FeaturedPersonalizationContext defaults = _personalization.Resolve(config, _user.Id);
+        Assert.True(defaults.Display.AutoSaveTrailerAudio);
+        Assert.True(new FeaturedItemsResponseDto(config, [], 5, 5, defaults, null, null, null).AutoSaveTrailerAudio);
+
+        // Only "off" is stored; the saved mute and volume stay as the user's defaults.
+        _personalization.NormalizeAndSave(
+            config,
+            _user.Id,
+            new FeaturedUserPreferences
+            {
+                Display = new FeaturedUserDisplayPreferences
+                {
+                    AutoSaveTrailerAudio = false,
+                    StartTrailersMuted = false,
+                    TrailerVolume = 30
+                }
+            },
+            new HashSet<string>());
+        FeaturedPersonalizationContext effective = _personalization.Resolve(config, _user.Id);
+        FeaturedItemsResponseDto response = new(config, [], 5, 5, effective, null, null, null);
+
+        Assert.False(_personalization.Get(_user.Id)?.Display.AutoSaveTrailerAudio);
+        Assert.False(response.AutoSaveTrailerAudio);
+        Assert.False(response.StartTrailersMuted);
+        Assert.Equal(30, response.TrailerVolume);
+        Assert.Equal(defaults.Fingerprint, effective.Fingerprint);
+
+        _personalization.NormalizeAndSave(
+            config,
+            _user.Id,
+            new FeaturedUserPreferences
+            {
+                Display = new FeaturedUserDisplayPreferences { AutoSaveTrailerAudio = true }
+            },
+            new HashSet<string>());
+        Assert.Null(_personalization.Get(_user.Id));
+    }
+
+    [Theory]
+    [InlineData(true, false)]
+    [InlineData(false, true)]
+    public void AdminCanStopRememberingTrailerAudio(bool personalizationEnabled, bool allowRemember)
+    {
+        PluginConfiguration config = new()
+        {
+            StartTrailersMuted = true,
+            PersonalizationPolicy = new FeaturedPersonalizationPolicy
+            {
+                Enabled = personalizationEnabled,
+                AllowRememberTrailerAudio = allowRemember
+            }
+        };
+        _personalization.SetTrailerAudio(_user.Id, false, 20);
+
+        FeaturedPersonalizationContext effective = _personalization.Resolve(config, _user.Id);
+        FeaturedItemsResponseDto response = new(config, [], 5, 5, effective, null, null, null);
+
+        Assert.False(FeaturedPersonalizationService.CanRememberTrailerAudio(config));
+        Assert.True(effective.Display.StartTrailersMuted);
+        Assert.Null(effective.Display.TrailerVolume);
+        Assert.False(response.RememberTrailerAudio);
+        Assert.False(response.AutoSaveTrailerAudio);
+        Assert.Null(response.TrailerVolume);
+    }
+
+    [Fact]
     public void DismissalButtonCanBeHiddenByUserOrAdminWithoutPersonalization()
     {
         PluginConfiguration config = new()

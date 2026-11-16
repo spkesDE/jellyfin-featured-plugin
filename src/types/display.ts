@@ -20,6 +20,8 @@ export interface FeaturedDisplaySettings {
   showAutoplayButton: boolean;
   enableBackgroundTrailers: boolean;
   startTrailersMuted: boolean;
+  /** Volume saved in the user's profile; absent when the browser's own volume applies. */
+  trailerVolume?: number;
   showTrailerControls: boolean;
   trailerVolumeSliderDirection: TrailerVolumeSliderDirection;
   hideYouTubeTrailerUntilControlsFade: boolean;

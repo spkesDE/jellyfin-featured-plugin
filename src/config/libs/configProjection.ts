@@ -92,6 +92,10 @@ export function createFeaturedResponseDefaults(): Omit<FeaturedResponse, 'items'
     reduceImageSizes: config.ReduceImageSize,
     trackDisplayedItems: config.RepeatCooldownDays > 0,
     personalizationEnabled: config.PersonalizationPolicy.Enabled,
+    rememberTrailerAudio:
+      config.PersonalizationPolicy.Enabled && config.PersonalizationPolicy.AllowRememberTrailerAudio,
+    autoSaveTrailerAudio:
+      config.PersonalizationPolicy.Enabled && config.PersonalizationPolicy.AllowRememberTrailerAudio,
     dismissalsEnabled: config.DismissalPolicy.Enabled
   };
 }

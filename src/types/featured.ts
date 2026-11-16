@@ -76,6 +76,10 @@ export interface FeaturedResponse extends FeaturedDisplaySettings {
   reduceImageSizes: boolean;
   trackDisplayedItems: boolean;
   personalizationEnabled: boolean;
+  /** Whether the admin lets trailer mute and volume be remembered in the user profile. */
+  rememberTrailerAudio?: boolean;
+  /** False keeps player mute and volume changes until the page reloads instead of saving them. */
+  autoSaveTrailerAudio?: boolean;
   dismissalsEnabled: boolean;
   activePresetId?: string;
   activePresetName?: string;
@@ -104,6 +108,11 @@ export interface FeaturedUserDisplayPreferences {
   showFavoriteButton: boolean | null;
   showPlaystateButton: boolean | null;
   showDismissalButton: boolean | null;
+  /** Remembered trailer mute state; stored explicitly for both values. */
+  startTrailersMuted?: boolean | null;
+  trailerVolume?: number | null;
+  /** Only false is stored; saving player changes automatically is the default. */
+  autoSaveTrailerAudio?: boolean | null;
 }
 
 export interface FeaturedEffectivePreferences {
@@ -128,6 +137,9 @@ export interface FeaturedEffectiveDisplayPreferences {
   showFavoriteButton: boolean;
   showPlaystateButton: boolean;
   showDismissalButton: boolean;
+  startTrailersMuted: boolean;
+  trailerVolume?: number | null;
+  autoSaveTrailerAudio: boolean;
 }
 
 export interface FeaturedPreferencesResponse {
@@ -146,6 +158,7 @@ export interface FeaturedPreferencePolicy {
   allowFavouriteBoost: boolean;
   allowInProgressSeriesBoost: boolean;
   allowRepeatCooldown: boolean;
+  allowRememberTrailerAudio?: boolean;
 }
 
 export interface FeaturedPreferenceOptions {

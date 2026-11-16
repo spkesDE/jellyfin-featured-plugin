@@ -40,4 +40,47 @@ describe('serializePreferencesForm', () => {
     expect(result.excludedGenres).toEqual(['Horror']);
     expect(result.repeatCooldownHours).toBe(24);
   });
+
+  it('stores the trailer mute state explicitly once it changes and keeps it when untouched', () => {
+    const createDialog = (checked: boolean): HTMLFormElement => {
+      const dialog = document.createElement('form');
+      dialog.innerHTML = `<label data-display-preference-key="startTrailersMuted"><input type="checkbox" ${checked ? 'checked' : ''}></label>`;
+      return dialog;
+    };
+    const current = {
+      preferences: { display: { startTrailersMuted: false } },
+      effective: { display: { startTrailersMuted: false } },
+      defaults: { display: { startTrailersMuted: false } }
+    } as unknown as FeaturedPreferencesBootstrapResponse['current'];
+    const options = { policy: {} } as unknown as FeaturedPreferencesBootstrapResponse['options'];
+
+    expect(serializePreferencesForm(createDialog(false), current, options).display.startTrailersMuted).toBe(false);
+    expect(serializePreferencesForm(createDialog(true), current, options).display.startTrailersMuted).toBe(true);
+  });
+
+  it('stores the trailer volume once it changes and keeps the saved value when untouched', () => {
+    const createDialog = (value: number): HTMLFormElement => {
+      const dialog = document.createElement('form');
+      dialog.innerHTML = `<label data-trailer-volume="true"><input type="range" min="0" max="100" value="${value}"></label>`;
+      return dialog;
+    };
+    const options = { policy: {} } as unknown as FeaturedPreferencesBootstrapResponse['options'];
+    const unsaved = {
+      preferences: { display: {} },
+      effective: { display: {} },
+      defaults: { display: {} }
+    } as unknown as FeaturedPreferencesBootstrapResponse['current'];
+    const saved = {
+      preferences: { display: { trailerVolume: 40 } },
+      effective: { display: { trailerVolume: 40 } },
+      defaults: { display: {} }
+    } as unknown as FeaturedPreferencesBootstrapResponse['current'];
+
+    // Without a saved volume the field shows 100; leaving it there keeps the browser's own volume.
+    expect(serializePreferencesForm(createDialog(100), unsaved, options).display.trailerVolume).toBeNull();
+    expect(serializePreferencesForm(createDialog(70), unsaved, options).display.trailerVolume).toBe(70);
+    expect(serializePreferencesForm(createDialog(40), saved, options).display.trailerVolume).toBe(40);
+    expect(serializePreferencesForm(createDialog(100), saved, options).display.trailerVolume).toBe(100);
+    expect(serializePreferencesForm(createDialog(250), saved, options).display.trailerVolume).toBe(100);
+  });
 });

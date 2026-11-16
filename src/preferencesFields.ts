@@ -47,6 +47,40 @@ export function createNumberField(label: string, value: number, max: number): HT
   return wrapper;
 }
 
+/** A 0–max slider with its current value shown beside the label, e.g. for the trailer volume. */
+export function createRangeField(label: string, value: number, max: number, unit = '%'): HTMLLabelElement {
+  const wrapper = document.createElement('label');
+  wrapper.className = 'inputContainer featured-preference-range';
+  const header = document.createElement('span');
+  header.className = 'featured-preference-range-header';
+  const text = document.createElement('span');
+  text.className = 'inputLabel';
+  text.textContent = label;
+  const output = document.createElement('output');
+  output.className = 'featured-preference-range-value';
+  output.setAttribute('aria-hidden', 'true');
+  header.append(text, output);
+  const input = document.createElement('input');
+  input.type = 'range';
+  input.className = 'featured-preference-range-input';
+  input.min = '0';
+  input.max = String(max);
+  input.step = '1';
+  input.value = String(Math.max(0, Math.min(max, value)));
+  const update = (): void => {
+    output.textContent = `${input.value}${unit}`;
+    input.setAttribute('aria-valuetext', `${input.value}${unit}`);
+  };
+  update();
+  input.addEventListener('input', update);
+  // Arrow keys move the slider; Jellyfin's page-wide navigation must not consume them.
+  input.addEventListener('keydown', keepFieldKeyboardInputLocal);
+  input.addEventListener('keypress', keepFieldKeyboardInputLocal);
+  input.addEventListener('keyup', keepFieldKeyboardInputLocal);
+  wrapper.append(header, input);
+  return wrapper;
+}
+
 const COOLDOWN_CHOICES: Array<[number, TranslationKey]> = [
   [0, 'preferences.cooldown.off'],
   [1, 'preferences.cooldown.1h'],

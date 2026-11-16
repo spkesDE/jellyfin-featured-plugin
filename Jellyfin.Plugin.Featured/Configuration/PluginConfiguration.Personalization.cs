@@ -49,6 +49,9 @@ public sealed class FeaturedPersonalizationPolicy
     public bool AllowInProgressSeriesBoost { get; set; } = true;
 
     public bool AllowRepeatCooldown { get; set; }
+
+    /// <summary>When off, trailer volume and mute are not saved; the admin mute default and per-browser volume apply.</summary>
+    public bool AllowRememberTrailerAudio { get; set; } = true;
 }
 
 public static class FeaturedSourceTypes

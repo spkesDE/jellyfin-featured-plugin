@@ -25,4 +25,22 @@ describe('preferences bootstrap isolation', () => {
       'featured/preferences/bootstrap?userId=other-user'
     ]);
   });
+
+  it('does not cache a response that was requested before an invalidation', async () => {
+    let resolveStale!: (value: unknown) => void;
+    const stale = { current: { hasOverrides: false } };
+    const fresh = { current: { hasOverrides: true } };
+    mocks.requestJson
+      .mockReturnValueOnce(new Promise((resolve) => (resolveStale = resolve)))
+      .mockResolvedValueOnce(fresh);
+
+    const preload = loadPreferencesBootstrap();
+    invalidatePreferencesBootstrap();
+    resolveStale(stale);
+    expect(await preload).toBe(stale);
+
+    expect(await loadPreferencesBootstrap()).toBe(fresh);
+    expect(await loadPreferencesBootstrap()).toBe(fresh);
+    expect(mocks.requestJson).toHaveBeenCalledTimes(2);
+  });
 });

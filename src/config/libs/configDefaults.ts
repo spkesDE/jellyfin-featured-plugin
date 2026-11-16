@@ -25,7 +25,8 @@ export const CONFIG_DEFAULTS: FeaturedPluginConfig = {
     AllowUnplayedBoost: true,
     AllowFavouriteBoost: true,
     AllowInProgressSeriesBoost: true,
-    AllowRepeatCooldown: false
+    AllowRepeatCooldown: false,
+    AllowRememberTrailerAudio: true
   },
   DismissalPolicy: {
     Enabled: true,

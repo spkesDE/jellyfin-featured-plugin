@@ -24,6 +24,8 @@ public sealed class FeaturedItemsResponseDto : FeaturedDisplaySettingsDto
         ReduceImageSizes = config.ReduceImageSize;
         TrackDisplayedItems = personalization.RepeatCooldownHours > 0;
         PersonalizationEnabled = config.PersonalizationPolicy.Enabled;
+        RememberTrailerAudio = FeaturedPersonalizationService.CanRememberTrailerAudio(config);
+        AutoSaveTrailerAudio = RememberTrailerAudio && personalization.Display.AutoSaveTrailerAudio;
         DismissalsEnabled = config.DismissalPolicy.Enabled;
         ActivePresetId = activePresetId;
         ActivePresetName = activePresetName;
@@ -39,6 +41,10 @@ public sealed class FeaturedItemsResponseDto : FeaturedDisplaySettingsDto
     public bool ReduceImageSizes { get; }
     public bool TrackDisplayedItems { get; }
     public bool PersonalizationEnabled { get; }
+    public bool RememberTrailerAudio { get; }
+
+    /// <summary>Whether player mute and volume changes are saved, or only kept until the page reloads.</summary>
+    public bool AutoSaveTrailerAudio { get; }
     public bool DismissalsEnabled { get; }
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]

@@ -2,7 +2,13 @@ import { CONSOLE_PREFIX } from '../constants';
 import { t } from '../i18n';
 import type { FeaturedItem, FeaturedResponse } from '../types/featured';
 import { createTrailerPlayer, isMobileTrailerClient, type TrailerPlayer } from './trailer';
-import { readTrailerVolume, requiresLegacyVerticalRangeAppearance, saveTrailerVolume } from './trailerVolume';
+import { rememberTrailerAudio, type TrailerAudioChange } from './trailerAudioPreference';
+import {
+  DEFAULT_TRAILER_VOLUME,
+  readTrailerVolume,
+  requiresLegacyVerticalRangeAppearance,
+  saveTrailerVolume
+} from './trailerVolume';
 import { shouldSkipYouTubeTrailer } from './youtubeTrailerFilter';
 
 const YOUTUBE_CONTROL_CONCEALMENT_MS = 5000;
@@ -59,7 +65,7 @@ export class TrailerController {
     this.autoplayButton = autoplayButton;
     this.countdownProgress = countdownProgress;
     this.callbacks = callbacks;
-    this.volume = readTrailerVolume();
+    this.volume = TrailerController.getInitialVolume(response);
     // Browser autoplay rules can still require interaction before audible playback.
     this.muted = response.startTrailersMuted || this.volume === 0;
     this.controls = response.showTrailerControls && hasTrailers ? this.createControls() : null;
@@ -381,23 +387,54 @@ export class TrailerController {
   private toggleMuted(): void {
     if (!this.player) return;
     this.muted = !this.muted;
+    const change: TrailerAudioChange = { muted: this.muted };
     if (!this.muted && this.volume === 0) {
       this.volume = 10;
-      saveTrailerVolume(this.volume);
+      this.storeBrowserVolume();
       void this.player.setVolume(this.volume);
+      change.volume = this.volume;
     }
     if (!this.concealed) void this.player.setMuted(this.muted);
+    this.rememberAudio(change);
     this.updateControls();
   }
 
   private setVolume(volume: number): void {
     if (!this.player || !Number.isFinite(volume)) return;
     this.volume = Math.max(0, Math.min(100, volume));
-    saveTrailerVolume(this.volume);
+    this.storeBrowserVolume();
+    const wasMuted = this.muted;
     this.muted = this.volume === 0;
+    // Dragging to or from zero is an implicit mute toggle, so the profile follows it too.
+    this.rememberAudio(this.muted === wasMuted ? { volume: this.volume } : { volume: this.volume, muted: this.muted });
     void this.player.setVolume(this.volume);
     if (!this.concealed) void this.player.setMuted(this.muted);
     this.updateControls();
+  }
+
+  /**
+   * A volume saved in the user's profile follows them across devices. Without one, this browser's last volume
+   * applies, except in session-only mode, where every reload starts again from the user's defaults.
+   */
+  private static getInitialVolume(response: FeaturedResponse): number {
+    if (!response.rememberTrailerAudio) return readTrailerVolume();
+    return (
+      response.trailerVolume ?? (response.autoSaveTrailerAudio === false ? DEFAULT_TRAILER_VOLUME : readTrailerVolume())
+    );
+  }
+
+  private get keepsAudioForSessionOnly(): boolean {
+    return this.response.rememberTrailerAudio === true && this.response.autoSaveTrailerAudio === false;
+  }
+
+  private storeBrowserVolume(): void {
+    if (!this.keepsAudioForSessionOnly) saveTrailerVolume(this.volume);
+  }
+
+  /** Only an admin-allowed profile remembers audio; otherwise the admin mute default and browser volume apply. */
+  private rememberAudio(change: TrailerAudioChange): void {
+    if (!this.response.rememberTrailerAudio) return;
+    rememberTrailerAudio(change, { persist: !this.keepsAudioForSessionOnly });
   }
 
   private releaseVolumeInput = (): void => {

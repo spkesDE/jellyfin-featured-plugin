@@ -59,6 +59,12 @@ public sealed class FeaturedEffectivePreferences
     public FeaturedDisplayPreferences Display { get; set; } = new(false, false, false, false, false, false);
 }
 
+public sealed class FeaturedTrailerAudioUpdate
+{
+    public bool? Muted { get; set; }
+    public int? Volume { get; set; }
+}
+
 public sealed class FeaturedPreferencesUpdate
 {
     public bool Reset { get; set; }
