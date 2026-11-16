@@ -1,7 +1,12 @@
 param(
     [string]$Configuration = "Release",
     [string]$Changelog,
-    [switch]$Beta
+    [switch]$Beta,
+    # Local only builds release/; Server also installs into the Jellyfin plugin folder; Ask prompts when interactive.
+    [ValidateSet("Ask", "Local", "Server")]
+    [string]$Target = "Ask",
+    # Jellyfin's plugins folder (e.g. a mounted share). Falls back to JELLYFIN_PLUGINS_PATH, then .env.deploy.local.
+    [string]$ServerPluginsPath
 )
 
 $ErrorActionPreference = "Stop"
@@ -128,6 +133,180 @@ function Remove-TempBuild {
     }
 }
 
+function Test-Interactive {
+    return [Environment]::UserInteractive -and -not [Console]::IsInputRedirected
+}
+
+function Read-DeployEnvFile {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Path
+    )
+
+    $values = @{}
+
+    if (-not (Test-Path -LiteralPath $Path)) {
+        return $values
+    }
+
+    foreach ($line in Get-Content -LiteralPath $Path) {
+        if ($line -match '^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*?)\s*$') {
+            $values[$Matches[1]] = $Matches[2].Trim('"')
+        }
+    }
+
+    return $values
+}
+
+function Resolve-ServerPluginsPath {
+    param(
+        [string]$Requested,
+
+        [Parameter(Mandatory = $true)]
+        [string]$EnvFilePath
+    )
+
+    $path = $Requested
+
+    if ([string]::IsNullOrWhiteSpace($path)) {
+        $path = $env:JELLYFIN_PLUGINS_PATH
+    }
+
+    if ([string]::IsNullOrWhiteSpace($path)) {
+        $path = (Read-DeployEnvFile -Path $EnvFilePath)["JELLYFIN_PLUGINS_PATH"]
+    }
+
+    if ([string]::IsNullOrWhiteSpace($path)) {
+        if (-not (Test-Interactive)) {
+            throw "No Jellyfin plugins folder configured. Pass -ServerPluginsPath or set JELLYFIN_PLUGINS_PATH."
+        }
+
+        $path = Read-Host "Jellyfin plugins folder (for example a mounted share such as X:\jellyfin\config\plugins)"
+
+        if ([string]::IsNullOrWhiteSpace($path)) {
+            throw "No Jellyfin plugins folder entered."
+        }
+
+        $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+        [System.IO.File]::WriteAllText($EnvFilePath, "JELLYFIN_PLUGINS_PATH=$path`n", $utf8NoBom)
+        Write-Host "Saved the plugins folder to $EnvFilePath (git-ignored)."
+    }
+
+    if (-not (Test-Path -LiteralPath $path -PathType Container)) {
+        throw "Jellyfin plugins folder not found: $path"
+    }
+
+    return [System.IO.Path]::GetFullPath($path)
+}
+
+function Find-InstalledPluginFolder {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$PluginsPath,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Guid
+    )
+
+    $installed = foreach ($folder in Get-ChildItem -LiteralPath $PluginsPath -Directory) {
+        $metaPath = Join-Path $folder.FullName "meta.json"
+
+        if (-not (Test-Path -LiteralPath $metaPath)) {
+            continue
+        }
+
+        try {
+            $meta = Get-Content -LiteralPath $metaPath -Raw | ConvertFrom-Json
+        } catch {
+            continue
+        }
+
+        if ($meta.guid -ne $Guid) {
+            continue
+        }
+
+        $version = [Version]"0.0.0.0"
+        [void][Version]::TryParse([string]$meta.version, [ref]$version)
+
+        [pscustomobject]@{
+            Folder = $folder.FullName
+            Meta = $meta
+            Version = $version
+            Active = $meta.status -eq "Active"
+        }
+    }
+
+    # Jellyfin loads the active, highest version; that is the folder to replace.
+    return $installed | Sort-Object -Property @{ Expression = "Active"; Descending = $true }, @{ Expression = "Version"; Descending = $true } | Select-Object -First 1
+}
+
+function Install-ToServer {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$PluginsPath,
+
+        [Parameter(Mandatory = $true)]
+        [string]$StageDir,
+
+        [Parameter(Mandatory = $true)]
+        [System.Collections.IDictionary]$StagedMeta,
+
+        [Parameter(Mandatory = $true)]
+        [string]$BackupRoot,
+
+        [switch]$KeepChangelog
+    )
+
+    $existing = Find-InstalledPluginFolder -PluginsPath $PluginsPath -Guid $StagedMeta.guid
+
+    if ($existing) {
+        $targetDir = $existing.Folder
+        $backupDir = Join-Path $BackupRoot ("{0}_{1}" -f (Split-Path -Leaf $targetDir), [DateTime]::Now.ToString("yyyyMMdd-HHmmss"))
+        New-Item -ItemType Directory -Path $backupDir -Force | Out-Null
+        Get-ChildItem -LiteralPath $targetDir -File | Copy-Item -Destination $backupDir
+        Write-Host "Replacing $($existing.Meta.version) in: $targetDir"
+        Write-Host "Backup of the previous files: $backupDir"
+    } else {
+        $targetDir = Join-Path $PluginsPath ("{0}_{1}" -f $StagedMeta.name, $StagedMeta.version)
+        New-Item -ItemType Directory -Path $targetDir -Force | Out-Null
+        Write-Host "No installed copy found; installing into: $targetDir"
+    }
+
+    try {
+        Get-ChildItem -LiteralPath $StageDir | Where-Object { $_.Name -ne "meta.json" } |
+            Copy-Item -Destination $targetDir -Recurse -Force
+    } catch {
+        throw "Could not copy into $targetDir. If the DLL is locked, stop the Jellyfin container and run again. $($_.Exception.Message)"
+    }
+
+    # Keep the state Jellyfin manages itself (status, autoUpdate, imagePath) and refresh what the build defines.
+    # Without -Changelog the installed changelog stays instead of the "Initial release." placeholder.
+    $preserved = @("status", "autoUpdate", "imagePath")
+    if ($KeepChangelog) {
+        $preserved += "changelog"
+    }
+    $meta = [ordered]@{}
+    foreach ($key in $StagedMeta.Keys) {
+        $meta[$key] = $StagedMeta[$key]
+    }
+
+    if ($existing) {
+        foreach ($property in $existing.Meta.PSObject.Properties) {
+            if ($property.Name -in $preserved) {
+                $meta[$property.Name] = $property.Value
+            }
+        }
+    }
+
+    $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+    [System.IO.File]::WriteAllText((Join-Path $targetDir "meta.json"), ($meta | ConvertTo-Json -Depth 5), $utf8NoBom)
+
+    Write-Host ""
+    Write-Host "Installed $($StagedMeta.name) $($StagedMeta.version) into:"
+    Write-Host "  $targetDir"
+    Write-Host "Restart the Jellyfin server (for example the container in Dockhand) to load it."
+}
+
 function Step {
     param(
         [Parameter(Mandatory = $true)]
@@ -167,6 +346,9 @@ if ($Beta -and -not (Test-Path -LiteralPath (Join-RepoPath @($repoRoot, "logo-be
 }
 
 $releaseRoot = Join-RepoPath @($repoRoot, "release")
+$deployEnvPath = Join-RepoPath @($repoRoot, ".env.deploy.local")
+$serverBackupRoot = Join-RepoPath @($releaseRoot, "server-backup")
+$changelogProvided = -not [string]::IsNullOrWhiteSpace($Changelog)
 $buildOutput = Join-RepoPath @($releaseRoot, ".build-$([Guid]::NewGuid().ToString("N"))")
 $stageDir = Join-RepoPath @($releaseRoot, $pluginName)
 $zipPath = Join-RepoPath @($releaseRoot, "$pluginName.zip")
@@ -175,6 +357,25 @@ $configBundlePath = Join-RepoPath @($repoRoot, "dist", "config.bundle.js")
 $bootstrapBundlePath = Join-RepoPath @($repoRoot, "dist", "bootstrap.bundle.js")
 $verifyScript = Join-RepoPath @($repoRoot, "scripts", "verify-embedded-bundle.ps1")
 $syncFrontendVersionScript = Join-RepoPath @($repoRoot, "scripts", "sync-frontend-version.mjs")
+
+if ($Target -eq "Ask") {
+    if (Test-Interactive) {
+        $choices = [System.Management.Automation.Host.ChoiceDescription[]]@(
+            [System.Management.Automation.Host.ChoiceDescription]::new("&Local", "Build release/Featured and release/Featured.zip only."),
+            [System.Management.Automation.Host.ChoiceDescription]::new("&Server", "Build, then replace the installed plugin in the Jellyfin plugins folder.")
+        )
+        $Target = @("Local", "Server")[$Host.UI.PromptForChoice("Build target", "Build locally only, or also deploy to the Jellyfin server?", $choices, 0)]
+    } else {
+        $Target = "Local"
+    }
+}
+
+# Resolve the server folder before the build so a missing share fails fast.
+$resolvedPluginsPath = if ($Target -eq "Server") {
+    Resolve-ServerPluginsPath -Requested $ServerPluginsPath -EnvFilePath $deployEnvPath
+} else {
+    $null
+}
 
 try {
     Step "Reading project metadata"
@@ -423,6 +624,11 @@ try {
     Write-Host "  $stageDir"
     Write-Host "Release zip:"
     Write-Host "  $zipPath"
+
+    if ($Target -eq "Server") {
+        Step "Deploying to the Jellyfin server"
+        Install-ToServer -PluginsPath $resolvedPluginsPath -StageDir $stageDir -StagedMeta $meta -BackupRoot $serverBackupRoot -KeepChangelog:(-not $changelogProvided)
+    }
 } finally {
     Remove-TempBuild -Path $buildOutput
 }
