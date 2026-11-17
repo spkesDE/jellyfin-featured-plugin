@@ -712,5 +712,18 @@
   "statistics.plays": "Abgespielt",
   "statistics.clickRate": "Klickrate",
   "statistics.lastShown": "Zuletzt angezeigt",
-  "statistics.removedTitle": "Aus der Bibliothek entfernt"
+  "statistics.removedTitle": "Aus der Bibliothek entfernt",
+  "backup.title": "Sicherung und Übertragung",
+  "backup.help": "Alle Einstellungen als JSON-Datei sichern oder eine Datei aus einer Sicherung oder von einem anderen Server laden. Bibliotheken, Sammlungen, Benutzer und Titel manueller Listen werden über ihre Jellyfin-IDs gespeichert und passen nur auf dem Server, von dem sie stammen. Importierte Einstellungen gelten erst nach dem Speichern.",
+  "backup.export": "Einstellungen exportieren",
+  "backup.importAll": "Alle Einstellungen importieren",
+  "backup.importPresets": "Nur Presets importieren",
+  "backup.exported": "Einstellungen exportiert.",
+  "backup.imported": "Einstellungen importiert. Bitte prüfen und speichern, damit sie gelten.",
+  "backup.presetsImported": "{count} Presets hinzugefügt. Zum Übernehmen speichern.",
+  "backup.presetsImportedOne": "1 Preset hinzugefügt. Zum Übernehmen speichern.",
+  "backup.noPresets": "Die Datei enthält keine Presets.",
+  "backup.replaceConfirm": "Alle aktuellen Einstellungen durch die importierte Datei ersetzen? Auf dem Server ändert sich erst etwas, wenn du speicherst.",
+  "backup.invalidJson": "Die Datei ist kein gültiges JSON.",
+  "backup.notAConfiguration": "Die Datei ist keine Jellyfin-Featured-Konfiguration."
 }
