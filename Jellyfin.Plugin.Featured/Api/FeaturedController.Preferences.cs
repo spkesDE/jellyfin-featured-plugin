@@ -135,25 +135,12 @@ public sealed partial class FeaturedController
 
     private string[] QueryVisibleGenres(Jellyfin.Database.Implementations.Entities.User user)
     {
-        Stopwatch totalTimer = Stopwatch.StartNew();
-        InternalItemsQuery query = new(user) { IncludeItemTypes = FeaturedMediaTypes.All };
-        Stopwatch queryTimer = Stopwatch.StartNew();
-        List<BaseItem> visibleItems = _libraryManager.GetItemList(query)
-            .Where(item => item.IsVisible(user))
-            .ToList();
-        double queryMilliseconds = queryTimer.Elapsed.TotalMilliseconds;
-        string[] genres = visibleItems
-            .SelectMany(item => item.Genres)
-            .Where(genre => !string.IsNullOrWhiteSpace(genre))
-            .Distinct(StringComparer.CurrentCultureIgnoreCase)
-            .OrderBy(genre => genre, StringComparer.CurrentCultureIgnoreCase)
-            .ToArray();
+        Stopwatch timer = Stopwatch.StartNew();
+        string[] genres = FeaturedGenreOptions.Query(_libraryManager, user);
         _logger.LogInformation(
-            "Jellyfin Featured user-settings genre scan inspected {ItemCount} visible items and found {GenreCount} genres in {ElapsedMilliseconds:F1} ms (library query {QueryMilliseconds:F1} ms).",
-            visibleItems.Count,
+            "Jellyfin Featured user-settings genre lookup found {GenreCount} genres in {ElapsedMilliseconds:F1} ms.",
             genres.Length,
-            totalTimer.Elapsed.TotalMilliseconds,
-            queryMilliseconds);
+            timer.Elapsed.TotalMilliseconds);
         return genres;
     }
 }

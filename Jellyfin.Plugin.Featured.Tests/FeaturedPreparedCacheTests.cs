@@ -71,9 +71,10 @@ public sealed class FeaturedPreparedCacheTests : FeaturedPreparedCacheTestBase
         PluginConfiguration config = new();
         FeaturedPersonalizationContext personalization = _personalization.Resolve(config, _user.Id);
         Store(config, personalization, CreateItems(5));
-        config.ShowDescription = !config.ShowDescription;
+        // Resolved configurations are read-only; a saved change arrives as a new instance.
+        PluginConfiguration changed = new() { ShowDescription = !config.ShowDescription };
 
-        Assert.False(TryGet(config, personalization, [], 5, out _, out string status));
+        Assert.False(TryGet(changed, personalization, [], 5, out _, out string status));
         Assert.Equal("miss (fingerprint mismatch)", status);
     }
 

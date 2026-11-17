@@ -35,6 +35,7 @@ public sealed class FeaturedCacheConfigurationObserver : IHostedService
 
     private void OnConfigurationChanged(object? sender, BasePluginConfiguration configuration)
     {
+        FeaturedEffectiveConfiguration.Invalidate();
         _preparedCache.Clear();
         _candidateCache.Clear();
         if (configuration is PluginConfiguration { EnablePreparedCache: true })
