@@ -34,7 +34,37 @@ public sealed class FeaturedPresetResolverTests
             new DateTimeOffset(2026, 7, 10, 17, 0, 0, TimeSpan.Zero));
 
         Assert.Equal(preset.Id, resolution.ActivePresetId);
-        Assert.Equal(new DateTimeOffset(2026, 7, 10, 21, 59, 0, TimeSpan.Zero), resolution.NextScheduleChange);
+        Assert.Equal(new DateTimeOffset(2026, 7, 10, 22, 0, 0, TimeSpan.Zero), resolution.NextScheduleChange);
+    }
+
+    [Fact]
+    public void EndTimeOfLastMinuteCoversTheWholeDay()
+    {
+        FeaturedPreset weekly = CreatePreset("weekly-all-day");
+        weekly.ScheduleType = FeaturedPresetScheduleTypes.Weekly;
+        weekly.TimeZoneId = "UTC";
+        weekly.DaysOfWeek = [DayOfWeek.Friday];
+        weekly.StartTime = "00:00";
+        weekly.EndTime = "23:59";
+        FeaturedPreset annual = CreatePreset("new-years-eve");
+        annual.ScheduleType = FeaturedPresetScheduleTypes.Annual;
+        annual.TimeZoneId = "UTC";
+        annual.AnnualStart = "12-31";
+        annual.AnnualEnd = "12-31";
+        annual.StartTime = "00:00";
+        annual.EndTime = "23:59";
+
+        DateTimeOffset fridayLastMinute = new(2026, 7, 10, 23, 59, 30, TimeSpan.Zero);
+        DateTimeOffset yearLastMinute = new(2026, 12, 31, 23, 59, 30, TimeSpan.Zero);
+
+        Assert.Equal(weekly.Id, FeaturedPresetResolver.Resolve(new PluginConfiguration { Presets = [weekly] }, fridayLastMinute).ActivePresetId);
+        Assert.Equal(
+            new DateTimeOffset(2026, 7, 11, 0, 0, 0, TimeSpan.Zero),
+            FeaturedPresetResolver.Resolve(new PluginConfiguration { Presets = [weekly] }, fridayLastMinute).NextScheduleChange);
+        Assert.Equal(annual.Id, FeaturedPresetResolver.Resolve(new PluginConfiguration { Presets = [annual] }, yearLastMinute).ActivePresetId);
+        Assert.Null(FeaturedPresetResolver.Resolve(
+            new PluginConfiguration { Presets = [annual] },
+            new DateTimeOffset(2027, 1, 1, 0, 0, 0, TimeSpan.Zero)).ActivePresetId);
     }
 
     [Fact]

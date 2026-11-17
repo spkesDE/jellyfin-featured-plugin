@@ -16,6 +16,7 @@ interface Window {
 
 const MINUTE = 60_000;
 const DAY = 24 * 60 * MINUTE;
+const LAST_MINUTE_OF_DAY = 23 * 60 + 59;
 
 /**
  * Mirrors FeaturedPresetResolver so the editor can say which preset applies right now. Recurring windows are compared
@@ -64,7 +65,7 @@ function weeklyWindows(preset: FeaturedPreset, now: Date): Window[] {
   if (!preset.DaysOfWeek.length) return [];
   const today = Math.floor(wallTime(now, preset) / DAY) * DAY;
   const start = parseTime(preset.StartTime, 18 * 60);
-  const end = parseTime(preset.EndTime, 23 * 60 + 59);
+  const end = endOfWindow(parseTime(preset.EndTime, LAST_MINUTE_OF_DAY));
   const windows: Window[] = [];
   for (const offset of [-1, 0]) {
     const day = today + offset * DAY;
@@ -80,7 +81,7 @@ function weeklyWindows(preset: FeaturedPreset, now: Date): Window[] {
 function annualWindows(preset: FeaturedPreset, now: Date): Window[] {
   const year = new Date(wallTime(now, preset)).getUTCFullYear();
   const start = parseTime(preset.StartTime, 0);
-  const end = parseTime(preset.EndTime, 23 * 60 + 59);
+  const end = endOfWindow(parseTime(preset.EndTime, LAST_MINUTE_OF_DAY));
   const windows: Window[] = [];
   for (const candidate of [year - 1, year]) {
     const windowStart = annualBoundary(candidate, preset.AnnualStart, start, 12, 1);
@@ -105,6 +106,11 @@ function annualBoundary(
   const parsedDay = Number(dayText);
   const day = Number.isInteger(parsedDay) && dayText ? Math.min(Math.max(parsedDay, 1), daysInMonth) : fallbackDay;
   return Date.UTC(year, month - 1, day) + minutes * MINUTE;
+}
+
+/** Mirrors the server: end times are exclusive, and 23:59 (the editor has no 24:00) means the end of the day. */
+function endOfWindow(minutes: number): number {
+  return minutes === LAST_MINUTE_OF_DAY ? 24 * 60 : minutes;
 }
 
 function parseTime(value: string, fallback: number): number {
