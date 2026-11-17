@@ -54,5 +54,8 @@ public sealed partial class PluginConfiguration : BasePluginConfiguration
 
     public bool EnablePreparedCache { get; set; } = true;
 
+    /// <summary>Counts how often titles are shown, opened and played from the banner, summed over all users.</summary>
+    public bool EnableStatistics { get; set; } = true;
+
     public bool Debug { get; set; }
 }

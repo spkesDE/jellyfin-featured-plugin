@@ -40,6 +40,7 @@ test('critical C# and TypeScript defaults stay in parity', async () => {
     HeroBackdropPosition: "'center'",
     EnableFrontendBootstrap: 'true',
     EnablePreparedCache: 'true',
+    EnableStatistics: 'true',
     BannerHeight: '360',
     ShowPaginationDots: 'true',
     TrailerDelayMilliseconds: '1500',

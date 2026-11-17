@@ -179,6 +179,7 @@ export interface FeaturedPluginConfig {
   HeroBackdropPosition: HeroBackdropPosition;
   ReduceImageSize: boolean;
   EnablePreparedCache: boolean;
+  EnableStatistics: boolean;
   BannerHeight: number;
   ShowYear: boolean;
   ShowRuntime: boolean;

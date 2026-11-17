@@ -103,6 +103,7 @@ export const CONFIG_DEFAULTS: FeaturedPluginConfig = {
   HeroBackdropPosition: 'center',
   ReduceImageSize: false,
   EnablePreparedCache: true,
+  EnableStatistics: true,
   BannerHeight: 360,
   ShowYear: true,
   ShowRuntime: true,

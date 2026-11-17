@@ -22,7 +22,8 @@ public sealed class FeaturedItemsResponseDto : FeaturedDisplaySettingsDto
         Autoplay = config.EnableAutoplay;
         AutoplayInterval = config.AutoplayInterval * 1000;
         ReduceImageSizes = config.ReduceImageSize;
-        TrackDisplayedItems = personalization.RepeatCooldownHours > 0;
+        TrackDisplayedItems = personalization.RepeatCooldownHours > 0 || config.EnableStatistics;
+        StatisticsEnabled = config.EnableStatistics;
         PersonalizationEnabled = config.PersonalizationPolicy.Enabled;
         RememberTrailerAudio = FeaturedPersonalizationService.CanRememberTrailerAudio(config);
         AutoSaveTrailerAudio = RememberTrailerAudio && personalization.Display.AutoSaveTrailerAudio;
@@ -40,6 +41,8 @@ public sealed class FeaturedItemsResponseDto : FeaturedDisplaySettingsDto
     public int AutoplayInterval { get; }
     public bool ReduceImageSizes { get; }
     public bool TrackDisplayedItems { get; }
+
+    public bool StatisticsEnabled { get; }
     public bool PersonalizationEnabled { get; }
     public bool RememberTrailerAudio { get; }
 

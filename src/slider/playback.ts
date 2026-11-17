@@ -139,7 +139,11 @@ function updateButton(button: HTMLButtonElement, target: PlaybackTarget, customP
   button.title = target.positionTicks > 0 ? t('carousel.resume') : t('carousel.play');
 }
 
-export function createPlaybackButton(item: FeaturedItem, customPlayText?: string | null): HTMLButtonElement {
+export function createPlaybackButton(
+  item: FeaturedItem,
+  customPlayText?: string | null,
+  onActivate?: () => void
+): HTMLButtonElement {
   const button = document.createElement('button');
   button.type = 'button';
   button.className = 'featured-button featured-play-button raised button-submit emby-button';
@@ -157,6 +161,7 @@ export function createPlaybackButton(item: FeaturedItem, customPlayText?: string
   button.addEventListener('pointerdown', () => void refresh(true).catch(() => undefined));
   button.addEventListener('click', async () => {
     if (button.disabled) return;
+    onActivate?.();
     button.disabled = true;
     button.setAttribute('aria-busy', 'true');
     try {
