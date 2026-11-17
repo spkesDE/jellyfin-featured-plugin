@@ -1,4 +1,6 @@
+using Jellyfin.Data.Events.Users;
 using MediaBrowser.Controller;
+using MediaBrowser.Controller.Events;
 using MediaBrowser.Controller.Plugins;
 using Jellyfin.Plugin.Featured.Api;
 using Jellyfin.Plugin.Featured.ScheduledTasks;
@@ -29,8 +31,11 @@ public sealed class PluginServiceRegistrator : IPluginServiceRegistrator
         serviceCollection.AddSingleton<FeaturedFeedService>();
         serviceCollection.AddSingleton<FeaturedPreparedCache>();
         serviceCollection.AddSingleton<FrontendInjectionAvailabilityService>();
+        serviceCollection.AddSingleton<FeaturedUserDataCleanup>();
+        serviceCollection.AddScoped<IEventConsumer<UserDeletedEventArgs>, FeaturedUserDeletedConsumer>();
         serviceCollection.AddSingleton<IScheduledTask, RefreshFeaturedCacheTask>();
         serviceCollection.AddSingleton<IScheduledTask, WarmUserSettingsCacheTask>();
+        serviceCollection.AddSingleton<IScheduledTask, CleanUpDeletedUsersTask>();
         serviceCollection.AddHostedService<FrontendRegistrationHostedService>();
         serviceCollection.AddHostedService<FeaturedCacheConfigurationObserver>();
     }
