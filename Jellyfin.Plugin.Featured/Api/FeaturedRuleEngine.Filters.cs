@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text.RegularExpressions;
+using Jellyfin.Data.Enums;
 using Jellyfin.Extensions;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Entities.TV;
@@ -54,8 +55,68 @@ internal sealed partial class FeaturedRuleEngine
             FeaturedFilterFields.Director => MatchMetadataCollection(itemMetadata.Directors, filter.Values, filter.Operator),
             FeaturedFilterFields.OriginalLanguage => MatchMetadataCollection(itemMetadata.OriginalLanguages, filter.Values, filter.Operator),
             FeaturedFilterFields.AudioLanguage => MatchMetadataCollection(itemMetadata.AudioLanguages, filter.Values, filter.Operator),
+            FeaturedFilterFields.HasTrailer => MatchBoolean(HasTrailer(item) == ParseBoolean(filter.Values[0]), filter.Operator),
+            FeaturedFilterFields.HasLogo => MatchBoolean(
+                item.HasImage(MediaBrowser.Model.Entities.ImageType.Logo) == ParseBoolean(filter.Values[0]),
+                filter.Operator),
+            FeaturedFilterFields.HasBackdrop => MatchBoolean(
+                item.HasImage(MediaBrowser.Model.Entities.ImageType.Backdrop) == ParseBoolean(filter.Values[0]),
+                filter.Operator),
+            FeaturedFilterFields.Studio => MatchMetadataCollection(item.Studios, filter.Values, filter.Operator),
+            FeaturedFilterFields.DaysSinceAdded => MatchNumber(GetDaysSinceAdded(item), filter.Values[0], filter.Operator),
+            FeaturedFilterFields.VideoRange => MatchMetadataCollection(GetVideoRanges(item), filter.Values, filter.Operator),
+            FeaturedFilterFields.SeriesStatus => MatchMetadataCollection(
+                item is Series { Status: { } status } ? [status.ToString()] : [],
+                filter.Values,
+                filter.Operator),
             _ => true
         };
+    }
+
+    /// <summary>Trailer links from metadata or local trailer files. Links come first: local trailers need a library lookup.</summary>
+    internal static bool HasTrailer(BaseItem item)
+        => item is IHasTrailers trailers && (trailers.RemoteTrailers.Count > 0 || trailers.LocalTrailers.Count > 0);
+
+    internal static double? GetDaysSinceAdded(BaseItem item)
+        => item.DateCreated == default ? null : Math.Max(0, (DateTime.UtcNow - item.DateCreated).TotalDays);
+
+    internal static string[] GetVideoRanges(BaseItem item)
+    {
+        if (item is not Video video) return [];
+        MediaBrowser.Model.Entities.MediaStream? stream = video.GetDefaultVideoStream();
+        if (stream is null) return [];
+        List<string> ranges = [];
+        switch (stream.VideoRangeType)
+        {
+            case VideoRangeType.SDR:
+                ranges.Add(FeaturedVideoRanges.Sdr);
+                break;
+            case VideoRangeType.HDR10:
+                ranges.Add(FeaturedVideoRanges.Hdr10);
+                break;
+            case VideoRangeType.HDR10Plus:
+                ranges.AddRange([FeaturedVideoRanges.Hdr10, FeaturedVideoRanges.Hdr10Plus]);
+                break;
+            case VideoRangeType.HLG:
+                ranges.Add(FeaturedVideoRanges.Hlg);
+                break;
+            case VideoRangeType.DOVI or VideoRangeType.DOVIWithEL or VideoRangeType.DOVIWithSDR:
+                ranges.Add(FeaturedVideoRanges.DolbyVision);
+                break;
+            case VideoRangeType.DOVIWithHDR10:
+                ranges.AddRange([FeaturedVideoRanges.DolbyVision, FeaturedVideoRanges.Hdr10]);
+                break;
+            case VideoRangeType.DOVIWithHDR10Plus or VideoRangeType.DOVIWithELHDR10Plus:
+                ranges.AddRange([FeaturedVideoRanges.DolbyVision, FeaturedVideoRanges.Hdr10, FeaturedVideoRanges.Hdr10Plus]);
+                break;
+            case VideoRangeType.DOVIWithHLG:
+                ranges.AddRange([FeaturedVideoRanges.DolbyVision, FeaturedVideoRanges.Hlg]);
+                break;
+        }
+
+        if (stream.VideoRange == VideoRange.HDR) ranges.Add(FeaturedVideoRanges.Hdr);
+        else if (stream.VideoRange == VideoRange.SDR && ranges.Count == 0) ranges.Add(FeaturedVideoRanges.Sdr);
+        return [.. ranges.Distinct(StringComparer.Ordinal)];
     }
 
     private static double? GetVideoResolution(BaseItem item)

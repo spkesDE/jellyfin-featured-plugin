@@ -71,6 +71,13 @@ public sealed partial class FeaturedController
                 .Distinct(StringComparer.CurrentCultureIgnoreCase)
                 .OrderBy(value => value, StringComparer.CurrentCultureIgnoreCase)
                 .ToArray();
+            string[] studios = items
+                .Where(item => FeaturedMediaTypes.Contains(item.GetBaseItemKind()))
+                .SelectMany(item => item.Studios)
+                .Where(value => !string.IsNullOrWhiteSpace(value))
+                .Distinct(StringComparer.CurrentCultureIgnoreCase)
+                .OrderBy(value => value, StringComparer.CurrentCultureIgnoreCase)
+                .ToArray();
             FeaturedFilterOptions filterOptions = _mediaMetadata.GetFilterOptions(
                 items.Where(item => FeaturedMediaTypes.Contains(item.GetBaseItemKind())));
 
@@ -80,6 +87,7 @@ public sealed partial class FeaturedController
                 ["playlists"] = playlists,
                 ["genres"] = genres,
                 ["tags"] = tags,
+                ["studios"] = studios,
                 ["actors"] = filterOptions.Actors,
                 ["directors"] = filterOptions.Directors,
                 ["originalLanguages"] = filterOptions.OriginalLanguages,

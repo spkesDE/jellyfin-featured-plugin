@@ -36,7 +36,14 @@ internal static class PluginConfigurationNormalizer
         FeaturedFilterFields.Actor,
         FeaturedFilterFields.Director,
         FeaturedFilterFields.OriginalLanguage,
-        FeaturedFilterFields.AudioLanguage
+        FeaturedFilterFields.AudioLanguage,
+        FeaturedFilterFields.HasTrailer,
+        FeaturedFilterFields.HasLogo,
+        FeaturedFilterFields.HasBackdrop,
+        FeaturedFilterFields.Studio,
+        FeaturedFilterFields.DaysSinceAdded,
+        FeaturedFilterFields.VideoRange,
+        FeaturedFilterFields.SeriesStatus
     };
 
     private static readonly HashSet<string> ValidFilterOperators = new(StringComparer.OrdinalIgnoreCase)
@@ -543,14 +550,23 @@ internal static class PluginConfigurationNormalizer
             or FeaturedFilterFields.CriticRating
             or FeaturedFilterFields.ProductionYear
             or FeaturedFilterFields.RuntimeMinutes
-            or FeaturedFilterFields.VideoResolution)
+            or FeaturedFilterFields.VideoResolution
+            or FeaturedFilterFields.DaysSinceAdded)
         {
             return filterOperator == FeaturedFilterOperators.LessThanOrEqual
                 ? FeaturedFilterOperators.LessThanOrEqual
                 : FeaturedFilterOperators.GreaterThanOrEqual;
         }
 
-        if (field is FeaturedFilterFields.Genre or FeaturedFilterFields.Tag)
+        if (field is FeaturedFilterFields.Genre
+            or FeaturedFilterFields.Tag
+            or FeaturedFilterFields.Actor
+            or FeaturedFilterFields.Director
+            or FeaturedFilterFields.OriginalLanguage
+            or FeaturedFilterFields.AudioLanguage
+            or FeaturedFilterFields.Studio
+            or FeaturedFilterFields.VideoRange
+            or FeaturedFilterFields.SeriesStatus)
         {
             return filterOperator is FeaturedFilterOperators.ContainsAll or FeaturedFilterOperators.NotEquals
                 ? filterOperator

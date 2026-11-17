@@ -87,6 +87,24 @@ public static class FeaturedFilterFields
     public const string Director = "DIRECTOR";
     public const string OriginalLanguage = "ORIGINAL_LANGUAGE";
     public const string AudioLanguage = "AUDIO_LANGUAGE";
+    public const string HasTrailer = "HAS_TRAILER";
+    public const string HasLogo = "HAS_LOGO";
+    public const string HasBackdrop = "HAS_BACKDROP";
+    public const string Studio = "STUDIO";
+    public const string DaysSinceAdded = "DAYS_SINCE_ADDED";
+    public const string VideoRange = "VIDEO_RANGE";
+    public const string SeriesStatus = "SERIES_STATUS";
+}
+
+/// <summary>Values of the <see cref="FeaturedFilterFields.VideoRange"/> filter; one item can match several.</summary>
+public static class FeaturedVideoRanges
+{
+    public const string Sdr = "SDR";
+    public const string Hdr = "HDR";
+    public const string Hdr10 = "HDR10";
+    public const string Hdr10Plus = "HDR10_PLUS";
+    public const string Hlg = "HLG";
+    public const string DolbyVision = "DOLBY_VISION";
 }
 
 public sealed class FeaturedDismissalPolicy

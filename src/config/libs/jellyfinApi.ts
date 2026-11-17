@@ -34,6 +34,7 @@ export async function loadLibrariesAndCollections(): Promise<{
   directors: string[];
   originalLanguages: string[];
   audioLanguages: string[];
+  studios: string[];
 }> {
   try {
     const api = getApiClient();
@@ -79,7 +80,8 @@ export async function loadLibrariesAndCollections(): Promise<{
       actors: mergeStrings(configOptions.actors),
       directors: mergeStrings(configOptions.directors),
       originalLanguages: mergeStrings(configOptions.originalLanguages),
-      audioLanguages: mergeStrings(configOptions.audioLanguages)
+      audioLanguages: mergeStrings(configOptions.audioLanguages),
+      studios: mergeStrings(configOptions.studios)
     };
   } catch {
     return {
@@ -91,7 +93,8 @@ export async function loadLibrariesAndCollections(): Promise<{
       actors: [],
       directors: [],
       originalLanguages: [],
-      audioLanguages: []
+      audioLanguages: [],
+      studios: []
     };
   }
 }
