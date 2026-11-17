@@ -69,6 +69,8 @@ public static class FeaturedSourceTypes
     public const string Recommendations = "RECOMMENDATIONS";
     public const string ContinueWatching = "CONTINUE_WATCHING";
     public const string NextUp = "NEXT_UP";
+    public const string NewEpisodes = "NEW_EPISODES";
+    public const string Upcoming = "UPCOMING";
 }
 
 public static class FeaturedFilterFields

@@ -11,7 +11,9 @@ export type SourceType =
   | 'MANUAL_LISTS'
   | 'RECOMMENDATIONS'
   | 'CONTINUE_WATCHING'
-  | 'NEXT_UP';
+  | 'NEXT_UP'
+  | 'NEW_EPISODES'
+  | 'UPCOMING';
 export type FilterField =
   | 'LIBRARY'
   | 'GENRE'

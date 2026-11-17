@@ -38,17 +38,21 @@ internal sealed partial class FeaturedRuleEngine
             FeaturedSourceTypes.Recommendations => _recommendations.GetMovieRecommendations(activeUser, candidateLimit),
             FeaturedSourceTypes.ContinueWatching => _mediaMetadata.GetContinueWatching(activeUser, candidateLimit),
             FeaturedSourceTypes.NextUp => _mediaMetadata.GetNextUp(activeUser, candidateLimit),
+            FeaturedSourceTypes.NewEpisodes => _mediaMetadata.GetNewEpisodes(activeUser, rule.RecentDays, candidateLimit),
+            FeaturedSourceTypes.Upcoming => _mediaMetadata.GetUpcoming(rule.RecentDays, candidateLimit),
             _ => QueryStandardCandidates(rule, userScoped ? activeUser : null, candidateLimit)
         };
 
         List<BaseItem> sourceOrder = candidates.ToList();
-        bool preserveEpisodes = rule.Type is FeaturedSourceTypes.ContinueWatching or FeaturedSourceTypes.NextUp;
+        bool preserveEpisodes = PreservesEpisodes(rule);
         bool requiresRequery = rule.Type is FeaturedSourceTypes.Favourites
             or FeaturedSourceTypes.Collections
             or FeaturedSourceTypes.Playlists
             or FeaturedSourceTypes.Recommendations
             or FeaturedSourceTypes.ContinueWatching
-            or FeaturedSourceTypes.NextUp;
+            or FeaturedSourceTypes.NextUp
+            or FeaturedSourceTypes.NewEpisodes
+            or FeaturedSourceTypes.Upcoming;
         List<BaseItem> normalized = requiresRequery
             ? NormalizeAndRequery(
                 sourceOrder,
@@ -74,7 +78,7 @@ internal sealed partial class FeaturedRuleEngine
                     && item.PremiereDate.Value >= DateTime.UtcNow.AddDays(-rule.RecentDays))
                 .OrderByDescending(item => item.PremiereDate)
                 .ToList(),
-            FeaturedSourceTypes.Recommendations or FeaturedSourceTypes.ContinueWatching or FeaturedSourceTypes.NextUp => normalized
+            _ when KeepsSourceOrder(rule) => normalized
                 .OrderBy(item => sourceOrder.FindIndex(candidate => candidate.Id == item.Id))
                 .ToList(),
             _ => normalized
@@ -237,5 +241,20 @@ internal sealed partial class FeaturedRuleEngine
         => rule.Type is FeaturedSourceTypes.Unplayed
             or FeaturedSourceTypes.Recommendations
             or FeaturedSourceTypes.ContinueWatching
-            or FeaturedSourceTypes.NextUp;
+            or FeaturedSourceTypes.NextUp
+            or FeaturedSourceTypes.NewEpisodes;
+
+    /// <summary>Sources that feature episodes themselves instead of their series.</summary>
+    internal static bool PreservesEpisodes(FeaturedSourceRule rule)
+        => rule.Type is FeaturedSourceTypes.ContinueWatching
+            or FeaturedSourceTypes.NextUp
+            or FeaturedSourceTypes.NewEpisodes;
+
+    /// <summary>Sources whose order already means something, so personal scoring does not reshuffle them.</summary>
+    internal static bool KeepsSourceOrder(FeaturedSourceRule rule)
+        => rule.Type is FeaturedSourceTypes.Recommendations
+            or FeaturedSourceTypes.ContinueWatching
+            or FeaturedSourceTypes.NextUp
+            or FeaturedSourceTypes.NewEpisodes
+            or FeaturedSourceTypes.Upcoming;
 }

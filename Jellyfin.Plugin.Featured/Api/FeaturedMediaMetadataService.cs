@@ -2,6 +2,7 @@ using Jellyfin.Data.Enums;
 using Jellyfin.Database.Implementations.Enums;
 using MediaBrowser.Controller.Dto;
 using MediaBrowser.Controller.Entities;
+using MediaBrowser.Controller.Entities.TV;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.TV;
 using MediaBrowser.Model.Entities;
@@ -63,6 +64,48 @@ public sealed class FeaturedMediaMetadataService
                 EnableRewatching = false
             },
             new DtoOptions()).Items;
+
+    /// <summary>
+    /// Next Up episodes added within the window: the user is caught up on the series and a new episode arrived.
+    /// </summary>
+    internal IReadOnlyList<BaseItem> GetNewEpisodes(
+        Jellyfin.Database.Implementations.Entities.User user,
+        int recentDays,
+        int limit)
+    {
+        DateTime cutoff = DateTime.UtcNow.AddDays(-Math.Max(1, recentDays));
+        return GetNextUp(user, Math.Max(limit, 100))
+            .Where(item => item.DateCreated >= cutoff)
+            .OrderByDescending(item => item.DateCreated)
+            .Take(limit)
+            .ToList();
+    }
+
+    /// <summary>
+    /// Series with an episode premiering within the window, and movies whose premiere is ahead, soonest first.
+    /// Unaired episodes are usually virtual, so the series itself is featured.
+    /// </summary>
+    internal IReadOnlyList<BaseItem> GetUpcoming(int upcomingDays, int limit)
+    {
+        DateTime now = DateTime.UtcNow;
+        InternalItemsQuery query = new()
+        {
+            IncludeItemTypes = [BaseItemKind.Episode, BaseItemKind.Movie],
+            Recursive = true,
+            MinPremiereDate = now,
+            MaxPremiereDate = now.AddDays(Math.Max(1, upcomingDays)),
+            OrderBy = [(ItemSortBy.PremiereDate, SortOrder.Ascending)],
+            Limit = Math.Max(limit * 10, 500),
+            DtoOptions = new DtoOptions(false)
+        };
+        return _libraryManager.GetItemList(query)
+            .Select(item => item is Episode episode ? (BaseItem?)episode.Series : item)
+            .Where(item => item is not null)
+            .Cast<BaseItem>()
+            .DistinctBy(item => item.Id)
+            .Take(limit)
+            .ToList();
+    }
 
     internal FeaturedMediaMetadataSnapshot BuildSnapshot(
         IReadOnlyList<BaseItem> items,
