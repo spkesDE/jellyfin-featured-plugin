@@ -47,7 +47,7 @@ public sealed partial class FeaturedController
         FeaturedPersonalizationContext personalization = _personalization.Resolve(_config, activeUser.Id);
         if (personalization.RepeatCooldownHours <= 0) return Ok(new { ok = true });
         BaseItem? item = _libraryManager.GetItemById(request.ItemId);
-        if (item is null || !item.IsVisible(activeUser)) return NotFound();
+        if (item is null || !item.IsVisibleStandalone(activeUser)) return NotFound();
         _historyStore.Record(activeUser.Id, item.Id);
         _preparedCache.RemoveDisplayedItem(activeUser.Id, item.Id);
         return Ok(new { ok = true });
@@ -69,7 +69,7 @@ public sealed partial class FeaturedController
         if (activeUser is null) return NotFound();
         if (itemId == Guid.Empty) return BadRequest();
         BaseItem? item = _libraryManager.GetItemById(itemId);
-        if (item is null || !item.IsVisible(activeUser)) return NotFound();
+        if (item is null || !item.IsVisibleStandalone(activeUser)) return NotFound();
 
         _candidateCache.RemoveUser(activeUser.Id);
         _preparedCache.RemoveUser(activeUser.Id);
