@@ -10,6 +10,7 @@ import {
   saveTrailerVolume
 } from './trailerVolume';
 import { shouldSkipYouTubeTrailer } from './youtubeTrailerFilter';
+import { prefersReducedMotion } from '../core/motion';
 
 const YOUTUBE_CONTROL_CONCEALMENT_MS = 5000;
 const TRAILER_VOLUME_PLACEMENTS = ['right', 'left', 'up', 'down'] as const;
@@ -88,6 +89,7 @@ export class TrailerController {
     // The server only sends video fallbacks when the source allows trailers or the item lacks artwork.
     const isFallbackMedia = isTrickplay || isFiniteSegment;
     if ((!this.response.enableBackgroundTrailers && !isFallbackMedia) || !trailer || document.hidden) return;
+    if (prefersReducedMotion()) return;
     if (!isTrickplay && !this.response.allowTrailersOnMobile && isMobileTrailerClient()) return;
     if (
       this.itemId === item.id &&
