@@ -156,9 +156,11 @@ watch(
         </div>
       </ConfigCard>
 
-      <ConfigCard :title="t('statistics.topTitle')">
-        <p v-if="!statistics.items.length" class="featured-statisticsNote">{{ t('statistics.empty') }}</p>
-        <StatisticsTable v-else :rows="statistics.items" :bar-color="COLORS.impressions" />
+      <ConfigCard v-if="!statistics.items.length" :title="t('statistics.topTitle')">
+        <p class="featured-statisticsNote">{{ t('statistics.empty') }}</p>
+      </ConfigCard>
+      <ConfigCard v-else>
+        <StatisticsTable :title="t('statistics.topTitle')" :rows="statistics.items" :bar-color="COLORS.impressions" />
       </ConfigCard>
     </template>
   </section>

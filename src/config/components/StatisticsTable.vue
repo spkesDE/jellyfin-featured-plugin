@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { computed, nextTick, ref, watch } from 'vue';
 import { t } from '../../i18n';
 
 export interface StatisticsRow {
@@ -16,7 +16,7 @@ type SortKey = 'name' | 'impressions' | 'opens' | 'plays' | 'clickRate' | 'lastS
 type SortDirection = 'asc' | 'desc';
 
 /** Sortable, searchable and paged table of banner statistics per title. */
-const props = defineProps<{ rows: StatisticsRow[]; barColor: string }>();
+const props = defineProps<{ title: string; rows: StatisticsRow[]; barColor: string }>();
 
 const PAGE_SIZES = [10, 25, 50, 100];
 const numberFormat = new Intl.NumberFormat();
@@ -28,6 +28,9 @@ const sortKey = ref<SortKey>('impressions');
 const sortDirection = ref<SortDirection>('desc');
 const pageSize = ref(25);
 const page = ref(0);
+const searchOpen = ref(false);
+const searchInput = ref<HTMLInputElement | null>(null);
+const searchToggle = ref<HTMLButtonElement | null>(null);
 
 const columns: Array<{ key: SortKey; label: string; numeric: boolean }> = [
   { key: 'name', label: t('statistics.titleColumn'), numeric: false },
@@ -92,6 +95,28 @@ function sortBy(key: SortKey): void {
   sortDirection.value = key === 'name' ? 'asc' : 'desc';
 }
 
+async function openSearch(): Promise<void> {
+  searchOpen.value = true;
+  await nextTick();
+  searchInput.value?.focus();
+}
+
+function toggleSearch(): void {
+  if (searchOpen.value && !query.value) searchOpen.value = false;
+  else void openSearch();
+}
+
+/** An empty field folds back into the icon; a search in progress stays open. */
+function onSearchBlur(): void {
+  if (!query.value.trim()) searchOpen.value = false;
+}
+
+function closeSearch(): void {
+  query.value = '';
+  searchOpen.value = false;
+  searchToggle.value?.focus();
+}
+
 function ariaSort(key: SortKey): 'ascending' | 'descending' | 'none' {
   if (sortKey.value !== key) return 'none';
   return sortDirection.value === 'asc' ? 'ascending' : 'descending';
@@ -111,16 +136,30 @@ function formatDate(value: string | null): string {
 
 <template>
   <div class="featured-dataTable">
-    <div class="featured-dataTableToolbar">
-      <label class="featured-dataTableSearch">
-        <span class="material-icons" aria-hidden="true">search</span>
+    <div class="featured-dataTableHeader">
+      <p class="jmp-subsectionTitle featured-dataTableTitle">{{ title }}</p>
+      <div class="featured-dataTableSearch" :class="{ 'is-open': searchOpen }">
+        <button
+          ref="searchToggle"
+          type="button"
+          class="featured-dataTableSearchToggle"
+          :aria-label="t('statistics.search')"
+          :aria-expanded="searchOpen ? 'true' : 'false'"
+          @click="toggleSearch"
+        >
+          <span class="material-icons" aria-hidden="true">search</span>
+        </button>
         <input
+          ref="searchInput"
           v-model="query"
           type="search"
           :placeholder="t('statistics.search')"
           :aria-label="t('statistics.search')"
+          :tabindex="searchOpen ? 0 : -1"
+          @blur="onSearchBlur"
+          @keydown.escape.prevent="closeSearch"
         />
-      </label>
+      </div>
       <label class="featured-dataTablePageSize">
         <span>{{ t('statistics.rowsPerPage') }}</span>
         <select v-model.number="pageSize">
@@ -220,28 +259,55 @@ function formatDate(value: string | null): string {
 </template>
 
 <style scoped>
-.featured-dataTableToolbar {
+.featured-dataTableHeader {
   align-items: center;
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem 1.5rem;
-  justify-content: space-between;
+  gap: 0.5rem 1rem;
   margin-bottom: 0.75rem;
 }
+.featured-dataTableTitle {
+  margin: 0 !important;
+}
+/* Folded, the search is a round icon next to the title; opened, it grows into a field on the same line. */
 .featured-dataTableSearch {
   align-items: center;
-  background: var(--featured-theme-background);
-  border: 1px solid var(--featured-theme-divider);
-  border-radius: var(--featured-theme-radius);
+  border: 1px solid transparent;
+  border-radius: 999px;
   display: flex;
-  flex: 1 1 16rem;
-  gap: 0.4rem;
-  max-width: 24rem;
-  padding: 0 0.6rem;
+  height: 2.25rem;
+  overflow: hidden;
+  transition:
+    width 220ms ease,
+    background-color 220ms ease,
+    border-color 220ms ease;
+  width: 2.25rem;
 }
-.featured-dataTableSearch .material-icons {
+.featured-dataTableSearch.is-open {
+  background: var(--featured-theme-background);
+  border-color: var(--featured-theme-divider);
+  width: min(18rem, 60vw);
+}
+.featured-dataTableSearchToggle {
+  align-items: center;
+  background: none;
+  border: 0;
+  border-radius: 999px;
   color: var(--featured-theme-text-secondary);
-  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex;
+  flex: 0 0 2.25rem;
+  height: 2.25rem;
+  justify-content: center;
+  padding: 0;
+}
+.featured-dataTableSearchToggle:hover,
+.featured-dataTableSearchToggle:focus-visible,
+.featured-dataTableSearch.is-open .featured-dataTableSearchToggle {
+  color: var(--featured-theme-text-primary);
+}
+.featured-dataTableSearchToggle .material-icons {
+  font-size: 1.25rem;
 }
 .featured-dataTableSearch input {
   background: transparent;
@@ -250,11 +316,17 @@ function formatDate(value: string | null): string {
   flex: 1;
   font: inherit;
   min-width: 0;
+  opacity: 0;
   outline: none;
-  padding: 0.5rem 0;
+  padding: 0 0.75rem 0 0;
+  transition: opacity 160ms ease;
+}
+.featured-dataTableSearch.is-open input {
+  opacity: 1;
 }
 .featured-dataTablePageSize {
   align-items: center;
+  margin-left: auto;
   color: var(--featured-theme-text-secondary);
   display: flex;
   font-size: 0.85rem;
@@ -365,5 +437,12 @@ function formatDate(value: string | null): string {
 .featured-dataTablePageNumber {
   min-width: 3.5rem;
   text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .featured-dataTableSearch,
+  .featured-dataTableSearch input {
+    transition: none;
+  }
 }
 </style>

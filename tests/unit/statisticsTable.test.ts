@@ -7,7 +7,7 @@ let app: App | null = null;
 function mountTable(rows: StatisticsRow[]): HTMLElement {
   const host = document.createElement('div');
   document.body.appendChild(host);
-  app = createApp({ render: () => h(StatisticsTable, { rows, barColor: '#3987e5' }) });
+  app = createApp({ render: () => h(StatisticsTable, { title: 'Titles', rows, barColor: '#3987e5' }) });
   app.mount(host);
   return host;
 }
@@ -72,5 +72,28 @@ describe('statistics data table', () => {
       'Movie 18',
       'Movie 19'
     ]);
+  });
+  it('opens the search from its icon and folds it back on Escape', async () => {
+    const host = mountTable([row('Alpha', 2), row('Beta', 1)]);
+    const search = host.querySelector<HTMLElement>('.featured-dataTableSearch')!;
+    const toggle = search.querySelector<HTMLButtonElement>('button')!;
+    const input = search.querySelector<HTMLInputElement>('input')!;
+    expect(search.classList.contains('is-open')).toBe(false);
+
+    toggle.click();
+    await nextTick();
+    await nextTick();
+    expect(search.classList.contains('is-open')).toBe(true);
+    expect(toggle.getAttribute('aria-expanded')).toBe('true');
+
+    input.value = 'beta';
+    input.dispatchEvent(new Event('input'));
+    await nextTick();
+    expect(titles(host)).toEqual(['Beta']);
+
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    await nextTick();
+    expect(search.classList.contains('is-open')).toBe(false);
+    expect(titles(host)).toEqual(['Alpha', 'Beta']);
   });
 });
