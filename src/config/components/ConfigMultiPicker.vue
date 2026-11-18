@@ -236,7 +236,8 @@ onBeforeUnmount(() => {
   gap: 1rem;
   justify-content: space-between;
   min-height: 2.7rem;
-  padding: 0.6rem 0.75rem;
+  /* The small right padding lines the arrow up with the arrow of Jellyfin's native selects. */
+  padding: 0.6rem 0.25rem 0.6rem 0.75rem;
   text-align: left;
   width: 100%;
 }

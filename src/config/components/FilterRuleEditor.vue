@@ -223,7 +223,7 @@ function numberLimits(field: FilterField): { min: number; max: number; step: num
         @update:model-value="setOperator(filter, $event)"
       />
 
-      <div class="featured-filterValue">
+      <div class="featured-filterValue" :class="{ 'has-help': valueHelp(filter.Field) }">
         <ConfigMultiPicker
           v-if="filter.Field === 'LIBRARY'"
           v-model="filter.Values"
@@ -392,6 +392,23 @@ function numberLimits(field: FilterField): { min: number; max: number; step: num
   display: flex;
   gap: 0.75rem;
   min-width: 0;
+  position: relative;
+}
+/* The value hint sits inside the field, just before its arrow, so rows with and without a hint line up. */
+.featured-filterValue > :deep(.featured-helpTrigger) {
+  position: absolute;
+  right: 2.6rem;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+}
+.featured-filterValue.has-help :deep(select.emby-select),
+.featured-filterValue.has-help :deep(.emby-input) {
+  padding-right: 4.5rem;
+}
+/* The multi-picker keeps its arrow at the edge; its text makes room for the hint instead. */
+.featured-filterValue.has-help :deep(.featured-multiPickerTrigger > span:first-child) {
+  padding-right: 1.75rem;
 }
 /* Jellyfin's selects, number inputs, and the multi-picker trigger have different natural heights; rows align them. */
 .featured-filterRow :deep(.emby-select),
