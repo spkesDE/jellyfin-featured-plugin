@@ -91,6 +91,10 @@ jobs:
         shell: pwsh
         run: |
           $manifestChangelog = Get-Content manifest-changelog.md -Raw
+          # Releases without features, fixes or performance work would otherwise get the "Initial release." placeholder.
+          if ([string]::IsNullOrWhiteSpace($manifestChangelog)) {
+            $manifestChangelog = "- Maintenance and stability improvements."
+          }
           ./build-release.ps1 -Changelog $manifestChangelog
 
       - name: Compute checksum and timestamp
