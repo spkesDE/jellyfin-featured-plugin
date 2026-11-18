@@ -32,42 +32,24 @@ topo_order = true
 topo_order_commits = true
 sort_commits = "oldest"
 
+# Only user-facing changes reach the changelog: features, fixes and performance work.
+# Changes to the release tooling, CI, docs and dependencies are skipped even when typed feat/fix.
 [[git.commit_parsers]]
-message = "^Prepare release .*"
+message = '^(feat|fix|perf)\((build|ci|release|beta|dependabot|readme|docs|deps|tooling|dev|test|tests|contracts|format|lint)\)'
 skip = true
 
 [[git.commit_parsers]]
-message = "^Update changelog and manifest for v.*"
-skip = true
-
-[[git.commit_parsers]]
-message = "^Merge .*"
-skip = true
-
-[[git.commit_parsers]]
-message = "^ci"
-skip = true
-
-[[git.commit_parsers]]
-message = "^feat"
+message = '^feat(\([^)]*\))?!?:'
 group = "<!-- 0 -->Features"
 
 [[git.commit_parsers]]
-message = "^fix"
+message = '^fix(\([^)]*\))?!?:'
 group = "<!-- 1 -->Fixes"
 
 [[git.commit_parsers]]
-message = "^build"
-group = "<!-- 2 -->Build"
-
-[[git.commit_parsers]]
-message = "^docs"
-group = "<!-- 3 -->Documentation"
-
-[[git.commit_parsers]]
-message = "^refactor"
-group = "<!-- 4 -->Refactoring"
+message = '^perf(\([^)]*\))?!?:'
+group = "<!-- 2 -->Performance"
 
 [[git.commit_parsers]]
 message = ".*"
-group = "<!-- 5 -->Other"
+skip = true
