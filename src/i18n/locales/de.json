@@ -740,5 +740,7 @@
   "backup.noPresets": "Die Datei enthält keine Presets.",
   "backup.replaceConfirm": "Alle aktuellen Einstellungen durch die importierte Datei ersetzen? Auf dem Server ändert sich erst etwas, wenn du speicherst.",
   "backup.invalidJson": "Die Datei ist kein gültiges JSON.",
-  "backup.notAConfiguration": "Die Datei ist keine Jellyfin-Featured-Konfiguration."
+  "backup.notAConfiguration": "Die Datei ist keine Jellyfin-Featured-Konfiguration.",
+  "number.increase": "Erhöhen",
+  "number.decrease": "Verringern"
 }
