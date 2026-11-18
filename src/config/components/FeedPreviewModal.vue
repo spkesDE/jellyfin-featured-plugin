@@ -113,15 +113,16 @@ watch(
             <strong>{{ t('feedPreview.selectedCount', { count: rule.returned }) }}</strong>
           </div>
           <div>
-            <span>{{ t('feedPreview.duplicates') }}</span><strong>{{
-              store.feedPreview.value.duplicatesRemoved
-            }}</strong>
+            <span>{{ t('feedPreview.duplicates') }}</span
+            ><strong>{{ store.feedPreview.value.duplicatesRemoved }}</strong>
           </div>
           <div>
-            <span>{{ t('feedPreview.cooldown') }}</span><strong>{{ store.feedPreview.value.cooldownExcluded }}</strong>
+            <span>{{ t('feedPreview.cooldown') }}</span
+            ><strong>{{ store.feedPreview.value.cooldownExcluded }}</strong>
           </div>
           <div>
-            <span>{{ t('feedPreview.diversity') }}</span><strong>{{ store.feedPreview.value.diversitySkipped }}</strong>
+            <span>{{ t('feedPreview.diversity') }}</span
+            ><strong>{{ store.feedPreview.value.diversitySkipped }}</strong>
           </div>
         </div>
       </template>
