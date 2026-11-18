@@ -28,7 +28,8 @@ split_commits = false
 tag_pattern = "v[0-9].*"
 skip_tags = ""
 ignore_tags = ""
-topo_order = true
+# Order tags by date: with topo_order = true git-cliff lists them by name, so v12.10 sorts before v12.2 and --latest picks the wrong tag.
+topo_order = false
 topo_order_commits = true
 sort_commits = "oldest"
 
