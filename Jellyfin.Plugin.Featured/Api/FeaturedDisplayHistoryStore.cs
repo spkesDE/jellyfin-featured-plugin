@@ -111,6 +111,19 @@ public sealed class FeaturedDisplayHistoryStore : IDisposable
         }
     }
 
+    /// <summary>Lists every user that has stored entries, for removing the data of deleted users.</summary>
+    internal Guid[] GetUserIds()
+    {
+        lock (_syncRoot)
+        {
+            EnsureLoaded();
+            return _entries!.Keys
+                .Select(key => Guid.TryParse(key, out Guid id) ? id : Guid.Empty)
+                .Where(id => id != Guid.Empty)
+                .ToArray();
+        }
+    }
+
     public void Dispose()
     {
         _saveTimer.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);

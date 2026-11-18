@@ -319,15 +319,12 @@ public sealed class FeaturedPreparedCache
             || config.SourceRules.Any(rule => rule.MinimumItems > 0 || rule.MaximumItems > 0 || rule.IsFallback);
 
     private static PluginConfiguration GetCurrentConfiguration()
-    {
-        PluginConfiguration baseConfig = PluginConfigurationNormalizer.Normalize(Plugin.Instance?.Configuration);
-        return FeaturedPresetResolver.Resolve(baseConfig, DateTimeOffset.UtcNow).Configuration;
-    }
+        => FeaturedEffectiveConfiguration.Get().Configuration;
 
     private string GetConfigurationFingerprint(
         PluginConfiguration config,
         FeaturedPersonalizationContext personalization,
         FeaturedDismissalSnapshot dismissals)
-        => JsonSerializer.Serialize(config) + personalization.Fingerprint + dismissals.Fingerprint;
+        => FeaturedEffectiveConfiguration.GetFingerprint(config) + personalization.Fingerprint + dismissals.Fingerprint;
 
 }

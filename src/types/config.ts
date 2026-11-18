@@ -11,7 +11,9 @@ export type SourceType =
   | 'MANUAL_LISTS'
   | 'RECOMMENDATIONS'
   | 'CONTINUE_WATCHING'
-  | 'NEXT_UP';
+  | 'NEXT_UP'
+  | 'NEW_EPISODES'
+  | 'UPCOMING';
 export type FilterField =
   | 'LIBRARY'
   | 'GENRE'
@@ -26,7 +28,14 @@ export type FilterField =
   | 'ACTOR'
   | 'DIRECTOR'
   | 'ORIGINAL_LANGUAGE'
-  | 'AUDIO_LANGUAGE';
+  | 'AUDIO_LANGUAGE'
+  | 'HAS_TRAILER'
+  | 'HAS_LOGO'
+  | 'HAS_BACKDROP'
+  | 'STUDIO'
+  | 'DAYS_SINCE_ADDED'
+  | 'VIDEO_RANGE'
+  | 'SERIES_STATUS';
 export type FilterOperator = 'EQUALS' | 'NOT_EQUALS' | 'GTE' | 'LTE' | 'CONTAINS_ANY' | 'CONTAINS_ALL';
 export type FrontendInjectionMethod = 'automatic' | 'file-transformation' | 'javascript-injector' | 'direct';
 export type TransitionEffect = 'slide' | 'fade';
@@ -170,6 +179,7 @@ export interface FeaturedPluginConfig {
   HeroBackdropPosition: HeroBackdropPosition;
   ReduceImageSize: boolean;
   EnablePreparedCache: boolean;
+  EnableStatistics: boolean;
   BannerHeight: number;
   ShowYear: boolean;
   ShowRuntime: boolean;

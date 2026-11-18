@@ -63,6 +63,7 @@ export interface ConfigStore {
   directors: Ref<string[]>;
   originalLanguages: Ref<string[]>;
   audioLanguages: Ref<string[]>;
+  studios: Ref<string[]>;
   ratings: Ref<ConfigRating[]>;
   preview: Ref<FeaturedResponse | null>;
   diagnostics: Ref<FeaturedDiagnostics | null>;
@@ -117,6 +118,7 @@ export function createConfigStore(): ConfigStore {
   const directors = ref<string[]>([]);
   const originalLanguages = ref<string[]>([]);
   const audioLanguages = ref<string[]>([]);
+  const studios = ref<string[]>([]);
   const ratings = ref<ConfigRating[]>([{ value: '-2,0', label: t('filter.currentUserProfile') }]);
   const preview = ref<FeaturedResponse | null>(null);
   const diagnostics = ref<FeaturedDiagnostics | null>(null);
@@ -171,6 +173,7 @@ export function createConfigStore(): ConfigStore {
         directors.value = discovery.directors;
         originalLanguages.value = discovery.originalLanguages;
         audioLanguages.value = discovery.audioLanguages;
+        studios.value = discovery.studios;
         ratings.value = loadedRatings;
       })
       .finally(() => {
@@ -427,6 +430,7 @@ export function createConfigStore(): ConfigStore {
     directors,
     originalLanguages,
     audioLanguages,
+    studios,
     ratings,
     preview,
     diagnostics,

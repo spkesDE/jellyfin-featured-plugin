@@ -4,6 +4,8 @@ using Jellyfin.Database.Implementations.Entities;
 using Jellyfin.Database.Implementations.Enums;
 using Jellyfin.Plugin.Featured.Api;
 using MediaBrowser.Controller.Entities;
+using MediaBrowser.Controller.Entities.Movies;
+using MediaBrowser.Controller.Entities.TV;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.TV;
 using MediaBrowser.Model.Querying;
@@ -99,6 +101,58 @@ public sealed class FeaturedRoadmapFilterTests
         Assert.False(query.EnableRewatching);
     }
 
+    [Fact]
+    public void NormalizerKeepsNewEpisodesAndUpcomingSources()
+    {
+        PluginConfiguration normalized = PluginConfigurationNormalizer.Normalize(new PluginConfiguration
+        {
+            SourceRules =
+            [
+                new FeaturedSourceRule { Type = FeaturedSourceTypes.NewEpisodes },
+                new FeaturedSourceRule { Type = FeaturedSourceTypes.Upcoming }
+            ]
+        });
+
+        Assert.Equal(
+            [FeaturedSourceTypes.NewEpisodes, FeaturedSourceTypes.Upcoming],
+            normalized.SourceRules.Select(rule => rule.Type));
+    }
+
+    [Fact]
+    public void NewEpisodesKeepsRecentlyAddedNextUpEpisodesNewestFirst()
+    {
+        User user = new("new-episodes-test", "auth", "reset");
+        ILibraryManager libraryManager = DispatchProxy.Create<ILibraryManager, LibraryManagerStub>();
+        FeaturedMediaMetadataService service = CreateService(libraryManager, out TvSeriesManagerStub tv);
+        Episode old = new() { Id = Guid.NewGuid(), DateCreated = DateTime.UtcNow.AddDays(-40) };
+        Episode recent = new() { Id = Guid.NewGuid(), DateCreated = DateTime.UtcNow.AddDays(-5) };
+        Episode newest = new() { Id = Guid.NewGuid(), DateCreated = DateTime.UtcNow.AddDays(-1) };
+        tv.Items.AddRange([old, recent, newest]);
+
+        IReadOnlyList<BaseItem> result = service.GetNewEpisodes(user, 14, 10);
+
+        Assert.Equal([newest.Id, recent.Id], result.Select(item => item.Id));
+        Assert.Same(user, tv.LastQuery!.User);
+    }
+
+    [Fact]
+    public void UpcomingQueriesPremieresInsideTheWindowSoonestFirst()
+    {
+        ILibraryManager libraryManager = DispatchProxy.Create<ILibraryManager, LibraryManagerStub>();
+        LibraryManagerStub stub = (LibraryManagerStub)libraryManager;
+        FeaturedMediaMetadataService service = CreateService(libraryManager, out _);
+        Movie movie = new() { Id = Guid.NewGuid() };
+        stub.Items.AddRange([movie, movie]);
+
+        IReadOnlyList<BaseItem> result = service.GetUpcoming(30, 10);
+
+        InternalItemsQuery query = Assert.IsType<InternalItemsQuery>(stub.LastQuery);
+        Assert.Equal([BaseItemKind.Episode, BaseItemKind.Movie], query.IncludeItemTypes);
+        Assert.InRange((query.MaxPremiereDate!.Value - query.MinPremiereDate!.Value).TotalDays, 29.9, 30.1);
+        Assert.Contains(query.OrderBy, order => order.Item1 == ItemSortBy.PremiereDate && order.Item2 == SortOrder.Ascending);
+        Assert.Equal([movie.Id], result.Select(item => item.Id));
+    }
+
     private static FeaturedMediaMetadataService CreateService(
         ILibraryManager libraryManager,
         out TvSeriesManagerStub tv)
@@ -115,12 +169,14 @@ public sealed class FeaturedRoadmapFilterTests
     {
         public InternalItemsQuery? LastQuery { get; private set; }
 
+        public List<BaseItem> Items { get; } = [];
+
         protected override object? Invoke(MethodInfo? targetMethod, object?[]? args)
         {
             if (targetMethod?.Name == nameof(ILibraryManager.GetItemList))
             {
                 LastQuery = (InternalItemsQuery)args![0]!;
-                return new List<BaseItem>();
+                return Items.ToList();
             }
 
             return Default(targetMethod?.ReturnType);
@@ -131,12 +187,14 @@ public sealed class FeaturedRoadmapFilterTests
     {
         public NextUpQuery? LastQuery { get; private set; }
 
+        public List<BaseItem> Items { get; } = [];
+
         protected override object? Invoke(MethodInfo? targetMethod, object?[]? args)
         {
             if (targetMethod?.Name == nameof(ITVSeriesManager.GetNextUp))
             {
                 LastQuery = (NextUpQuery)args![0]!;
-                return new QueryResult<BaseItem>([]);
+                return new QueryResult<BaseItem>(Items.ToList());
             }
 
             return Default(targetMethod?.ReturnType);

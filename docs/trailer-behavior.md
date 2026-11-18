@@ -58,3 +58,7 @@ Local trailers follow the user's Jellyfin permissions. Direct links need a forma
 
 > [!NOTE]
 > Background trailers are off on mobile by default. Autoplay and video support differ between devices.
+
+## Reduced motion
+
+When the device or browser asks for reduced motion (`prefers-reduced-motion: reduce`), the banner does not change slides on its own and starts no background video. Viewers can still start the rotation with the autoplay button.

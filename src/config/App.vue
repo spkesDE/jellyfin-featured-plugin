@@ -10,6 +10,7 @@ import FiltersTab from './tabs/FiltersTab.vue';
 import ManualListsTab from './tabs/ManualListsTab.vue';
 import PresetsTab from './tabs/PresetsTab.vue';
 import SourcesTab from './tabs/SourcesTab.vue';
+import StatisticsTab from './tabs/StatisticsTab.vue';
 import TrailersTab from './tabs/TrailersTab.vue';
 import UserProfilesTab from './tabs/UserProfilesTab.vue';
 
@@ -46,6 +47,7 @@ onBeforeUnmount(() => {
         <DisplayTab v-show="store.activeTab.value === 'display'" />
         <TrailersTab v-show="store.activeTab.value === 'trailers'" />
         <PresetsTab v-show="store.activeTab.value === 'presets'" />
+        <StatisticsTab v-show="store.activeTab.value === 'statistics'" />
         <AdvancedTab v-show="store.activeTab.value === 'advanced'" />
       </div>
     </form>

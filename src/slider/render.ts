@@ -7,6 +7,7 @@ import { ExternalPlayer } from './trailer';
 import { createFavoriteButton } from './favorites';
 import { createPlaystateButton } from './playstate';
 import { createDismissalControl } from './dismissals';
+import { reportInteraction, type FeaturedInteraction } from './statistics';
 
 export function loadSlideArtwork(slide: HTMLElement): void {
   const backdrop = slide.querySelector<HTMLElement>('.featured-backdrop');
@@ -80,6 +81,9 @@ function createMetadata(item: FeaturedItem, response: FeaturedResponse): HTMLEle
 }
 
 export function createSlide(item: FeaturedItem, response: FeaturedResponse): HTMLElement {
+  const report = (kind: FeaturedInteraction): void => {
+    if (response.statisticsEnabled) reportInteraction(item.id, kind);
+  };
   const slide = document.createElement('article');
   slide.className = 'featured-slide';
   slide.tabIndex = -1;
@@ -147,14 +151,17 @@ export function createSlide(item: FeaturedItem, response: FeaturedResponse): HTM
     const actions = document.createElement('div');
     actions.className = 'featured-actions';
     if (response.showPlayButton) {
-      actions.appendChild(createPlaybackButton(item, response.playButtonText));
+      actions.appendChild(createPlaybackButton(item, response.playButtonText, () => report('play')));
     }
     if (response.showSecondaryButton) {
       const details = document.createElement('button');
       details.type = 'button';
       details.className = 'featured-button featured-button-secondary raised emby-button';
       details.textContent = response.secondaryButtonText || t('carousel.moreInfo');
-      details.addEventListener('click', () => openItemDetails(item.id));
+      details.addEventListener('click', () => {
+        report('open');
+        openItemDetails(item.id);
+      });
       actions.appendChild(details);
     }
     if (favoriteAction) actions.appendChild(createFavoriteButton(item, 'action'));
@@ -175,6 +182,7 @@ export function createSlide(item: FeaturedItem, response: FeaturedResponse): HTM
     slide.addEventListener('click', (event) => {
       if (!slide.classList.contains('is-active')) return;
       if ((event.target as Element).closest('button')) return;
+      report('open');
       openItemDetails(item.id);
     });
     slide.addEventListener('keydown', (event) => {
@@ -183,6 +191,7 @@ export function createSlide(item: FeaturedItem, response: FeaturedResponse): HTM
       if (target?.closest('button')) return;
       if (event.key !== 'Enter' && event.key !== ' ') return;
       event.preventDefault();
+      report('open');
       openItemDetails(item.id);
     });
   }

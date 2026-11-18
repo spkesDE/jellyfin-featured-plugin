@@ -75,6 +75,8 @@ export interface FeaturedResponse extends FeaturedDisplaySettings {
   autoplayInterval: number;
   reduceImageSizes: boolean;
   trackDisplayedItems: boolean;
+  /** Whether opened and played titles are counted for the admin statistics. */
+  statisticsEnabled?: boolean;
   personalizationEnabled: boolean;
   /** Whether the admin lets trailer mute and volume be remembered in the user profile. */
   rememberTrailerAudio?: boolean;

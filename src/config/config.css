@@ -502,3 +502,10 @@
 #FeaturedConfigPage .featured-warningNotice > .material-icons {
   font-size: 1.15rem;
 }
+
+/* Jellyfin draws selects on the paper surface but text inputs on a lighter translucent fill. Fields that sit next to
+   selects (numbers, text, the multi-picker) use the darker select surface so a row reads as one set of controls. */
+#FeaturedConfigPage .emby-input,
+#FeaturedConfigPage .featured-multiPickerTrigger {
+  background-color: var(--featured-theme-paper);
+}

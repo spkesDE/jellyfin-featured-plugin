@@ -60,7 +60,7 @@ test('personalization is authenticated, policy-bound, user scoped, and fast to r
     controller,
     /user-settings bootstrap resolved preferences[\s\S]*?user-settings bootstrap built options[\s\S]*?user-settings bootstrap completed/
   );
-  assert.match(controller, /genre scan inspected[\s\S]*?library query/);
+  assert.match(controller, /FeaturedGenreOptions\.Query\(_libraryManager, user\)[\s\S]*?genre lookup found/);
   assert.match(services, /AddSingleton<FeaturedPreferenceOptionsCache>/);
   assert.match(services, /AddSingleton<IScheduledTask, WarmUserSettingsCacheTask>/);
   assert.match(warmupTask, /IScheduledTask, IConfigurableScheduledTask/);

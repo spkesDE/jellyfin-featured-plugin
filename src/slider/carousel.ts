@@ -5,6 +5,7 @@ import { CONSOLE_PREFIX, PLUGIN_VERSION } from '../constants';
 import { createSlide, loadSlideArtwork } from './render';
 import { applyHeroLayoutVariables } from './layout';
 import { replaceElementChildren } from '../core/dom';
+import { prefersReducedMotion } from '../core/motion';
 import { HeroLayoutGuard } from './heroLayoutGuard';
 import { LayoutInsetGuard } from './layoutInsets';
 import { OverviewFitGuard } from './overviewFit';
@@ -63,7 +64,8 @@ export class FeaturedCarousel {
       this.items.map((item) => item.id),
       response.infiniteLoading && response.hasMore
     );
-    this.autoplayEnabled = response.autoplay;
+    // With reduced motion the slides only change on request; the autoplay button can still start the rotation.
+    this.autoplayEnabled = response.autoplay && !prefersReducedMotion();
     this.root = document.createElement('section');
     this.root.className = `featured-root featured-ready featured-effect-${response.transitionEffect} featured-height-${response.heroHeightMode} featured-text-${response.heroTextPosition} featured-text-v-${response.heroTextVerticalPosition} featured-banner-navigation-${response.bannerNavigationPosition} featured-banner-media-${response.bannerMediaControlsPosition}${response.useHeroLayout ? ' featured-hero' : ''}${response.showControlsOnHoverOnly ? ' featured-controls-hover' : ''}${response.interactOnWholeBanner ? ' featured-whole-banner-interactive' : ''}`;
     this.root.dataset.featuredVersion = PLUGIN_VERSION;

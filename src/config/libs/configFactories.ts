@@ -36,7 +36,7 @@ export function createSourceRule(
     PlaylistIds: [],
     ManualListIds: [],
     Tags: [],
-    RecentDays: type === 'LATEST_RELEASES' ? 365 : 30,
+    RecentDays: type === 'LATEST_RELEASES' ? 365 : type === 'NEW_EPISODES' ? 14 : 30,
     Filters: []
   };
 }

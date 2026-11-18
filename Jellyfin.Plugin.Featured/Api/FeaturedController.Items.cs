@@ -39,17 +39,25 @@ public sealed partial class FeaturedController
 
     [HttpPost("items/displayed")]
     [Authorize]
-    public ActionResult RecordDisplayedItem([FromBody] FeaturedDisplayedRequest? request)
+    public ActionResult RecordDisplayedItem(
+        [FromBody] FeaturedDisplayedRequest? request,
+        [FromServices] FeaturedStatisticsStore statistics)
     {
         Jellyfin.Database.Implementations.Entities.User? activeUser = GetActiveUser();
         if (activeUser == null) return NotFound();
         if (request is null || request.ItemId == Guid.Empty) return BadRequest();
         FeaturedPersonalizationContext personalization = _personalization.Resolve(_config, activeUser.Id);
-        if (personalization.RepeatCooldownHours <= 0) return Ok(new { ok = true });
+        bool tracksHistory = personalization.RepeatCooldownHours > 0;
+        if (!tracksHistory && !_config.EnableStatistics) return Ok(new { ok = true });
         BaseItem? item = _libraryManager.GetItemById(request.ItemId);
-        if (item is null || !item.IsVisible(activeUser)) return NotFound();
-        _historyStore.Record(activeUser.Id, item.Id);
-        _preparedCache.RemoveDisplayedItem(activeUser.Id, item.Id);
+        if (item is null || !item.IsVisibleStandalone(activeUser)) return NotFound();
+        if (_config.EnableStatistics) statistics.RecordImpression(item.Id);
+        if (tracksHistory)
+        {
+            _historyStore.Record(activeUser.Id, item.Id);
+            _preparedCache.RemoveDisplayedItem(activeUser.Id, item.Id);
+        }
+
         return Ok(new { ok = true });
     }
 
@@ -69,7 +77,7 @@ public sealed partial class FeaturedController
         if (activeUser is null) return NotFound();
         if (itemId == Guid.Empty) return BadRequest();
         BaseItem? item = _libraryManager.GetItemById(itemId);
-        if (item is null || !item.IsVisible(activeUser)) return NotFound();
+        if (item is null || !item.IsVisibleStandalone(activeUser)) return NotFound();
 
         _candidateCache.RemoveUser(activeUser.Id);
         _preparedCache.RemoveUser(activeUser.Id);

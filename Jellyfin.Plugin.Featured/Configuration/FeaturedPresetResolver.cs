@@ -12,6 +12,7 @@ internal sealed record FeaturedPresetResolution(
 internal static class FeaturedPresetResolver
 {
     private static readonly JsonSerializerOptions CloneOptions = new();
+    private static readonly TimeOnly LastMinuteOfDay = new(23, 59);
 
     internal static FeaturedPresetResolution Resolve(PluginConfiguration source, DateTimeOffset now)
     {
@@ -107,14 +108,14 @@ internal static class FeaturedPresetResolver
 
         TimeZoneInfo zone = FindTimeZone(preset.TimeZoneId);
         DateTime localDate = TimeZoneInfo.ConvertTime(now, zone).Date;
-        TimeOnly startTime = ParseTime(preset.StartTime, new TimeOnly(18, 0));
-        TimeOnly endTime = ParseTime(preset.EndTime, new TimeOnly(23, 59));
+        TimeSpan startTime = ParseTime(preset.StartTime, new TimeOnly(18, 0)).ToTimeSpan();
+        TimeSpan endTime = ToEndOfWindow(ParseTime(preset.EndTime, LastMinuteOfDay));
         for (int dayOffset = -1; dayOffset <= 8; dayOffset++)
         {
             DateTime date = localDate.AddDays(dayOffset);
             if (!selectedDays.Contains(date.DayOfWeek)) continue;
-            DateTime localStart = date.Add(startTime.ToTimeSpan());
-            DateTime localEnd = date.Add(endTime.ToTimeSpan());
+            DateTime localStart = date.Add(startTime);
+            DateTime localEnd = date.Add(endTime);
             if (localEnd <= localStart) localEnd = localEnd.AddDays(1);
             yield return new ScheduleWindow(ToUtc(localStart, zone), ToUtc(localEnd, zone));
         }
@@ -124,8 +125,8 @@ internal static class FeaturedPresetResolver
     {
         TimeZoneInfo zone = FindTimeZone(preset.TimeZoneId);
         int localYear = TimeZoneInfo.ConvertTime(now, zone).Year;
-        TimeOnly startTime = ParseTime(preset.StartTime, TimeOnly.MinValue);
-        TimeOnly endTime = ParseTime(preset.EndTime, new TimeOnly(23, 59));
+        TimeSpan startTime = ParseTime(preset.StartTime, TimeOnly.MinValue).ToTimeSpan();
+        TimeSpan endTime = ToEndOfWindow(ParseTime(preset.EndTime, LastMinuteOfDay));
         for (int year = localYear - 1; year <= localYear + 2; year++)
         {
             DateTime localStart = CreateAnnualBoundary(year, preset.AnnualStart, startTime, 12, 1);
@@ -142,7 +143,7 @@ internal static class FeaturedPresetResolver
     private static DateTime CreateAnnualBoundary(
         int year,
         string? monthDay,
-        TimeOnly time,
+        TimeSpan timeOfDay,
         int fallbackMonth,
         int fallbackDay)
     {
@@ -153,8 +154,15 @@ internal static class FeaturedPresetResolver
         int day = parts.Length == 2 && int.TryParse(parts[1], NumberStyles.None, CultureInfo.InvariantCulture, out int parsedDay)
             ? Math.Clamp(parsedDay, 1, DateTime.DaysInMonth(year, month))
             : fallbackDay;
-        return new DateTime(year, month, day, time.Hour, time.Minute, 0, DateTimeKind.Unspecified);
+        return new DateTime(year, month, day, 0, 0, 0, DateTimeKind.Unspecified).Add(timeOfDay);
     }
+
+    /// <summary>
+    /// End times are exclusive so back-to-back presets tile without overlap. The editor cannot enter 24:00,
+    /// so its last minute (23:59) stands for the end of the day; otherwise the final minute would be lost.
+    /// </summary>
+    private static TimeSpan ToEndOfWindow(TimeOnly endTime)
+        => endTime == LastMinuteOfDay ? TimeSpan.FromDays(1) : endTime.ToTimeSpan();
 
     private static TimeOnly ParseTime(string? value, TimeOnly fallback)
         => TimeOnly.TryParseExact(value, "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out TimeOnly parsed)

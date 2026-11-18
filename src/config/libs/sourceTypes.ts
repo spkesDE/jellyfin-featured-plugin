@@ -62,6 +62,13 @@ export const SOURCE_TYPES: Record<SourceType, SourceTypeInfo> = {
     icon: 'event',
     group: 'time'
   },
+  UPCOMING: {
+    label: 'source.type.upcoming',
+    help: 'source.help.upcoming',
+    short: 'source.short.upcoming',
+    icon: 'upcoming',
+    group: 'time'
+  },
   UNPLAYED: {
     label: 'source.type.unplayed',
     help: 'source.help.unplayed',
@@ -81,6 +88,13 @@ export const SOURCE_TYPES: Record<SourceType, SourceTypeInfo> = {
     help: 'source.help.next_up',
     short: 'source.short.next_up',
     icon: 'skip_next',
+    group: 'personal'
+  },
+  NEW_EPISODES: {
+    label: 'source.type.new_episodes',
+    help: 'source.help.new_episodes',
+    short: 'source.short.new_episodes',
+    icon: 'fiber_new',
     group: 'personal'
   },
   RECOMMENDATIONS: {

@@ -202,6 +202,24 @@ function runAction(id: string): void {
         :step="1"
       />
       <ConfigNumber
+        v-else-if="rule.Type === 'NEW_EPISODES'"
+        v-model="rule.RecentDays"
+        :label="t('source.recentDays')"
+        :help-text="t('source.newEpisodesWindowHelp')"
+        :min="1"
+        :max="3650"
+        :step="1"
+      />
+      <ConfigNumber
+        v-else-if="rule.Type === 'UPCOMING'"
+        v-model="rule.RecentDays"
+        :label="t('source.upcomingDays')"
+        :help-text="t('source.upcomingWindowHelp')"
+        :min="1"
+        :max="3650"
+        :step="1"
+      />
+      <ConfigNumber
         v-else-if="rule.Type === 'LATEST_RELEASES'"
         v-model="rule.RecentDays"
         :label="t('source.releaseDays')"

@@ -40,6 +40,15 @@ describe('preset schedule resolution', () => {
     expect(resolveActivePreset([winter], new Date('2027-02-01T12:00:00Z'))).toBeNull();
   });
 
+  it('treats an end time of 23:59 as the end of the day', () => {
+    const allDay = preset({ ScheduleType: 'weekly', DaysOfWeek: [4], StartTime: '00:00', EndTime: '23:59' });
+    const lastMinute = new Date('2026-12-24T23:59:30Z');
+    expect(resolveActivePreset([allDay], lastMinute)?.endsAt?.toISOString()).toBe('2026-12-25T00:00:00.000Z');
+    const eve = preset({ ScheduleType: 'annual', AnnualStart: '12-31', AnnualEnd: '12-31', StartTime: '00:00' });
+    expect(resolveActivePreset([eve], new Date('2026-12-31T23:59:30Z'))?.preset).toBe(eve);
+    expect(resolveActivePreset([eve], new Date('2027-01-01T00:00:00Z'))).toBeNull();
+  });
+
   it('reports one-time and disabled states', () => {
     expect(presetScheduleState(preset({ Enabled: false }), now)).toBe('disabled');
     expect(presetScheduleState(preset({ StartsAt: '2027-01-01T00:00:00Z' }), now)).toBe('scheduled');

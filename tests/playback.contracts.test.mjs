@@ -11,7 +11,7 @@ test('hero play action resolves video progress and starts native Jellyfin playba
     read('src/i18n/locales/de.json')
   ]);
 
-  assert.match(render, /createPlaybackButton\(item, response\.playButtonText\)/);
+  assert.match(render, /createPlaybackButton\(item, response\.playButtonText, \(\) => report\('play'\)\)/);
   assert.match(playback, /Users\/\$\{encodeURIComponent\(userId\)\}\/Items\/\$\{encodeURIComponent\(item\.id\)\}/);
   assert.match(playback, /PlaybackPositionTicks/);
   assert.match(playback, /dataset\.action = target\.positionTicks > 0 \? 'resume' : 'play'/);

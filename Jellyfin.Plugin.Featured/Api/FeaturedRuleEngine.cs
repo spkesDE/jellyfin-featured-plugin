@@ -116,7 +116,7 @@ internal sealed partial class FeaturedRuleEngine
                     item,
                     allowedItemIds,
                     requestExcludedIds,
-                    rule.Type is FeaturedSourceTypes.ContinueWatching or FeaturedSourceTypes.NextUp,
+                    PreservesEpisodes(rule),
                     FeaturedMediaPriorityTypes.CanFillMissingImages(rule.MediaPriority)))
                 .DistinctBy(item => item.Id)
                 .ToList();
@@ -132,10 +132,7 @@ internal sealed partial class FeaturedRuleEngine
             ruleFiltersMilliseconds += ElapsedMilliseconds(phaseStarted);
 
             phaseStarted = Stopwatch.GetTimestamp();
-            if (rule.Type is not (FeaturedSourceTypes.ManualLists
-                or FeaturedSourceTypes.Recommendations
-                or FeaturedSourceTypes.ContinueWatching
-                or FeaturedSourceTypes.NextUp))
+            if (rule.Type != FeaturedSourceTypes.ManualLists && !KeepsSourceOrder(rule))
             {
                 eligible = OrderForProfile(eligible, profile, selectionUserData);
                 cooldownEligible = OrderForProfile(cooldownEligible, profile, selectionUserData)

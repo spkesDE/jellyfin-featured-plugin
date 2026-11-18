@@ -28,7 +28,36 @@ const fieldOptions: SelectOption[] = [
   { value: 'ACTOR', label: t('filter.field.actor') },
   { value: 'DIRECTOR', label: t('filter.field.director') },
   { value: 'ORIGINAL_LANGUAGE', label: t('filter.field.originalLanguage') },
-  { value: 'AUDIO_LANGUAGE', label: t('filter.field.audioLanguage') }
+  { value: 'AUDIO_LANGUAGE', label: t('filter.field.audioLanguage') },
+  { value: 'STUDIO', label: t('filter.field.studio') },
+  { value: 'DAYS_SINCE_ADDED', label: t('filter.field.daysSinceAdded') },
+  { value: 'VIDEO_RANGE', label: t('filter.field.videoRange') },
+  { value: 'SERIES_STATUS', label: t('filter.field.seriesStatus') },
+  { value: 'HAS_TRAILER', label: t('filter.field.hasTrailer') },
+  { value: 'HAS_LOGO', label: t('filter.field.hasLogo') },
+  { value: 'HAS_BACKDROP', label: t('filter.field.hasBackdrop') }
+];
+const BOOLEAN_FIELDS: FilterField[] = ['PLAYED', 'HAS_TRAILER', 'HAS_LOGO', 'HAS_BACKDROP'];
+const PRESENCE_FIELDS: FilterField[] = ['HAS_TRAILER', 'HAS_LOGO', 'HAS_BACKDROP'];
+const COLLECTION_FIELDS: FilterField[] = [
+  'GENRE',
+  'TAG',
+  'ACTOR',
+  'DIRECTOR',
+  'ORIGINAL_LANGUAGE',
+  'AUDIO_LANGUAGE',
+  'STUDIO',
+  'VIDEO_RANGE',
+  'SERIES_STATUS'
+];
+const METADATA_FIELDS: FilterField[] = [
+  'ACTOR',
+  'DIRECTOR',
+  'ORIGINAL_LANGUAGE',
+  'AUDIO_LANGUAGE',
+  'STUDIO',
+  'VIDEO_RANGE',
+  'SERIES_STATUS'
 ];
 const libraryOptions = (): SelectOption[] => namedOptions(store.libraries.value);
 const genreOptions = (): SelectOption[] => valueOptions(store.genres.value);
@@ -37,6 +66,24 @@ const actorOptions = (): SelectOption[] => valueOptions(store.actors.value);
 const directorOptions = (): SelectOption[] => valueOptions(store.directors.value);
 const originalLanguageOptions = (): SelectOption[] => valueOptions(store.originalLanguages.value);
 const audioLanguageOptions = (): SelectOption[] => valueOptions(store.audioLanguages.value);
+const studioOptions = (): SelectOption[] => valueOptions(store.studios.value);
+const videoRangeOptions: SelectOption[] = [
+  { value: 'HDR', label: t('filter.value.anyHdr') },
+  { value: 'DOLBY_VISION', label: 'Dolby Vision' },
+  { value: 'HDR10_PLUS', label: 'HDR10+' },
+  { value: 'HDR10', label: 'HDR10' },
+  { value: 'HLG', label: 'HLG' },
+  { value: 'SDR', label: 'SDR' }
+];
+const seriesStatusOptions: SelectOption[] = [
+  { value: 'Continuing', label: t('filter.value.continuing') },
+  { value: 'Ended', label: t('filter.value.ended') },
+  { value: 'Unreleased', label: t('filter.value.unreleased') }
+];
+const presenceOptions: SelectOption[] = [
+  { value: 'true', label: t('filter.value.present') },
+  { value: 'false', label: t('filter.value.missing') }
+];
 const supportedMediaTypeOptions: SelectOption[] = [
   ...mediaTypeOptions(),
   { value: 'Episode', label: t('filter.value.episodes') }
@@ -57,15 +104,21 @@ const resolutionOptions: SelectOption[] = [
 /** Value hints that would otherwise sit next to a per-row label, which compact rows do not show. */
 function valueHelp(field: FilterField): string | undefined {
   if (field === 'LIBRARY') return t('filter.librariesHelp');
-  if (['ACTOR', 'DIRECTOR', 'ORIGINAL_LANGUAGE', 'AUDIO_LANGUAGE'].includes(field))
-    return t('filter.metadataMissingHelp');
+  if (METADATA_FIELDS.includes(field)) return t('filter.metadataMissingHelp');
+  if (field === 'HAS_TRAILER') return t('filter.hasTrailerHelp');
+  if (field === 'DAYS_SINCE_ADDED') return t('filter.daysSinceAddedHelp');
   return undefined;
 }
 
 function isNumeric(field: FilterField): boolean {
-  return ['COMMUNITY_RATING', 'CRITIC_RATING', 'PRODUCTION_YEAR', 'RUNTIME_MINUTES', 'VIDEO_RESOLUTION'].includes(
-    field
-  );
+  return [
+    'COMMUNITY_RATING',
+    'CRITIC_RATING',
+    'PRODUCTION_YEAR',
+    'RUNTIME_MINUTES',
+    'VIDEO_RESOLUTION',
+    'DAYS_SINCE_ADDED'
+  ].includes(field);
 }
 
 function operatorOptions(field: FilterField): SelectOption[] {
@@ -74,7 +127,7 @@ function operatorOptions(field: FilterField): SelectOption[] {
       { value: 'GTE', label: t('filter.operator.gte') },
       { value: 'LTE', label: t('filter.operator.lte') }
     ];
-  if (['GENRE', 'TAG', 'ACTOR', 'DIRECTOR', 'ORIGINAL_LANGUAGE', 'AUDIO_LANGUAGE'].includes(field))
+  if (COLLECTION_FIELDS.includes(field))
     return [
       { value: 'CONTAINS_ANY', label: t('filter.operator.containsAny') },
       { value: 'CONTAINS_ALL', label: t('filter.operator.containsAll') },
@@ -89,7 +142,13 @@ function operatorOptions(field: FilterField): SelectOption[] {
 function setField(filter: FeaturedFilterRule, value: string): void {
   filter.Field = value as FilterField;
   filter.Operator = operatorOptions(filter.Field)[0].value as FilterOperator;
-  filter.Values = filter.Field === 'PLAYED' ? ['false'] : filter.Field === 'VIDEO_RESOLUTION' ? ['720'] : [];
+  filter.Values = BOOLEAN_FIELDS.includes(filter.Field)
+    ? [filter.Field === 'PLAYED' ? 'false' : 'true']
+    : filter.Field === 'VIDEO_RESOLUTION'
+      ? ['720']
+      : filter.Field === 'DAYS_SINCE_ADDED'
+        ? ['30']
+        : [];
 }
 
 function setOperator(filter: FeaturedFilterRule, value: string): void {
@@ -109,6 +168,7 @@ function numberLimits(field: FilterField): { min: number; max: number; step: num
   if (field === 'COMMUNITY_RATING') return { min: 0, max: 10, step: 0.1 };
   if (field === 'CRITIC_RATING') return { min: 0, max: 100, step: 1 };
   if (field === 'PRODUCTION_YEAR') return { min: 1880, max: 2200, step: 1 };
+  if (field === 'DAYS_SINCE_ADDED') return { min: 0, max: 36500, step: 1 };
   return { min: 0, max: 1000, step: 1 };
 }
 </script>
@@ -163,7 +223,7 @@ function numberLimits(field: FilterField): { min: number; max: number; step: num
         @update:model-value="setOperator(filter, $event)"
       />
 
-      <div class="featured-filterValue">
+      <div class="featured-filterValue" :class="{ 'has-help': valueHelp(filter.Field) }">
         <ConfigMultiPicker
           v-if="filter.Field === 'LIBRARY'"
           v-model="filter.Values"
@@ -212,6 +272,35 @@ function numberLimits(field: FilterField): { min: number; max: number; step: num
           :label="t('filter.valueLabel')"
           :options="audioLanguageOptions()"
           hide-label
+        />
+        <ConfigMultiPicker
+          v-else-if="filter.Field === 'STUDIO'"
+          v-model="filter.Values"
+          :label="t('filter.valueLabel')"
+          :options="studioOptions()"
+          hide-label
+        />
+        <ConfigMultiPicker
+          v-else-if="filter.Field === 'VIDEO_RANGE'"
+          v-model="filter.Values"
+          :label="t('filter.valueLabel')"
+          :options="videoRangeOptions"
+          hide-label
+        />
+        <ConfigMultiPicker
+          v-else-if="filter.Field === 'SERIES_STATUS'"
+          v-model="filter.Values"
+          :label="t('filter.valueLabel')"
+          :options="seriesStatusOptions"
+          hide-label
+        />
+        <ConfigSelect
+          v-else-if="PRESENCE_FIELDS.includes(filter.Field)"
+          :model-value="filter.Values[0] || 'true'"
+          :label="t('filter.valueLabel')"
+          :options="presenceOptions"
+          hide-label
+          @update:model-value="filter.Values = [$event]"
         />
         <ConfigMultiPicker
           v-else-if="filter.Field === 'MEDIA_TYPE'"
@@ -303,6 +392,23 @@ function numberLimits(field: FilterField): { min: number; max: number; step: num
   display: flex;
   gap: 0.75rem;
   min-width: 0;
+  position: relative;
+}
+/* The value hint sits inside the field, just before its arrow, so rows with and without a hint line up. */
+.featured-filterValue > :deep(.featured-helpTrigger) {
+  position: absolute;
+  right: 2.6rem;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+}
+.featured-filterValue.has-help :deep(select.emby-select),
+.featured-filterValue.has-help :deep(.emby-input) {
+  padding-right: 4.5rem;
+}
+/* The multi-picker keeps its arrow at the edge; its text makes room for the hint instead. */
+.featured-filterValue.has-help :deep(.featured-multiPickerTrigger > span:first-child) {
+  padding-right: 1.75rem;
 }
 /* Jellyfin's selects, number inputs, and the multi-picker trigger have different natural heights; rows align them. */
 .featured-filterRow :deep(.emby-select),

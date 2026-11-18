@@ -58,14 +58,5 @@ public sealed class WarmUserSettingsCacheTask : IScheduledTask, IConfigurableSch
     public IEnumerable<TaskTriggerInfo> GetDefaultTriggers() => [];
 
     private string[] QueryVisibleGenres(Jellyfin.Database.Implementations.Entities.User user)
-    {
-        InternalItemsQuery query = new(user) { IncludeItemTypes = FeaturedMediaTypes.All };
-        return _libraryManager.GetItemList(query)
-            .Where(item => item.IsVisible(user))
-            .SelectMany(item => item.Genres)
-            .Where(genre => !string.IsNullOrWhiteSpace(genre))
-            .Distinct(StringComparer.CurrentCultureIgnoreCase)
-            .OrderBy(genre => genre, StringComparer.CurrentCultureIgnoreCase)
-            .ToArray();
-    }
+        => FeaturedGenreOptions.Query(_libraryManager, user);
 }

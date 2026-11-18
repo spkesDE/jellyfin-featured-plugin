@@ -56,6 +56,52 @@ export function installMockJellyfin(): void {
         };
       }
       if (url.includes('featured/items/displayed')) return { ok: true };
+      if (url.includes('featured/statistics/reset')) return { ok: true };
+      if (url.includes('featured/statistics')) {
+        return {
+          enabled: true,
+          since: '2026-10-01T00:00:00Z',
+          trackedItems: 3,
+          totalImpressions: 1840,
+          totalOpens: 96,
+          totalPlays: 41,
+          days: Array.from({ length: 30 }, (_, index) => ({
+            date: new Date(Date.UTC(2026, 9, 19 + index)).toISOString().slice(0, 10),
+            impressions: 40 + ((index * 37) % 50),
+            opens: 2 + ((index * 7) % 5),
+            plays: (index * 3) % 3
+          })),
+          items: [
+            {
+              id: 'movie-1',
+              name: 'The Winter Archive',
+              type: 'Movie',
+              impressions: 920,
+              opens: 58,
+              plays: 27,
+              lastShownAt: '2026-11-17T20:12:00Z'
+            },
+            {
+              id: 'series-1',
+              name: 'Northern Lights',
+              type: 'Series',
+              impressions: 740,
+              opens: 31,
+              plays: 12,
+              lastShownAt: '2026-11-17T19:40:00Z'
+            },
+            {
+              id: 'gone-1',
+              name: null,
+              type: null,
+              impressions: 180,
+              opens: 7,
+              plays: 2,
+              lastShownAt: '2026-10-28T18:05:00Z'
+            }
+          ]
+        };
+      }
       if (url.includes('featured/config/youtube-api-key')) return { apiKeyConfigured: false };
       if (url.includes('featured/config/history/clear')) return { ok: true, selectedUsers: 1, historiesRemoved: 1 };
       if (url.includes('Items/Filters')) {
@@ -75,7 +121,8 @@ export function installMockJellyfin(): void {
             { id: 'playlist-2', name: 'Family Picks' }
           ],
           genres: ['Action', 'Comedy', 'Drama', 'Science Fiction'],
-          tags: ['Christmas', 'Family', 'Featured', 'Weekend']
+          tags: ['Christmas', 'Family', 'Featured', 'Weekend'],
+          studios: ['A24', 'HBO', 'Netflix', 'Studio Ghibli']
         };
       }
       if (url.includes('featured/diagnostics')) {

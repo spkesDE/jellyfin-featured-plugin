@@ -40,6 +40,7 @@ test('critical C# and TypeScript defaults stay in parity', async () => {
     HeroBackdropPosition: "'center'",
     EnableFrontendBootstrap: 'true',
     EnablePreparedCache: 'true',
+    EnableStatistics: 'true',
     BannerHeight: '360',
     ShowPaginationDots: 'true',
     TrailerDelayMilliseconds: '1500',
@@ -103,16 +104,18 @@ test('item and runtime contracts retain their established names and interval uni
 });
 
 test('featured presets resolve schedules and override all roadmap sections', async () => {
-  const [configuration, normalizer, resolver, controller, response, cache, defaults, presetTab] = await Promise.all([
-    read('Jellyfin.Plugin.Featured/Configuration/PluginConfiguration.cs'),
-    read('Jellyfin.Plugin.Featured/Configuration/PluginConfigurationNormalizer.cs'),
-    read('Jellyfin.Plugin.Featured/Configuration/FeaturedPresetResolver.cs'),
-    read('Jellyfin.Plugin.Featured/Api/FeaturedController.cs'),
-    read('Jellyfin.Plugin.Featured/Api/FeaturedResponseDtos.cs'),
-    read('Jellyfin.Plugin.Featured/Api/FeaturedPreparedCache.cs'),
-    read('src/config/libs/defaults.ts'),
-    read('src/config/tabs/PresetsTab.vue')
-  ]);
+  const [configuration, normalizer, resolver, controller, response, cache, defaults, presetTab, effective] =
+    await Promise.all([
+      read('Jellyfin.Plugin.Featured/Configuration/PluginConfiguration.cs'),
+      read('Jellyfin.Plugin.Featured/Configuration/PluginConfigurationNormalizer.cs'),
+      read('Jellyfin.Plugin.Featured/Configuration/FeaturedPresetResolver.cs'),
+      read('Jellyfin.Plugin.Featured/Api/FeaturedController.cs'),
+      read('Jellyfin.Plugin.Featured/Api/FeaturedResponseDtos.cs'),
+      read('Jellyfin.Plugin.Featured/Api/FeaturedPreparedCache.cs'),
+      read('src/config/libs/defaults.ts'),
+      read('src/config/tabs/PresetsTab.vue'),
+      read('Jellyfin.Plugin.Featured/Configuration/FeaturedEffectiveConfiguration.cs')
+    ]);
   for (const section of ['SourceRules', 'GlobalFilters', 'PersonalizationPolicy', 'Mixer', 'Layout', 'Trailers']) {
     assert.match(configuration, new RegExp(`class FeaturedPreset[\\s\\S]*?${section}`), `preset misses ${section}`);
   }
@@ -134,10 +137,15 @@ test('featured presets resolve schedules and override all roadmap sections', asy
   );
   assert.match(resolver, /target\.EnableInfiniteLoading = source\.EnableInfiniteLoading/);
   assert.match(resolver, /target\.TrailerOverrides = source\.Overrides/);
-  assert.match(controller, /FeaturedPresetResolver\.Resolve\(baseConfig, DateTimeOffset\.UtcNow\)/);
+  assert.match(controller, /_presetResolution = FeaturedEffectiveConfiguration\.Get\(\)/);
+  assert.match(
+    effective,
+    /PluginConfigurationNormalizer\.Normalize\(source\)[\s\S]*?FeaturedPresetResolver\.Resolve\(normalized, now\)/
+  );
+  assert.match(effective, /NextScheduleChange is not \{ \} next \|\| now < next/);
   assert.match(response, /public string\? ActivePresetName \{ get; \}/);
   assert.match(response, /public DateTimeOffset\? NextPresetChange \{ get; \}/);
-  assert.match(cache, /FeaturedPresetResolver\.Resolve\(baseConfig, DateTimeOffset\.UtcNow\)\.Configuration/);
+  assert.match(cache, /FeaturedEffectiveConfiguration\.Get\(\)\.Configuration/);
   assert.match(
     defaults,
     /createPresetFromConfig[\s\S]*?SourceRules: cloneJsonValue[\s\S]*?PersonalizationPolicy[\s\S]*?Mixer:[\s\S]*?Layout:[\s\S]*?Trailers:/

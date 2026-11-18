@@ -54,8 +54,7 @@ public sealed partial class FeaturedController : ControllerBase
         _feedService = feedService;
         _frontendInjectionAvailability = frontendInjectionAvailability;
         _logger = logger;
-        PluginConfiguration baseConfig = PluginConfigurationNormalizer.Normalize(Plugin.Instance?.Configuration);
-        _presetResolution = FeaturedPresetResolver.Resolve(baseConfig, DateTimeOffset.UtcNow);
+        _presetResolution = FeaturedEffectiveConfiguration.Get();
         _config = _presetResolution.Configuration;
     }
 

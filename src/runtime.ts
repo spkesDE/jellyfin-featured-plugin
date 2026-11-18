@@ -1,5 +1,5 @@
 import { requestJson } from './core/apiClient';
-import { config } from './config';
+import { applyResponseDisplaySettings, config } from './config';
 import { FeaturedCarousel } from './slider/carousel';
 import { heroImageUrl, logoUrl } from './slider/images';
 import { applyHeroLayoutVariables } from './slider/layout';
@@ -254,6 +254,7 @@ async function mount(container: Element): Promise<void> {
     }
 
     const response = withSessionTrailerAudio(await freshResponse);
+    applyResponseDisplaySettings(response);
     setUserSettingsMenuEnabled(response.personalizationEnabled || response.dismissalsEnabled);
     schedulePresetRefresh(response.nextPresetChange);
     if (

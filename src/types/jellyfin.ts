@@ -32,6 +32,7 @@ export interface FeaturedConfigOptions {
   directors?: string[];
   originalLanguages?: string[];
   audioLanguages?: string[];
+  studios?: string[];
 }
 
 export interface ParentalRating {
