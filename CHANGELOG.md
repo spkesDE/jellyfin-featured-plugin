@@ -1,5 +1,17 @@
 # Changelog
 
+## v12.9.2.0 - 2026-11-16
+
+### Features
+
+- feat(preferences): remember trailer mute and volume per user
+- feat(build): optionally deploy the release build to a Jellyfin server
+
+### Other
+
+- deps: Bump the nuget-minor-and-patch group with 1 update (#33)
+- deps(deps): bump the npm-minor-and-patch group across 1 directory with 9 updates (#34)
+
 ## v12.9.1.0 - 2026-11-05
 
 ### Features
