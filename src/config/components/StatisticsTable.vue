@@ -151,13 +151,16 @@ function formatDate(value: string | null): string {
         <tbody>
           <tr v-for="row in pageRows" :key="row.id">
             <td :class="{ 'is-removed': !row.name }">{{ displayName(row) }}</td>
-            <td class="is-numeric featured-dataTableBarCell">
-              <span
-                class="featured-dataTableBar"
-                :style="{ width: `${(row.impressions / impressionsMaximum) * 100}%`, background: barColor }"
-                aria-hidden="true"
-              ></span>
-              <span class="featured-dataTableBarValue">{{ numberFormat.format(row.impressions) }}</span>
+            <td class="is-numeric">
+              <span class="featured-dataTableBarCell">
+                <span class="featured-dataTableBarTrack" aria-hidden="true">
+                  <span
+                    class="featured-dataTableBar"
+                    :style="{ width: `${(row.impressions / impressionsMaximum) * 100}%`, background: barColor }"
+                  ></span>
+                </span>
+                <span>{{ numberFormat.format(row.impressions) }}</span>
+              </span>
             </td>
             <td class="is-numeric">{{ numberFormat.format(row.opens) }}</td>
             <td class="is-numeric">{{ numberFormat.format(row.plays) }}</td>
@@ -321,20 +324,23 @@ function formatDate(value: string | null): string {
   opacity: 0.6;
 }
 .featured-dataTableBarCell {
-  min-width: 9rem;
-  position: relative;
+  align-items: center;
+  display: inline-flex;
+  gap: 0.6rem;
+  justify-content: flex-end;
+}
+.featured-dataTableBarTrack {
+  background: var(--featured-theme-divider);
+  border-radius: 4px;
+  display: inline-block;
+  height: 6px;
+  overflow: hidden;
+  width: 5rem;
 }
 .featured-dataTableBar {
-  border-radius: 4px 0 0 4px;
-  bottom: 0.45rem;
-  max-width: calc(100% - 1.3rem);
-  opacity: 0.35;
-  position: absolute;
-  right: 0.65rem;
-  top: 0.45rem;
-}
-.featured-dataTableBarValue {
-  position: relative;
+  border-radius: 4px;
+  display: block;
+  height: 100%;
 }
 .featured-dataTableEmpty {
   color: var(--featured-theme-text-secondary);
