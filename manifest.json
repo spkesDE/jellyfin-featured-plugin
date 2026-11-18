@@ -9,6 +9,14 @@
     "imageUrl": "https://raw.githubusercontent.com/spkesDE/jellyfin-featured-plugin/main/logo.png",
     "versions": [
       {
+        "version": "12.10.0.0",
+        "changelog": "- feat(preferences): remember trailer mute and volume per user\n",
+        "targetAbi": "12.4.0.0",
+        "sourceUrl": "https://github.com/spkesDE/jellyfin-featured-plugin/releases/download/v12.10.0.0/Featured.zip",
+        "checksum": "d197c1ca4ca232d28cb40efe2cf56d68",
+        "timestamp": "2026-11-18 14:57:58"
+      },
+      {
         "version": "12.9.2.0",
         "changelog": "- feat(preferences): remember trailer mute and volume per user\n",
         "targetAbi": "12.4.0.0",

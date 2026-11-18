@@ -1,23 +1,42 @@
 # Changelog
 
+## v12.10.0.0 - 2026-11-18
+
+### Features
+
+- feat(a11y): respect reduced motion for autoplay and background video
+- feat(filters): filter by trailer, artwork, studio, date added, HDR and series status
+- feat(sources): add new episodes and coming soon sources
+- feat(statistics): count banner impressions, opens and plays for admins
+- feat(config): export and import settings as JSON
+- feat(statistics): move banner statistics into their own tab with charts
+- feat(statistics): put the table search and page size in the title row
+- feat(config): custom number stepper and matching field surfaces
+
+### Fixes
+
+- fix(presets): treat an end time of 23:59 as the end of the day
+- fix(users): remove stored data of deleted users
+- fix(api): check library access for displayed, favourite and playstate updates
+- fix(runtime): use the latest preset's display settings for placeholders
+- fix(statistics): draw the impressions bar as a slim track beside the count
+- fix(config): keep filter value hints inside the field
+
+### Performance
+
+- perf(config): cache the resolved configuration and query genres directly
+
 ## v12.9.2.0 - 2026-11-16
 
 ### Features
 
 - feat(preferences): remember trailer mute and volume per user
-- feat(build): optionally deploy the release build to a Jellyfin server
-
-### Other
-
-- deps: Bump the nuget-minor-and-patch group with 1 update (#33)
-- deps(deps): bump the npm-minor-and-patch group across 1 directory with 9 updates (#34)
 
 ## v12.9.1.0 - 2026-11-05
 
 ### Features
 
 - feat(sources): allow custom source names
-- feat(readme): update plugin repository link and add star history section
 
 ### Fixes
 
@@ -28,13 +47,6 @@
 - fix(hero): lift the home tab with a margin instead of a transform
 - fix(runtime): keep the cached carousel when the fresh response is identical
 - fix(runtime): update upcoming slides without rebuilding the carousel
-
-### Other
-
-- deps: Bump the nuget-minor-and-patch group with 3 updates (#28)
-- deps: Bump the nuget-minor-and-patch group with 3 updates (#29)
-- deps(deps-dev): bump the npm-minor-and-patch group across 1 directory with 5 updates (#30)
-- chore(release): bump version to 12.9.1.0
 
 ## v12.9.0.0 - 2026-10-24
 
@@ -52,23 +64,6 @@
 
 - fix(hero): keep controls on the right for right-aligned text
 
-### Refactoring
-
-- refactor(trailer): select media excerpts through the trailer source
-- refactor(config): rebuild the settings tabs on the shared components
-
-### Other
-
-- deps(deps-dev): bump the npm-minor-and-patch group with 4 updates (#18)
-- deps(deps): bump source-map-js from 1.2.1 to 1.2.2 (#19)
-- deps: Bump the nuget-minor-and-patch group with 4 updates (#21)
-- deps(deps-dev): bump the npm-minor-and-patch group with 5 updates (#20)
-- deps: Bump the nuget-minor-and-patch group with 1 update (#23)
-- deps(deps): bump the npm-minor-and-patch group with 6 updates (#22)
-- deps(deps-dev): bump happy-dom from 20.14.6 to 21.0.4 (#24)
-- chore(dev): load Jellyfin Web styles in the config harness
-- chore(gitignore): add .claude to ignore list
-
 ## v12.8.0.0 - 2026-10-03
 
 ### Features
@@ -77,39 +72,11 @@
 
 ## v12.7.2.0 - 2026-09-29
 
-### Features
-
-- feat(ci): add .NET setup step and update workflow for translation status
-
 ### Fixes
 
 - fix(hero): preserve mobile hero fade on iOS
-- fix(release): format generated metadata
 - fix(styles): fixed drop-shadow for overview
 - fix(config): keep drag previews in styling scope
-
-### Refactoring
-
-- refactor(build): compile bootstrap assets with Vite
-- refactor(injection): centralize frontend markup handling
-- refactor(storage): share atomic persistence and cache primitives
-- refactor(config): split persisted models and mappings by domain
-- refactor(api): separate feed construction and response models
-- refactor(config-ui): separate defaults, factories and projections
-- refactor(config-ui): simplify shared editors and previews
-- refactor(config-ui): reorganize settings tabs and layouts
-- refactor(runtime): coordinate routing, mounting and response reuse
-- refactor(preferences): split dialog, form and dismissal behavior
-- refactor(trailers): separate controller and playback providers
-- refactor(carousel): extract navigation, controls and layout state
-- refactor(styles): organize runtime CSS by ownership
-- refactor(naming): rename ec- prefix to featured-
-
-### Other
-
-- chore(tooling): standardize formatting, linting and tests
-- chore(format): normalize release metadata
-- deps(deps-dev): bump vite (#16)
 
 ## v12.7.1.0 - 2026-09-26
 
@@ -117,11 +84,7 @@
 
 - feat(cache): accelerate startup and coalesce remounts
 
-### Documentation
-
-- docs: document cache performance behavior
-
-### Other
+### Performance
 
 - perf(rule-engine): warm and streamline candidate loading
 
@@ -136,11 +99,6 @@
 ### Fixes
 
 - fix(sources): fill feed from sole available source
-
-### Documentation
-
-- docs(injection): document automatic fallback order
-- docs: update documentation
 
 ## v12.6.0.0 - 2026-09-24
 
@@ -196,19 +154,10 @@
 - fix(settings): streamline configuration and preview controls
 - fix(settings): keep live preview visible while scrolling
 
-### Other
-
-- chore(tests): split and prune test suites
-- deps(deps): bump the npm-minor-and-patch group with 3 updates (#13)
-- deps: Bump the nuget-minor-and-patch group with 4 updates (#15)
-- deps(deps-dev): bump typescript from 5.9.3 to 6.0.3 (#14)
-
 ## v12.4.0.0 - 2026-09-15
 
 ### Fixes
 
-- fix(webos): support Chromium 79 and safe hero spacing
-- fix(style): adjust spacing for meta elements in featured.css
 - fix(hero): keep overlap layout stable with adaptive content
 - fix(hero): preserve logos and align layout tests
 - fix(hero): prioritize logos and align webOS tests
@@ -216,21 +165,10 @@
 - fix(hero): adapt overview lines to available space
 - fix(hero): scope stacking context to viewport
 
-## v12.3.1.1 - 2026-09-15
-
-### Fixes
-
-- fix(release): commit synchronized frontend version
-
-### Other
-
-- chore: update plugin version to 12.3.1.0
-
 ## v12.3.1.0 - 2026-09-15
 
 ### Features
 
-- feat(dependabot): add configuration for npm, nuget, and GitHub Actions updates
 - feat: add CodeQL analysis and Dependency Review workflows
 - feat(hero): bound whole-banner interactions
 - feat(display): implement responsive layout for display settings
@@ -239,35 +177,22 @@
 - feat(preferences): add user display opt-outs
 - feat(preferences): apply changes without page reload
 - feat(logo): add new beta logo image
-- feat(beta): prepare standalone beta release infrastructure (#10)
 
 ### Fixes
 
-- fix(ci): remove push trigger from CI workflow
 - fix(carousel): update trailer handling and media structure in slides
 - fix(hero): soften shared media fade
 - fix(carousel): restrict hero hitbox to active slide
 - fix(trailers): make source priority own remote fallback
 - fix(trailers): honor start-muted setting on iOS
-
-### Documentation
-
-- docs: update build guide and contributing documentation for clarity and workflow improvements
-
-### Other
-
-- deps(deps-dev): bump vite in the npm-minor-and-patch group (#2)
-- deps: Bump the nuget-minor-and-patch group with 1 update (#4)
-- deps: Bump Microsoft.NET.Test.Sdk from 17.14.1 to 18.10.0 (#5)
-- deps: Bump xunit.runner.visualstudio from 3.1.5 to 4.0.0 (#7)
-- Update beta manifest and logo for 12.3.0.1
+- fix(webos): support Chromium 79 and safe hero spacing
+- fix(style): adjust spacing for meta elements in featured.css
 
 ## v12.3.0.0 - 2026-09-14
 
 ### Features
 
 - feat(theming): enhance theming capabilities with new CSS variables and documentation
-- feat(readme): add additional badges for license, release, Jellyfin version, and build status
 - feat: add feed preview functionality and better scheduling options for presets
 
 ### Fixes
@@ -282,12 +207,6 @@
 - feat: implement Jellyfin theme tokens and update styles across components
 - feat(i18n): enhance translation workflow and fallback handling
 
-### Documentation
-
-- docs: add translation status badge to README
-- docs: highlight 12.2.1 performance improvements
-- docs: add performance in README
-
 ## v12.2.1.0 - 2026-09-13
 
 ### Features
@@ -298,14 +217,6 @@
 
 - fix(cache): enhance prepared cache diagnostics and add response serialization
 - fix(config): set new default values
-
-### Documentation
-
-- docs: update README and add cache and trailer behavior documentation
-
-### Refactoring
-
-- refactor(ruleEngine): Refactor Featured Rule Engine and Enhance Timing Diagnostics
 
 ## v12.2.0.0 - 2026-09-13
 
@@ -359,49 +270,10 @@
 - fix(trailers): recover from blocked YouTube embeds
 - fix(performance): defer user settings until opened
 
-### Documentation
-
-- docs: Revise README for clarity and update installation instructions
-- docs: Add section for additional Jellyfin plugins in README
-- docs: document completed 12.2 personalization
-- docs: document completed source mixer v2
-- docs: document proper trailer support
-- docs: document featured preset scheduling
-- docs: simplify readme for end users
-
-### Refactoring
-
-- refactor(mixer): split rule engine responsibilities
-- refactor(api): split controller endpoints
-- refactor(player): reorganize player initialization and event handling
-
-### Other
-
-- test(trailers): cover resolver and player contracts
-- test(config): align layout contract with page styles
-- revert(trailers): restore compact backdrop fade
-- style(preferences): enlarge responsive settings modal
-
 ## v12.1.1.0 - 2026-09-12
 
 ### Features
 
 - feat: Add sample file exclusion logic and corresponding tests in FeaturedRuleEngine
 
-### Documentation
-
-- docs: Add Star History section to README
-
-### Refactoring
-
-- refactor: Improve item selection logic in FeaturedPreparedCache and update tests
-
-### Other
-
-- chore: Update JavaScript Injector repository URL in README
-
 ## v12.1.0.0 - 2026-09-12
-
-### Other
-
-- Initial commit 12.1.0.0
