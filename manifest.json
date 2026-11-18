@@ -10,7 +10,7 @@
     "versions": [
       {
         "version": "12.10.0.0",
-        "changelog": "- feat(preferences): remember trailer mute and volume per user\n",
+        "changelog": "- feat(a11y): respect reduced motion for autoplay and background video\n- feat(filters): filter by trailer, artwork, studio, date added, HDR and series status\n- feat(sources): add new episodes and coming soon sources\n- feat(statistics): count banner impressions, opens and plays for admins\n- feat(config): export and import settings as JSON\n- feat(statistics): move banner statistics into their own tab with charts\n- feat(statistics): put the table search and page size in the title row\n- feat(config): custom number stepper and matching field surfaces\n- fix(presets): treat an end time of 23:59 as the end of the day\n- fix(users): remove stored data of deleted users\n- fix(api): check library access for displayed, favourite and playstate updates\n- fix(runtime): use the latest preset's display settings for placeholders\n- fix(statistics): draw the impressions bar as a slim track beside the count\n- fix(config): keep filter value hints inside the field\n- perf(config): cache the resolved configuration and query genres directly\n",
         "targetAbi": "12.4.0.0",
         "sourceUrl": "https://github.com/spkesDE/jellyfin-featured-plugin/releases/download/v12.10.0.0/Featured.zip",
         "checksum": "d197c1ca4ca232d28cb40efe2cf56d68",
