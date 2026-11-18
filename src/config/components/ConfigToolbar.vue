@@ -13,6 +13,7 @@ const tabs: Array<{ id: ConfigTab; label: string }> = [
   { id: 'display', label: t('tab.display') },
   { id: 'trailers', label: t('tab.trailers') },
   { id: 'presets', label: t('tab.presets') },
+  { id: 'statistics', label: t('tab.statistics') },
   { id: 'advanced', label: t('tab.advanced') }
 ];
 

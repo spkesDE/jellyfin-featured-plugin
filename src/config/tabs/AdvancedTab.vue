@@ -4,7 +4,6 @@ import ConfigCard from '../components/ConfigCard.vue';
 import ConfigListHeader from '../components/ConfigListHeader.vue';
 import ConfigSelect, { type SelectOption } from '../components/ConfigSelect.vue';
 import ConfigSwitch from '../components/ConfigSwitch.vue';
-import StatisticsCard from '../components/StatisticsCard.vue';
 import BackupCard from '../components/BackupCard.vue';
 import { t, type TranslationKey } from '../../i18n';
 import { useConfigStore } from '../libs/store';
@@ -206,8 +205,6 @@ watch(
         {{ t('advanced.diagnosticsEmpty') }}
       </p>
     </ConfigCard>
-
-    <StatisticsCard />
 
     <BackupCard />
 

@@ -16,6 +16,7 @@ public static class FeaturedInteractionKinds
 public sealed class FeaturedStatisticsStore : IDisposable
 {
     internal const int MaximumItems = 5000;
+    internal const int RetainedDays = 90;
     private const string ConfigurationDirectoryName = "Jellyfin.Plugin.Featured";
     private static readonly TimeSpan PersistenceDelay = TimeSpan.FromSeconds(5);
     private readonly object _syncRoot = new();
@@ -36,9 +37,10 @@ public sealed class FeaturedStatisticsStore : IDisposable
     }
 
     internal void RecordImpression(Guid itemId)
-        => Update(itemId, entry =>
+        => Update(itemId, (entry, day) =>
         {
             entry.Impressions += 1;
+            day.Impressions += 1;
             entry.LastShownAt = DateTimeOffset.UtcNow;
         });
 
@@ -47,13 +49,44 @@ public sealed class FeaturedStatisticsStore : IDisposable
         switch (kind?.Trim().ToLowerInvariant())
         {
             case FeaturedInteractionKinds.Open:
-                Update(itemId, entry => entry.Opens += 1);
+                Update(itemId, (entry, day) =>
+                {
+                    entry.Opens += 1;
+                    day.Opens += 1;
+                });
                 return true;
             case FeaturedInteractionKinds.Play:
-                Update(itemId, entry => entry.Plays += 1);
+                Update(itemId, (entry, day) =>
+                {
+                    entry.Plays += 1;
+                    day.Plays += 1;
+                });
                 return true;
             default:
                 return false;
+        }
+    }
+
+    /// <summary>Daily totals for the last <paramref name="days"/> UTC days, oldest first, including empty days.</summary>
+    internal FeaturedDailyStatistics[] GetDailyTotals(int days, DateTimeOffset? now = null)
+    {
+        DateOnly today = DateOnly.FromDateTime((now ?? DateTimeOffset.UtcNow).UtcDateTime);
+        int count = Math.Clamp(days, 1, RetainedDays);
+        lock (_syncRoot)
+        {
+            EnsureLoaded();
+            return Enumerable.Range(0, count)
+                .Select(offset => today.AddDays(offset - count + 1))
+                .Select(date =>
+                {
+                    string key = DayKey(date);
+                    FeaturedDailyStatistics day = _snapshot!.Days.TryGetValue(key, out FeaturedDailyStatistics? value)
+                        ? value.Copy()
+                        : new FeaturedDailyStatistics();
+                    day.Date = key;
+                    return day;
+                })
+                .ToArray();
         }
     }
 
@@ -83,7 +116,7 @@ public sealed class FeaturedStatisticsStore : IDisposable
         GC.SuppressFinalize(this);
     }
 
-    private void Update(Guid itemId, Action<FeaturedItemStatistics> change)
+    private void Update(Guid itemId, Action<FeaturedItemStatistics, FeaturedDailyStatistics> change)
     {
         if (itemId == Guid.Empty) return;
         lock (_syncRoot)
@@ -97,10 +130,30 @@ public sealed class FeaturedStatisticsStore : IDisposable
                 _snapshot.Items[key] = entry;
             }
 
-            change(entry);
+            DateOnly today = DateOnly.FromDateTime(DateTime.UtcNow);
+            string dayKey = DayKey(today);
+            if (!_snapshot.Days.TryGetValue(dayKey, out FeaturedDailyStatistics? day))
+            {
+                day = new FeaturedDailyStatistics();
+                _snapshot.Days[dayKey] = day;
+                TrimDays(today);
+            }
+
+            change(entry, day);
             QueueSave();
         }
     }
+
+    private void TrimDays(DateOnly today)
+    {
+        string oldestKept = DayKey(today.AddDays(1 - RetainedDays));
+        foreach (string key in _snapshot!.Days.Keys.Where(key => string.CompareOrdinal(key, oldestKept) < 0).ToArray())
+        {
+            _snapshot.Days.Remove(key);
+        }
+    }
+
+    private static string DayKey(DateOnly date) => date.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
 
     private void TrimOldest()
     {
@@ -123,7 +176,10 @@ public sealed class FeaturedStatisticsStore : IDisposable
             Since = loaded.Since,
             Items = new Dictionary<string, FeaturedItemStatistics>(
                 loaded.Items ?? new Dictionary<string, FeaturedItemStatistics>(),
-                StringComparer.OrdinalIgnoreCase)
+                StringComparer.OrdinalIgnoreCase),
+            Days = new Dictionary<string, FeaturedDailyStatistics>(
+                loaded.Days ?? new Dictionary<string, FeaturedDailyStatistics>(),
+                StringComparer.Ordinal)
         });
     }
 
@@ -156,12 +212,35 @@ public sealed class FeaturedStatisticsSnapshot
 
     public Dictionary<string, FeaturedItemStatistics> Items { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 
+    /// <summary>Totals per UTC day (yyyy-MM-dd) for the history charts.</summary>
+    public Dictionary<string, FeaturedDailyStatistics> Days { get; set; } = new(StringComparer.Ordinal);
+
     internal static FeaturedStatisticsSnapshot CreateEmpty() => new() { Since = DateTimeOffset.UtcNow };
 
     internal FeaturedStatisticsSnapshot Copy() => new()
     {
         Since = Since,
-        Items = Items.ToDictionary(pair => pair.Key, pair => pair.Value.Copy(), StringComparer.OrdinalIgnoreCase)
+        Items = Items.ToDictionary(pair => pair.Key, pair => pair.Value.Copy(), StringComparer.OrdinalIgnoreCase),
+        Days = Days.ToDictionary(pair => pair.Key, pair => pair.Value.Copy(), StringComparer.Ordinal)
+    };
+}
+
+public sealed class FeaturedDailyStatistics
+{
+    public string? Date { get; set; }
+
+    public long Impressions { get; set; }
+
+    public long Opens { get; set; }
+
+    public long Plays { get; set; }
+
+    internal FeaturedDailyStatistics Copy() => new()
+    {
+        Date = Date,
+        Impressions = Impressions,
+        Opens = Opens,
+        Plays = Plays
     };
 }
 

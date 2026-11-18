@@ -65,6 +65,12 @@ export function installMockJellyfin(): void {
           totalImpressions: 1840,
           totalOpens: 96,
           totalPlays: 41,
+          days: Array.from({ length: 30 }, (_, index) => ({
+            date: new Date(Date.UTC(2026, 9, 19 + index)).toISOString().slice(0, 10),
+            impressions: 40 + ((index * 37) % 50),
+            opens: 2 + ((index * 7) % 5),
+            plays: (index * 3) % 3
+          })),
           items: [
             {
               id: 'movie-1',

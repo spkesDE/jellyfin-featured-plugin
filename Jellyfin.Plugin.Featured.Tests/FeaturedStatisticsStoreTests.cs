@@ -30,6 +30,24 @@ public sealed class FeaturedStatisticsStoreTests : FeaturedPreparedCacheTestBase
     }
 
     [Fact]
+    public void KeepsDailyTotalsWithEmptyDaysFilledIn()
+    {
+        using FeaturedStatisticsStore store = CreateStore();
+        Guid itemId = Guid.NewGuid();
+        store.RecordImpression(itemId);
+        store.RecordImpression(itemId);
+        store.RecordInteraction(itemId, "play");
+
+        FeaturedDailyStatistics[] days = store.GetDailyTotals(7);
+
+        Assert.Equal(7, days.Length);
+        Assert.Equal(DateOnly.FromDateTime(DateTime.UtcNow).ToString("yyyy-MM-dd"), days[^1].Date);
+        Assert.Equal(2, days[^1].Impressions);
+        Assert.Equal(1, days[^1].Plays);
+        Assert.All(days[..^1], day => Assert.Equal(0, day.Impressions));
+    }
+
+    [Fact]
     public void ResetStartsANewPeriod()
     {
         using FeaturedStatisticsStore store = CreateStore();

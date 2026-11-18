@@ -1,4 +1,5 @@
-export type ConfigTab = 'sources' | 'manual' | 'users' | 'filters' | 'display' | 'trailers' | 'presets' | 'advanced';
+export type ConfigTab =
+  'sources' | 'manual' | 'users' | 'filters' | 'display' | 'trailers' | 'presets' | 'statistics' | 'advanced';
 export type SaveState = 'clean' | 'dirty' | 'saved';
 
 export interface ConfigUser {

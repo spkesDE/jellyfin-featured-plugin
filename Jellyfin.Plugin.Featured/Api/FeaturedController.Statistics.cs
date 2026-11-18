@@ -31,7 +31,8 @@ public sealed partial class FeaturedController
     [Produces(MediaTypeNames.Application.Json)]
     public ActionResult<FeaturedStatisticsResponse> GetStatistics(
         [FromServices] FeaturedStatisticsStore statistics,
-        [FromQuery] int limit = 100)
+        [FromQuery] int limit = 100,
+        [FromQuery] int days = 30)
     {
         Jellyfin.Database.Implementations.Entities.User? activeUser = GetActiveUser();
         if (activeUser is null) return NotFound();
@@ -68,6 +69,7 @@ public sealed partial class FeaturedController
                 TotalImpressions = snapshot.Items.Values.Sum(entry => entry.Impressions),
                 TotalOpens = snapshot.Items.Values.Sum(entry => entry.Opens),
                 TotalPlays = snapshot.Items.Values.Sum(entry => entry.Plays),
+                Days = statistics.GetDailyTotals(Math.Clamp(days, 7, FeaturedStatisticsStore.RetainedDays)),
                 Items = rows
             },
             RuntimeConfigJsonOptions);
@@ -105,6 +107,8 @@ public sealed class FeaturedStatisticsResponse
     public long TotalOpens { get; init; }
 
     public long TotalPlays { get; init; }
+
+    public FeaturedDailyStatistics[] Days { get; init; } = [];
 
     public FeaturedStatisticsRow[] Items { get; init; } = [];
 }

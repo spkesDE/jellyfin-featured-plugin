@@ -1,19 +1,19 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
-import ConfigCard from './ConfigCard.vue';
-import ConfigSwitch from './ConfigSwitch.vue';
+import { computed, ref, watch } from 'vue';
+import ConfigCard from '../components/ConfigCard.vue';
+import ConfigListHeader from '../components/ConfigListHeader.vue';
+import ConfigSwitch from '../components/ConfigSwitch.vue';
+import DailyBarChart, { type DailyBarDatum, type DailyBarSeries } from '../components/DailyBarChart.vue';
+import StatisticsTable, { type StatisticsRow } from '../components/StatisticsTable.vue';
 import { t } from '../../i18n';
 import { requestJson } from '../../core/apiClient';
 import { useConfigStore } from '../libs/store';
 
-interface StatisticsRow {
-  id: string;
-  name: string | null;
-  type: string | null;
+interface StatisticsDay {
+  date: string;
   impressions: number;
   opens: number;
   plays: number;
-  lastShownAt: string | null;
 }
 
 interface StatisticsResponse {
@@ -23,16 +23,35 @@ interface StatisticsResponse {
   totalImpressions: number;
   totalOpens: number;
   totalPlays: number;
+  days: StatisticsDay[];
   items: StatisticsRow[];
 }
+
+/** One color per measure across every chart, validated for color vision deficiencies on the dark surface. */
+const COLORS = { impressions: '#3987e5', opens: '#d95926', plays: '#199e70' } as const;
+const MAXIMUM_ROWS = 500;
 
 const store = useConfigStore();
 const statistics = ref<StatisticsResponse | null>(null);
 const loading = ref(false);
 const error = ref<string | null>(null);
-
 const numberFormat = new Intl.NumberFormat();
 const dateFormat = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' });
+
+const impressionSeries: DailyBarSeries[] = [
+  { key: 'impressions', label: t('statistics.impressions'), color: COLORS.impressions }
+];
+const interactionSeries: DailyBarSeries[] = [
+  { key: 'opens', label: t('statistics.opens'), color: COLORS.opens },
+  { key: 'plays', label: t('statistics.plays'), color: COLORS.plays }
+];
+const days = computed<DailyBarDatum[]>(() => (statistics.value?.days ?? []).map((day) => ({ ...day })));
+const summary = computed(() => {
+  const value = statistics.value;
+  if (!store.config.EnableStatistics) return t('statistics.summaryOff');
+  if (!value) return '';
+  return t('statistics.since', { date: formatDate(value.since), count: value.trackedItems });
+});
 
 const totals = computed(() => {
   const value = statistics.value;
@@ -60,7 +79,9 @@ async function load(): Promise<void> {
   loading.value = true;
   error.value = null;
   try {
-    statistics.value = await requestJson<StatisticsResponse>('featured/statistics', { query: { limit: 100 } });
+    statistics.value = await requestJson<StatisticsResponse>('featured/statistics', {
+      query: { limit: MAXIMUM_ROWS, days: 30 }
+    });
   } catch (cause) {
     error.value = cause instanceof Error ? cause.message : String(cause);
   } finally {
@@ -79,13 +100,25 @@ async function reset(): Promise<void> {
   await load();
 }
 
-onMounted(() => void load());
+// The tab is kept in the page; load when it is first shown and reload on every later visit.
+watch(
+  () => store.activeTab.value,
+  (tab) => {
+    if (tab === 'statistics') void load();
+  },
+  { immediate: true }
+);
 </script>
 
 <template>
-  <ConfigCard class="featured-statisticsCard" :title="t('statistics.title')" :help="t('statistics.help')">
-    <template #actions>
-      <div class="featured-statisticsActions">
+  <section
+    id="featuredPanel-statistics"
+    class="jmp-section jmp-section-plain"
+    role="tabpanel"
+    aria-labelledby="featuredTab-statistics"
+  >
+    <ConfigListHeader :title="t('statistics.title')" :help-text="t('statistics.help')" :summary="summary">
+      <template #actions>
         <label class="featured-statisticsToggle">
           <span>{{ t('statistics.enabledShort') }}</span>
           <ConfigSwitch v-model="store.config.EnableStatistics" :label="t('statistics.enabled')" hide-label />
@@ -103,63 +136,35 @@ onMounted(() => void load());
           <span class="material-icons" aria-hidden="true">delete_sweep</span>
           {{ t('statistics.reset') }}
         </button>
-      </div>
-    </template>
+      </template>
+    </ConfigListHeader>
 
-    <p v-if="error" class="featured-statisticsNote" role="alert">
-      {{ t('statistics.loadFailed', { error }) }}
-    </p>
-    <template v-else-if="statistics">
+    <p v-if="error" class="featured-statisticsNote" role="alert">{{ t('statistics.loadFailed', { error }) }}</p>
+    <p v-else-if="!statistics" class="featured-statisticsNote">{{ t('statistics.loading') }}</p>
+    <template v-else>
       <dl class="featured-statisticsTotals" aria-live="polite">
         <div v-for="total in totals" :key="total.label">
           <dt>{{ total.label }}</dt>
           <dd>{{ total.value }}</dd>
         </div>
       </dl>
-      <p class="featured-statisticsNote">
-        {{ t('statistics.since', { date: formatDate(statistics.since), count: statistics.trackedItems }) }}
-      </p>
-      <div v-if="statistics.items.length" class="featured-statisticsScroll">
-        <table>
-          <thead>
-            <tr>
-              <th>{{ t('statistics.titleColumn') }}</th>
-              <th>{{ t('statistics.impressions') }}</th>
-              <th>{{ t('statistics.opens') }}</th>
-              <th>{{ t('statistics.plays') }}</th>
-              <th>{{ t('statistics.clickRate') }}</th>
-              <th>{{ t('statistics.lastShown') }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="row in statistics.items" :key="row.id">
-              <td :class="{ 'is-removed': !row.name }">{{ row.name ?? t('statistics.removedTitle') }}</td>
-              <td>{{ numberFormat.format(row.impressions) }}</td>
-              <td>{{ numberFormat.format(row.opens) }}</td>
-              <td>{{ numberFormat.format(row.plays) }}</td>
-              <td>{{ clickRate(row.opens + row.plays, row.impressions) }}</td>
-              <td>{{ formatDate(row.lastShownAt) }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <p v-else class="featured-statisticsNote">{{ t('statistics.empty') }}</p>
+
+      <ConfigCard :title="t('statistics.historyTitle')">
+        <div class="featured-statisticsCharts">
+          <DailyBarChart :title="t('statistics.impressionsPerDay')" :days="days" :series="impressionSeries" />
+          <DailyBarChart :title="t('statistics.interactionsPerDay')" :days="days" :series="interactionSeries" />
+        </div>
+      </ConfigCard>
+
+      <ConfigCard :title="t('statistics.topTitle')">
+        <p v-if="!statistics.items.length" class="featured-statisticsNote">{{ t('statistics.empty') }}</p>
+        <StatisticsTable v-else :rows="statistics.items" :bar-color="COLORS.impressions" />
+      </ConfigCard>
     </template>
-    <p v-else class="featured-statisticsNote">{{ t('statistics.loading') }}</p>
-  </ConfigCard>
+  </section>
 </template>
 
 <style scoped>
-.featured-statisticsCard {
-  margin-top: 1rem;
-}
-.featured-statisticsActions {
-  align-items: center;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem 1rem;
-  justify-content: flex-end;
-}
 .featured-statisticsToggle {
   align-items: center;
   cursor: pointer;
@@ -170,66 +175,46 @@ onMounted(() => void load());
   font-size: 0.9rem;
   opacity: 0.75;
 }
+.featured-statisticsNote {
+  color: var(--featured-theme-text-secondary);
+  font-size: 0.85rem;
+  margin: 0 0 0.75rem;
+}
 .featured-statisticsTotals {
   display: grid;
-  gap: 0.6rem 1.5rem;
+  gap: 0.75rem;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  margin: 0 0 0.5rem;
+  margin: 0 0 1rem;
 }
 .featured-statisticsTotals div {
-  border-bottom: 1px solid var(--featured-theme-divider);
-  padding-bottom: 0.5rem;
+  background: var(--featured-theme-paper);
+  border-radius: var(--featured-theme-radius);
+  padding: 0.75rem 1rem;
 }
 .featured-statisticsTotals dt {
   color: var(--featured-theme-text-secondary);
   font-size: 0.75rem;
 }
 .featured-statisticsTotals dd {
-  font-size: 1.25rem;
+  font-size: 1.5rem;
   font-variant-numeric: tabular-nums;
-  margin: 0;
+  margin: 0.15rem 0 0;
 }
-.featured-statisticsNote {
-  color: var(--featured-theme-text-secondary);
-  font-size: 0.85rem;
-  margin: 0 0 0.75rem;
+.featured-statisticsCharts {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
-.featured-statisticsScroll {
-  overflow-x: auto;
-}
-.featured-statisticsScroll table {
-  border-collapse: collapse;
-  min-width: 36rem;
-  width: 100%;
-}
-.featured-statisticsScroll th,
-.featured-statisticsScroll td {
-  border-bottom: 1px solid var(--featured-theme-divider);
-  padding: 0.5rem 0.65rem;
-  text-align: left;
-}
-.featured-statisticsScroll th:not(:first-child),
-.featured-statisticsScroll td:not(:first-child) {
-  font-variant-numeric: tabular-nums;
-  text-align: right;
-  white-space: nowrap;
-}
-.featured-statisticsScroll th {
-  color: var(--featured-theme-text-secondary);
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-.featured-statisticsScroll td.is-removed {
-  font-style: italic;
-  opacity: 0.6;
+
+@media (max-width: 1000px) {
+  .featured-statisticsCharts {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 @media (max-width: 600px) {
   .featured-statisticsTotals {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  .featured-statisticsActions {
-    justify-content: space-between;
   }
 }
 </style>
